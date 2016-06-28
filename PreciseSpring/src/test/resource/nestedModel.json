@@ -1,0 +1,40 @@
+{
+  "name": "A nested model",
+  "config": {
+    "taskTypes": [
+      {
+        "@id": 11,
+        "name": "Task A"
+      },
+      {
+        "@id": 12,
+        "name": "Task B"
+      }
+    ],
+    "constructionUnits": [
+      {
+        "@id": 21,
+        "sector": "A",
+        "level": "l1",
+        "section": "r",
+        "unit": 1
+      }
+    ]
+  },
+  "flow": {
+    "tasks": [
+      {
+        "@id": 31,
+        "taskType": 11,
+        "constructionUnits": [21]
+      }
+    ],
+    "constraints": [
+      {
+        "kind": "EXCLUSIVE_EXISTENCE",
+        "scope": "LEVEL",
+        "tasks": [31]
+      }
+    ]
+  }
+}
