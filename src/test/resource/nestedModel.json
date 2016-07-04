@@ -34,13 +34,25 @@
         "@id": 1,
         "taskType": 1,
         "constructionUnits": [1]
+      },
+      {
+        "@id": 2,
+        "taskType": 1,
+        "constructionUnits": [1, 2],
+        "orderScope": "UNIT"
       }
     ],
     "constraints": [
       {
         "kind": "EXCLUSIVE_EXISTENCE",
         "scope": "LEVEL",
-        "tasks": [1]
+        "task": 1
+      },
+      {
+        "kind": "PRECEDENCE",
+        "scope": "TASK",
+        "source": 1,
+        "target": 2
       }
     ]
   }

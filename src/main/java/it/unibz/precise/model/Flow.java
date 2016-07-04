@@ -31,12 +31,12 @@ public class Flow extends BaseEntity {
 		joinColumns=@JoinColumn(name="flow", referencedColumnName="id"),
 		inverseJoinColumns=@JoinColumn(name="flowConstraint", referencedColumnName="id")
 	)
-	private List<FlowConstraint> constraints;
+	private List<Constraint> constraints;
 	
 	public Flow() {
 	}
 	
-	public Flow(List<Task> tasks, List<FlowConstraint> constraints) {
+	public Flow(List<Task> tasks, List<Constraint> constraints) {
 		this.tasks = tasks;
 		this.constraints = constraints;
 	}
@@ -49,11 +49,11 @@ public class Flow extends BaseEntity {
 		this.tasks = updateList(this.tasks, tasks);
 	}
 
-	public List<FlowConstraint> getConstraints() {
+	public List<Constraint> getConstraints() {
 		return constraints;
 	}
 
-	public void setConstraints(List<FlowConstraint> constraints) {
+	public void setConstraints(List<Constraint> constraints) {
 		this.constraints = updateList(this.constraints, constraints);
 	}
 	

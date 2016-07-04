@@ -10,6 +10,7 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceProcessor;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -50,8 +51,8 @@ public class FullModel implements ResourceProcessor<RepositoryLinksResource> {
 		);
     }
 
-	private Resource<Iterable<Model>> withLinks(Iterable<Model> models) {
-		return new Resource<Iterable<Model>>(models,
+	private Resources<Model> withLinks(Iterable<Model> models) {
+		return new Resources<Model>(models,
 			linkTo(methodOn(FullModel.class).findAll()).withSelfRel(),
 			entityLinks.linkToCollectionResource(Model.class)
 		);
@@ -70,7 +71,7 @@ public class FullModel implements ResourceProcessor<RepositoryLinksResource> {
 		method=RequestMethod.GET,
 		produces={MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE}
 	)
-	public Resource<Iterable<Model>> findAll() {
+	public Resources<Model> findAll() {
 		return withLinks(repository.findAll());
 	}
 	

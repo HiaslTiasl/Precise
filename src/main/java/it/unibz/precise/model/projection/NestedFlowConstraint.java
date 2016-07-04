@@ -4,12 +4,10 @@ import java.util.List;
 
 import org.springframework.data.rest.core.config.Projection;
 
-import it.unibz.precise.model.Flow;
 import it.unibz.precise.model.Constraint;
 import it.unibz.precise.model.Task;
 
-@Projection(name="nested", types=Flow.class)
-public interface NestedFlow {
+@Projection(name="nested", types=Constraint.class)
+public interface NestedFlowConstraint {
 	List<Task> getTasks();
-	List<Constraint> getConstraint();
 }

@@ -51,6 +51,15 @@ public class ModelsClientTest {
 		traverson = TraversonUtil.create(String.format(SERVICE_URI, port));
 	}
 
+	/**
+	 * Equivalent test using curl: <ol>
+	 * <li> go to project folder.
+	 * <li> go to src/test/resources.
+	 * <li> curl -i -v -X POST -H "Content-Type: application/json" -d @nestedModel.json localhost:8080/fullModels
+	 * <li> curl {_links: model}
+	 * <li> curl {_links: config}
+	 * <li> curl {_links: taskTypes}
+	 */
 	@Test
 	public void postNestedModel() throws IOException, Exception {
 		Link fullModelsLink = traverson.follow("fullModels").asLink();
