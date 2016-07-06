@@ -1,6 +1,7 @@
 package it.unibz.precise.model;
 
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -14,6 +15,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 public class TaskType extends BaseEntity {
 
 	private String name;
+	@Lob
+	private String description;
 	
 	@ManyToOne
 	@JsonBackReference
@@ -34,6 +37,14 @@ public class TaskType extends BaseEntity {
 		this.name = name;
 	}
 	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public Configuration getConfig() {
 		return config;
 	}

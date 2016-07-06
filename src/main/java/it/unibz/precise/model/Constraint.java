@@ -14,15 +14,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id", scope=Constraint.class)
 @JsonIdentityReference(alwaysAsId=false)
-//@DiscriminatorColumn(name="arity", discriminatorType=DiscriminatorType.INTEGER)
-//@JsonTypeInfo(property="arity", use=Id.NAME, include=As.PROPERTY)
-//@JsonSubTypes({
-//	@Type(name="1", value=UnaryConstraint.class),
-//	@Type(name="2", value=BinaryConstraint.class)
-//})
 public abstract class Constraint<K extends ConstraintKind> extends BaseEntity {
 	
-//	@JsonTypeInfo(property="arity", use=Id.NAME, include=As.EXTERNAL_PROPERTY)
 	private K kind;
 	private Scope scope;
 	

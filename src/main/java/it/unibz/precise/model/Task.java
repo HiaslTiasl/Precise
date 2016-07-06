@@ -7,6 +7,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OrderColumn;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -25,6 +26,7 @@ public class Task extends BaseEntity {
 		joinColumns=@JoinColumn(name="task", referencedColumnName="id"),
 		inverseJoinColumns=@JoinColumn(name="constructionUnit", referencedColumnName="id")
 	)
+	@OrderColumn(nullable=false)
 	private List<ConstructionUnit> constructionUnits;
 	private Scope orderScope;
 	

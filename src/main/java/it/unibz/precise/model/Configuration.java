@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -15,6 +16,10 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id", scope=Configuration.class)
 @JsonIdentityReference(alwaysAsId=false)
 public class Configuration extends BaseEntity {
+	
+	private String name;
+	@Lob
+	private String description;
 	
 	@OneToMany(mappedBy="config", cascade={CascadeType.PERSIST,CascadeType.MERGE})
 	@JsonManagedReference
@@ -32,6 +37,22 @@ public class Configuration extends BaseEntity {
 		this.constructionUnits = units;
 	}
 	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public List<TaskType> getTaskTypes() {
 		return taskTypes;
 	}

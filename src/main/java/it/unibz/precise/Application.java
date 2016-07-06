@@ -40,8 +40,8 @@ public class Application extends SpringBootServletInitializer {
 		);
 		UniquePropertyPolymorphicDeserializer<Constraint> deserializer =
 				new UniquePropertyPolymorphicDeserializer<>(Constraint.class);
-		deserializer.register("task", UnaryConstraint.class);
-		deserializer.register("source", BinaryConstraint.class);
+		deserializer.register(UnaryConstraint.TASK_FIELD_NAME, UnaryConstraint.class);
+		deserializer.registerDefault(BinaryConstraint.class);
 		module.addDeserializer(Constraint.class, deserializer);
 		return module;
 	}

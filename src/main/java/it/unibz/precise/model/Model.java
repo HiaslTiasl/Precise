@@ -2,6 +2,7 @@ package it.unibz.precise.model;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -14,6 +15,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 public class Model extends BaseEntity {
 	
 	private String name;
+	@Lob
+	private String description;
 
 	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE})
 	private Configuration config;
@@ -29,6 +32,14 @@ public class Model extends BaseEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public Model(Configuration config, Flow flow) {

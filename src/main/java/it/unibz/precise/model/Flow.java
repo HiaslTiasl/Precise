@@ -6,6 +6,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -17,6 +18,10 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id", scope=Flow.class)
 @JsonIdentityReference(alwaysAsId=false)
 public class Flow extends BaseEntity {
+	
+	private String name;
+	@Lob
+	private String description;
 
 	@ManyToMany(cascade={CascadeType.PERSIST,CascadeType.MERGE})
 	@JoinTable(
@@ -31,16 +36,32 @@ public class Flow extends BaseEntity {
 		joinColumns=@JoinColumn(name="flow", referencedColumnName="id"),
 		inverseJoinColumns=@JoinColumn(name="flowConstraint", referencedColumnName="id")
 	)
-	private List<Constraint> constraints;
+	private List<Constraint<? extends ConstraintKind>> constraints;
 	
 	public Flow() {
 	}
 	
-	public Flow(List<Task> tasks, List<Constraint> constraints) {
+	public Flow(List<Task> tasks, List<Constraint<? extends ConstraintKind>> constraints) {
 		this.tasks = tasks;
 		this.constraints = constraints;
 	}
 	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public List<Task> getTasks() {
 		return tasks;
 	}
@@ -49,11 +70,11 @@ public class Flow extends BaseEntity {
 		this.tasks = updateList(this.tasks, tasks);
 	}
 
-	public List<Constraint> getConstraints() {
+	public List<Constraint<? extends ConstraintKind>> getConstraints() {
 		return constraints;
 	}
 
-	public void setConstraints(List<Constraint> constraints) {
+	public void setConstraints(List<Constraint<? extends ConstraintKind>> constraints) {
 		this.constraints = updateList(this.constraints, constraints);
 	}
 	

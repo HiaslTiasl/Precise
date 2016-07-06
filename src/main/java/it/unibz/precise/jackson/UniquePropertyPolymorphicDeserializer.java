@@ -27,6 +27,8 @@ public class UniquePropertyPolymorphicDeserializer<T> extends StdDeserializer<T>
 	// the registry of unique field names to Class types
 	private Map<String, Class<? extends T>> registry;
 	
+	private Class<? extends T> defaultClass;
+	
 	public UniquePropertyPolymorphicDeserializer(Class<T> clazz) {
 		super(clazz);
 		registry = new HashMap<String, Class<? extends T>>();
@@ -34,6 +36,10 @@ public class UniquePropertyPolymorphicDeserializer<T> extends StdDeserializer<T>
 	
 	public void register(String uniqueProperty, Class<? extends T> clazz) {
 		registry.put(uniqueProperty, clazz);
+	}
+	
+	public void registerDefault(Class<? extends T> clazz) {
+		defaultClass = clazz;
 	}
 
 	/* (non-Javadoc)
@@ -57,7 +63,10 @@ public class UniquePropertyPolymorphicDeserializer<T> extends StdDeserializer<T>
 	    }
 	    
 	    if (clazz == null) {
-	    	throw ctxt.mappingException("No registered unique properties found for polymorphic deserialization");  
+	    	if (defaultClass != null)
+	    		clazz = defaultClass;
+	    	else
+	    		throw ctxt.mappingException("No registered unique properties found for polymorphic deserialization");  
 	    }
 	    
 	    return mapper.treeToValue(obj, clazz);
