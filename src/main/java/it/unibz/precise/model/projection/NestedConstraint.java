@@ -8,6 +8,6 @@ import it.unibz.precise.model.Constraint;
 import it.unibz.precise.model.Task;
 
 @Projection(name="nested", types=Constraint.class)
-public interface NestedFlowConstraint {
+public interface NestedConstraint {
 	List<Task> getTasks();
 }

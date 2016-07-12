@@ -1,9 +1,10 @@
 package it.unibz.precise.rest.rep;
 
+import it.unibz.precise.model.Constraint;
+import it.unibz.precise.model.ConstraintKind;
+
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import it.unibz.precise.model.Constraint;
-
-public interface FlowConstraintRepository extends PagingAndSortingRepository<Constraint, Long> {
+public interface FlowConstraintRepository extends PagingAndSortingRepository<Constraint<? extends ConstraintKind>, Long> {
 
 }

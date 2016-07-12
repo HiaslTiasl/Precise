@@ -1,61 +1,44 @@
 package it.unibz.precise.model;
 
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id", scope=ConstructionUnit.class)
 @JsonIdentityReference(alwaysAsId=false)
-public class ConstructionUnit extends BaseEntity {
+@JsonIgnoreProperties("casection")
+public class ConstructionUnit extends BaseEntity implements ModelComponent {
 	
-	private String sector;
-	private String level;
-	//private String orientation;
-	private String section;
+	@Embedded
+	@JsonUnwrapped
+	private CASection caSection;
 	
 	private Integer unit;
 	
 	@ManyToOne
-	@JsonBackReference
-	private Configuration config;
+	private Model model;
 	
 	public ConstructionUnit() {
 	}
 	
-	public ConstructionUnit(String sector, String level, String section, Integer unit) {
-		this.sector = sector;
-		this.level = level;
-		this.section = section;
+	public ConstructionUnit(CASection caSection, Integer unit) {
+		this.caSection = caSection;
 		this.unit = unit;
 	}
 
-	public String getSector() {
-		return sector;
+	public CASection getCASection() {
+		return caSection;
 	}
 
-	public void setSector(String sector) {
-		this.sector = sector;
-	}
-
-	public String getLevel() {
-		return level;
-	}
-
-	public void setLevel(String level) {
-		this.level = level;
-	}
-
-	public String getSection() {
-		return section;
-	}
-
-	public void setSection(String section) {
-		this.section = section;
+	public void setCASection(CASection caSection) {
+		this.caSection = caSection;
 	}
 
 	public Integer getUnit() {
@@ -66,18 +49,12 @@ public class ConstructionUnit extends BaseEntity {
 		this.unit = unit;
 	}
 
-	@Override
-	public String toString() {
-		return "ConstructionUnit [sector=" + sector + ", level=" + level + ", section=" + section + ", unit=" + unit
-				+ "]";
+	public Model getModel() {
+		return model;
 	}
 
-	public Configuration getConfig() {
-		return config;
-	}
-
-	public void setConfig(Configuration config) {
-		this.config = config;
+	public void setModel(Model model) {
+		this.model = model;
 	}
 	
 }

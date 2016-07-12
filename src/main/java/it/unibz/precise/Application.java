@@ -30,7 +30,6 @@ public class Application extends SpringBootServletInitializer {
 		return application.sources(Application.class);
 	}
 	
-	
 	@Bean
 	@SuppressWarnings("rawtypes")
 	public Module constraintDeserializerModule() {

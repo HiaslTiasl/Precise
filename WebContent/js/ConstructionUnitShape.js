@@ -31,6 +31,7 @@ define(['lodash', 'joint', 'BaseShape', 'TaskShape', 'TemplateUtil'], function (
 				rect: {
 					width: WIDTH,
 					height: ROW_HEIGHT,
+					'stroke-width': 1,
 					'follow-scale': true
 				},
 				'rect.cu-level':   { y: 1/4 * HEIGHT },
@@ -45,7 +46,7 @@ define(['lodash', 'joint', 'BaseShape', 'TaskShape', 'TemplateUtil'], function (
 		}, BaseShape.prototype.defaults),
 		
 		update: function () {
-			var data = this.get('data');
+			var data = this.get('data') || {};
 			this.attr({
 				'text.cu-sector':  { text: data.sector },
 				'text.cu-level':   { text: data.level },

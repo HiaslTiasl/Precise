@@ -33,7 +33,7 @@ import it.unibz.precise.model.TaskType;
 @WebIntegrationTest(randomPort=true)
 public class ModelsClientTest {
 
-	private static final String SERVICE_URI = "http://localhost:%s";
+	private static final String SERVICE_URI = "http://localhost:%s/api";
 	
 	@Value("${local.server.port}")
 	private int port;
@@ -73,7 +73,7 @@ public class ModelsClientTest {
 		.andReturn();
 		
 		Resources<TaskType> taskTypes = TraversonUtil.continueFrom(result)
-			.follow("model", "config", "taskTypes")
+			.follow("model", "taskTypes")
 			.toObject(new ParameterizedTypeReference<Resources<TaskType>>(){});
 	
 		assertThat(taskTypes.getContent(), hasSize(2));

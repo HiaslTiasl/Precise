@@ -1,59 +1,55 @@
 {
   "name": "A nested model",
-  "config": {
-    "taskTypes": [
-      {
-        "@id": 1,
-        "name": "Task A"
-      },
-      {
-        "@id": 2,
-        "name": "Task B"
-      }
-    ],
-    "constructionUnits": [
-      {
-        "@id": 1,
-        "sector": "A",
-        "level": "l1",
-        "section": "r",
-        "unit": 1
-      },
-      {
-        "@id": 2,
-        "sector": "A",
-        "level": "l1",
-        "section": "r",
-        "unit": 2
-      }
-    ]
-  },
-  "flow": {
-    "tasks": [
-      {
-        "@id": 1,
-        "taskType": 1,
-        "constructionUnits": [1]
-      },
-      {
-        "@id": 2,
-        "taskType": 1,
-        "constructionUnits": [1, 2],
-        "orderScope": "UNIT"
-      }
-    ],
-    "constraints": [
-      {
-        "kind": "EXCLUSIVE_EXISTENCE",
-        "scope": "LEVEL",
-        "task": 1
-      },
-      {
-        "kind": "PRECEDENCE",
-        "scope": "TASK",
-        "source": 1,
-        "target": 2
-      }
-    ]
-  }
+  "taskTypes": [
+    {
+      "@id": 1,
+      "name": "Task A"
+    },
+    {
+      "@id": 2,
+      "name": "Task B"
+    }
+  ],
+  "constructionUnits": [
+    {
+      "@id": 1,
+      "sector": "A",
+      "level": "l1",
+      "section": "r",
+      "unit": 1
+    },
+    {
+      "@id": 2,
+      "sector": "A",
+      "level": "l1",
+      "section": "r",
+      "unit": 2
+    }
+  ],
+  "tasks": [
+    {
+      "@id": 1,
+      "taskType": 1,
+      "constructionUnits": [1]
+    },
+    {
+      "@id": 2,
+      "taskType": 1,
+      "constructionUnits": [1, 2],
+      "orderScope": "UNIT"
+    }
+  ],
+  "constraints": [
+    {
+      "kind": "EXCLUSIVE_EXISTENCE",
+      "scope": "LEVEL",
+      "task": 1
+    },
+    {
+      "kind": "PRECEDENCE",
+      "scope": "TASK",
+      "source": 1,
+      "target": 2
+    }
+  ]
 }

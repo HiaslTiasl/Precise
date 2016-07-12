@@ -8,7 +8,7 @@ package it.unibz.precise.model;
  */
 public enum Scope {
 
-	TASK(4), SECTOR(3), LEVEL(2), SECTION(1), UNIT(0);
+	UNIT(0), SECTION(1), LEVEL(2), SECTOR(3), TASK(4);
 
 	private int depth;
 

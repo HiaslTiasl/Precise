@@ -4,7 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -12,15 +11,14 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Entity
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id", scope=TaskType.class)
 @JsonIdentityReference(alwaysAsId=false)
-public class TaskType extends BaseEntity {
+public class TaskType extends BaseEntity implements ModelComponent {
 
 	private String name;
 	@Lob
 	private String description;
 	
 	@ManyToOne
-	@JsonBackReference
-	private Configuration config;
+	private Model model;
 
 	public TaskType() {
 	}
@@ -45,12 +43,12 @@ public class TaskType extends BaseEntity {
 		this.description = description;
 	}
 
-	public Configuration getConfig() {
-		return config;
+	public Model getModel() {
+		return model;
 	}
 
-	public void setConfig(Configuration config) {
-		this.config = config;
+	public void setModel(Model model) {
+		this.model = model;
 	}
 
 }

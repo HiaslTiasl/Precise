@@ -1,9 +1,11 @@
 package it.unibz.precise.model;
 
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
@@ -18,10 +20,17 @@ public class Model extends BaseEntity {
 	@Lob
 	private String description;
 
-	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE})
-	private Configuration config;
-	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE})
-	private Flow flow;
+	@OneToMany(mappedBy="model", cascade={CascadeType.PERSIST, CascadeType.MERGE})
+	private List<TaskType> taskTypes;
+	
+	@OneToMany(mappedBy="model", cascade={CascadeType.PERSIST, CascadeType.MERGE})
+	private List<ConstructionUnit> constructionUnits;
+	
+	@OneToMany(mappedBy="model", cascade={CascadeType.PERSIST, CascadeType.MERGE})
+	private List<Task> tasks;
+	
+	@OneToMany(mappedBy="model", cascade={CascadeType.PERSIST, CascadeType.MERGE})
+	private List<Constraint<? extends ConstraintKind>> constraints;
 	
 	public Model() {
 	}
@@ -42,25 +51,45 @@ public class Model extends BaseEntity {
 		this.description = description;
 	}
 
-	public Model(Configuration config, Flow flow) {
-		this.config = config;
-		this.flow = flow;
-	}
-	
-	public Configuration getConfig() {
-		return config;
+	public List<TaskType> getTaskTypes() {
+		return taskTypes;
 	}
 
-	public Flow getFlow() {
-		return flow;
-	}
-	
-	public void setConfig(Configuration config) {
-		this.config = config;
+	public void setTaskTypes(List<TaskType> taskTypes) {
+		this.taskTypes = updateList(this.taskTypes, taskTypes);
+		updateModelComponents(this.taskTypes);
 	}
 
-	public void setFlow(Flow flow) {
-		this.flow = flow;
+	public List<ConstructionUnit> getConstructionUnits() {
+		return constructionUnits;
+	}
+
+	public void setConstructionUnits(List<ConstructionUnit> constructionUnits) {
+		this.constructionUnits = constructionUnits;
+		updateModelComponents(this.constructionUnits);
+	}
+
+	public List<Task> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(List<Task> tasks) {
+		this.tasks = updateList(this.tasks, tasks);
+		updateModelComponents(this.tasks);
+	}
+
+	public List<Constraint<? extends ConstraintKind>> getConstraints() {
+		return constraints;
+	}
+
+	public void setConstraints(List<Constraint<? extends ConstraintKind>> constraints) {
+		this.constraints = updateList(this.constraints, constraints);
+		updateModelComponents(this.constraints);
+	}
+	
+	private <T extends ModelComponent> List<T> updateModelComponents(List<T> list) {
+		list.stream().filter(e -> e.getModel() != this).forEach(e -> e.setModel(this));
+		return list;
 	}
 	
 }
