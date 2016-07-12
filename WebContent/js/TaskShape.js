@@ -1,6 +1,6 @@
 define(['lodash', 'joint', 'BaseShape', 'TemplateUtil'], function (_, joint, BaseShape, TemplateUtil) {
 	
-	var WIDTH = 400,
+	var WIDTH = 200,
 		HEIGHT = WIDTH,
 		ROW_HEIGHT = WIDTH / 4,
 		CUS_POS_Y = 2 * ROW_HEIGHT,
