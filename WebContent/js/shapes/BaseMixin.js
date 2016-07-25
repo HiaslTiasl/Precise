@@ -1,4 +1,8 @@
-define(['joint'], function (joint) {
+define([
+	'lib/joint'
+], function (
+	joint
+) {
 	return {
 		
 		defaults: joint.util.deepSupplement({
@@ -8,7 +12,6 @@ define(['joint'], function (joint) {
 		}, joint.shapes.basic.Generic.prototype.defaults),
 		
 		initialize: function() {
-
 	        this.on('change:data', function() {
 	            this.update();
 	            this.trigger('precise-update');
@@ -17,10 +20,6 @@ define(['joint'], function (joint) {
 	        this.update();
 
 	        joint.shapes.basic.Generic.prototype.initialize.apply(this, arguments);
-	    },
-	    
-	    isAllowedAction: function (name) {
-	    	return true;
 	    },
 	    
 		data: null

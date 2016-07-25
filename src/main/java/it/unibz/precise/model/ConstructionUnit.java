@@ -6,14 +6,12 @@ import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id", scope=ConstructionUnit.class)
 @JsonIdentityReference(alwaysAsId=false)
-@JsonIgnoreProperties("casection")
 public class ConstructionUnit extends BaseEntity implements ModelComponent {
 	
 	@Embedded
@@ -33,11 +31,11 @@ public class ConstructionUnit extends BaseEntity implements ModelComponent {
 		this.unit = unit;
 	}
 
-	public CASection getCASection() {
+	public CASection getCaSection() {
 		return caSection;
 	}
 
-	public void setCASection(CASection caSection) {
+	public void setCaSection(CASection caSection) {
 		this.caSection = caSection;
 	}
 

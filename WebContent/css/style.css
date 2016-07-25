@@ -1,9 +1,88 @@
 @CHARSET "ISO-8859-1";
 
-#paper {
-	border: solid thin #333;
-	width: 100%;
-	height: 300px;
+html {
+	font-size: 16px;
+	font-family: Helvetica sans-serif;
+}
+
+button {
+	cursor: pointer;
+}
+
+#toolbar {
+	margin: 0.25em -0.25em;
+}
+
+#toolbar button {
+	color: #aa4400;
+	border: 2px solid #aa4400;
+	border-radius: 3px;
+	background: none;
+	padding: 0.25em 0.5em;
+	margin: 0.25em;
+}
+
+#toolbar button:hover,
+#toolbar button.selected {
+	color: #fff;
+	background: #aa4400;
+}
+
+#toolbar button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+#toolbar button:hover {
+	box-shadow: 0 0 2px 1px #aa4400;
+}
+
+#main {
+	height: 500px;
 	height: 80vh;
+	box-sizing: border-box;
+}
+
+#paper, #properties {
+	border: thin solid #333;
+}
+
+#paper {
+	min-width: 50%;
+	right: 300px;
+	margin-right: 5px;
+}
+
+#paper + .split-pane-divider {
+	right: 300px;
+	width: 5px;
+}
+
+#properties {
+	min-width: 200px;
+	width: 300px;
+	vertical-align: top;
+}
+
+.properties-wrapper {
+	margin: 0.25em;
+}
+
+#properties h2 {
+	text-align: center;
+}
+
+#properties form {
+	display: table;
+	margin: 0.25em;
+}
+
+#properties form label {
+	display: table-row;
+}
+
+#properties form label > * {
+	display: table-cell;
+	padding: 0.25em;
 }
 

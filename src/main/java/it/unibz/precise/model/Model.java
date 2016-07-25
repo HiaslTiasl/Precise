@@ -20,16 +20,16 @@ public class Model extends BaseEntity {
 	@Lob
 	private String description;
 
-	@OneToMany(mappedBy="model", cascade={CascadeType.PERSIST, CascadeType.MERGE})
+	@OneToMany(mappedBy="model", cascade=CascadeType.ALL)
 	private List<TaskType> taskTypes;
 	
-	@OneToMany(mappedBy="model", cascade={CascadeType.PERSIST, CascadeType.MERGE})
+	@OneToMany(mappedBy="model", cascade=CascadeType.ALL)
 	private List<ConstructionUnit> constructionUnits;
 	
-	@OneToMany(mappedBy="model", cascade={CascadeType.PERSIST, CascadeType.MERGE})
+	@OneToMany(mappedBy="model", cascade=CascadeType.ALL)
 	private List<Task> tasks;
 	
-	@OneToMany(mappedBy="model", cascade={CascadeType.PERSIST, CascadeType.MERGE})
+	@OneToMany(mappedBy="model", cascade=CascadeType.ALL)
 	private List<Constraint<? extends ConstraintKind>> constraints;
 	
 	public Model() {

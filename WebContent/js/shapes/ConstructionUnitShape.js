@@ -1,7 +1,19 @@
-define(['lodash', 'joint', 'BaseShape', 'TaskShape', 'TemplateUtil'], function (_, joint, BaseShape, TaskShape, TemplateUtil) {
+define([
+	'lib/lodash',
+	'lib/joint',
+	'shapes/BaseShape',
+	'shapes/TemplateUtil',
+	'Util'
+], function (
+	_,
+	joint,
+	BaseShape,
+	TemplateUtil,
+	Util
+) {
 	
-	var WIDTH = TaskShape.WIDTH / 8,
-		HEIGHT = TaskShape.CUS_HEIGHT,
+	var WIDTH = 25,
+		HEIGHT = 100,
 		ROW_HEIGHT = HEIGHT / 4;
 	
 	var classes = [
@@ -11,7 +23,7 @@ define(['lodash', 'joint', 'BaseShape', 'TaskShape', 'TemplateUtil'], function (
 		'cu-unit'
 	];
 	
-	return BaseShape.extend({
+	Util.set(joint.shapes, 'precise.ConstructionUnitShape', BaseShape.extend({
 		markup: [
 			'<g class="rotatable">',
 				'<g class="scalable">',
@@ -34,9 +46,9 @@ define(['lodash', 'joint', 'BaseShape', 'TaskShape', 'TemplateUtil'], function (
 					'stroke-width': 1,
 					'follow-scale': true
 				},
-				'rect.cu-level':   { y: 1/4 * HEIGHT },
-				'rect.cu-section': { y: 2/4 * HEIGHT },
-				'rect.cu-unit':    { y: 3/4 * HEIGHT }
+				'rect.cu-level':   { y: 1 * ROW_HEIGHT },
+				'rect.cu-section': { y: 2 * ROW_HEIGHT },
+				'rect.cu-unit':    { y: 3 * ROW_HEIGHT }
 			}, TemplateUtil.withRefsToSameClass('text', 'rect', classes, {
 				 'ref-y': .5,
 				 'ref-x': .5,
@@ -55,18 +67,19 @@ define(['lodash', 'joint', 'BaseShape', 'TaskShape', 'TemplateUtil'], function (
 			});
 		},
 		
-		isAllowedAction: function (name) {
-			switch (name) {
-			case 'cell:pointermove':
-				return false;
-			default:
-				return true;
-			}
-	    },
-		
 	}, {
 		WIDTH: WIDTH,
 		HEIGHT: HEIGHT,
 		ROW_HEIGHT: ROW_HEIGHT
-	});
+	}));
+	
+	Util.set(joint.shapes, 'precise.ConstructionUnitShapeView', joint.dia.ElementView.extend({
+		pointerdown: function () {
+			joint.dia.ElementView.prototype.pointerdown.apply(this, arguments);
+			// TODO: wire up moving logic
+			//this.model.startMoving
+		}
+	}));
+	
+	return joint.shapes.precise.ConstructionUnitShape;
 });

@@ -35,7 +35,7 @@ public class TotalConstructionUnitRange extends AbstractConstructionUnitRange {
 	public static List<TotalConstructionUnitRange> from(List<ConstructionUnit> constructionUnits) {
 		return constructionUnits.stream()
 			.collect(Collectors.groupingBy(
-				ConstructionUnit::getCASection,
+				ConstructionUnit::getCaSection,
 				Collectors.counting()
 			)).entrySet().stream().map(e -> {
 				return new TotalConstructionUnitRange(e.getKey(), e.getValue().intValue());

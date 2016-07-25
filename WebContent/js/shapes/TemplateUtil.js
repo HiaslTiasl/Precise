@@ -46,12 +46,17 @@ define(function () {
 		}, {});
 	}
 	
+	function markup(lines) {
+		return lines.join('');
+	}
+	
 	return {
 		toTag: toTag,
 		openTag: openTag,
 		emptyTag: emptyTag,
 		closeTag: closeTag,
 		createElements: createElements,
-		withRefsToSameClass: withRefsToSameClass
+		withRefsToSameClass: withRefsToSameClass,
+		markup: markup
 	}
 });

@@ -3,3 +3,45 @@
 text {
 	fill: black;
 }
+
+.label rect {
+	display: none;
+}
+
+#paper.add-task {
+	cursor: crosshair;
+}
+
+#paper.add-precedence .precise.TaskShape {
+	cursor: pointer; 
+}
+
+#paper.add-precedence .precise.TaskShape .outline {
+	visibility: visible;
+	fill: #ffff80;
+	stroke: none;
+}
+
+#paper.add-precedence .precise.TaskShape.highlighted {
+	cursor: move; 
+}
+
+#paper.add-precedence .precise.TaskShape.highlighted .outline {
+	fill: transparent;
+	stroke: black;
+	stroke-dasharray: 10,10;
+}
+
+.precise.TaskShape .outline {
+	visibility: hidden;
+}
+
+.precise.TaskShape.highlighted {
+	opacity: initial;	/* Override default JointJS styles */
+}
+
+.precise.TaskShape.highlighted .outline {
+	visibility: visible;
+	stroke: black;
+	stroke-dasharray: 10,10;
+}

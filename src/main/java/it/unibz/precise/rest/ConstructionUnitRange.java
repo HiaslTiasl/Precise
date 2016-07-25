@@ -110,7 +110,7 @@ public class ConstructionUnitRange extends AbstractConstructionUnitRange {
 	public static List<ConstructionUnitRange> from(List<TaskConstructionUnit> constructionUnits) {
 		return constructionUnits.stream()
 			.collect(Collectors.groupingBy(
-				tcu -> tcu.getConstructionUnit().getCASection(),
+				tcu -> tcu.getConstructionUnit().getCaSection(),
 				Collectors.mapping(tcu -> tcu.getConstructionUnit().getUnit(), Util.toBitSetCollector())
 			)).entrySet().stream().map(e -> {
 				CASection caSection = e.getKey();
