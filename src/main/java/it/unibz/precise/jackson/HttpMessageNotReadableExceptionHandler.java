@@ -29,7 +29,7 @@ public class HttpMessageNotReadableExceptionHandler {
     	String errMsg;
     	if (e instanceof UnresolvedForwardReference)
     		errMsg = serialize((UnresolvedForwardReference)e);
-    	if (e instanceof JsonProcessingException)
+    	else if (e instanceof JsonProcessingException)
     		errMsg = serialize((JsonProcessingException)e);
     	else
     		errMsg = e.getMessage();
@@ -41,14 +41,14 @@ public class HttpMessageNotReadableExceptionHandler {
     	List<UnresolvedId> ids = ufr.getUnresolvedIds();
         if (ids != null) {
         	msg += ids.stream()
-        		.map(unresolvedId -> serialize(unresolvedId.getId().toString(), unresolvedId.getLocation()))
+        		.map(unresolvedId -> serialize("Object ID [" + unresolvedId.getId() + "]", unresolvedId.getLocation()))
         		.collect(Collectors.joining(", "));
         }
         return msg;
     }
     
     private static String serialize(String msg, JsonLocation jsonLoc) {
-    	return msg == null ? msg : msg + " at " + serialize(jsonLoc);
+    	return jsonLoc == null ? msg : msg + " at " + serialize(jsonLoc);
     }
 
     private static String serialize(JsonProcessingException jpe) {
