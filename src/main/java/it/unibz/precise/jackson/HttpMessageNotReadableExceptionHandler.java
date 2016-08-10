@@ -15,9 +15,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.deser.UnresolvedForwardReference;
 import com.fasterxml.jackson.databind.deser.UnresolvedId;
 
-import it.unibz.precise.rest.UserSyntaxController;
+import it.unibz.precise.rest.mdl.MDLFileController;
 
-@ControllerAdvice(basePackageClasses = {RepositoryRestExceptionHandler.class, UserSyntaxController.class})
+@ControllerAdvice(basePackageClasses = {RepositoryRestExceptionHandler.class, MDLFileController.class})
 public class HttpMessageNotReadableExceptionHandler {
 
     @ExceptionHandler

@@ -1,31 +1,27 @@
 package it.unibz.precise.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id", scope=TaskType.class)
-@JsonIdentityReference(alwaysAsId=false)
-public class TaskType extends BaseEntity implements ModelComponent {
-
+@Table(uniqueConstraints={
+	@UniqueConstraint(columnNames={"model_id", "name"})
+})
+public class TaskType extends BaseEntity {
+	
+	@Column(nullable=false)
 	private String name;
-	@Lob
 	private String description;
+	private String craft;
+	
+	@ManyToOne
+	private Phase phase;
 	
 	@ManyToOne
 	private Model model;
-
-	public TaskType() {
-	}
-
-	public TaskType(String name) {
-		this.name = name;
-	}
 	
 	public String getName() {
 		return name;
@@ -34,7 +30,7 @@ public class TaskType extends BaseEntity implements ModelComponent {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public String getDescription() {
 		return description;
 	}
@@ -43,12 +39,34 @@ public class TaskType extends BaseEntity implements ModelComponent {
 		this.description = description;
 	}
 
+	public String getCraft() {
+		return craft;
+	}
+
+	public void setCraft(String craft) {
+		this.craft = craft;
+	}
+
+	public Phase getPhase() {
+		return phase;
+	}
+
+	public void setPhase(Phase phase) {
+		this.phase = phase;
+	}
+
 	public Model getModel() {
 		return model;
 	}
 
 	public void setModel(Model model) {
+		ModelToMany.TYPES.setOne(this, model);
+	}
+
+	void internalSetModel(Model model) {
 		this.model = model;
 	}
+
+	public void checkOverlappingLocations() {}
 
 }

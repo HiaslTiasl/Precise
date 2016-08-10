@@ -1,80 +1,260 @@
-
 {
 	"model": {
-		"name": "A new model",
-		"description": "TBD"
+		"description": "Excerpt of a real process model for the realization of an hotel."
 	},
-	"constructionUnits": [
+	"attributes": [
 		{
-			"sector": "A",
-			"level": "l1",
-			"section": "r",
-			"totalNumberOfUnits": 10
+			"name": "sector",
+			"range": ["A"]
 		},
 		{
-			"sector": "A",
-			"level": "l2",
-			"section": "r",
-			"totalNumberOfUnits": 10
+			"name": "level",
+			"range": ["u1", "f0", "f1", "f2"],
+			"ordered": true
+		},
+		{
+			"name": "section",
+			"range": ["en", "r", "c"]
+		},
+		{
+			"name": "unit",
+			"range": 10,
+			"ordered": true
+		}
+	],
+	"phases": [
+		{
+			"name": "Interior",
+			"attributes": ["sector", "level", "section", "unit"],
+			"valueTree": {
+				"A": {
+					"u1": {
+						"c": 2,
+						"r": 10
+					},
+					"f0": {
+						"en": 1,
+						"c": 2,
+						"r": 10
+					},
+					"f1": {
+						"c": 1,
+						"r": 10
+					},
+					"f2": {
+						"c": 1,
+						"r": 10
+					}
+				}
+			}
+		}
+	],
+	"taskTypes": [
+		{
+			"name": "Construction Site Preparation",
+			"phase": "Interior",
+			"craft": "SE"
+		},
+		{
+			"name": "Excavation",
+			"phase": "Interior",
+			"craft": "Di"
+		},
+		{
+			"name": "Concrete Pouring",
+			"phase": "Interior",
+			"craft": "Br"
+		},
+		{
+			"name": "Electricity Connection",
+			"phase": "Interior",
+			"craft": "El"
+		},
+		{
+			"name": "Water and Gas Connection",
+			"phase": "Interior",
+			"craft": "Pl"
+		},
+		{
+			"name": "Fill Excavation",
+			"phase": "Interior",
+			"craft": "Di"
+		},
+		{
+			"name": "Scaffolding Installation",
+			"phase": "Interior",
+			"craft": "Sc"
+		},
+		{
+			"name": "Pipes Installation",
+			"phase": "Interior",
+			"craft": "Pl"
 		}
 	],
 	"tasks": [
 		{
 			"id": 1,
-			"type": "Scaffolding",
+			"type": "Construction Site Preparation",
 			"numberOfWorkersNeeded": 4,
-			"numberOfUnitsPerDay": 4,
-			"orderScope": "LEVEL",
-			"constructionUnits": [
-				{
-				
-					"sector": "A",
-					"level": "l1",
-					"section": "r"
-				},
-				{
-				
-					"sector": "A",
-					"level": "l2",
-					"section": "r",
-					"unit": {
-						"from": 2,
-						"to": 10
-					}
-				}
+			"numberOfUnitsPerDay": 0.2,
+			"exclusiveness": ["sector"],
+			"locations": [
+				{}
 			]
 		},
 		{
 			"id": 2,
+			"type": "Excavation",
+			"numberOfWorkersNeeded": 6,
+			"numberOfUnitsPerDay": 0.1,
+			"exclusiveness": ["sector"],
+			"locations": [
+				{}
+			]
+		},
+		{
+			"id": 3,
 			"type": "Concrete Pouring",
 			"numberOfWorkersNeeded": 3,
-			"numberOfUnitsPerDay": 3,
-			"exclusivenessScope": "LEVEL",
-			"constructionUnits": [
+			"numberOfUnitsPerDay": 0.025,
+			"orderSpecification": {
+				"level": "ASCENDING"
+			},
+			"locations": [
+				{}
+			]
+		},
+		{
+			"id": 4,
+			"type": "Electricity Connection",
+			"numberOfWorkersNeeded": 2,
+			"numberOfUnitsPerDay": 0.5,
+			"locations": [
 				{
-				
 					"sector": "A",
-					"level": "l1",
-					"section": "r"
+					"level": "u1"
+				}
+			]
+		},
+		{
+			"id": 5,
+			"type": "Water and Gas Connection",
+			"numberOfWorkersNeeded": 3,
+			"numberOfUnitsPerDay": 0.2,
+			"locations": [
+				{
+					"sector": "A",
+					"level": "u1"
+				}
+			]
+		},
+		{
+			"id": 6,
+			"type": "Fill Excavation",
+			"numberOfWorkersNeeded": 2,
+			"numberOfUnitsPerDay": 0.333,
+			"locations": [
+				{
+					"sector": "A",
+					"level": "u1"
+				}
+			]
+		},
+		{
+			"id": 7,
+			"type": "Scaffolding Installation",
+			"numberOfWorkersNeeded": 4,
+			"numberOfUnitsPerDay": 0.333,
+			"orderSpecification": {
+				"level": "ASCENDING"
+			},
+			"locations": [
+				{
+					"sector": "A",
+					"level": "f0"
 				},
 				{
-				
 					"sector": "A",
-					"level": "l2",
+					"level": "f1"
+				},
+				{
+					"sector": "A",
+					"level": "f2"
+				}
+			]
+		},
+		{
+			"id": 8,
+			"type": "Pipes Installation",
+			"numberOfWorkersNeeded": 3,
+			"numberOfUnitsPerDay": 0.2,
+			"locations": [
+				{
+					"sector": "A",
+					"level": "u1",
 					"section": "r",
-					"unit": {
-						"from": 2,
-						"to": 10
-					}
+					"unit": 1
+				},
+				{
+					"sector": "A",
+					"level": "u1",
+					"section": "c",
+					"unit": 1
+				},
+				{
+					"sector": "A",
+					"level": "f0",
+					"section": "r",
+					"unit": 1
 				}
 			]
 		}
 	],
-	"alternatePrecedences": [
+	"dependencies": [
 		{
+			"chain": true,
 			"source": 1,
 			"target": 2,
-			"scope": "LEVEL"
+			"scope": ["sector"]
+		},
+		{
+			"source": 2,
+			"target": 3,
+			"scope": []
+		},
+		{
+			"source": 3,
+			"target": 4,
+			"scope": ["sector", "level"]
+		},
+		{
+			"source": 3,
+			"target": 5,
+			"scope": ["sector", "level"]
+		},
+		{
+			"source": 4,
+			"target": 5,
+			"scope": ["sector", "level"]
+		},
+		{
+			"source": 5,
+			"target": 6,
+			"scope": ["sector", "level"]
+		},
+		{
+			"source": 6,
+			"target": 7
+		},
+		{
+			"alternate": true,
+			"source": 7,
+			"target": 3,
+			"scope": ["sector", "level"]
+		},
+		{
+			"source": 3,
+			"target": 8
 		}
 	]
 }

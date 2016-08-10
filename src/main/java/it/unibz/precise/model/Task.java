@@ -1,62 +1,71 @@
 package it.unibz.precise.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
-@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id", scope=Task.class)
-@JsonIdentityReference(alwaysAsId=false)
-public class Task extends BaseEntity implements ModelComponent {
+public class Task extends BaseEntity {
 
 	@ManyToOne
-	private TaskType taskType;
-	@OneToMany(mappedBy="task")
-	@OrderBy("position")
-	private List<TaskConstructionUnit> constructionUnits;
-	private Scope orderScope;
+	private TaskType type;
 	
+	@ElementCollection
+	private List<Location> locations = new ArrayList<>();
+	
+	@ElementCollection
+	private List<OrderSpecification> orderSpecifications = new ArrayList<>();
+	
+	@ManyToMany
+	private List<Attribute> exclusiveness = new ArrayList<>();
+	
+	private boolean globalExclusiveness;
+
 	@ManyToOne
 	private Model model;
-	
-	public Task() {
-	}
-	
-	public Task(TaskType taskType, List<TaskConstructionUnit> constructionUnits, Scope orderScope) {
-		this.taskType = taskType;
-		this.constructionUnits = constructionUnits;
-		this.orderScope = orderScope;
+
+	public TaskType getType() {
+		return type;
 	}
 
-	public TaskType getTaskType() {
-		return taskType;
-	}
-	
-	public void setTaskType(TaskType taskType) {
-		this.taskType = taskType;
+	public void setType(TaskType type) {
+		this.type = type;
 	}
 
-	public Scope getOrderScope() {
-		return orderScope;
-	}
-	
-	public void setOrderScope(Scope orderScope) {
-		this.orderScope = orderScope;
+	public List<Location> getLocations() {
+		return locations;
 	}
 
-	public List<TaskConstructionUnit> getTaskConstructionUnits() {
-		return constructionUnits;
+	public void setLocations(List<Location> locations) {
+		this.locations = locations;
+	}
+
+	public List<OrderSpecification> getOrderSpecifications() {
+		return orderSpecifications;
+	}
+
+	public void setOrderSpecifications(List<OrderSpecification> orderSpecifications) {
+		this.orderSpecifications = orderSpecifications;
 	}
 	
-	public void setTaskConstructionUnits(List<TaskConstructionUnit> constructionUnits) {
-		this.constructionUnits = updateList(this.constructionUnits, constructionUnits);
+	public List<Attribute> getExclusiveness() {
+		return exclusiveness;
+	}
+
+	public void setExclusiveness(List<Attribute> exclusiveness) {
+		this.exclusiveness = exclusiveness;
+	}
+
+	public boolean isGlobalExclusiveness() {
+		return globalExclusiveness;
+	}
+
+	public void setGlobalExclusiveness(boolean globalExclusiveness) {
+		this.globalExclusiveness = globalExclusiveness;
 	}
 
 	public Model getModel() {
@@ -64,7 +73,11 @@ public class Task extends BaseEntity implements ModelComponent {
 	}
 
 	public void setModel(Model model) {
-		this.model = model;
+		ModelToMany.TASKS.setOne(this, model);
 	}
 
+	void internalSetModel(Model model) {
+		this.model = model;
+	}
+	
 }
