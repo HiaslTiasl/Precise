@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 @Entity
@@ -54,6 +55,11 @@ public class TaskType extends BaseEntity {
 	public void setPhase(Phase phase) {
 		this.phase = phase;
 	}
+	
+	@Transient
+	public Long getTypeID() {
+		return phase == null ? null : phase.getId();
+	}
 
 	public Model getModel() {
 		return model;
@@ -62,7 +68,7 @@ public class TaskType extends BaseEntity {
 	public void setModel(Model model) {
 		ModelToMany.TYPES.setOne(this, model);
 	}
-
+	
 	void internalSetModel(Model model) {
 		this.model = model;
 	}

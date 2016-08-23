@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 @Entity
 public class AttributeHierarchyNode extends BaseEntity {
@@ -50,6 +51,11 @@ public class AttributeHierarchyNode extends BaseEntity {
 		this.level = level;
 	}
 
+	@Transient
+	public Long getLevelID() {
+		return level == null ? null : level.getId();
+	}
+	
 	public AttributeHierarchyNode getParent() {
 		return parent;
 	}
@@ -62,6 +68,11 @@ public class AttributeHierarchyNode extends BaseEntity {
 		this.parent = parent;
 	}
 
+	@Transient
+	public Long getParentID() {
+		return parent == null ? null : parent.getId();
+	}
+	
 	public List<AttributeHierarchyNode> getChildren() {
 		return children;
 	}

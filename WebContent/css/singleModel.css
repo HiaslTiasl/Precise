@@ -1,0 +1,47 @@
+
+#panels {
+	height: 100%;
+	position: relative;
+}
+
+#precise-diagram, #properties {
+	height: 100%;
+}
+
+#precise-diagram {
+	margin-right: 300px;
+}
+
+.properties-wrapper {
+	margin: 0.25em;
+}
+
+#properties {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 295px;
+	margin-left: 5px;
+	min-width: 200px;
+	/* border: thin solid #333; */
+	vertical-align: top;
+}
+
+#properties h2 {
+	text-align: center;
+}
+
+#properties form {
+	display: table;
+	margin: 0.25em;
+}
+
+#properties form label {
+	display: table-row;
+}
+
+#properties form label > * {
+	display: table-cell;
+	padding: 0.25em;
+}
+

@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.rest.webmvc.RepositoryRestExceptionHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -18,10 +18,10 @@ import com.fasterxml.jackson.databind.deser.UnresolvedId;
 import it.unibz.precise.rest.mdl.MDLFileController;
 
 @ControllerAdvice(basePackageClasses = {RepositoryRestExceptionHandler.class, MDLFileController.class})
-public class HttpMessageNotReadableExceptionHandler {
+public class HttpMessageConversionExceptionHandler {
 
     @ExceptionHandler
-    ResponseEntity<String> handle(HttpMessageNotReadableException e) {
+    ResponseEntity<String> handle(HttpMessageConversionException e) {
     	return badRequest(getErrorMessage(e.getMostSpecificCause()));
     }
     

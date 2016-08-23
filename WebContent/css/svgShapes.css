@@ -1,0 +1,80 @@
+@CHARSET "ISO-8859-1";
+
+/* General */
+
+text {
+	fill: black;
+	font-size: 10;
+}
+
+/******************************************
+ * Override JointJS styles
+ ******************************************/
+
+.label rect {
+	display: none;
+}
+
+.highlighted {
+	opacity: initial;
+}
+
+/******************************************
+ * Highlighting
+ ******************************************/
+
+.precise.TaskShape .outline {
+	visibility: hidden;
+}
+
+.precise.TaskShape.highlighted .outline {
+	visibility: visible;
+	stroke: black;
+	stroke-dasharray: 10,10;
+}
+
+.precise.DependencyShape.highlighted .link-tools {
+	opacity: 1;
+}
+
+.precise.DependencyShape.highlighted .connection-wrap {
+	opacity: .4;
+	stroke-opacity: .4;
+}
+
+.precise.LocationShape {
+	pointer-events: none;
+}
+
+.precise.LocationShape.highlightable {
+	pointer-events: visible;
+}
+
+/******************************************
+ * Edit Modes
+ ******************************************/
+
+.add-task {
+	cursor: crosshair;
+}
+
+.add-dependency .precise.TaskShape {
+	cursor: pointer; 
+}
+
+.add-dependency .precise.TaskShape .outline {
+	visibility: visible;
+	fill: #ffff80;
+	stroke: none;
+}
+
+.add-precedence .precise.TaskShape.highlighted {
+	cursor: move; 
+}
+
+.add-precedence .precise.TaskShape.highlighted .outline {
+	fill: transparent;
+	stroke: black;
+	stroke-dasharray: 10,10;
+}
+

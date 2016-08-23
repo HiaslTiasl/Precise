@@ -51,8 +51,7 @@ public class Phase extends BaseEntity {
 	}
 
 	public void setAttributeHierarchyLevels(List<AttributeHierarchyLevel> attributeHierarchyLevels) {
-		attributeHierarchyLevels.forEach(l -> l.internalSetPhase(this));
-		this.attributeHierarchyLevels = Ordered.adjustPositions(attributeHierarchyLevels);
+		PhaseToMany.LEVELS.setMany(this, attributeHierarchyLevels);
 	}
 	
 	public void addAttribute(Attribute attribute) {
@@ -60,9 +59,8 @@ public class Phase extends BaseEntity {
 	}
 
 	public void addLevel(AttributeHierarchyLevel level) {
-		internalAddLevel(level);
-		if (!level.getPhase().equals(this))
-			level.internalSetPhase(this);
+		level.setPosition(attributeHierarchyLevels.size() + 1);
+		PhaseToMany.LEVELS.addOneOfMany(this, level);
 	}
 	
 	void internalSetLevels(List<AttributeHierarchyLevel> levels) {

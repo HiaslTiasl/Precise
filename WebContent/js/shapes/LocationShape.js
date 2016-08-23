@@ -12,8 +12,8 @@ define([
 	Util
 ) {
 	
-	var WIDTH = 25,
-		HEIGHT = 100,
+	var WIDTH = 16,
+		HEIGHT = WIDTH * 4,
 		ROW_HEIGHT = HEIGHT / 4;
 	
 	var classes = [
@@ -23,7 +23,7 @@ define([
 		'cu-unit'
 	];
 	
-	Util.set(joint.shapes, 'precise.ConstructionUnitShape', BaseShape.extend({
+	Util.set(joint.shapes, 'precise.LocationShape', BaseShape.extend({
 		markup: [
 			'<g class="rotatable">',
 				'<g class="scalable">',
@@ -34,7 +34,7 @@ define([
 		].join(''),
 		
 		defaults: joint.util.deepSupplement({
-			type: 'precise.ConstructionUnitShape',
+			type: 'precise.LocationShape',
 			size: {
 				width: WIDTH,
 				height: HEIGHT,
@@ -73,13 +73,8 @@ define([
 		ROW_HEIGHT: ROW_HEIGHT
 	}));
 	
-	Util.set(joint.shapes, 'precise.ConstructionUnitShapeView', joint.dia.ElementView.extend({
-		pointerdown: function () {
-			joint.dia.ElementView.prototype.pointerdown.apply(this, arguments);
-			// TODO: wire up moving logic
-			//this.model.startMoving
-		}
+	Util.set(joint.shapes, 'precise.LocationShapeView', joint.dia.ElementView.extend({
 	}));
 	
-	return joint.shapes.precise.ConstructionUnitShape;
+	return joint.shapes.precise.LocationShape;
 });

@@ -68,7 +68,7 @@ public class MDLTaskAST {
 					.map(a -> new OrderSpecification(a, order.get(a.getName())))
 					.collect(Collectors.toList())
 			);
-			task.setLocations(Util.mapToList(locations, map -> mapToLocation(levels, map)));
+			task.setLocations(Util.mapToList(locations, locMap -> mapToLocation(levels, task, locMap)));
 		}
 		return task;
 	}
@@ -130,7 +130,7 @@ public class MDLTaskAST {
 		return nodeToMap(location.getNode());
 	}
 	
-	public static Location mapToLocation(List<AttributeHierarchyLevel> levels, Map<String, String> locationMap)
+	public static Location mapToLocation(List<AttributeHierarchyLevel> levels, Task task, Map<String, String> locationMap)
 		throws InvalidLocationException
 	{
 		int entryCount = locationMap.size();
@@ -158,7 +158,7 @@ public class MDLTaskAST {
 			parent = node;
 		}
 			
-		return new Location(parent);
+		return new Location(parent, task);
 	}
 	
 }

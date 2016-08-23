@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 @Entity
@@ -46,6 +47,11 @@ public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
 	
 	void internalSetPhase(Phase phase) {
 		this.phase = phase;
+	}
+
+	@Transient
+	public Long getPhaseID() {
+		return phase == null ? null : phase.getId();
 	}
 
 	public Attribute getAttribute() {

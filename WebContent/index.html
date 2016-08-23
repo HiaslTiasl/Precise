@@ -2,98 +2,27 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Test</title>
+<title>PRECISE - Process Modelling</title>
 <script data-main="main.js" src="js/lib/require.js"></script>
 <link rel="stylesheet" href="css/joint.css"/>
 <link rel="stylesheet" href="css/split-pane.css"/>
-<link rel="stylesheet" href="css/shapes.css"/>
-<link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/svgShapes.css"/>
+<link rel="stylesheet" href="css/bootstrap.css"/>
+<link rel="stylesheet" href="css/bootstrap-theme.css"/>
+<link rel="stylesheet" href="css/bootstrap-table.css"/>
+<link rel="stylesheet" href="css/xeditable.css"/>
+<link rel="stylesheet" href="css/app.css"/>
+<link rel="stylesheet" href="css/allModels.css"/>
+<link rel="stylesheet" href="css/singleModel.css"/>
+<link rel="stylesheet" href="css/diagram.css"/>
 </head>
 <body>
 
-<div id="toolbar"></div>
-<div id="main" class="split-pane fixed-right">
-	<div id="paper" class="split-pane-component"></div>
-	<div class="split-pane-divider"></div>
-	<aside id="properties" class="split-pane-component">
-		<h2>Properties</h2>
-		<div id="task-properties" class="properties-wrapper">
-			<h3>Task</h3>
-			<hr>
-			<form>
-				<label>
-					<span>Name:</span>
-					<input type="text" name="name"/>
-				</label>
-				<label>
-					<span>Order Scope:</span>
-					<select name="orderScope">
-						<option value="TASK">task</option>
-						<option value="SECTOR">sector</option>
-						<option value="LEVEL">level</option>
-						<option value="SECTION">section</option>
-						<option value="UNIT">unit</option>
-					</select>
-				</label>
-				<label>
-					<span>Exclusiveness Scope:</span>
-					<select name="exclusivenessScope">
-						<option value="TASK">task</option>
-						<option value="SECTOR">sector</option>
-						<option value="LEVEL">level</option>
-						<option value="SECTION">section</option>
-						<option value="UNIT">unit</option>
-					</select>
-				</label>
-			</form>
-		</div>
-		<div id="cu-properties" class="properties-wrapper">
-			<h3>Construction Unit</h3>
-			<hr>
-			<form>
-				<label>
-					<span>Sector:</span>
-					<input type="text" name="sector"/>
-				</label>
-				<label>
-					<span>Level:</span>
-					<input type="text" name="level"/>
-				</label>
-				<label>
-					<span>Section:</span>
-					<input type="text" name="section"/>
-				</label>
-				<label>
-					<span>Unit:</span>
-					<input type="text" name="unit"/>
-				</label>
-			</form>
-		</div>
-		<div id="precedence-properties" class="properties-wrapper">
-			<h3>Precedence</h3>
-			<hr>
-			<form>
-				<label>
-					<span>Kind:</span>
-					<select name="kind">
-						<option value="PRECEDENCE">precedence</option>
-						<option value="ALTERNATE_PRECEDENCE">alternate precedence</option>
-						<option value="CHAIN_PRECEDENCE">chain precedence</option>
-					</select>
-				</label>
-				<label>
-					<span>Scope:</span>
-					<select name="scope">
-						<option value="TASK">task</option>
-						<option value="SECTOR">sector</option>
-						<option value="LEVEL">level</option>
-						<option value="SECTION">section</option>
-						<option value="UNIT">unit</option>
-					</select>
-				</label>
-			</form>	
-		</div>
-	</aside>
-</div>
+<header id="page-header">
+	<h1>PRECISE</h1>
+</header>
+<article id="page-main" class="container">
+	<ui-view></ui-view>
+</article>
 </body>
 </html>

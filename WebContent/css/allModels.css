@@ -1,0 +1,9 @@
+
+#all-models-table th,
+#all-models-table td {
+	width: 30%;
+}
+
+.btn-file > input[type="file"] {
+	display: none;
+}

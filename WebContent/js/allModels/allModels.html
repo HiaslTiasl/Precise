@@ -1,0 +1,26 @@
+<div class="toolbar">
+	<button class="btn btn-default" ng-click="$ctrl.createModel()">Create</button>
+	<button class="btn btn-default" ng-model="$ctrl.file" ngf-select="$ctrl.importFile($ctrl.file)">Import</button>
+</div>
+<table id="all-models-table" st-table="$ctrl.coll" st-safe-src="$ctrl.models" class="table table-striped">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="m in $ctrl.coll">
+			<td>
+				<a href editable-text="m.name" onbeforesave="$ctrl.renameModel(m, $data)">{{m.name}}</a>
+			</td>
+			<td>{{m.description}}</td>
+			<td class="toolbar">
+				<a class="btn btn-default" ui-sref="singleModel({ name: m.name })">Open</a>
+				<a class="btn btn-default" ng-href="{{$ctrl.getFileURI(m)}}" target="_blank" download="{{$ctrl.getFileName(m)}}">Export</a>
+				<button class="btn btn-default" ng-click="$ctrl.duplicateModel(m)">Duplicate</button>
+				<button class="btn btn-default" ng-click="$ctrl.deleteModel(m)">Delete</button>
+			<td>
+		</tr>
+	</tbody>
+</table>

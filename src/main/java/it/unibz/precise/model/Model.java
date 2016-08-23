@@ -2,16 +2,28 @@ package it.unibz.precise.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
+@Table(uniqueConstraints=@UniqueConstraint(name="UC_MODEL_NAME", columnNames="name"))
 public class Model extends BaseEntity {
 	
-	@Column(unique=true, nullable=false)
+	@Column(nullable=false)
+	@NotNull
+	@Size(min=1)
+	@Pattern(regexp="^[\\.\\w\\-_ ]*$")
 	private String name;
 	
 	private String description;
@@ -111,12 +123,20 @@ public class Model extends BaseEntity {
 		ModelToMany.TASKS.setMany(this, tasks);
 	}
 	
+	public void addTask(Task task) {
+		ModelToMany.TASKS.addOneOfMany(this, task);
+	}
+	
 	void internalSetTasks(List<Task> tasks) {
 		this.tasks = tasks;
 	}
-	
-	public void addTask(Task task) {
-		ModelToMany.TASKS.addOneOfMany(this, task);
+
+	@JsonIgnore
+	public List<Location> getLocations() {
+		return tasks.stream()
+			.map(Task::getLocations)
+			.flatMap(List::stream)
+			.collect(Collectors.toList());
 	}
 
 	public List<TaskType> getTaskTypes() {

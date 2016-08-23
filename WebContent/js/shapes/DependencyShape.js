@@ -23,9 +23,9 @@ define([
 		'UNIT': 'u'
 	};
 	
-	Util.set(joint.shapes, ['precise', 'Precedence'], joint.dia.Link.extend(BaseMixin).extend({
+	Util.set(joint.shapes, ['precise', 'DependencyShape'], joint.dia.Link.extend(BaseMixin).extend({
 		defaults: joint.util.deepSupplement({
-			type: 'precise.Precedence',
+			type: 'precise.DependencyShape',
 			attrs: {
 				'.marker-target': {
 					fill: 'black',
@@ -50,8 +50,8 @@ define([
 				}
 			});
 			this.attr({
-				'.marker-source': { d: data.kind === 'ALTERNATE_PRECEDENCE' ? CROSS_MARKER : '' },
-				'.marker_target': { d: data.kind === 'CHAIN_PRECEDENCE' ? DOUBLE_ARROW_MARKER : '' }
+				'.marker-source': { d: data.alternate ? CROSS_MARKER : '' },
+				'.marker_target': { d: data.chain ? DOUBLE_ARROW_MARKER : '' }
 			});
 		}
 	}, {
@@ -60,6 +60,7 @@ define([
 	
 	var defineFilter = _.once(function (paper, markup) {
 		joint.V(paper.defs).append(joint.V(markup));
+		return 'url(#stroke-doubler)';
 	});
 	
 	var intensify = [
@@ -76,7 +77,7 @@ define([
 		  0,  0,  0, 1, 0
 	].join(' ');
 	
-	Util.set(joint.shapes, 'precise.PrecedenceView', joint.dia.LinkView.extend({
+	Util.set(joint.shapes, 'precise.DependencyShapeView', joint.dia.LinkView.extend({
 		filterMarkup: [
 			'<filter id="stroke-doubler" filterUnits="userSpaceOnUse">',
 				'<feColorMatrix in="SourceGraphic" result="intense" type="matrix" values="' + intensify + '"/>',
@@ -100,14 +101,19 @@ define([
 		
 		render: function () {
 			joint.dia.LinkView.prototype.render.apply(this, arguments);
-			defineFilter(this.paper, this.filterMarkup);
 			this.model.attr(
 				'.connection/filter',
-				this.model.get('data').kind === 'CHAIN_PRECEDENCE' ? 'url(#stroke-doubler)' : 'none'
+				this.model.get('data').chain ? defineFilter(this.paper, this.filterMarkup) : 'none'
 			);
-		}
+		},
+		
+		pointerdblclick: function (evt, x, y) {
+            if (joint.V(evt.target).hasClass('connection') || joint.V(evt.target).hasClass('connection-wrap')) {
+                this.addVertex({ x: x, y: y });
+            }
+        }
 	}));
 	
-	return joint.shapes.precise.Precedence;
+	return joint.shapes.precise.DependencyShape;
 	
 });

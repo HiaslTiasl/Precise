@@ -2,10 +2,12 @@ package it.unibz.precise.model;
 
 import java.util.List;
 
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 @Entity
@@ -13,15 +15,18 @@ import javax.persistence.UniqueConstraint;
 	@UniqueConstraint(columnNames={"source_id", "target_id"})
 })
 public class Dependency extends BaseEntity {
+	
+	private boolean alternate;
+	private boolean chain;
+	
+	@Embedded
+	private List<Position> vertices;
 
 	@ManyToOne
 	private Task source;
 	
 	@ManyToOne
 	private Task target;
-	
-	private boolean alternate;
-	private boolean chain;
 	
 	@ManyToMany
 	private List<Attribute> scope;
@@ -31,12 +36,25 @@ public class Dependency extends BaseEntity {
 	@ManyToOne
 	private Model model;
 
+	public List<Position> getVertices() {
+		return vertices;
+	}
+
+	public void setVertices(List<Position> vertices) {
+		this.vertices = vertices;
+	}
+
 	public Task getSource() {
 		return source;
 	}
 
 	public void setSource(Task source) {
 		this.source = source;
+	}
+	
+	@Transient
+	public Long getSourceID() {
+		return source == null ? null : source.getId();
 	}
 
 	public Task getTarget() {
@@ -45,6 +63,11 @@ public class Dependency extends BaseEntity {
 
 	public void setTarget(Task target) {
 		this.target = target;
+	}
+	
+	@Transient
+	public Long getTargetID() {
+		return target == null ? null : target.getId();
 	}
 
 	public boolean isAlternate() {

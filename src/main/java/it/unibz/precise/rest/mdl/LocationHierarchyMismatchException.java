@@ -10,6 +10,4 @@ public class LocationHierarchyMismatchException extends InvalidLocationException
 		super(locationMap, "The location has an invalid number of entries for the given hierarchy");
 	}
 
-	
-	
 }

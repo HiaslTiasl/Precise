@@ -2,7 +2,7 @@ define([
 	'lib/lodash',
 	'lib/joint',
 	'shapes/BaseShape',
-	'shapes/ConstructionUnitShape',
+	'shapes/LocationShape',
 	'shapes/TemplateUtil',
 	'Util'//,
 	//'TaskToolsShape'
@@ -10,27 +10,27 @@ define([
 	_,
 	joint,
 	BaseShape,
-	ConstructionUnitShape,
+	LocationShape,
 	TemplateUtil,
 	Util
 ) {
 	
-	var WIDTH = 200,
+	var WIDTH = LocationShape.WIDTH * 8,
 		NAME_POS_Y = WIDTH / 8,
 		NAME_HEIGHT = WIDTH / 4,
 		CUS_POS_Y = NAME_POS_Y + NAME_HEIGHT,
-		CUS_HEIGHT = ConstructionUnitShape.HEIGHT,
+		CUS_HEIGHT = LocationShape.HEIGHT,
 		HEIGHT = CUS_POS_Y + CUS_HEIGHT;
 	
 	var textClasses = [
 		'task-id',
-		'task-workers',
-		'task-time-units',
-		'task-craft',
-		'task-name',
+		'task-workers-needed',
+		'task-units-per-day',
+		'task-type-craft',
+		'task-type-name',
 	];
 	
-	var classes = textClasses.concat('task-cus');
+	var classes = textClasses.concat('task-locations');
 	
 	function compareX(cell1, cell2) {
 		return cell1.get('position').x - cell2.get('position').x;
@@ -59,16 +59,16 @@ define([
 					width: WIDTH,
 					'follow-scale': true
 				},
-				'rect.task-id, rect.task-workers, rect.task-time-units, rect.task-craft': {
+				'rect.task-id, rect.task-workers-needed, rect.task-units-per-day, rect.task-type-craft': {
 					width: WIDTH / 4,
 					height: NAME_POS_Y
 				},
-				'rect.task-workers':    { x: 1/4 * WIDTH },
-				'rect.task-time-units': { x: 2/4 * WIDTH },
-				'rect.task-craft':      { x: 3/4 * WIDTH },
+				'rect.task-workers-needed': { x: 1/4 * WIDTH },
+				'rect.task-units-per-day':  { x: 2/4 * WIDTH },
+				'rect.task-type-craft':     { x: 3/4 * WIDTH },
 				
-				'rect.task-name': { y: NAME_POS_Y, height: NAME_HEIGHT },
-				'rect.task-cus':  { y: CUS_POS_Y,  height: CUS_HEIGHT },
+				'rect.task-type-name': { y: NAME_POS_Y, height: NAME_HEIGHT },
+				'rect.task-locations': { y: CUS_POS_Y,  height: CUS_HEIGHT },
 			}, TemplateUtil.withRefsToSameClass('text', 'rect', textClasses, {
 				 'ref-y': .5,
 				 'ref-x': .5,
@@ -85,11 +85,11 @@ define([
 		update: function () {
 			var data = this.get('data');
 			this.attr({
-				'text.task-id':         { text: data.id },
-				'text.task-workers':    { text: data.workers },
-				'text.task-time-units': { text: data.timeUnits },
-				'text.task-craft':      { text: data.craft },
-				'text.task-name':       { text: data.name }
+				'text.task-id':             { text: data.id },
+				'text.task-workers-needed': { text: data.numberOfWorkersNeeded },
+				'text.task-units-per-day':  { text: data.numberOfUnitsPerDay },
+				'text.task-type-craft':     { text: data.type.craft },
+				'text.task-type-name':      { text: data.type.name }
 			});
 		},
 		
@@ -98,7 +98,7 @@ define([
 				embeds = this.get('embeds'),
 				count = embeds ? embeds.length : 0;
 			BaseShape.prototype.embed.call(this, cell);
-			cell.position(count * ConstructionUnitShape.WIDTH, CUS_POS_Y, {
+			cell.position(count * LocationShape.WIDTH, CUS_POS_Y, {
 				parentRelative: true
 			});
 		},
@@ -112,7 +112,7 @@ define([
 			var embeds = this.getEmbeddedCells(),
 				len = embeds.length;
 			for (var i = fromIndex || 0; i < len; i++)
-				embeds[i].translate(-ConstructionUnitShape.WIDTH);
+				embeds[i].translate(-LocationShape.WIDTH);
 		},
 		
 		startMoveConstructionUnit: function (cu) {

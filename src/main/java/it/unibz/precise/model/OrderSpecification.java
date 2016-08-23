@@ -1,15 +1,18 @@
 package it.unibz.precise.model;
 
-import javax.persistence.Embeddable;
+import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
-@Embeddable
-public class OrderSpecification {
+@Entity
+public class OrderSpecification extends BaseEntity {
 	
 	@ManyToOne
 	private Attribute attribute;
 	
 	private OrderType orderType;
+	
+	@ManyToOne
+	private Task task;
 	
 	public OrderSpecification() {
 	}
@@ -34,5 +37,16 @@ public class OrderSpecification {
 	public void setOrderType(OrderType orderType) {
 		this.orderType = orderType;
 	}
+
+	public Task getTask() {
+		return task;
+	}
+
+	public void setTask(Task task) {
+		TaskToMany.ORDER_SPECIFICATIONS.setOne(this, task);
+	}
 	
+	void internalSetTask(Task task) {
+		this.task = task;
+	}
 }

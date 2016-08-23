@@ -1,8 +1,8 @@
 require.config({
 	baseUrl: 'js',
 	paths: {	// library paths
-		'jquery': './lib/jquery.min',		// jquery is a named module, so 'lib/jquery' does not work...
-		'lib/lodash': './lib/lodash.min'
+		'jquery': './lib/jquery'			// jquery is a named module, so 'lib/jquery' does not work...
+		//'lib/lodash': './lib/lodash.min'	// ... for production use
     },
     map: {
     	// Tell libraries where their dependencies are
@@ -13,43 +13,45 @@ require.config({
         }
     },
     shim: {
-    	'lib/split-pane': ['jquery']
+    	'lib/split-pane': ['jquery'],
+    	'lib/bootstrap': ['jquery'],
+    	'lib/bootstrap-table': ['jquery', 'lib/bootstrap'],
+    	'lib/angular': {
+    		deps: ['lib/jquery'],
+    		exports: 'angular'
+    	},
+    	'lib/angular-ui-router': ['lib/angular'],
+    	'lib/traverson-angular': ['lib/angular'],
+    	'lib/smart-table': ['lib/angular'],
+    	'lib/ng-file-upload': {
+    		deps: ['lib/angular'],
+    		exports: 'ngFileUpload'
+    	},
+    	'lib/xeditable': ['lib/angular']
     }
 });
 
 require([
-	'lib/lodash',
 	'jquery',
-	'ctrl/Diagram',
-	'ctrl/Toolset',
-	'ctrl/Toolbar',
-	'shapes/TaskShape',
-	'shapes/ConstructionUnitShape',
-	'shapes/Precedence',
-	'lib/split-pane'
+	'lib/angular',
+	'app'
 ], function (
-	_,
 	$,
-	Diagram,
-	Toolset,
-	Toolbar,
-	TaskShape,
-	ConstructionUnitShape,
-	Precedence
+	angular,
+	app
 ) {
-	"use strict";
+	'use strict';
 	
-	var dia = new Diagram();
-	dia.initPaper('#paper');
+	$(function () {
+		angular.bootstrap(document.body, [app.name]);
+	});
 	
-	Toolbar.initHtmlToolbar('#toolbar', Toolset, dia);
-	
-	// Fire 'task:select' with null, undefined for initializing listeners
-	dia.selectTask(null);
 
 	// Init split pane
-	var $mainSplitPane = $('#main');
-	$mainSplitPane.splitPane();
+//	var $mainSplitPane = $('#page-main');
+//	$mainSplitPane.splitPane();
+//	
+//	AllModels.$el.show();
 	
 	// Keep paper dimensions equal to parent
 //	var updateDiagramDimensions = dia.updateDimensions.bind(dia);
@@ -59,64 +61,64 @@ require([
 	// Sample code for initial data
 	// TODO: fetch from server instead
 	
-	var scaffInstall = new TaskShape({
-        position: { x: 100, y: 30 },
-        data: {
-        	id: 1,
-        	workers: 4,
-        	timeUnits: 4,
-        	craft: 'Sc',
-        	name: 'Scaffolding Installation'
-        }
-    });
-	
-	var concrPour = new TaskShape({
-        position: { x: 400, y: 30 },
-        data: {
-        	id: 1,
-        	workers: 4,
-        	timeUnits: 4,
-        	craft: 'Br',
-        	name: 'Concrete Pouring'
-        }
-    });
-	
-	var cus = [];
-	for (var unit = 1; unit <= 4; unit++) {
-		cus.push(new ConstructionUnitShape({
-			data: {
-				sector: 'A',
-				level: 'u1',
-				section: 'r',
-				unit: unit
-			}
-		}));
-	}
-	
-	var prec = new Precedence({
-		source: { id: scaffInstall.id },
-		target: { id: concrPour.id },
-		data: {
-			kind: 'CHAIN_PRECEDENCE',
-			scope: 'UNIT'
-		}
-	});
-	
-	var altPrec = new Precedence({
-		source: { id: scaffInstall.id },
-		target: { id: concrPour.id },
-		vertices: [{ x: 350, y: 250 }],
-		data: {
-			kind: 'ALTERNATE_PRECEDENCE',
-			scope: 'LEVEL'
-		}
-	});
-
-	dia.graph.addCells([scaffInstall, concrPour, prec, altPrec]);
-	dia.graph.addCells(cus);
-
-	scaffInstall.embed(cus[0]);
-	scaffInstall.embed(cus[1]);
-	concrPour.embed(cus[2]);
-	concrPour.embed(cus[3]);
+//	var scaffInstall = new TaskShape({
+//        position: { x: 100, y: 30 },
+//        data: {
+//        	id: 1,
+//        	workers: 4,
+//        	timeUnits: 4,
+//        	craft: 'Sc',
+//        	name: 'Scaffolding Installation'
+//        }
+//    });
+//	
+//	var concrPour = new TaskShape({
+//        position: { x: 400, y: 30 },
+//        data: {
+//        	id: 1,
+//        	workers: 4,
+//        	timeUnits: 4,
+//        	craft: 'Br',
+//        	name: 'Concrete Pouring'
+//        }
+//    });
+//	
+//	var cus = [];
+//	for (var unit = 1; unit <= 4; unit++) {
+//		cus.push(new ConstructionUnitShape({
+//			data: {
+//				sector: 'A',
+//				level: 'u1',
+//				section: 'r',
+//				unit: unit
+//			}
+//		}));
+//	}
+//	
+//	var prec = new Precedence({
+//		source: { id: scaffInstall.id },
+//		target: { id: concrPour.id },
+//		data: {
+//			kind: 'CHAIN_PRECEDENCE',
+//			scope: 'UNIT'
+//		}
+//	});
+//	
+//	var altPrec = new Precedence({
+//		source: { id: scaffInstall.id },
+//		target: { id: concrPour.id },
+//		vertices: [{ x: 350, y: 250 }],
+//		data: {
+//			kind: 'ALTERNATE_PRECEDENCE',
+//			scope: 'LEVEL'
+//		}
+//	});
+//
+//	dia.graph.addCells([scaffInstall, concrPour, prec, altPrec]);
+//	dia.graph.addCells(cus);
+//
+//	scaffInstall.embed(cus[0]);
+//	scaffInstall.embed(cus[1]);
+//	concrPour.embed(cus[2]);
+//	concrPour.embed(cus[3]);
 });
