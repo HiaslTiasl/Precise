@@ -2,7 +2,7 @@ package it.unibz.precise.model;
 
 import java.util.List;
 
-import javax.persistence.Embedded;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -18,9 +18,6 @@ public class Dependency extends BaseEntity {
 	
 	private boolean alternate;
 	private boolean chain;
-	
-	@Embedded
-	private List<Position> vertices;
 
 	@ManyToOne
 	private Task source;
@@ -31,18 +28,13 @@ public class Dependency extends BaseEntity {
 	@ManyToMany
 	private List<Attribute> scope;
 	
+	@ElementCollection
+	private List<Position> vertices;
+	
 	private boolean globalScope;
 	
 	@ManyToOne
 	private Model model;
-
-	public List<Position> getVertices() {
-		return vertices;
-	}
-
-	public void setVertices(List<Position> vertices) {
-		this.vertices = vertices;
-	}
 
 	public Task getSource() {
 		return source;
@@ -100,6 +92,14 @@ public class Dependency extends BaseEntity {
 
 	public void setGlobalScope(boolean globalScope) {
 		this.globalScope = globalScope;
+	}
+	
+	public List<Position> getVertices() {
+		return vertices;
+	}
+	
+	public void setVertices(List<Position> vertices) {
+		this.vertices = vertices;
 	}
 
 	public Model getModel() {

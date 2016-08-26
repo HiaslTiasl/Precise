@@ -38,12 +38,14 @@ function (
 	                gridSize: $ctrl.gridSize || 2,
 	                model: new joint.dia.Graph(),
 	                multiLinks: false,
-	                interactive: {
-	                	vertexAdd: false
-	                },
+	                defaultConnector: { name: 'jumpover' },
+	                perpendicularLinks: true,
+	                interactive: { vertexAdd: false },
 	                restrictTranslate: function (cellView) {
-			        	return cellView.model.get('type') !== 'precise.ConstructionUnitShape'
-			        		&& this.getArea();
+	                	var model = cellView.model;
+			        	return model.get('type') === 'precise.LocationShape'
+			        		? _.extend({ width: 0, height: 0 }, model.get('position'))
+			        		: this.getArea();
 			        }
 	            });
 	        	

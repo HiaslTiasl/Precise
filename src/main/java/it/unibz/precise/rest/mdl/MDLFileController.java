@@ -1,10 +1,15 @@
 package it.unibz.precise.rest.mdl;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.core.RepositoryConstraintViolationException;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +28,9 @@ public class MDLFileController {
 	
 	@Autowired
 	private ModelRepository repository;
+
+	@Autowired
+	private Validator validator;
 	
 	public static final String RESOURCE_NAME = "files";
 	
@@ -42,7 +50,8 @@ public class MDLFileController {
 	)
 	public void save(
 		@PathVariable("name") String name,
-		@RequestBody MDLFileAST modelDTO,
+		@Valid @RequestBody MDLFileAST modelDTO,
+		Errors errors,
 		@RequestParam(defaultValue="false") boolean update)
 	{
 		if (update) {
@@ -57,7 +66,12 @@ public class MDLFileController {
 				repository.flush();		 
 			}
 		}
-		repository.save(modelDTO.toModel(name));
+		Model newModel = modelDTO.toModel(name);
+		validator.validate(newModel, errors);
+		if (errors.hasErrors())
+			throw new RepositoryConstraintViolationException(errors);
+		else
+			repository.save(newModel);
 	}
 	
 }

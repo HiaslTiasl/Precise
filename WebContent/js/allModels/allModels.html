@@ -1,6 +1,7 @@
 <div class="toolbar">
 	<button class="btn btn-default" ng-click="$ctrl.createModel()">Create</button>
 	<button class="btn btn-default" ng-model="$ctrl.file" ngf-select="$ctrl.importFile($ctrl.file)">Import</button>
+	<span class="text-danger">{{$ctrl.fileErrorMsg}}</span>
 </div>
 <table id="all-models-table" st-table="$ctrl.coll" st-safe-src="$ctrl.models" class="table table-striped">
 	<thead>

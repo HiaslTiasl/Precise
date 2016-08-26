@@ -23,6 +23,8 @@ define([
 		'UNIT': 'u'
 	};
 	
+	var getScopeName = _.property('name');
+	
 	Util.set(joint.shapes, ['precise', 'DependencyShape'], joint.dia.Link.extend(BaseMixin).extend({
 		defaults: joint.util.deepSupplement({
 			type: 'precise.DependencyShape',
@@ -32,10 +34,10 @@ define([
 					d: ARROW_MARKER
 				}
 			},
-			perpenducularLinks: true,
-			router: {
-				name: 'orthogonal'
-			}
+//			perpendicular: true,
+//			router: {
+//				name: 'orthogonal'
+//			}
 		}, joint.dia.Link.prototype.defaults),
 		
 		update: function () {
@@ -44,7 +46,7 @@ define([
 				position: 0.5,
 				attrs: {
 					text: {
-						text: scopeLabels[data.scope] || '<missing scope>',
+						text: data.scope && data.scope.map(getScopeName).join(','),
 						transform: 'translate(-10, -10)'
 					}
 				}
@@ -55,7 +57,12 @@ define([
 			});
 		}
 	}, {
-		scopeLabels: scopeLabels
+		// Static properties
+		scopeLabels: scopeLabels,
+		
+		toDependencyID: function (id) {
+			return 'dependency-' + id;
+		}
 	}));
 	
 	var defineFilter = _.once(function (paper, markup) {

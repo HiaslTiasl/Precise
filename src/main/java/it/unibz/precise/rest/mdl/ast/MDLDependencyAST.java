@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import it.unibz.precise.model.Dependency;
+import it.unibz.precise.model.Position;
 import it.unibz.util.Util;
 
 public class MDLDependencyAST {
@@ -17,6 +18,7 @@ public class MDLDependencyAST {
 	private MDLTaskAST target;
 	private boolean globalScope;
 	private List<MDLAttributeAST> scope;
+	private List<Position> vertices;
 
 	public MDLDependencyAST() {
 	}
@@ -29,6 +31,7 @@ public class MDLDependencyAST {
 		target = context.translate(dependency.getTarget());
 		globalScope = dependency.isGlobalScope();
 		scope = Util.mapToList(dependency.getScope(), context::translate);
+		vertices = dependency.getVertices();
 	}
 	
 	public Dependency toDependency() {
@@ -40,6 +43,7 @@ public class MDLDependencyAST {
 			dependency.setTarget(target.toTask());
 			dependency.setGlobalScope(globalScope);
 			dependency.setScope(Util.mapToList(scope, MDLAttributeAST::toAttribute));
+			dependency.setVertices(vertices);
 		}
 		return dependency;
 	}
@@ -90,6 +94,22 @@ public class MDLDependencyAST {
 
 	public void setScope(List<MDLAttributeAST> scope) {
 		this.scope = scope;
+	}
+
+	public Dependency getDependency() {
+		return dependency;
+	}
+
+	public void setDependency(Dependency dependency) {
+		this.dependency = dependency;
+	}
+
+	public List<Position> getVertices() {
+		return vertices;
+	}
+
+	public void setVertices(List<Position> vertices) {
+		this.vertices = vertices;
 	}
 	
 }

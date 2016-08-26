@@ -7,10 +7,13 @@ define(function () {
 		return allModels.getModels();
 	}
 	
-	resolveSingleModel.$inject = ['$stateParams', 'singleModel'];
+	resolveSingleModel.$inject = ['$stateParams', '$state', 'singleModel'];
 	
-	function resolveSingleModel($stateParams, singleModel) {
-		return singleModel.findByName($stateParams.name);
+	function resolveSingleModel($stateParams, $state, singleModel) {
+		return singleModel.findByName($stateParams.name)
+			['catch'](function () {
+				$state.go('allModels');
+			});
 	}
 	
 	onEnterSingleModel.$inject = ['$window', '$timeout', '$q', 'model'];
@@ -64,8 +67,8 @@ define(function () {
 				controller: 'SingleModelController',
 				controllerAs: '$ctrl',
 				templateUrl: 'js/singleModel/singleModel.html',
-				onEnter: onEnterSingleModel,
-				onExit: onExitSingleModel,
+				//onEnter: onEnterSingleModel,
+				//onExit: onExitSingleModel,
 				resolve: {
 					'model': resolveSingleModel
 				}

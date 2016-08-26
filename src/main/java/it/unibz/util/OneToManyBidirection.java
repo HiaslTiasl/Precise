@@ -1,10 +1,10 @@
 package it.unibz.util;
 
-import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
-public class OneToManyBidirection<One, OneOfMany, Many extends Collection<OneOfMany>> {
+public abstract class OneToManyBidirection<One, OneOfMany, Many> {
 	
 	private Function<One, Many> getMany;
 	private BiConsumer<One, Many> setMany;
@@ -24,49 +24,45 @@ public class OneToManyBidirection<One, OneOfMany, Many extends Collection<OneOfM
 		this.setOne = setOne;
 	}
 	
+	public Many getMany(One one) {
+		return getMany.apply(one);
+	}
+	
 	public void setMany(One one, Many many) {
 		adjustManyToOne(one, many);
 		setMany.accept(one, many);
 	}
-
+	
+	public One getOne(OneOfMany oneOfMany) {
+		return getOne.apply(oneOfMany);
+	}
+	
 	public void setOne(OneOfMany oneOfMany, One one) {
-		One oldOwner = getOne.apply(oneOfMany);
-		if (oldOwner != null)
-			getMany.apply(oldOwner).remove(oneOfMany);
-		internalSetOne(oneOfMany, one, oldOwner);
+		One oldOne = getOne.apply(oneOfMany);
+		if (oldOne != null)
+			removeImpl(getMany.apply(oldOne), oneOfMany);
+		setOne.accept(oneOfMany, one);
 		addIfAbsent(getMany.apply(one), oneOfMany);
 	}
 	
 	public void addOneOfMany(One one, OneOfMany oneOfMany) {
-		internalSetOne(oneOfMany, one);
-		getMany.apply(one).add(oneOfMany);
-	}
-	
-	public void adjustManyToOne(One one) {
-		adjustManyToOne(one, getMany.apply(one));
-	}
-	
-	private void internalSetOne(OneOfMany oneOfMany, One one) {
-		internalSetOne(oneOfMany, one, getOne.apply(oneOfMany));
-	}
-	
-	private void internalSetOne(OneOfMany oneOfMany, One one, One oldOne) {
 		setOne.accept(oneOfMany, one);
+		addImpl(getMany.apply(one), oneOfMany);
 	}
 	
-	private void adjustManyToOne(One one, Many many) {
+	protected void addIfAbsent(Many many, OneOfMany oneOfMany) {
+		if (many != null && containsImpl(many, oneOfMany))
+			addImpl(many, oneOfMany);
+	}
+	
+	protected abstract void removeImpl(Many many, OneOfMany oneOfMany);
+	protected abstract boolean containsImpl(Many many, OneOfMany oneOfMany);
+	protected abstract void addImpl(Many many, OneOfMany oneOfMany);
+	protected abstract Stream<OneOfMany> stream(Many many);
+	
+	protected void adjustManyToOne(One one, Many many) {
 		if (many != null)
-			many.forEach(item -> internalSetOne(item, one));
-	}
-	
-	private void addIfAbsent(Many many, OneOfMany oneOfMany) {
-		if (many != null && !many.contains(oneOfMany))
-			add(many, oneOfMany);
-	}
-	
-	private void add(Many many, OneOfMany oneOfMany) {
-		if (many != null)
-			many.add(oneOfMany);
+			stream(many).forEach(oneOfMany -> setOne(oneOfMany, one));
 	}
 	
 }

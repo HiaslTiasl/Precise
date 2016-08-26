@@ -3,6 +3,10 @@ package it.unibz.precise.rest.mdl.ast;
 import java.util.List;
 import java.util.function.Function;
 
+import javax.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -15,6 +19,7 @@ import it.unibz.precise.model.TaskType;
 import it.unibz.util.Util;
 
 @JsonPropertyOrder({"model", "attributes", "phases", "taskTypes", "tasks", "dependencies"})
+@Validated
 public class MDLFileAST {
 
 	@JsonIgnoreProperties({"id", "name", "attributes", "phases", "taskTypes", "tasks", "dependencies"})
@@ -44,7 +49,7 @@ public class MDLFileAST {
 		dependencies = Util.mapToList(model.getDependencies(), this::translate);
 	}
 	
-	public Model toModel(String name) {
+	public @Valid Model toModel(String name) {
 		model.setName(name);
 		attributes.stream()
 			.map(MDLAttributeAST::toAttribute)

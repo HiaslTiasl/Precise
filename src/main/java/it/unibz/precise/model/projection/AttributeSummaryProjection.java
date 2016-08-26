@@ -4,8 +4,8 @@ import org.springframework.data.rest.core.config.Projection;
 
 import it.unibz.precise.model.Attribute;
 
-@Projection(name="attribute", types=Attribute.class)
-public interface AttributeProjection {
+@Projection(name="attributeSummary", types=Attribute.class)
+public interface AttributeSummaryProjection {
 
 	String getName();
 	

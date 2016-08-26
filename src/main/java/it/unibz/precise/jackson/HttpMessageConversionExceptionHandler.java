@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.rest.webmvc.RepositoryRestExceptionHandler;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.rest.webmvc.support.ExceptionMessage;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,24 +17,22 @@ import com.fasterxml.jackson.databind.deser.UnresolvedForwardReference;
 import com.fasterxml.jackson.databind.deser.UnresolvedId;
 
 import it.unibz.precise.rest.mdl.MDLFileController;
+import it.unibz.util.ResponseEntityHelper;
 
 @ControllerAdvice(basePackageClasses = {RepositoryRestExceptionHandler.class, MDLFileController.class})
 public class HttpMessageConversionExceptionHandler {
 
     @ExceptionHandler
-    ResponseEntity<String> handle(HttpMessageConversionException e) {
-    	return badRequest(getErrorMessage(e.getMostSpecificCause()));
+    ResponseEntity<ExceptionMessage> handle(HttpMessageConversionException e) {
+    	return ResponseEntityHelper.badRequest(new HttpHeaders(), mapException(e.getMostSpecificCause()));
     }
     
-    private static String getErrorMessage(Throwable e) {
-    	String errMsg;
+    private static Throwable mapException(Throwable e) {
     	if (e instanceof UnresolvedForwardReference)
-    		errMsg = serialize((UnresolvedForwardReference)e);
+    		e = new Exception(serialize((UnresolvedForwardReference)e));
     	else if (e instanceof JsonProcessingException)
-    		errMsg = serialize((JsonProcessingException)e);
-    	else
-    		errMsg = e.getMessage();
-    	return errMsg;
+    		e = new Exception(serialize((JsonProcessingException)e));
+    	return e;
     }
     
     private static String serialize(UnresolvedForwardReference ufr) {
@@ -60,7 +59,4 @@ public class HttpMessageConversionExceptionHandler {
 			+ " column " + jsonLoc.getColumnNr();
     }
     
-    private static ResponseEntity<String> badRequest(String errMsg) {
-    	return new ResponseEntity<>(errMsg, HttpStatus.BAD_REQUEST);
-    }
 }

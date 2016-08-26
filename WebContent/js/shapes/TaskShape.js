@@ -18,9 +18,9 @@ define([
 	var WIDTH = LocationShape.WIDTH * 8,
 		NAME_POS_Y = WIDTH / 8,
 		NAME_HEIGHT = WIDTH / 4,
-		CUS_POS_Y = NAME_POS_Y + NAME_HEIGHT,
-		CUS_HEIGHT = LocationShape.HEIGHT,
-		HEIGHT = CUS_POS_Y + CUS_HEIGHT;
+		LOC_POS_Y = NAME_POS_Y + NAME_HEIGHT,
+		DEFAULT_LOC_HEIGHT = LocationShape.DEFAULT_HEIGHT,
+		DEFAULT_HEIGHT = LOC_POS_Y + DEFAULT_LOC_HEIGHT;
 	
 	var textClasses = [
 		'task-id',
@@ -51,7 +51,7 @@ define([
 			type: 'precise.TaskShape',
 			size: {
 				width: WIDTH,
-				height: HEIGHT,
+				height: DEFAULT_HEIGHT,
 			},
 			cusWidth: 0,
 			attrs: _.assign({
@@ -68,7 +68,7 @@ define([
 				'rect.task-type-craft':     { x: 3/4 * WIDTH },
 				
 				'rect.task-type-name': { y: NAME_POS_Y, height: NAME_HEIGHT },
-				'rect.task-locations': { y: CUS_POS_Y,  height: CUS_HEIGHT },
+				'rect.task-locations': { y: LOC_POS_Y,  height: DEFAULT_LOC_HEIGHT },
 			}, TemplateUtil.withRefsToSameClass('text', 'rect', textClasses, {
 				 'ref-y': .5,
 				 'ref-x': .5,
@@ -77,14 +77,17 @@ define([
 			}))
 		}, BaseShape.prototype.defaults),
 		
-//		initialize: function () {
-//			joint.plugins.precise.TaskToolsShape.initialize.apply(this, arguments);
-//			BaseShape.prototype.initialize.apply(this, arguments);
-//		},
+		initialize: function () {
+			BaseShape.prototype.initialize.apply(this, arguments);
+		},
 		
 		update: function () {
-			var data = this.get('data');
+			var data = this.get('data'),
+				locationsHeight = data.hierarchyDepth * LocationShape.ROW_HEIGHT;
+			
+			this.set('size', { width: WIDTH, height: LOC_POS_Y + locationsHeight });
 			this.attr({
+				'rect.task-locations':      { height: locationsHeight },
 				'text.task-id':             { text: data.id },
 				'text.task-workers-needed': { text: data.numberOfWorkersNeeded },
 				'text.task-units-per-day':  { text: data.numberOfUnitsPerDay },
@@ -96,9 +99,11 @@ define([
 		embed: function (cell) {
 			var cusWidth = this.get('cusWidth'),
 				embeds = this.get('embeds'),
+				z = this.get('z'),
 				count = embeds ? embeds.length : 0;
 			BaseShape.prototype.embed.call(this, cell);
-			cell.position(count * LocationShape.WIDTH, CUS_POS_Y, {
+			cell.set('z', z);
+			cell.position(count * LocationShape.WIDTH, LOC_POS_Y, {
 				parentRelative: true
 			});
 		},
@@ -138,11 +143,16 @@ define([
 			}
 		}
 	}, {
+		// Static properties
 		WIDTH: WIDTH,
-		HEIGHT: HEIGHT,
 		NAME_POS_Y: NAME_POS_Y,
 		NAME_HEIGHT: NAME_HEIGHT,
-		CUS_POS_Y: CUS_POS_Y
+		LOC_POS_Y: LOC_POS_Y,
+		DEFAULT_HEIGHT: DEFAULT_HEIGHT,
+		
+		toTaskID: function (id) {
+			return 'task-' + id;
+		}
 	}));
 	
 	// http://stackoverflow.com/a/30275325
@@ -155,15 +165,11 @@ define([
 				|| this.model.get('outlineMarkup');
 			
 			if (markup) {
+				var size = this.model.get('size');
 				joint.V(this.el).prepend(
-					joint.V(markup).attr({
-						width: WIDTH,
-						height: HEIGHT
-					})
-					.translate(-WIDTH * 0.025, -HEIGHT * 0.025)
+					joint.V(markup).attr(size)
+					.translate(-0.025 * size.width, -0.025 * size.height)
 					.scale(1.05)
-					//.translate(WIDTH / 2, HEIGHT / 2)
-					
 				);
 			}
 	        return this;

@@ -2,12 +2,16 @@ define([
 	'lib/lodash',
 	'lib/angular',
 	'lib/joint',
-	'shapes/TaskShape'
+	'shapes/TaskShape',
+	'shapes/LocationShape',
+	'shapes/DependencyShape'
 ], function (
 	_,
 	angular,
 	joint,
-	TaskShape
+	TaskShape,
+	LocationShape,
+	DependencyShape
 ) {
 	'use strict';
 	
@@ -19,45 +23,33 @@ define([
 		
 		function toRawGraph(model, bbox) {
 			
-			bbox.width -= TaskShape.WIDTH;
-			bbox.height -= TaskShape.HEIGHT;
+			var randomBBox = _.defaults({
+				width: bbox.width - TaskShape.WIDTH,
+				height: bbox.height - 4 * TaskShape.DEFAULT_HEIGHT
+			}, bbox);
+			
+			function checkPosition(task) {
+				if (!task.position)
+					task.position = randomPosition(randomBBox);
+				return task;
+			}
+			
+			var baseResource = preciseApi.fromBase(),
+				modelHref = model.link('self').href;
 		
-			function taskToCell(task) {
-				return {
-					id: String(task.id),
-					type: 'precise.TaskShape',
-					position: task.position || randomPosition(bbox),
-					embeds: [],
-					data: task
-				};
-			}
-			
-			function locationToCell(location) {
-				return {
-					id: String(location.id),
-					type: 'precise.LocationShape',
-					parent: String(location.taskID),
-					data: location
-				};
-			}
-			
-			function dependencyToCell(dependency) {
-				return {
-					id: String(dependency.id),
-					type: 'precise.DependencyShape',
-					source: { id: String(dependency.sourceID) },
-					target: { id: String(dependency.targetID) },
-					vertices: dependency.vertices,
-					//labels: []		// TODO check whether required
-					data: dependency
-				};
-			}
-			
 			return $q.all({
-				tasks: preciseApi.from(model.link('tasks').href)
-					.followAndGet('tasks[$all]')
-					.then(mapArrUsing(taskToCell)),
-				locations: preciseApi.fromBase()
+				tasks: baseResource
+					.traverse(function (builder) {
+						// Use 'search' method since projections are not exposed in associations
+						return builder.follow('tasks', 'search', 'findByModel', 'tasks[$all]')
+							.withTemplateParameters({
+								model: modelHref,
+								projection: 'fullTask'
+							})
+							.get();
+					})
+					.then(mapArrUsing(_.flow(taskToCell, checkPosition))),
+				locations: baseResource
 					.traverse(function (builder) {
 						return builder
 							.follow(
@@ -67,24 +59,58 @@ define([
 								'locations[$all]'
 							)
 							.withTemplateParameters({
-								model: model.link('self').href
+								model: modelHref
 							})
 							.get();
 					})
 					.then(mapArrUsing(locationToCell)),
-				dependencies: preciseApi.from(model.link('dependencies').href)
-					.followAndGet('dependencies[$all]')
+				dependencies: baseResource
+					.traverse(function (builder) {
+						return builder
+							.follow('dependencies', 'search', 'findByModel', 'dependencies[$all]')
+							.withTemplateParameters({
+								model: modelHref,
+								projection: 'dependencySummary'
+							})
+							.get()
+					})
 					.then(mapArrUsing(dependencyToCell))
 			}).then(function (cells) {
-//				var tasksByID = _.indexBy(cells.tasks, 'id');
-//				cells.locations.forEach(function (loc) {
-//					tasksByID[loc.parent].embeds.push(loc.id);
-//				});
 				return {
 					cells: [].concat(cells.tasks, cells.locations, cells.dependencies)
 				};
 			});
-			
+		}
+		
+		function taskToCell(task) {
+			return {
+				id: TaskShape.toTaskID(task.id),
+				type: 'precise.TaskShape',
+				position: task.position,
+				embeds: [],
+				data: task
+			};
+		}
+		
+		function locationToCell(location) {
+			return {
+				id: LocationShape.toLocationID(location.id),
+				type: 'precise.LocationShape',
+				parent: TaskShape.toTaskID(location.taskID),
+				data: location
+			};
+		}
+		
+		function dependencyToCell(dependency) {
+			return {
+				id: DependencyShape.toDependencyID(dependency.id),
+				type: 'precise.DependencyShape',
+				source: { id: TaskShape.toTaskID(dependency.sourceID) },
+				target: { id: TaskShape.toTaskID(dependency.targetID) },
+				vertices: dependency.vertices,
+				//labels: []		// TODO check whether required
+				data: dependency
+			};
 		}
 		
 		function mapArrUsing(mapper) {

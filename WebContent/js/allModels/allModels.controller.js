@@ -5,14 +5,15 @@ define([
 ) {
 	'use strict';
 	
-	AllModelsController.$inject = ['$scope', '$window', '$q', 'preciseApi', 'allModels', 'models'];
+	AllModelsController.$inject = ['$scope', '$q', 'preciseApi', 'allModels', 'models'];
 	
-	function AllModelsController($scope, $window, $q, preciseApi, allModels, models) {
+	function AllModelsController($scope, $q, preciseApi, allModels, models) {
 		
 		var $ctrl = this;
 		
 		$ctrl.models = models;
 		
+		$ctrl.refreshModels = refreshModels;
 		$ctrl.getFileName = getFileName;
 		$ctrl.getFileURI = getFileURI;
 		$ctrl.createModel = createModel;
@@ -33,15 +34,19 @@ define([
 			return '/files/' + getFileName(model);
 		}
 		
+		function refreshModels() {
+			return allModels.getModels().then(setModels);
+		}
+		
 		function createModel(model) {
 			
 		}
 		
 		function importFile(file) {
-			return allModels.importFile(file)
-				.then(allModels.getModels)
-				.then(setModels, function (errReason) {
-					$window.alert(preciseApi.extractErrorMessage(errReason));
+			$ctrl.fileErrorMsg = null;
+			return file && allModels.importFile(file)
+				.then(refreshModels, function (errReason) {
+					$ctrl.fileErrorMsg = preciseApi.extractErrorMessage(errReason);
 				});
 		}
 		
@@ -55,7 +60,16 @@ define([
 		}
 		
 		function deleteModel(model) {
-			
+			return preciseApi.asyncConfirm([
+				'Are you sure you want to delete model ' + model.name + '?',
+				'It cannot be undone afterwards.',
+			].join('\n'))
+			.then(function () {
+				return allModels.deleteModel(model)
+					.then(refreshModels, function (reason) {
+						preciseApi.asyncAlert(preciseApi.extractErrorMessage(reason))
+					});
+			});
 		}
 	}
 	

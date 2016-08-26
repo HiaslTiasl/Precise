@@ -23,6 +23,7 @@ public class Attribute extends BaseEntity {
 	
 	@ElementCollection
 	@OrderColumn(name="position")
+	@Column(name="\"range\"")
 	private List<String> range;
 	
 	/**

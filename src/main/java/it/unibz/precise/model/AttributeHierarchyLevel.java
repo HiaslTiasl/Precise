@@ -1,11 +1,12 @@
 package it.unibz.precise.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -27,7 +28,8 @@ public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
 	private int position;
 	
 	@OneToMany(mappedBy="level", cascade=CascadeType.ALL, orphanRemoval=true)
-	private List<AttributeHierarchyNode> nodes = new ArrayList<>();
+	@MapKey(name="value")
+	private Map<String, AttributeHierarchyNode> nodes = new HashMap<>();
 	
 	public AttributeHierarchyLevel() {
 	}
@@ -70,28 +72,24 @@ public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
 		this.position = position;
 	}
 
-	public List<AttributeHierarchyNode> getNodes() {
+	public Map<String, AttributeHierarchyNode> getNodes() {
 		return nodes;
 	}
 
-	public void setNodes(List<AttributeHierarchyNode> nodes) {
+	public void setNodes(Map<String, AttributeHierarchyNode> nodes) {
 		LevelToMany.NODES.setMany(this, nodes);
-	}
-	
-	void internalSetNodes(List<AttributeHierarchyNode> nodes) {
-		this.nodes = nodes;
 	}
 	
 	public void addNode(AttributeHierarchyNode node) {
 		LevelToMany.NODES.addOneOfMany(this, node);
 	}
 	
-	void internalAddNode(AttributeHierarchyNode node) {
-		nodes.add(node);
+	void internalSetNodes(Map<String, AttributeHierarchyNode> nodes) {
+		this.nodes = nodes;
 	}
 	
 	public AttributeHierarchyNode findNodeByValue(String value) {
-		return AttributeHierarchyNode.findByValue(nodes, value);
+		return nodes.get(value);
 	}
-
+	
 }

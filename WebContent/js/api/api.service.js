@@ -8,11 +8,14 @@ define([
 	halfred
 ) {
 	
-	ApiService.$inject = ['$q', 'traverson']
+	ApiService.$inject = ['$window', '$timeout', '$q', 'traverson']
 	
-	function ApiService($q, traverson) {
+	function ApiService($window, $timeout, $q, traverson) {
 		// register the traverson-hal plug-in for media type 'application/hal+json'
 		traverson.registerMediaType(JsonHalAdapter.mediaType, JsonHalAdapter);
+		
+		var getErrorMessage = _.property('message'),
+			getResponseData = _.property('data');
 		
 		this.baseUrl = baseUrl;
 		this.urlTo = urlTo;
@@ -22,6 +25,10 @@ define([
 		this.resultOf = resultOf;
 		this.mapReason = mapReason;
 		this.extractErrorMessage = extractErrorMessage;
+		this.getResponseData = getResponseData;
+		
+		this.asyncAlert = wrapAsync($window.alert, $window);
+		this.asyncConfirm = wrapAsync($window.confirm, $window, _.identity);
 		
 		var baseUrl = '/api';
 		
@@ -54,11 +61,10 @@ define([
 		
 		// TODO: improve
 		function extractErrorMessage(errReason) {
-			return errReason && (
-				errReason.error ? getErrorMessage(errReason.error)
-				: errReason.errors ? errReason.errors.map(getErrorMessage).join('. ')
-				: getErrorMessage(errReason)
-			) || 'Error';
+			return errReason
+				&& errReason.errors && errReason.errors.map(getErrorMessage).join('. ')		// Multiple Validation errors
+				|| getErrorMessage(errReason)												// Exception message 
+				|| 'Error';																	// Fallback
 		}
 		
 		function resolveSuccess(response) {
@@ -73,9 +79,6 @@ define([
 				? data.map(halfred.parse)
 				: halfred.parse(data);
 		}
-		
-		var getErrorMessage = _.property('message'),
-			getResponseData = _.property('data');
 		
 		/**
 		 * https://github.com/angular/angular.js/blob/master/src/ng/http.js#L235
@@ -101,13 +104,30 @@ define([
 		
 		function createTraverson(url) {
 			return traverson.from(url)
-			.jsonHal()
-			.withRequestOptions({
-				headers: {
-					'Content-Type': 'application/json',
-					'Accept': 'application/hal+json'
-				}
-			});
+				.jsonHal()
+				.withRequestOptions({
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept': 'application/hal+json'
+					}
+				});
+		}
+		
+		// Async dialogs
+		
+		function wrapAsync(nativeFn, thisArg, successFilter) {
+			return function () {
+				var args = arguments;
+				return $q(function (resolve, reject) {
+					$timeout(function () {
+						var result = nativeFn.apply(thisArg, args);
+						if (successFilter && successFilter(result))
+							resolve(result);
+						else
+							reject(result);
+					});
+				});
+			};
 		}
 		
 	}

@@ -1,6 +1,6 @@
 package it.unibz.precise.model.projection;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
@@ -15,6 +15,6 @@ public interface AttributeValueTreeProjection {
 	
 	String getValue();
 
-	List<AttributeValueTreeProjection> getChildren();
+	Map<String, AttributeValueTreeProjection> getChildren();
 	
 }

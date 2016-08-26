@@ -1,5 +1,7 @@
 package it.unibz.precise.model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
@@ -55,6 +57,10 @@ public class Location extends BaseEntity {
 	
 	void internalSetTask(Task task) {
 		this.task = task;
+	}
+	
+	public List<PatternEntry> getPattern() {
+		return AttributeHierarchyNode.toPattern(node, task.getType().getPhase());
 	}
 	
 }

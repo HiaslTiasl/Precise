@@ -1,6 +1,5 @@
 package it.unibz.precise.rest.mdl.ast;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,6 +14,8 @@ import it.unibz.precise.model.AttributeHierarchyNode;
 import it.unibz.precise.model.Location;
 import it.unibz.precise.model.OrderSpecification;
 import it.unibz.precise.model.OrderType;
+import it.unibz.precise.model.PatternEntry;
+import it.unibz.precise.model.Position;
 import it.unibz.precise.model.Task;
 import it.unibz.precise.model.TaskType;
 import it.unibz.precise.rest.mdl.InvalidLocationException;
@@ -31,9 +32,12 @@ public class MDLTaskAST {
 	private Task task;
 	
 	private MDLTaskTypeAST type;
+	private float numberOfWorkersNeeded;
+	private float numberOfUnitsPerDay;
 	private boolean globalExclusiveness;
 	private List<MDLAttributeAST> exclusiveness;
 	private Map<String, OrderType> order;
+	private Position position;
 	private List<Map<String, String>> locations;
 	
 	public MDLTaskAST() {
@@ -42,13 +46,19 @@ public class MDLTaskAST {
 	public MDLTaskAST(MDLFileAST context, Task task) {
 		this.task = task;	
 		type = context.translate(task.getType());
+		numberOfWorkersNeeded = task.getNumberOfWorkersNeeded();
+		numberOfUnitsPerDay = task.getNumberOfUnitsPerDay();
 		globalExclusiveness = task.isGlobalExclusiveness();
 		exclusiveness = Util.mapToList(task.getExclusiveness(), context::translate);
 		order = Util.mapToMap(task.getOrderSpecifications(),
 			os -> os.getAttribute().getName(),
 			OrderSpecification::getOrderType
 		);
-		locations = Util.mapToList(task.getLocations(), MDLTaskAST::locationToMap);
+		position = task.getPosition();
+		locations = task.getLocations().stream()
+			.map(Location::getNode)
+			.map(MDLTaskAST::nodeToMap)
+			.collect(Collectors.toList());
 	}
 	
 	public Task toTask() {
@@ -59,6 +69,8 @@ public class MDLTaskAST {
 			List<AttributeHierarchyLevel> levels = taskType.getPhase().getAttributeHierarchyLevels();
 			
 			task.setType(taskType);
+			task.setNumberOfWorkersNeeded(numberOfWorkersNeeded);
+			task.setNumberOfUnitsPerDay(numberOfUnitsPerDay);
 			task.setGlobalExclusiveness(globalExclusiveness);
 			task.setExclusiveness(Util.mapToList(exclusiveness, MDLAttributeAST::toAttribute));
 			task.setOrderSpecifications(
@@ -68,6 +80,7 @@ public class MDLTaskAST {
 					.map(a -> new OrderSpecification(a, order.get(a.getName())))
 					.collect(Collectors.toList())
 			);
+			task.setPosition(position);
 			task.setLocations(Util.mapToList(locations, locMap -> mapToLocation(levels, task, locMap)));
 		}
 		return task;
@@ -79,6 +92,22 @@ public class MDLTaskAST {
 
 	public void setType(MDLTaskTypeAST type) {
 		this.type = type;
+	}
+
+	public float getNumberOfWorkersNeeded() {
+		return numberOfWorkersNeeded;
+	}
+
+	public void setNumberOfWorkersNeeded(float numberOfWorkersNeeded) {
+		this.numberOfWorkersNeeded = numberOfWorkersNeeded;
+	}
+
+	public float getNumberOfUnitsPerDay() {
+		return numberOfUnitsPerDay;
+	}
+
+	public void setNumberOfUnitsPerDay(float numberOfUnitsPerDay) {
+		this.numberOfUnitsPerDay = numberOfUnitsPerDay;
 	}
 
 	public boolean isGlobalExclusiveness() {
@@ -105,6 +134,14 @@ public class MDLTaskAST {
 		this.order = order;
 	}
 
+	public Position getPosition() {
+		return position;
+	}
+
+	public void setPosition(Position position) {
+		this.position = position;
+	}
+
 	public List<Map<String, String>> getLocations() {
 		return locations;
 	}
@@ -120,14 +157,7 @@ public class MDLTaskAST {
 	}
 	
 	public static Map<String, String> nodeToMap(AttributeHierarchyNode node) {
-		Map<String, String> map = new LinkedHashMap<>();
-		for (AttributeHierarchyNode n = node; n != null; n = n.getParent())
-			map.put(n.getLevel().getAttribute().getName(), n.getValue());
-		return map;
-	}
-
-	public static Map<String, String> locationToMap(Location location) {
-		return nodeToMap(location.getNode());
+		return node == null ? null : Util.mapToMap(node.getPattern(), PatternEntry::getAttribute, PatternEntry::getValue);
 	}
 	
 	public static Location mapToLocation(List<AttributeHierarchyLevel> levels, Task task, Map<String, String> locationMap)

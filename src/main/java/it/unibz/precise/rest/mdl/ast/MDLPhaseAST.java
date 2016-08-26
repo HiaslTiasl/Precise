@@ -87,13 +87,13 @@ public class MDLPhaseAST {
 	public void setValueTree(Object valueTree) {
 		this.valueTree = valueTree;
 	}
-
-	private Object createTree(List<AttributeHierarchyNode> nodes) {
+	
+	private Object createTree(Map<String, AttributeHierarchyNode> nodes) {
 		Map<String, Object> tree = new HashMap<>();
 		boolean hasSubTrees = false;
-		for (AttributeHierarchyNode node : nodes) {
+		for (AttributeHierarchyNode node : nodes.values()) {
 			Object subTree = null;
-			List<AttributeHierarchyNode> children = node.getChildren();
+			Map<String, AttributeHierarchyNode> children = node.getChildren();
 			if (!children.isEmpty()) {
 				hasSubTrees = true;
 				if (node.isValuesMatchPositions())
@@ -105,7 +105,7 @@ public class MDLPhaseAST {
 		}
 		return hasSubTrees ? tree : tree.keySet();
 	}
-	
+
 	private void walkTree(AttributeHierarchyLevel level, Object tree, AttributeHierarchyNode parent) {
 		if (tree instanceof Integer)
 			walkTreeLevel(level, (int)tree, parent);

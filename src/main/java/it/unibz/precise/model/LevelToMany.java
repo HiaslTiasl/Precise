@@ -1,17 +1,18 @@
 package it.unibz.precise.model;
 
-import java.util.List;
+import java.util.Map;
 
-import it.unibz.util.OneToManyBidirection;
+import it.unibz.util.MapBidirection;
 
 public class LevelToMany {
 
-	static final OneToManyBidirection<AttributeHierarchyLevel, AttributeHierarchyNode, List<AttributeHierarchyNode>> NODES =
-		new OneToManyBidirection<>(
+	static final MapBidirection<String, AttributeHierarchyLevel, AttributeHierarchyNode, Map<String, AttributeHierarchyNode>> NODES =
+		new MapBidirection<>(
 			AttributeHierarchyLevel::getNodes,
 			AttributeHierarchyLevel::internalSetNodes,
 			AttributeHierarchyNode::getLevel,
-			AttributeHierarchyNode::internalSetLevel
+			AttributeHierarchyNode::internalSetLevel,
+			AttributeHierarchyNode::getValue
 		);
 
 }

@@ -1,12 +1,16 @@
 package it.unibz.precise.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
@@ -20,7 +24,8 @@ public class AttributeHierarchyNode extends BaseEntity {
 	private AttributeHierarchyNode parent;
 
 	@OneToMany(mappedBy="parent", cascade=CascadeType.ALL)
-	private List<AttributeHierarchyNode> children = new ArrayList<>();
+	@MapKey(name="value")
+	private Map<String, AttributeHierarchyNode> children = new HashMap<>();
 	
 	@Column(nullable=false)
 	private String value;
@@ -35,7 +40,6 @@ public class AttributeHierarchyNode extends BaseEntity {
 	}
 
 	public AttributeHierarchyNode(String value) {
-		this.children = new ArrayList<>();
 		this.value = value;
 	}
 
@@ -73,15 +77,15 @@ public class AttributeHierarchyNode extends BaseEntity {
 		return parent == null ? null : parent.getId();
 	}
 	
-	public List<AttributeHierarchyNode> getChildren() {
+	public Map<String, AttributeHierarchyNode> getChildren() {
 		return children;
 	}
 
-	public void setChildren(List<AttributeHierarchyNode> children) {
+	public void setChildren(Map<String, AttributeHierarchyNode> children) {
 		NodeToMany.CHILDREN.setMany(this, children);
 	}
 	
-	void internalSetChildren(List<AttributeHierarchyNode> children) {
+	void internalSetChildren(Map<String, AttributeHierarchyNode> children) {
 		this.children = children;
 	}
 	
@@ -90,18 +94,11 @@ public class AttributeHierarchyNode extends BaseEntity {
 	}
 	
 	void internalAddChild(AttributeHierarchyNode node) {
-		children.add(node);
+		children.put(node.getValue(), node);
 	}
 	
 	public AttributeHierarchyNode findChildByValue(String value) {
-		return findByValue(children, value);
-	}
-	
-	public static AttributeHierarchyNode findByValue(List<AttributeHierarchyNode> nodes, String value) {
-		return value == null ? null : nodes.stream()
-			.filter(c -> value.equals(c.getValue()))
-			.findAny()
-			.orElse(null);
+		return children.get(value);
 	}
 
 	public String getValue() {
@@ -118,6 +115,34 @@ public class AttributeHierarchyNode extends BaseEntity {
 
 	public void setValuesMatchPositions(boolean valuesMatchPositions) {
 		this.valuesMatchPositions = valuesMatchPositions;
+	}
+	
+	public List<PatternEntry> getPattern() {
+		return toPattern(this, level.getPhase());
+	}
+	
+	public static List<PatternEntry> toPattern(AttributeHierarchyNode node, Phase phase) {
+		List<PatternEntry> pattern = new ArrayList<>();
+		if (node != null)
+			node.addAncestorsTo(pattern);
+		addWildcardsTo(pattern, phase.getAttributeHierarchyLevels());
+		return pattern;
+	}
+	
+	private void addAncestorsTo(List<PatternEntry> pattern) {
+		if (parent != null)
+			parent.addAncestorsTo(pattern);
+		pattern.add(new PatternEntry(level.getAttribute().getName(), value));
+	}
+	
+	private static List<PatternEntry> addWildcardsTo(List<PatternEntry> pattern, List<AttributeHierarchyLevel> levels) {
+		if (pattern == null)
+			pattern = new ArrayList<>();
+		ListIterator<AttributeHierarchyLevel> it = levels.listIterator(pattern.size());
+		int len = levels.size();
+		for (int i = pattern.size(); i < len; i++)
+			pattern.add(new PatternEntry(it.next().getAttribute().getName()));
+		return pattern;
 	}
 	
 }

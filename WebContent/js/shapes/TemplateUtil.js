@@ -1,4 +1,9 @@
-define(function () {
+define([
+	'lib/lodash'
+],function (
+	_
+) {
+	'use strict';
 	
 	function toTag(name, attrs, open, close) {
 		var res = '<';
@@ -50,6 +55,12 @@ define(function () {
 		return lines.join('');
 	}
 	
+	function compile(markup) {
+		return _.template(markup);
+	}
+	
+	var cachingCompile = _.memoize(compile);
+	
 	return {
 		toTag: toTag,
 		openTag: openTag,
@@ -57,6 +68,7 @@ define(function () {
 		closeTag: closeTag,
 		createElements: createElements,
 		withRefsToSameClass: withRefsToSameClass,
-		markup: markup
+		markup: markup,
+		compile: cachingCompile
 	}
 });
