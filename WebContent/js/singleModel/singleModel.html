@@ -2,26 +2,20 @@
 <a ui-sref="allModels">Exit</a>
 <div id="panels">
 	<div id="precise-diagram" precise-diagram model="$ctrl.model"></div>
-	<div id="properties" ng-switch on="$ctrl.selectedCell.model.get('type')">
+	<div id="properties" ng-switch on="$ctrl.viewType">
 		<h3>Properties</h3>
-		<div ng-switch-when="precise.TaskShape">
-			<h4>Task</h4>
-			<div>
-				{{$ctrl.selectedShape.get('data')}}
-			</div>
-		</div>
-		<div ng-switch-when="precise.LocationShape">
-			<h4>Location</h4>
-			<div>
-				{{$ctrl.selectedShape.get('data')}}
-			</div>
-		</div>
-		<div ng-switch-when="precise.DependencyShape">
-			<h4>Dependency</h4>
-			<div>
-				{{$ctrl.selectedShape.get('data')}}
-			</div>
-		</div>
+		<task-properties
+			ng-switch-when="task"
+			resource="$ctrl.resource"
+			done="$ctrl.done($result)"
+			cancelled="$ctrl.cancelled()">
+		</task-properties>
+		<dependency-properties
+			ng-switch-when="dependency"
+			resource="$ctrl.resource"
+			done="$ctrl.done($result)"
+			cancelled="$ctrl.cancelled()">
+		</dependency-properties>
 		<div ng-switch-default>
 			Nothing selected.
 		</div>

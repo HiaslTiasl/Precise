@@ -1,19 +1,18 @@
 package it.unibz.precise.model.projection;
 
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
-import it.unibz.precise.model.Location;
+import it.unibz.precise.model.PatternEntry;
 import it.unibz.precise.model.Position;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
 
-@Projection(name="fullTask", types=Task.class)
-public interface TaskProjection {
+@Projection(name="expandedTask", types=Task.class)
+public interface ExpandedTaskProjection {
 	
-	int getId();
+	long getId();
 
 	float getNumberOfWorkersNeeded();
 	
@@ -23,12 +22,11 @@ public interface TaskProjection {
 	
 	List<AttributeSummaryProjection> getExclusiveness();
 
-	List<Location> getLocations();
+	List<OrderSpecificationSummaryProjection> getOrderSpecifications();
+
+	List<Map<String, PatternEntry>> getLocationPatterns();
 	
-	TaskType getType();
-	
-	@Value("#{target.type.phase.attributeHierarchyLevels.size()}")
-	int getHierarchyDepth();
+	ExpandedTaskTypeProjection getType();
 	
 	Position getPosition();
 }

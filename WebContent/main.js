@@ -27,7 +27,8 @@ require.config({
     		deps: ['lib/angular'],
     		exports: 'ngFileUpload'
     	},
-    	'lib/xeditable': ['lib/angular']
+    	'lib/xeditable': ['lib/angular'],
+    	'lib/select': ['lib/angular']
     }
 });
 

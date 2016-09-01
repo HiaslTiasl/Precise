@@ -4,11 +4,13 @@ import org.springframework.data.rest.core.config.Projection;
 
 import it.unibz.precise.model.TaskType;
 
-@Projection(name="taskType", types=TaskType.class)
-public interface TaskTypeProjection {
+@Projection(name="expandedTaskType", types=TaskType.class)
+public interface ExpandedTaskTypeProjection {
 
 	String getName();
 	
 	String getCraft();
+	
+	PhaseSummaryProjection getPhase();
 	
 }

@@ -67,11 +67,6 @@ public class Phase extends BaseEntity {
 		attributeHierarchyLevels = levels;
 	}
 	
-	void internalAddLevel(AttributeHierarchyLevel level) {
-		attributeHierarchyLevels.add(level);
-		level.setPosition(attributeHierarchyLevels.size());
-	}
-
 	public Model getModel() {
 		return model;
 	}
@@ -89,5 +84,5 @@ public class Phase extends BaseEntity {
 		return nextIndex < attributeHierarchyLevels.size()
 			? attributeHierarchyLevels.get(nextIndex) : null;
 	}
-
+	
 }

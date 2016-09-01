@@ -1,11 +1,11 @@
 define([
 	'lib/joint',
 	'shapes/BaseMixin',
-	'Util'
+	'util/util'
 ], function (
 	joint,
 	BaseMixin,
-	Util
+	util
 ) {
-	return Util.set(joint.shapes, 'precise.BaseShape', joint.shapes.basic.Generic.extend(BaseMixin));
+	return util.set(joint.shapes, 'precise.BaseShape', joint.shapes.basic.Generic.extend(BaseMixin));
 });

@@ -1,4 +1,8 @@
-define(function () {
+define([
+	'lib/lodash'
+], function (
+	_
+) {
 	'use strict';
 	
 	SingleModelController.$inject = ['$scope', 'model'];
@@ -9,40 +13,28 @@ define(function () {
 		
 		$ctrl.model = model;
 		
-		$ctrl.createModel = createModel;
-		$ctrl.importModel = importModel;
-		$ctrl.renameModel = renameModel;
-		$ctrl.duplicateModel = duplicateModel;
-		$ctrl.deleteModel = deleteModel;
+		$ctrl.done = done;
+		$ctrl.cancelled = cancelled;
 		
-		$scope.$on('cell:select', function (event, cellView) {
-			$ctrl.selectedCell = cellView;
-		});
+		$scope.$on('task:select', createSelectionHandler('task'));
+		$scope.$on('dependency:select', createSelectionHandler('dependency'));
 		
-		function createModel(model) {
-			
+		function createSelectionHandler(type) {
+			return function (event, selectedView) {
+				var resource = selectedView && selectedView.model.get('data');
+				$ctrl.viewType = resource && type;
+				$ctrl.resource = resource;
+			};
 		}
 		
-		function importModel(model) {
-			
+		function done(result) {
+			$scope.$broadcast('properties:change', $ctrl.viewType, result);
 		}
 		
-		function openModel(model) {
-			
-		}
-		
-		function renameModel(model) {
-			
-		}
-		
-		function duplicateModel(model) {
-			
-		}
-		
-		function deleteModel(model) {
-			
+		function cancelled() {
+			$scope.$broadcast('properties:cancel', $ctrl.viewType);
 		}
 	}
 	
 	return SingleModelController;
-})
+});

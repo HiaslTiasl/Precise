@@ -2,6 +2,7 @@ package it.unibz.util;
 
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,8 +38,8 @@ public class Util {
 		}
 	}
 	
-	public static <T, R> Function<T, R> memoize(Function<T, R> func) {
-		Map<T, R> cache = new ConcurrentHashMap<>();
+	public static <T, R> Function<T, R> memoize(Function<T, R> func, boolean concurrent) {
+		Map<T, R> cache = concurrent ? new ConcurrentHashMap<>() : new HashMap<>();
 		return t -> cache.computeIfAbsent(t, func);
 	}
 	

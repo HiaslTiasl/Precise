@@ -2,25 +2,28 @@ define([
 	'lib/lodash',
 	'lib/joint',
 	'shapes/BaseShape',
-	'shapes/LocationShape',
 	'shapes/TemplateUtil',
-	'Util'//,
-	//'TaskToolsShape'
+	'util/util'
 ], function (
 	_,
 	joint,
 	BaseShape,
-	LocationShape,
 	TemplateUtil,
-	Util
+	util
 ) {
 	
-	var WIDTH = LocationShape.WIDTH * 8,
-		NAME_POS_Y = WIDTH / 8,
-		NAME_HEIGHT = WIDTH / 4,
-		LOC_POS_Y = NAME_POS_Y + NAME_HEIGHT,
-		DEFAULT_LOC_HEIGHT = LocationShape.DEFAULT_HEIGHT,
+	var LOC_COL_WIDTH = 16,
+		LOC_ROW_HEIGHT = LOC_COL_WIDTH,
+		DEFAULT_LOC_HEIGHT = 1 * LOC_ROW_HEIGHT;
+	
+	var WIDTH = 8 * LOC_COL_WIDTH,
+		HEADER_ROW_HEIGHT = LOC_ROW_HEIGHT,
+		HEADER_COL_WIDTH = WIDTH / 4,
+		NAME_HEIGHT = 2 * HEADER_ROW_HEIGHT,
+		LOC_POS_Y = HEADER_ROW_HEIGHT + NAME_HEIGHT,
 		DEFAULT_HEIGHT = LOC_POS_Y + DEFAULT_LOC_HEIGHT;
+	
+	var WILDCARD_VALUE = "*";
 	
 	var textClasses = [
 		'task-id',
@@ -28,19 +31,16 @@ define([
 		'task-units-per-day',
 		'task-type-craft',
 		'task-type-name',
+		'task-order',
+		'task-exclusiveness'
 	];
 	
-	var classes = textClasses.concat('task-locations');
+	var classes = ['outline'].concat(textClasses, 'task-locations');
 	
-	function compareX(cell1, cell2) {
-		return cell1.get('position').x - cell2.get('position').x;
-	}
-	
-	Util.set(joint.shapes, ['precise', 'TaskShape'], BaseShape.extend(/*_.extend({}, joint.plugins.precise.TaskToolsShape,*/ {
+	util.set(joint.shapes, ['precise', 'TaskShape'], BaseShape.extend(/*_.extend({}, joint.plugins.precise.TaskToolsShape,*/ {
 		markup: [
 			'<g class="rotatable">',
 				'<g class="scalable">',
-					'<rect class="outline"/>',
 					TemplateUtil.createElements('rect', classes).join(''),
 				'</g>',
 				TemplateUtil.createElements('text', textClasses).join(''),
@@ -60,15 +60,22 @@ define([
 					'follow-scale': true
 				},
 				'rect.task-id, rect.task-workers-needed, rect.task-units-per-day, rect.task-type-craft': {
-					width: WIDTH / 4,
-					height: NAME_POS_Y
+					width: HEADER_COL_WIDTH,
+					height: HEADER_ROW_HEIGHT
 				},
-				'rect.task-workers-needed': { x: 1/4 * WIDTH },
-				'rect.task-units-per-day':  { x: 2/4 * WIDTH },
-				'rect.task-type-craft':     { x: 3/4 * WIDTH },
+				'rect.task-id':             { x: 0 * HEADER_COL_WIDTH },
+				'rect.task-workers-needed': { x: 1 * HEADER_COL_WIDTH },
+				'rect.task-units-per-day':  { x: 2 * HEADER_COL_WIDTH },
+				'rect.task-type-craft':     { x: 3 * HEADER_COL_WIDTH },
 				
-				'rect.task-type-name': { y: NAME_POS_Y, height: NAME_HEIGHT },
+				'rect.task-type-name': { y: HEADER_ROW_HEIGHT, height: NAME_HEIGHT },
 				'rect.task-locations': { y: LOC_POS_Y,  height: DEFAULT_LOC_HEIGHT },
+				'rect.loc-entry': {
+					width: LOC_COL_WIDTH,
+					height: LOC_ROW_HEIGHT,
+					'stroke-width': 1,
+					'follow-scale': true
+				}
 			}, TemplateUtil.withRefsToSameClass('text', 'rect', textClasses, {
 				 'ref-y': .5,
 				 'ref-x': .5,
@@ -83,69 +90,58 @@ define([
 		
 		update: function () {
 			var data = this.get('data'),
-				locationsHeight = data.hierarchyDepth * LocationShape.ROW_HEIGHT;
+				attributes = data.type.phase.attributes,
+				attrCount = attributes.length,
+				exclusive = data.globalExclusiveness || data.exclusiveness.length,
+				locationsHeight = attrCount * LOC_ROW_HEIGHT,
+				locationPatterns = data.locationPatterns,
+				width = WIDTH,
+				height = LOC_POS_Y + locationsHeight;
 			
-			this.set('size', { width: WIDTH, height: LOC_POS_Y + locationsHeight });
+			this.set('size', { width: width, height: height });
 			this.attr({
+				'rect.outline': {
+					width: exclusive ? width + 10 : width,
+					height: exclusive ? height + 10 : height,
+					transform: exclusive ? 'translate(-5,-5)' : ''
+				},
 				'rect.task-locations':      { height: locationsHeight },
 				'text.task-id':             { text: data.id },
 				'text.task-workers-needed': { text: data.numberOfWorkersNeeded },
 				'text.task-units-per-day':  { text: data.numberOfUnitsPerDay },
 				'text.task-type-craft':     { text: data.type.craft },
-				'text.task-type-name':      { text: data.type.name }
+				'text.task-type-name':      { text: data.type.name },
 			});
-		},
-		
-		embed: function (cell) {
-			var cusWidth = this.get('cusWidth'),
-				embeds = this.get('embeds'),
-				z = this.get('z'),
-				count = embeds ? embeds.length : 0;
-			BaseShape.prototype.embed.call(this, cell);
-			cell.set('z', z);
-			cell.position(count * LocationShape.WIDTH, LOC_POS_Y, {
-				parentRelative: true
-			});
-		},
-		
-		unembed: function (cell) {
-			this.cusWidth -= cell.get('size').width;
-			BaseShape.prototype.unembed.call(this, cell);
-		},
-		
-		updateCuPositions: function (fromIndex) {
-			var embeds = this.getEmbeddedCells(),
-				len = embeds.length;
-			for (var i = fromIndex || 0; i < len; i++)
-				embeds[i].translate(-LocationShape.WIDTH);
-		},
-		
-		startMoveConstructionUnit: function (cu) {
-			var embeds = this.getEmbeddedCells(),
-				index = Util.binarySearch(embeds, 0, 0, cu, compareX);
-			if (index >= 0) {
-				// Found in array (should always be the case)
-				this.updateCuPositions(index);
-				this.movingCuIndex = index;		// Save index, do not search again on endMove
-			}
-		},
-		
-		endMoveConstructionUnit: function (cu) {
-			var embeds = this.getEmbeddedCells();
-			embeds.splice(this.movingCuIndex, 1);
-			var index = Util.binarySearch(embeds, 0, 0, cu, compareX);
-			if (index < 0) {
-				// Not found in array (should always be the case)
-				var insertPos = -(index + 1);
-				embeds.splice(insertPos, 0, cu);
-				this.updateCuPositions(insertPos);
-				this.movingCuIndex = null;		// Reset index
+			if (locationPatterns) {
+				for (var i = 0, locLen = locationPatterns.length; i < locLen; i++) {
+					var pattern = locationPatterns[i];
+					for (var j = 0; j < attrCount; j++) {
+						var attrName = attributes[j].name,
+							value = pattern[attrName].value,
+							rectSelector = 'rect.loc-entry.loc-num-' + i + '.' + attrName,
+							textSelector = 'text.loc-entry.loc-num-' + i + '.' + attrName;
+						this.attr(rectSelector, {
+							x: i * LOC_COL_WIDTH,
+							y: j * LOC_ROW_HEIGHT + LOC_POS_Y
+						});
+						this.attr(textSelector, {
+							'ref-x': .5,
+							'ref-y': .5,
+							'text-anchor': 'middle',
+							'y-alignment': 'middle',
+							'ref': rectSelector,
+							'text': value
+						});
+						
+					}
+				}
 			}
 		}
+		
 	}, {
 		// Static properties
 		WIDTH: WIDTH,
-		NAME_POS_Y: NAME_POS_Y,
+		NAME_POS_Y: HEADER_ROW_HEIGHT,
 		NAME_HEIGHT: NAME_HEIGHT,
 		LOC_POS_Y: LOC_POS_Y,
 		DEFAULT_HEIGHT: DEFAULT_HEIGHT,
@@ -156,30 +152,119 @@ define([
 	}));
 	
 	// http://stackoverflow.com/a/30275325
-	Util.set(joint.shapes, 'precise.TaskShapeView', joint.dia.ElementView.extend({
-		outlineMarkup: '<rect class="outline"/>',
+	util.set(joint.shapes, 'precise.TaskShapeView', joint.dia.ElementView.extend({
 		
-		renderOutline: function () {
-			var markup = this.outlineMarkup
-				|| this.model.outlineMarkup
-				|| this.model.get('outlineMarkup');
-			
-			if (markup) {
-				var size = this.model.get('size');
-				joint.V(this.el).prepend(
-					joint.V(markup).attr(size)
-					.translate(-0.025 * size.width, -0.025 * size.height)
-					.scale(1.05)
-				);
-			}
-	        return this;
+		locRectsTemplate: [
+			'<% _.forEach(attributes, function (attr) { %>',
+				'<rect class="loc-num-${num} loc-entry ${attr.name}"/>',
+			'<% }); %>'
+		].join(''),
+		
+		locTextsTemplate: [
+   			'<% _.forEach(attributes, function (attr) { %>',
+   				'<text class="loc-num-${num} loc-entry ${attr.name}">',
+   					'${pattern[attr.name].value}',
+				'</text>',
+   			'<% }); %>'
+   		].join(''),
+   		
+   	    initialize: function() {
+
+   	        _.bindAll(this, 'renderLocations');
+
+   	        joint.dia.ElementView.prototype.initialize.apply(this, arguments);
+
+   	        this.listenTo(this.model, 'change:data', this.renderLocations);
+   	    },
+   	    
+   	    render: function () {
+   	    	joint.dia.ElementView.prototype.render.apply(this, arguments);
+   	    	this.update();
+   	    },
+   		
+		update: function () {
+			// Update attributes for new elements
+			this.renderLocations();
+			joint.dia.ElementView.prototype.update.apply(this, arguments);
 		},
 		
-		render: function () {
-			joint.dia.ElementView.prototype.render.apply(this, arguments);
-			this.renderOutline();
-			this.update();
-			return this;
+		renderLocations: function () {
+			var data = this.model.get('data'),
+				attributes = data.type.phase.attributes,
+				locationPatterns = data.locationPatterns,
+				actualLocationCount = locationPatterns ? locationPatterns.length : 0,
+				renderedLocationCount = this.scalableNode.find('.loc-entry').length / attributes.length;
+			
+			if (actualLocationCount < renderedLocationCount) {				
+				// Remove shapes that have been removed
+				for (var i = actualLocationCount; i < renderedLocationCount; i++) {
+					this.rotatableNode.find('.loc-num-' + i).forEach(function (vShape) {
+						vShape.remove()
+					});
+				}
+			}
+			else if (actualLocationCount > renderedLocationCount) {
+				// Add shapes for new locations
+				var rectsTemplateFn = TemplateUtil.compile(this.locRectsTemplate),
+					textsTemplateFn = TemplateUtil.compile(this.locTextsTemplate),
+					args = {
+						attributes: attributes
+					};
+				for (var i = renderedLocationCount; i < actualLocationCount; i++) {
+					args.pattern = locationPatterns[i];
+					args.num = i;
+					this.scalableNode.append(joint.V(rectsTemplateFn(args)));				
+					this.rotatableNode.append(joint.V(textsTemplateFn(args)));				
+				}
+			}
+		},
+		
+		highlight: function () {
+			this.model.attr({
+				'rect.outline': {
+					filter: {
+						name: 'dropShadow',
+						args: {
+							color: 'black',
+							dx: 5,
+							dy: 5,
+							blur: 3,
+							opacity: 0.7 
+						}
+
+					}
+				}
+//				'rect.outline': {
+//					filter: {
+//						name: 'outline',
+//						args: {
+//							color: 'red',
+//							width: 1,
+//							opacity: 5,
+//							margin: 2 
+//						}
+//	
+//					}
+//				}
+//				'rect': {
+//					filter: {
+//						name: 'highlight',
+//						args: {
+//							color: 'red',
+//							width: 1,
+//							blur: 5,
+//							opacity: 1 
+//						}
+//					
+//					}
+//				}
+			});
+			joint.dia.ElementView.prototype.highlight.apply(this, arguments);
+		},
+		
+		unhighlight: function () {
+			this.model.attr('rect.outline/filter', 'none');
+			joint.dia.ElementView.prototype.unhighlight.apply(this, arguments);
 		}
 		
 	}));

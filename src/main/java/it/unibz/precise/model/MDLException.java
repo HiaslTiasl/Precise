@@ -1,4 +1,4 @@
-package it.unibz.precise.rest.mdl;
+package it.unibz.precise.model;
 
 public class MDLException extends RuntimeException {
 

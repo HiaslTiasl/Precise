@@ -16,7 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.deser.UnresolvedForwardReference;
 import com.fasterxml.jackson.databind.deser.UnresolvedId;
 
-import it.unibz.precise.rest.mdl.MDLFileController;
+import it.unibz.precise.rest.MDLFileController;
 import it.unibz.util.ResponseEntityHelper;
 
 @ControllerAdvice(basePackageClasses = {RepositoryRestExceptionHandler.class, MDLFileController.class})

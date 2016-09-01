@@ -10,15 +10,17 @@ import it.unibz.precise.model.Position;
 @Projection(name="dependencySummary", types=Dependency.class)
 public interface DependencySummaryProjection {
 	
-	int getId();
+	long getId();
+	
+	int getSourceID();
+	
+	int getTargetID();
 	
 	boolean isAlternate();
 	
 	boolean isChain();
 	
-	int getSourceID();
-
-	int getTargetID();
+	boolean isGlobalScope();
 	
 	List<AttributeSummaryProjection> getScope();
 	

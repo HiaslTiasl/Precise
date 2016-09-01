@@ -1,6 +1,8 @@
 package it.unibz.precise.model;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -9,6 +11,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(uniqueConstraints={
@@ -112,5 +116,19 @@ public class Dependency extends BaseEntity {
 
 	void internalSetModel(Model model) {
 		this.model = model;
+	}
+	
+	private static Stream<Attribute> attributesOf(Task task) {
+		return task == null ? null
+			: task.getType().getPhase().getAttributeHierarchyLevels().stream()
+				.map(AttributeHierarchyLevel::getAttribute);
+	}
+	
+	@Transient
+	@JsonIgnore
+	public List<Attribute> getAttributes() {
+		Stream<Attribute> sourceAttrs = attributesOf(source);
+		Stream<Attribute> targetAttrs = attributesOf(target);
+		return sourceAttrs.filter(targetAttrs.collect(Collectors.toSet())::contains).collect(Collectors.toList());
 	}
 }

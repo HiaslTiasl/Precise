@@ -2,6 +2,7 @@ package it.unibz.precise.rest.mdl.ast;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -9,19 +10,15 @@ import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.IntSequenceGenerator;
 
+import it.unibz.precise.model.Attribute;
 import it.unibz.precise.model.AttributeHierarchyLevel;
-import it.unibz.precise.model.AttributeHierarchyNode;
-import it.unibz.precise.model.Location;
 import it.unibz.precise.model.OrderSpecification;
 import it.unibz.precise.model.OrderType;
 import it.unibz.precise.model.PatternEntry;
+import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Position;
 import it.unibz.precise.model.Task;
 import it.unibz.precise.model.TaskType;
-import it.unibz.precise.rest.mdl.InvalidLocationException;
-import it.unibz.precise.rest.mdl.LocationHierarchyMismatchException;
-import it.unibz.precise.rest.mdl.MissingIntermediateEntryException;
-import it.unibz.precise.rest.mdl.NonExistingLocationException;
 import it.unibz.util.Util;
 
 @JsonIdentityInfo(generator=IntSequenceGenerator.class, property="id", scope=MDLTaskAST.class)
@@ -44,8 +41,9 @@ public class MDLTaskAST {
 	}
 	
 	public MDLTaskAST(MDLFileAST context, Task task) {
-		this.task = task;	
-		type = context.translate(task.getType());
+		this.task = task;
+		TaskType taskType = task.getType();
+		type = context.translate(taskType);
 		numberOfWorkersNeeded = task.getNumberOfWorkersNeeded();
 		numberOfUnitsPerDay = task.getNumberOfUnitsPerDay();
 		globalExclusiveness = task.isGlobalExclusiveness();
@@ -55,10 +53,7 @@ public class MDLTaskAST {
 			OrderSpecification::getOrderType
 		);
 		position = task.getPosition();
-		locations = task.getLocations().stream()
-			.map(Location::getNode)
-			.map(MDLTaskAST::nodeToMap)
-			.collect(Collectors.toList());
+		locations = Util.mapToList(task.getLocationPatterns(), this::toSimplePattern);
 	}
 	
 	public Task toTask() {
@@ -66,7 +61,7 @@ public class MDLTaskAST {
 			task = new Task();
 	
 			TaskType taskType = type.toTaskType();
-			List<AttributeHierarchyLevel> levels = taskType.getPhase().getAttributeHierarchyLevels();
+			Phase phase = taskType.getPhase();
 			
 			task.setType(taskType);
 			task.setNumberOfWorkersNeeded(numberOfWorkersNeeded);
@@ -74,14 +69,14 @@ public class MDLTaskAST {
 			task.setGlobalExclusiveness(globalExclusiveness);
 			task.setExclusiveness(Util.mapToList(exclusiveness, MDLAttributeAST::toAttribute));
 			task.setOrderSpecifications(
-				order == null ? null : levels.stream()
+				order == null ? null : phase.getAttributeHierarchyLevels().stream()
 					.map(AttributeHierarchyLevel::getAttribute)
 					.filter(a -> order.containsKey(a.getName()))
 					.map(a -> new OrderSpecification(a, order.get(a.getName())))
 					.collect(Collectors.toList())
 			);
 			task.setPosition(position);
-			task.setLocations(Util.mapToList(locations, locMap -> mapToLocation(levels, task, locMap)));
+			task.setLocationPatterns(Util.mapToList(locations, p -> toPattern(p, phase.getAttributeHierarchyLevels())));
 		}
 		return task;
 	}
@@ -150,45 +145,22 @@ public class MDLTaskAST {
 		this.locations = locations;
 	}
 
-	public static String toLocationMapString(Map<String, String> locationMap) {
-		return locationMap.entrySet().stream()
-			.map(e -> e.getKey() + "=" + e.getValue())
-			.collect(Collectors.joining(", ", "[", "]"));
+	private Map<String, String> toSimplePattern(Map<String, PatternEntry> pattern) {
+		return pattern.values().stream()
+			.collect(Collectors.toMap(
+				PatternEntry::getAttributeName,
+				PatternEntry::getValue
+			));
 	}
-	
-	public static Map<String, String> nodeToMap(AttributeHierarchyNode node) {
-		return node == null ? null : Util.mapToMap(node.getPattern(), PatternEntry::getAttribute, PatternEntry::getValue);
-	}
-	
-	public static Location mapToLocation(List<AttributeHierarchyLevel> levels, Task task, Map<String, String> locationMap)
-		throws InvalidLocationException
-	{
-		int entryCount = locationMap.size();
-		
-		if (entryCount > levels.size())
-			throw new LocationHierarchyMismatchException(locationMap);
-		
-		AttributeHierarchyNode parent = null;
-		
-		for (int i = 0; i < entryCount; i++) {
-			AttributeHierarchyLevel level = levels.get(i);
-			String attrString = level.getAttribute().getName();
-			String value = locationMap.get(attrString);
-			
-			if (value == null)
-				throw new MissingIntermediateEntryException(locationMap, attrString);
-			
-			AttributeHierarchyNode node = parent == null
-				? level.findNodeByValue(value)
-				: parent.findChildByValue(value);
-				
-			if (node == null)
-				throw new NonExistingLocationException(locationMap, nodeToMap(parent), attrString, value);
-			
-			parent = node;
-		}
-			
-		return new Location(parent, task);
+
+	private Map<String, PatternEntry> toPattern(Map<String, String> simplePattern, List<AttributeHierarchyLevel> levels) {
+		return levels.stream()
+			.map(AttributeHierarchyLevel::getAttribute)
+			.map(Attribute::getName)
+			.collect(Collectors.toMap(
+				Function.identity(),
+				a -> new PatternEntry(a, simplePattern.get(a))
+			));
 	}
 	
 }

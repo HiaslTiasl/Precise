@@ -23,7 +23,7 @@ text {
  * Highlighting
  ******************************************/
 
-.precise.TaskShape .outline {
+/* .precise.TaskShape .outline {
 	visibility: hidden;
 }
 
@@ -31,7 +31,7 @@ text {
 	visibility: visible;
 	stroke: black;
 	stroke-dasharray: 10,10;
-}
+} */
 
 .precise.DependencyShape.highlighted .link-tools {
 	opacity: 1;

@@ -1,32 +1,40 @@
 package it.unibz.precise.model;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import it.unibz.util.Util;
+import javax.persistence.Embeddable;
+import javax.persistence.ManyToOne;
 
+@Embeddable
 public class PatternEntry {
 	
 	public static final String WILDCARD_VALUE = "*";
 
-	private String attribute;
+	@ManyToOne
+	private String attributeName;
 	private String value;
+	private Collection<String> allowedValues;
 	
-	public PatternEntry(String attribute) {
-		this(attribute, WILDCARD_VALUE);
+	public PatternEntry() {
 	}
 	
-	public PatternEntry(String attribute, String value) {
-		this.attribute = attribute;
-		this.value = value;
+	public PatternEntry(String attributeName) {
+		this(attributeName, WILDCARD_VALUE);
+	}
+	
+	public PatternEntry(String attributeName, String value) {
+		this.attributeName = attributeName;
+		this.value = value == null ? WILDCARD_VALUE : value;
 	}
 
-	public String getAttribute() {
-		return attribute;
+	public String getAttributeName() {
+		return attributeName;
 	}
 	
-	public void setAttribute(String attribute) {
-		this.attribute = attribute;
+	public void setAttributeName(String attributeName) {
+		this.attributeName = attributeName;
 	}
 	
 	public String getValue() {
@@ -37,8 +45,27 @@ public class PatternEntry {
 		this.value = value;
 	}
 	
-	public static Map<String, String> toMap(List<PatternEntry> pattern) {
-		return Util.mapToMap(pattern, PatternEntry::getAttribute, PatternEntry::getValue);
+	public Collection<String> getAllowedValues() {
+		return allowedValues;
+	}
+
+	public void setAllowedValues(Collection<String> allowedValues) {
+		this.allowedValues = allowedValues;
+	}
+	
+	public void checkValue() {
+		if (!allowedValues.contains(value))
+			value = WILDCARD_VALUE;
+	}
+	
+	public boolean hasValue() {
+		return value != null && !PatternEntry.WILDCARD_VALUE.equals(value);
+	}
+	
+	public static String toString(Map<String, PatternEntry> pattern) {
+		return pattern == null ? "[]" : pattern.values().stream()
+			.map(e -> e.getAttributeName() + "=" + e.getValue())
+			.collect(Collectors.joining(", ", "[", "]"));
 	}
 	
 }

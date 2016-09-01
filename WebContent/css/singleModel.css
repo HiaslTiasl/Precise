@@ -9,7 +9,7 @@
 }
 
 #precise-diagram {
-	margin-right: 300px;
+	margin-right: 350px;
 }
 
 .properties-wrapper {
@@ -20,28 +20,22 @@
 	position: absolute;
 	right: 0;
 	top: 0;
-	width: 295px;
-	margin-left: 5px;
+	width: 340px;
+	margin-left: 10px;
 	min-width: 200px;
 	/* border: thin solid #333; */
 	vertical-align: top;
 }
 
-#properties h2 {
+#properties .form-group {
+	margin-bottom: 10px;
+}
+
+#location-table {
+	table-layout: fixed;
+}
+
+#location-table th,
+#location-table td {
 	text-align: center;
 }
-
-#properties form {
-	display: table;
-	margin: 0.25em;
-}
-
-#properties form label {
-	display: table-row;
-}
-
-#properties form label > * {
-	display: table-cell;
-	padding: 0.25em;
-}
-

@@ -1,28 +1,21 @@
 package it.unibz.precise.model;
 
-import java.util.List;
-
-import javax.persistence.Entity;
+import javax.persistence.Embeddable;
 import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
 
-@Entity
-public class Location extends BaseEntity {
+@Embeddable
+public class Location {
 
 	private int level;
 
 	@ManyToOne
 	private AttributeHierarchyNode node;
-	
-	@ManyToOne
-	private Task task;
 
 	public Location() {
 	}
 	
-	public Location(AttributeHierarchyNode node, Task task) {
+	public Location(AttributeHierarchyNode node) {
 		setNode(node);
-		this.task = task;
 	}
 	
 	public AttributeHierarchyNode getNode() {
@@ -40,27 +33,6 @@ public class Location extends BaseEntity {
 	
 	public void setLevel(int level) {
 		this.level = level;
-	}
-
-	public Task getTask() {
-		return task;
-	}
-
-	public void setTask(Task task) {
-		TaskToMany.LOCATIONS.setOne(this, task);
-	}
-	
-	@Transient
-	public Long getTaskID() {
-		return task == null ? null : task.getId();
-	}
-	
-	void internalSetTask(Task task) {
-		this.task = task;
-	}
-	
-	public List<PatternEntry> getPattern() {
-		return AttributeHierarchyNode.toPattern(node, task.getType().getPhase());
 	}
 	
 }

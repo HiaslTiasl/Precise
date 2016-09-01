@@ -1,13 +1,11 @@
 define([
 	'lib/joint',
 	'shapes/TaskShape',
-	'shapes/LocationShape',
 	'shapes/DependencyShape'
 ],
 function (
 	joint,
 	TaskShape,
-	LocationShape,
 	DependencyShape
 ) {
 	'use strict';
@@ -38,15 +36,14 @@ function (
 	                gridSize: $ctrl.gridSize || 2,
 	                model: new joint.dia.Graph(),
 	                multiLinks: false,
-	                defaultConnector: { name: 'jumpover' },
 	                perpendicularLinks: true,
-	                interactive: { vertexAdd: false },
-	                restrictTranslate: function (cellView) {
-	                	var model = cellView.model;
-			        	return model.get('type') === 'precise.LocationShape'
-			        		? _.extend({ width: 0, height: 0 }, model.get('position'))
-			        		: this.getArea();
-			        }
+	                defaultConnector: {
+	                	name: 'jumpover'
+	                },
+	                interactive: {
+	                	vertexAdd: false,
+	                	labelMove: true
+	                }
 	            });
 	        	
 	        	scope.$emit('paper:init', paper);

@@ -1,0 +1,117 @@
+<div class="form-horizontal">
+	<div class="form-group">
+		<label for="phase" class="col-sm-4 control-label">Phase</label>
+		<div class="col-sm-8">
+			<p id="phase" class="form-control-static">{{$ctrl.data.type.phase.name}}</p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="type" class="col-sm-4 control-label">Task</label>
+		<div class="col-sm-8">
+			<p id="type" class="form-control-static">{{$ctrl.data.type.name}}</p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="craft" class="col-sm-4 control-label">Craft</label>
+		<div class="col-sm-8">
+			<p id="craft" class="form-control-static">{{$ctrl.data.type.craft}}</p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="workers" class="col-sm-4 control-label">Workers needed</label>
+		<div class="col-sm-8">
+			<input id="workers"
+				type="number"
+				step="0.01"
+				class="form-control"
+				ng-model="$ctrl.data.numberOfWorkersNeeded"
+				/>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="units" class="col-sm-4 control-label">Units/day</label>
+		<div class="col-sm-8">
+			<input id="units" type="number" class="form-control" ng-model="$ctrl.data.numberOfUnitsPerDay"/>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="workers" class="col-sm-4 control-label">Exclusiveness</label>
+		<div class="col-sm-8">
+			<div class="checkbox">
+				<label>
+					<input type="checkbox" ng-model="$ctrl.data.globalExclusiveness" ng-change="$ctrl.setGlobalExclusiveness()"> Global
+				</label>
+			</div>
+			<a href
+				editable-select="$ctrl.data.exclusiveness"
+				e-multiple
+				e-ng-options="attr as attr.name for attr in $ctrl.data.type.phase.attributes"
+				e-ng-change="ctrl.setExclusiveness()"
+				ng-disabled="$ctrl.data.globalExclusiveness">
+				{{ $ctrl.showExclusiveness() }}
+			</a>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="order" class="col-sm-4 control-label">Order</label>
+		<div class="col-sm-8">
+			<p id="order" class="form-control-static">
+				<a href ng-click="$ctrl.showOrderForm = !$ctrl.showOrderForm">
+					{{ $ctrl.showOrder() }}
+				</a>
+			</p>
+		</div>
+	</div>
+	<div class="form-group form-group-sm" ng-repeat="order in $ctrl.data.orderSpecifications" ng-show="$ctrl.showOrderForm">
+		<label for="attr-{{::order.attribute.name}}" class="col-sm-4 control-label">
+			{{::order.attribute.name}}
+		</label>
+		<div class="col-sm-8">
+			<select id="attr-{{::order.attribute.name}}"
+				class="form-control"
+				ng-model="order.orderType"
+				ng-options="t.name as t.name disable when $ctrl.isDisabledOrderType(t, order.attribute) for t in $ctrl.orderTypes">
+			</select>
+		</div>
+	</div>
+</div>
+<fieldset>
+	<legend>Locations</legend>
+	<!-- <label for="location-table" class="control-label">Locations</label> -->
+	<div class="toolbar">
+		<a href ng-click="$ctrl.addPattern()">
+			<span class="glyphicon glyphicon-plus"></span>
+		</a>
+	</div>
+	<table id="location-table" class="table table-striped" st-table="coll" st-safe-src="$ctrl.data.locationPatterns">
+		<thead>
+			<tr>
+				<th ng-repeat="attr in $ctrl.data.type.phase.attributes">{{::attr.name}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="pattern in coll track by $index" ng-init="patternNum = $index">
+				<td ng-repeat="attr in $ctrl.data.type.phase.attributes track by $index">
+					<a href
+						editable-select="pattern[attr.name].value"
+						e-ng-options="value for value in pattern[attr.name].allowedValues"
+						ng-disabled="$ctrl.isDisabledPatternEntry(pattern[attr.name])"
+						buttons="no"
+						onbeforesave="$ctrl.updatePattern(pattern, patternNum, attr, $data)">
+						{{ pattern[attr.name].value }}
+					</a>
+				</td>
+				<td>
+					<a href ng-click="$ctrl.removePattern(patternNum)">
+						<span class="glyphicon glyphicon-trash"></span>
+					</a>
+				</td>
+			</tr>
+		</tbody>
+		</table>
+</fieldset>
+<div class="text-right">
+	<button class="btn btn-primary" ng-click="$ctrl.updateTask()">Done</button>
+	<button class="btn btn-default" ng-click="$ctrl.cancel()">Cancel</button>
+</div>

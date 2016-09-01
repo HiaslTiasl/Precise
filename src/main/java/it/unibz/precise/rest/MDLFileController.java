@@ -1,4 +1,4 @@
-package it.unibz.precise.rest.mdl;
+package it.unibz.precise.rest;
 
 import javax.validation.Valid;
 

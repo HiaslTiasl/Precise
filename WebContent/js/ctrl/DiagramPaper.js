@@ -3,22 +3,28 @@ define([
 	'lib/lodash',
 	'lib/joint',
 	'shapes/TaskShape',
-	'shapes/LocationShape',
 	'shapes/DependencyShape'
 ], function (
 	$,
 	_,
 	joint,
 	TaskShape,
-	LocationShape,
 	DependencyShape
 ) {
 	
+	var VIEW_TYPE_TASK = 'task',
+		VIEW_TYPE_DEPENDENCY = 'dependency';
+	
+	function getOtherType(type) {
+		return type === VIEW_TYPE_TASK ? VIEW_TYPE_DEPENDENCY : VIEW_TYPE_TASK;
+	}
+	
 	function DiagramPaper(paper) {
 		this.paper = paper;
-		this.attachListeners();
 		//this.editMode;
-		//this.selectedView
+		//this.selectedView;
+		//this.selectedViewType;
+		this.attachListeners();
 	}
 	
 	DiagramPaper.prototype = Object.create(Backbone.Events);
@@ -35,10 +41,13 @@ define([
 		
 		// Update selected task
 		this.paper.on('blank:pointerclick', function (event, x, y) {
-			this.select(null);
+			this.select(this.selectedViewType, null);
 		}, this)
-		.on('cell:pointerclick', function (cellView, event, x, y) {
-			this.select(cellView);
+		.on('element:pointerup', function (cellView, event, x, y) {
+			this.select('task', cellView);
+		}, this)
+		.on('link:pointerup', function (cellView, event, x, y) {
+			this.select('dependency', cellView);
 		}, this);
 	};
 	
@@ -46,17 +55,23 @@ define([
 		this.paper.setDimensions(this.paper.$el.width(), this.paper.$el.height());
 	};
 	
-	DiagramPaper.prototype.select = function (cellView) {
-		if (cellView !== this.selectedView) {
-			if (this.selectedView)
-				this.selectedView.unhighlight();
-			if (cellView) {
-				cellView.highlight();
-				cellView.model.toFront({ deep: true });
-			}
-			this.trigger('cell:select', cellView, this.selectedView);
-			this.selectedView = cellView;
+	DiagramPaper.prototype.select = function (type, newView) {
+		var oldView = this.selectedView;
+		if (newView !== oldView) {
+			var oldType = this.selectedViewType;
+			if (oldView)
+				oldView.unhighlight();
+			if (newView) 
+				newView.highlight();
+			this.trigger(type + ':select', newView, oldType === type ? newView : null);
+			this.selectedViewType = type;
+			this.selectedView = newView;
 		}
+	};
+	
+	DiagramPaper.prototype.updateSelected = function (data) {
+		this.selectedView.model.set('data', data);
+		this.select('task', null);
 	};
 	
 	DiagramPaper.prototype.addTask = function (position, data) {
@@ -65,7 +80,7 @@ define([
 			data: data
 		});
 		this.paper.model.addCell(task);
-		this.select(this.paper.findViewByModel(task));
+		this.select('task', this.paper.findViewByModel(task));
 	};
 	
 	DiagramPaper.prototype.addDependency = function (sourceView, targetView, data) {
@@ -78,25 +93,12 @@ define([
 	
 	DiagramPaper.prototype.removeSelected = function () {
 		this.resetEditMode();
-		if (this.selectedView)
-			this.selectedView.remove();
+		if (this.selectedViews)
+			this.selectedViews.remove();
 	};
 	
 	DiagramPaper.prototype.fromJSON = function (rawGraph) {
 		this.paper.model.fromJSON(rawGraph);
-		this.checkParents();
-	};
-	
-	DiagramPaper.prototype.checkParents = function () {
-		var graph = this.paper.model,
-			elements = graph.getElements();
-		if (elements) {
-			elements.forEach(function (e) {
-				var parent = graph.getCell(e.get('parent'));
-				if (parent)
-					parent.embed(e);
-			});
-		}
 	};
 	
 	DiagramPaper.prototype.setEditMode = function (editMode) {

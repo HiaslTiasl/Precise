@@ -57,7 +57,7 @@ public class TaskType extends BaseEntity {
 	}
 	
 	@Transient
-	public Long getTypeID() {
+	public Long getPhaseID() {
 		return phase == null ? null : phase.getId();
 	}
 

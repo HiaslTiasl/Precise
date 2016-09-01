@@ -9,6 +9,12 @@ button {
 	cursor: pointer;
 }
 
+a[disabled] {
+	pointer-events: none;
+	color: inherit;
+	border: none;
+}
+
 /* .toolbar {
 	margin: 0.25em -0.25em;
 }
@@ -38,7 +44,7 @@ button {
 } */
 
 #page-header {
-	font-size: 2.25em;
+	font-size: 1.6em;
 	text-align: center;
 	padding: 0.25em;
 	color: white;

@@ -13,8 +13,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
@@ -29,8 +29,7 @@ import org.springframework.web.context.WebApplicationContext;
 import it.unibz.precise.model.TaskType;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(Application.class)
-@WebIntegrationTest(randomPort=true)
+@SpringBootTest(classes=Application.class, webEnvironment=WebEnvironment.RANDOM_PORT)
 public class ModelsClientTest {
 
 	private static final String SERVICE_URI = "http://localhost:%s/api";

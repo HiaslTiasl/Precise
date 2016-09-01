@@ -3,14 +3,12 @@ define([
 	'lib/angular',
 	'lib/joint',
 	'shapes/TaskShape',
-	'shapes/LocationShape',
 	'shapes/DependencyShape'
 ], function (
 	_,
 	angular,
 	joint,
 	TaskShape,
-	LocationShape,
 	DependencyShape
 ) {
 	'use strict';
@@ -37,33 +35,18 @@ define([
 			var baseResource = preciseApi.fromBase(),
 				modelHref = model.link('self').href;
 		
+			// Use 'search' method since projections are not exposed in associations
 			return $q.all({
 				tasks: baseResource
 					.traverse(function (builder) {
-						// Use 'search' method since projections are not exposed in associations
 						return builder.follow('tasks', 'search', 'findByModel', 'tasks[$all]')
 							.withTemplateParameters({
 								model: modelHref,
-								projection: 'fullTask'
+								projection: 'expandedTask'
 							})
 							.get();
 					})
 					.then(mapArrUsing(_.flow(taskToCell, checkPosition))),
-				locations: baseResource
-					.traverse(function (builder) {
-						return builder
-							.follow(
-								'locations',
-								'search',
-								'findByTask_Model',
-								'locations[$all]'
-							)
-							.withTemplateParameters({
-								model: modelHref
-							})
-							.get();
-					})
-					.then(mapArrUsing(locationToCell)),
 				dependencies: baseResource
 					.traverse(function (builder) {
 						return builder
@@ -77,7 +60,7 @@ define([
 					.then(mapArrUsing(dependencyToCell))
 			}).then(function (cells) {
 				return {
-					cells: [].concat(cells.tasks, cells.locations, cells.dependencies)
+					cells: [].concat(cells.tasks, cells.dependencies)
 				};
 			});
 		}
@@ -87,17 +70,7 @@ define([
 				id: TaskShape.toTaskID(task.id),
 				type: 'precise.TaskShape',
 				position: task.position,
-				embeds: [],
 				data: task
-			};
-		}
-		
-		function locationToCell(location) {
-			return {
-				id: LocationShape.toLocationID(location.id),
-				type: 'precise.LocationShape',
-				parent: TaskShape.toTaskID(location.taskID),
-				data: location
 			};
 		}
 		

@@ -178,7 +178,7 @@
 			"type": "Concrete Pouring",
 			"numberOfWorkersNeeded": 3,
 			"numberOfUnitsPerDay": 0.025,
-			"orderSpecification": {
+			"order": {
 				"level": "ASCENDING"
 			},
 			"position": {
@@ -242,7 +242,7 @@
 			"type": "Scaffolding Installation",
 			"numberOfWorkersNeeded": 4,
 			"numberOfUnitsPerDay": 0.333,
-			"orderSpecification": {
+			"order": {
 				"level": "ASCENDING"
 			},
 			"position": {

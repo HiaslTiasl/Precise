@@ -1,9 +1,8 @@
 package it.unibz.precise.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
@@ -117,31 +116,39 @@ public class AttributeHierarchyNode extends BaseEntity {
 		this.valuesMatchPositions = valuesMatchPositions;
 	}
 	
-	public List<PatternEntry> getPattern() {
+	public Map<String, PatternEntry> getPattern() {
 		return toPattern(this, level.getPhase());
 	}
 	
-	public static List<PatternEntry> toPattern(AttributeHierarchyNode node, Phase phase) {
-		List<PatternEntry> pattern = new ArrayList<>();
+	public static Map<String, PatternEntry> toPattern(AttributeHierarchyNode node, Phase phase) {
+		Map<String, PatternEntry> pattern = new LinkedHashMap<>();
 		if (node != null)
 			node.addAncestorsTo(pattern);
 		addWildcardsTo(pattern, phase.getAttributeHierarchyLevels());
 		return pattern;
 	}
 	
-	private void addAncestorsTo(List<PatternEntry> pattern) {
-		if (parent != null)
-			parent.addAncestorsTo(pattern);
-		pattern.add(new PatternEntry(level.getAttribute().getName(), value));
+	private static void addToPattern(Map<String, PatternEntry> pattern, Attribute attribute, String value) {
+		String attrName = attribute.getName();
+		pattern.put(attrName, new PatternEntry(attrName, value));
 	}
 	
-	private static List<PatternEntry> addWildcardsTo(List<PatternEntry> pattern, List<AttributeHierarchyLevel> levels) {
+	private void addToPattern(Map<String, PatternEntry> pattern) {
+		addToPattern(pattern, level.getAttribute(), value);
+	}
+	
+	private void addAncestorsTo(Map<String, PatternEntry> pattern) {
+		if (parent != null)
+			parent.addAncestorsTo(pattern);
+		addToPattern(pattern);
+	}
+	
+	private static Map<String, PatternEntry> addWildcardsTo(Map<String, PatternEntry> pattern, List<AttributeHierarchyLevel> levels) {
 		if (pattern == null)
-			pattern = new ArrayList<>();
-		ListIterator<AttributeHierarchyLevel> it = levels.listIterator(pattern.size());
+			pattern = new LinkedHashMap<>();
 		int len = levels.size();
 		for (int i = pattern.size(); i < len; i++)
-			pattern.add(new PatternEntry(it.next().getAttribute().getName()));
+			addToPattern(pattern, levels.get(i).getAttribute(), PatternEntry.WILDCARD_VALUE);
 		return pattern;
 	}
 	

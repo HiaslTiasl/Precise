@@ -18,7 +18,6 @@ define([
 			getResponseData = _.property('data');
 		
 		this.baseUrl = baseUrl;
-		this.urlTo = urlTo;
 		this.from = from;
 		this.fromBase = fromBase;
 		this.continueFrom = continueFrom;
@@ -36,16 +35,12 @@ define([
 			return new RootResource(url);
 		}
 		
-		function urlTo(res) {
-			return halfred.parse(res).link('self').href;
-		}
-		
 		function fromBase() {
 			return new RootResource(baseUrl);
 		}
 		
 		function continueFrom(res) {
-			return new RootResource(urlTo(res));
+			return new RootResource(halfred.parse(res).link('self').href);
 		}
 		
 		function resultOf(request) {

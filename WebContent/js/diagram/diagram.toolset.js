@@ -20,7 +20,7 @@ define(['ctrl/DiagramPaper'], function (DiagramPaper) {
 		editMode: {
 			className: 'add-dependency',
 			listeners: {
-				'cell:select': function (newTaskView, oldTaskView) {
+				'task:select': function (newTaskView, oldTaskView) {
 					if (DiagramPaper.isTaskView(newTaskView) && DiagramPaper.isTaskView(oldTaskView)) {
 						var data = { kind: 'PRECEDENCE', scope: 'TASK' };
 						this.addDependency(oldTaskView, newTaskView, data);

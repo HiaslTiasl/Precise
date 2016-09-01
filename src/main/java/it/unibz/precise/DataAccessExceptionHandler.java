@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import it.unibz.precise.rest.mdl.MDLFileController;
+import it.unibz.precise.rest.MDLFileController;
 import it.unibz.util.ResponseEntityHelper;
 
 @ControllerAdvice(basePackageClasses = {RepositoryController.class, MDLFileController.class})
