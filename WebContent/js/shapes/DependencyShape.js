@@ -2,11 +2,13 @@ define([
 	'lib/lodash',
 	'lib/joint',
 	'shapes/BaseMixin',
+	'shapes/TaskShape',
 	'util/util'
 ], function (
 	_,
 	joint,
 	BaseMixin,
+	TaskShape,
 	util
 ) {
 	'use strict';
@@ -27,7 +29,7 @@ define([
 	
 	var getScopeName = _.property('name');
 	
-	util.set(joint.shapes, ['precise', 'DependencyShape'], joint.dia.Link.extend(BaseMixin).extend({
+	var DependencyShape = util.set(joint.shapes, ['precise', 'DependencyShape'], joint.dia.Link.extend(BaseMixin).extend({
 		
 		markup: util.strInsertBefore(
 			joint.dia.Link.prototype.markup,
@@ -50,9 +52,18 @@ define([
 			},
 		}, joint.dia.Link.prototype.defaults),
 		
+		initialize: function (options) {
+			this.set('id', DependencyShape.toDependencyID(options.data.id));
+			BaseMixin.initialize.apply(this, arguments);
+		},
+		
 		update: function () {
 			var data = this.get('data') || {},
 				connectionStroke = data.chain ? 2 : 1;
+			
+			this.set('source', data.sourceID ? DependencyShape.idToEndpoint(data.sourceID) : data.sourceVertex);
+			this.set('target', data.targetID ? DependencyShape.idToEndpoint(data.targetID) : data.targetVertex);
+			this.set('vertices', data.vertices);
 			this.label(0, {
 				position: 0.5,
 				attrs: {
@@ -75,14 +86,55 @@ define([
 					'stroke-width': connectionStroke
 				}
 			});
-		}
+		},
+		
+		localToRemoteEndpoints: function (data) {
+			var endpoints = {};
+			this.addRemoteEndpoint(endpoints, 'source', Array.prototype.unshift);
+			this.addRemoteEndpoint(endpoints, 'target', Array.prototype.push);
+			return endpoints;
+		},
+		
+		addRemoteEndpoint: function (endpoints, data, end, arrFn) {
+			var endVal = this.get(end);
+			if (endVal) {
+				if (endVal.id)
+					endpoints[end] = endVal;
+				else if (endVal.x || endVal.y) {
+					if (!endpoints.vertices)
+						endpoints.vertices = this.vertices ? this.vertices.slice() : [];
+					arrFn.call(endpoints.vertices, endVal);
+				}
+			}
+		},
+		
 	}, {
 		// Static properties
 		scopeLabels: scopeLabels,
 		
 		toDependencyID: function (id) {
 			return 'dependency-' + id;
+		},
+		
+		idToEndpoint: function (id) {
+			return {
+				id: TaskShape.toTaskID(id)
+			};
+		},
+		
+		endInfo: {
+			source: {
+				id: 'sourceID',
+				vertex: 'sourceVertex',
+				opposite: 'target'
+			},
+			target: {
+				id: 'targetID',
+				vertex: 'targetVertex',
+				opposite: 'source'
+			}
 		}
+		
 	}));
 	
 	var defineFilter = _.once(function (paper, markup) {
@@ -116,16 +168,64 @@ define([
 			'</filter>'
 		].join(''),
 		
+		batchNameByAction: {
+			'vertex-move': 'vertices-change',
+			'arrowhead-move': 'end-change'
+		},
+		
+		initialize: function () {
+			this.batchOptions = _.transform(this.batchNameByAction, function (res, batchName) {
+				res[batchName] = {
+					batchName: batchName,
+					other: { cell: this.model }
+				};
+			}, {}, this);
+			joint.dia.LinkView.prototype.initialize.apply(this, arguments);
+		},
+		
 		render: function () {
 			joint.dia.LinkView.prototype.render.apply(this, arguments);
 			if (this.model.get('data').chain)
 				defineFilter(this.paper, this.filterMarkup);
 		},
 		
+		removeVertex: function (idx) {
+			var opt = this.batchOptions['vertices-change'];
+			this.model.trigger('batch:start', opt);
+			joint.dia.LinkView.prototype.removeVertex.call(this, idx);
+			this.model.trigger('batch:stop', opt);
+		},
+		
+		addVertex: function (vertex) {
+			var opt = this.batchOptions['vertices-change']
+			this.model.trigger('batch:start', opt);
+        	joint.dia.LinkView.prototype.addVertex.call(this, vertex);
+        	this.model.trigger('batch:stop', opt);
+		},
+		
+		pointerdown: function () {
+			joint.dia.LinkView.prototype.pointerdown.apply(this, arguments);
+			var batchName = this.batchNameByAction[this._action];
+			if (!this.ongoingBatch && batchName) {
+				var opt = this.batchOptions[batchName];
+				if (batchName === 'end-change')
+					opt.other.end = this._arrowhead;
+				this.ongoingBatch = opt;
+				this.model.trigger('batch:start', opt);
+			}
+		},
+		
+		pointerup: function () {
+			joint.dia.LinkView.prototype.pointerup.apply(this, arguments);
+			if (this.ongoingBatch) {
+				this.model.trigger('batch:stop', this.ongoingBatch);
+				this.ongoingBatch = null;
+			}
+		},
+		
 		pointerdblclick: function (evt, x, y) {
-            if (joint.V(evt.target).hasClass('connection') || joint.V(evt.target).hasClass('connection-wrap')) {
-                this.addVertex({ x: x, y: y });
-            }
+            if (joint.V(evt.target).hasClass('connection') || joint.V(evt.target).hasClass('connection-wrap'))
+            	this.addVertex({ x: x, y: y });
         },
         
         update: function () {
@@ -137,19 +237,28 @@ define([
         updateAltCrossPosition: function () {
         	// See joint.dia.LinkView.prototype.updateLabelPositions.
         	var connectionElement = this._V.connection.node,
-            	connectionLength = connectionElement.getTotalLength(),
-            	startCoords = connectionElement.getPointAtLength(0),
-            	crossCoords = connectionElement.getPointAtLength(20),
-            	theta = joint.g.point(startCoords).theta(crossCoords);
+            	connectionLength = this.getConnectionLength(),
+            	startCoords = this.getPointAtLength(0),
+            	coords = this.getPointAtLength(20),
+            	angle = 90 - joint.g.point(startCoords).theta(coords);
         		
-        	this._V.altCross
-        		.attr('transform', '')
-        		.rotate(90 - theta)
-        		.translate(crossCoords.x, crossCoords.y);
+        	this._V.altCross.attr('transform', '').rotate(angle).translate(coords.x, coords.y);
         }
         
+	}, {
+		
+		computeLoopVertices: function (taskView, vertices, opt) {
+			var selector = joint.dia.LinkView.makeSelector(taskView.model),
+				element = taskView.el.querySelector(selector),
+				bbox = taskView.getStrokeBBox(element);
+			return joint.routers.orthogonal(vertices, opt || {}, {
+				sourceBBox: bbox,
+				targetBBox: bbox
+			});
+		}
+	
 	}));
 	
-	return joint.shapes.precise.DependencyShape;
+	return DependencyShape;
 	
 });

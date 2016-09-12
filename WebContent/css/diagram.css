@@ -9,12 +9,17 @@
 	width: 100%;
 }
 
+.zoom-options {
+	float: right;
+}
+
 .precise-diagram.paper {
 	position: absolute;
 	top: 3em;
 	bottom: 0;
 	width: 100%;
 	border: thin solid #333;
+	/* overflow: scroll; */
 }
 
 .precise-diagram.paper + .split-pane-divider {

@@ -2,19 +2,39 @@
 	<div class="form-group">
 		<label for="phase" class="col-sm-4 control-label">Phase</label>
 		<div class="col-sm-8">
-			<p id="phase" class="form-control-static">{{$ctrl.data.type.phase.name}}</p>
+			<p ng-if="$ctrl.resource.exists" id="phase" class="form-control-static">
+				{{$ctrl.resource.task.type.phase.name}}
+			</p>
+			<select ng-if="!$ctrl.resource.exists"
+				id="phase"
+				class="form-control"
+				ng-model="$ctrl.phase"
+				ng-options="phase as phase.name for phase in $ctrl.phases"
+				ng-change="$ctrl.phaseChanged()">
+				<option value="">-- Select a Phase --</option>
+			</select>
 		</div>
 	</div>
 	<div class="form-group">
 		<label for="type" class="col-sm-4 control-label">Task</label>
 		<div class="col-sm-8">
-			<p id="type" class="form-control-static">{{$ctrl.data.type.name}}</p>
+			<p ng-if="$ctrl.resource.exists" id="type" class="form-control-static">
+				{{$ctrl.resource.task.type.name}}
+			</p>
+			<select ng-if="!$ctrl.resource.exists"
+				id="type"
+				class="form-control"
+				ng-model="$ctrl.resource.task.type"
+				ng-options="type as type.name for type in $ctrl.taskTypes"
+				ng-disabled="!$ctrl.taskTypes">
+				<option value="">-- Select a Task --</option>
+			</select>
 		</div>
 	</div>
 	<div class="form-group">
 		<label for="craft" class="col-sm-4 control-label">Craft</label>
 		<div class="col-sm-8">
-			<p id="craft" class="form-control-static">{{$ctrl.data.type.craft}}</p>
+			<p id="craft" class="form-control-static">{{$ctrl.resource.task.type.craft}}</p>
 		</div>
 	</div>
 	<div class="form-group">
@@ -22,16 +42,18 @@
 		<div class="col-sm-8">
 			<input id="workers"
 				type="number"
-				step="0.01"
 				class="form-control"
-				ng-model="$ctrl.data.numberOfWorkersNeeded"
-				/>
+				ng-model="$ctrl.resource.task.numberOfWorkersNeeded"/>
 		</div>
 	</div>
 	<div class="form-group">
 		<label for="units" class="col-sm-4 control-label">Units/day</label>
 		<div class="col-sm-8">
-			<input id="units" type="number" class="form-control" ng-model="$ctrl.data.numberOfUnitsPerDay"/>
+			<input id="units"
+				type="number"
+				step="0.01"
+				class="form-control"
+				ng-model="$ctrl.resource.task.numberOfUnitsPerDay"/>
 		</div>
 	</div>
 	<div class="form-group">
@@ -39,20 +61,20 @@
 		<div class="col-sm-8">
 			<div class="checkbox">
 				<label>
-					<input type="checkbox" ng-model="$ctrl.data.globalExclusiveness" ng-change="$ctrl.setGlobalExclusiveness()"> Global
+					<input type="checkbox" ng-model="$ctrl.resource.task.globalExclusiveness" ng-change="$ctrl.globalExclusivenessChanged()"> Global
 				</label>
 			</div>
 			<a href
-				editable-select="$ctrl.data.exclusiveness"
+				editable-select="$ctrl.resource.task.exclusiveness"
 				e-multiple
-				e-ng-options="attr as attr.name for attr in $ctrl.data.type.phase.attributes"
-				e-ng-change="ctrl.setExclusiveness()"
-				ng-disabled="$ctrl.data.globalExclusiveness">
+				e-ng-options="attr as attr.name for attr in $ctrl.resource.task.type.phase.attributes"
+				e-ng-change="ctrl.exclusivenessChanged()"
+				ng-disabled="$ctrl.resource.task.globalExclusiveness">
 				{{ $ctrl.showExclusiveness() }}
 			</a>
 		</div>
 	</div>
-	<div class="form-group">
+	<div class="form-group" ng-if="$ctrl.resource.exists">
 		<label for="order" class="col-sm-4 control-label">Order</label>
 		<div class="col-sm-8">
 			<p id="order" class="form-control-static">
@@ -62,7 +84,7 @@
 			</p>
 		</div>
 	</div>
-	<div class="form-group form-group-sm" ng-repeat="order in $ctrl.data.orderSpecifications" ng-show="$ctrl.showOrderForm">
+	<div class="form-group form-group-sm" ng-repeat="order in $ctrl.resource.task.orderSpecifications" ng-if="$ctrl.resource.exists" ng-show="$ctrl.showOrderForm">
 		<label for="attr-{{::order.attribute.name}}" class="col-sm-4 control-label">
 			{{::order.attribute.name}}
 		</label>
@@ -75,7 +97,7 @@
 		</div>
 	</div>
 </div>
-<fieldset>
+<fieldset ng-if="$ctrl.resource.exists">
 	<legend>Locations</legend>
 	<!-- <label for="location-table" class="control-label">Locations</label> -->
 	<div class="toolbar">
@@ -83,16 +105,16 @@
 			<span class="glyphicon glyphicon-plus"></span>
 		</a>
 	</div>
-	<table id="location-table" class="table table-striped" st-table="coll" st-safe-src="$ctrl.data.locationPatterns">
+	<table id="location-table" class="table table-striped" st-table="coll" st-safe-src="$ctrl.resource.task.locationPatterns">
 		<thead>
 			<tr>
-				<th ng-repeat="attr in $ctrl.data.type.phase.attributes">{{::attr.name}}</th>
+				<th ng-repeat="attr in $ctrl.resource.task.type.phase.attributes">{{::attr.name}}</th>
 				<th></th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr ng-repeat="pattern in coll track by $index" ng-init="patternNum = $index">
-				<td ng-repeat="attr in $ctrl.data.type.phase.attributes track by $index">
+				<td ng-repeat="attr in $ctrl.resource.task.type.phase.attributes track by $index">
 					<a href
 						editable-select="pattern[attr.name].value"
 						e-ng-options="value for value in pattern[attr.name].allowedValues"
@@ -112,6 +134,10 @@
 		</table>
 </fieldset>
 <div class="text-right">
-	<button class="btn btn-primary" ng-click="$ctrl.updateTask()">Done</button>
+	<button class="btn btn-primary"
+		ng-click="$ctrl.sendTask()"
+		ng-disabled="$ctrl.mode === 'add' && !$ctrl.resource.task.type">
+		Done
+	</button>
 	<button class="btn btn-default" ng-click="$ctrl.cancel()">Cancel</button>
 </div>

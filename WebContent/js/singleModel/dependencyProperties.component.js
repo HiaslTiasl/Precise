@@ -7,55 +7,48 @@ define([
 ) {
 	'use strict';
 	
-
+	DependencyPropertiesController.$inject = ['DependencyResource'];
 	
-	DependencyPropertiesController.$inject = ['dependencyProperties'];
-	
-	function DependencyPropertiesController(dependencyProperties) {
+	function DependencyPropertiesController(DependencyResource) {
 		var $ctrl = this;
 		
 		$ctrl.cancel = cancel;
-		$ctrl.updateDependency = updateDependency;
+		$ctrl.sendDependency = sendDependency;
 		$ctrl.showScope = showScope;
-		$ctrl.setGlobalScope = setGlobalScope;
-		$ctrl.setScope = setScope;
+		$ctrl.globalScopeChanged = globalScopeChanged;
+		$ctrl.scopeChanged = scopeChanged;
 		
 		$ctrl.$onChanges = $onChanges;
-		
-		var dependencyResourceService;
 		
 		var getAttrName = _.property('name'),
 			scopeParts;
 		
 		function $onChanges(changesObj) {
 			if (changesObj['resource']) {				
-				dependencyResourceService = dependencyProperties.ofResource($ctrl.resource);
-				dependencyResourceService.getData().then(function (data) {
-					$ctrl.data = data;
-				});
+				// Nothing to do here
 			}
 		}
 		
 		function showScope() {
-			if (!$ctrl.data)
+			if (!$ctrl.resource.dependency)
 				return undefined;
 			if (!scopeParts)
 				scopeParts = [];
-			util.mapInto(scopeParts, $ctrl.data.scope, getAttrName);
+			util.mapInto(scopeParts, $ctrl.resource.dependency.scope, getAttrName);
 			return scopeParts.length ? scopeParts.join(', ') : '(no attributes)';
 		}
 		
-		function setGlobalScope() {
-			if ($ctrl.data.globalScope)
-				util.limitArray($ctrl.data.scope, 0);
+		function globalScopeChanged() {
+			if ($ctrl.resource.dependency.globalScope)
+				util.limitArray($ctrl.resource.dependency.scope, 0);
 		}
 		
-		function setScope() {
-			$ctrl.data.globalScope = $ctrl.data.scope.length > 0;
+		function scopeChanged() {
+			$ctrl.resource.dependency.globalScope = $ctrl.resource.dependency.scope.length > 0;
 		}
 		
-		function updateDependency() {
-			return dependencyResourceService.updateDependency($ctrl.data)
+		function sendDependency() {
+			return $ctrl.resource.sendDependency()
 				.then(function (result) {
 					$ctrl.done({ $result: result });
 				}, function (reason) {
@@ -73,6 +66,8 @@ define([
 		controller: DependencyPropertiesController,
 		controllerAs: '$ctrl',
 		bindings: {
+			model: '<',
+			mode: '<',
 			resource: '<',
 			done: '&',
 			cancelled: '&'

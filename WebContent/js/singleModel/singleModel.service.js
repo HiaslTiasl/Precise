@@ -6,14 +6,18 @@ define([
 	
 	function SingleModelService(preciseApi) {
 		
-		this.findByName = function (name) {
+		this.findByName = findByName;
+		
+		function findByName(name) {
 			return preciseApi.fromBase()
 				.traverse(function (builder) {
-					return builder.follow('models', 'search', 'findByName')
+					return builder
+						.follow('models', 'search', 'findByName')
 						.withTemplateParameters({ name: name })
 						.get()
 				});
-		};
+		}
+		
 	}
 	
 	return SingleModelService;

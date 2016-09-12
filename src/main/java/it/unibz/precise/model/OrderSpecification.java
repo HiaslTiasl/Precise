@@ -6,7 +6,7 @@ import javax.persistence.ManyToOne;
 @Embeddable
 public class OrderSpecification {
 	
-	@ManyToOne()
+	@ManyToOne
 	private Attribute attribute;
 	
 	private OrderType orderType = OrderType.NONE;

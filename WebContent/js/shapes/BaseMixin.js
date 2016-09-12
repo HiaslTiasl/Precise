@@ -23,5 +23,6 @@ define([
 	    },
 	    
 		data: null
+		
 	};
 });

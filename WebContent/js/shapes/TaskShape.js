@@ -12,7 +12,7 @@ define([
 	util
 ) {
 	
-	var LOC_COL_WIDTH = 16,
+	var LOC_COL_WIDTH = 20,
 		LOC_ROW_HEIGHT = LOC_COL_WIDTH,
 		DEFAULT_LOC_HEIGHT = 1 * LOC_ROW_HEIGHT;
 	
@@ -35,13 +35,14 @@ define([
 		'task-exclusiveness'
 	];
 	
-	var classes = ['outline'].concat(textClasses, 'task-locations');
+	var rectClasses = ['outline', 'task-locations'].concat(textClasses);
 	
-	util.set(joint.shapes, ['precise', 'TaskShape'], BaseShape.extend(/*_.extend({}, joint.plugins.precise.TaskToolsShape,*/ {
+	var TaskShape = util.set(joint.shapes, ['precise', 'TaskShape'], BaseShape.extend(/*_.extend({}, joint.plugins.precise.TaskToolsShape,*/ {
 		markup: [
 			'<g class="rotatable">',
 				'<g class="scalable">',
-					TemplateUtil.createElements('rect', classes).join(''),
+					'<g class="task-locations"/>',
+					TemplateUtil.createElements('rect', rectClasses).join(''),
 				'</g>',
 				TemplateUtil.createElements('text', textClasses).join(''),
 			'</g>',
@@ -84,7 +85,8 @@ define([
 			}))
 		}, BaseShape.prototype.defaults),
 		
-		initialize: function () {
+		initialize: function (options) {
+			this.set('id', TaskShape.toTaskID(options.data.id));
 			BaseShape.prototype.initialize.apply(this, arguments);
 		},
 		
@@ -97,12 +99,17 @@ define([
 				locationPatterns = data.locationPatterns,
 				width = WIDTH,
 				height = LOC_POS_Y + locationsHeight;
+			if (exclusive) {
+				width += 10;
+				height += 10;
+			}
 			
 			this.set('size', { width: width, height: height });
+			this.set('position', data.position);
 			this.attr({
 				'rect.outline': {
-					width: exclusive ? width + 10 : width,
-					height: exclusive ? height + 10 : height,
+					width: width,
+					height: height,
 					transform: exclusive ? 'translate(-5,-5)' : ''
 				},
 				'rect.task-locations':      { height: locationsHeight },
@@ -110,7 +117,7 @@ define([
 				'text.task-workers-needed': { text: data.numberOfWorkersNeeded },
 				'text.task-units-per-day':  { text: data.numberOfUnitsPerDay },
 				'text.task-type-craft':     { text: data.type.craft },
-				'text.task-type-name':      { text: data.type.name },
+				'text.task-type-name':      { text: joint.util.breakText(data.type.name, { width: WIDTH, height: NAME_HEIGHT }) }
 			});
 			if (locationPatterns) {
 				for (var i = 0, locLen = locationPatterns.length; i < locLen; i++) {
@@ -172,6 +179,7 @@ define([
 
    	        _.bindAll(this, 'renderLocations');
 
+   	        this.positionChangeBatchOptions = { batchName: 'position-change', other: { cell: this.model }};
    	        joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
    	        this.listenTo(this.model, 'change:data', this.renderLocations);
@@ -219,6 +227,16 @@ define([
 			}
 		},
 		
+		pointerdown: function () {
+			this.model.trigger('batch:start', this.positionChangeBatchOptions);
+			joint.dia.ElementView.prototype.pointerdown.apply(this, arguments);
+		},
+		
+		pointerup: function () {
+			joint.dia.ElementView.prototype.pointerup.apply(this, arguments);
+			this.model.trigger('batch:stop', this.positionChangeBatchOptions);
+		},
+		
 		highlight: function () {
 			this.model.attr({
 				'rect.outline': {
@@ -246,7 +264,7 @@ define([
 //	
 //					}
 //				}
-//				'rect': {
+//				'rect.outline': {
 //					filter: {
 //						name: 'highlight',
 //						args: {
@@ -269,5 +287,5 @@ define([
 		
 	}));
 	
-	return joint.shapes.precise.TaskShape;
+	return TaskShape;
 });

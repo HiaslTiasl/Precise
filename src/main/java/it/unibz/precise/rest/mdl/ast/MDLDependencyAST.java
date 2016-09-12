@@ -16,6 +16,8 @@ public class MDLDependencyAST {
 	private boolean chain;
 	private MDLTaskAST source;
 	private MDLTaskAST target;
+	private Position sourceVertex;
+	private Position targetVertex;
 	private boolean globalScope;
 	private List<MDLAttributeAST> scope;
 	private List<Position> vertices;
@@ -29,9 +31,11 @@ public class MDLDependencyAST {
 		chain = dependency.isChain();
 		source = context.translate(dependency.getSource());
 		target = context.translate(dependency.getTarget());
+		sourceVertex = dependency.getSourceVertex();
+		targetVertex = dependency.getTargetVertex();
+		vertices = dependency.getVertices();
 		globalScope = dependency.isGlobalScope();
 		scope = Util.mapToList(dependency.getScope(), context::translate);
-		vertices = dependency.getVertices();
 	}
 	
 	public Dependency toDependency() {
@@ -41,9 +45,11 @@ public class MDLDependencyAST {
 			dependency.setChain(chain);
 			dependency.setSource(source.toTask());
 			dependency.setTarget(target.toTask());
+			dependency.setSourceVertex(sourceVertex);
+			dependency.setTargetVertex(targetVertex);
+			dependency.setVertices(vertices);
 			dependency.setGlobalScope(globalScope);
 			dependency.setScope(Util.mapToList(scope, MDLAttributeAST::toAttribute));
-			dependency.setVertices(vertices);
 		}
 		return dependency;
 	}
@@ -79,6 +85,30 @@ public class MDLDependencyAST {
 	public void setTarget(MDLTaskAST target) {
 		this.target = target;
 	}
+
+	public Position getSourceVertex() {
+		return sourceVertex;
+	}
+
+	public void setSourceVertex(Position sourceVertex) {
+		this.sourceVertex = sourceVertex;
+	}
+
+	public Position getTargetVertex() {
+		return targetVertex;
+	}
+
+	public void setTargetVertex(Position targetVertex) {
+		this.targetVertex = targetVertex;
+	}
+
+	public List<Position> getVertices() {
+		return vertices;
+	}
+
+	public void setVertices(List<Position> vertices) {
+		this.vertices = vertices;
+	}
 	
 	public boolean isGlobalScope() {
 		return globalScope;
@@ -96,20 +126,5 @@ public class MDLDependencyAST {
 		this.scope = scope;
 	}
 
-	public Dependency getDependency() {
-		return dependency;
-	}
-
-	public void setDependency(Dependency dependency) {
-		this.dependency = dependency;
-	}
-
-	public List<Position> getVertices() {
-		return vertices;
-	}
-
-	public void setVertices(List<Position> vertices) {
-		this.vertices = vertices;
-	}
 	
 }

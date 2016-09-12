@@ -2,13 +2,13 @@
 	<div class="form-group">
 		<label for="phase" class="col-sm-4 control-label">Source</label>
 		<div class="col-sm-8">
-			<p id="phase" class="form-control-static">{{$ctrl.data.sourceID}}</p>
+			<p id="phase" class="form-control-static">{{$ctrl.resource.dependency.sourceID}}</p>
 		</div>
 	</div>
 	<div class="form-group">
 		<label for="craft" class="col-sm-4 control-label">Target</label>
 		<div class="col-sm-8">
-			<p id="craft" class="form-control-static">{{$ctrl.data.targetID}}</p>
+			<p id="craft" class="form-control-static">{{$ctrl.resource.dependency.targetID}}</p>
 		</div>
 	</div>
 	<div class="form-group">
@@ -16,12 +16,12 @@
 		<div class="col-sm-8">
 			<div class="checkbox">
 				<label>
-					<input type="checkbox" ng-model="$ctrl.data.alternate"> Alternate
+					<input type="checkbox" ng-model="$ctrl.resource.dependency.alternate"> Alternate
 				</label>
 			</div>
 			<div class="checkbox">
 				<label>
-					<input type="checkbox" ng-model="$ctrl.data.chain"> Chain
+					<input type="checkbox" ng-model="$ctrl.resource.dependency.chain"> Chain
 				</label>
 			</div>
 		</div>
@@ -31,20 +31,20 @@
 		<div class="col-sm-8">
 			<div class="checkbox">
 				<label>
-					<input type="checkbox" ng-model="$ctrl.data.globalScope" ng-change="$ctrl.setGlobalScope()"> Global
+					<input type="checkbox" ng-model="$ctrl.resource.dependency.globalScope" ng-change="$ctrl.globalScopeChanged()"> Global
 				</label>
 			</div>
 			<a href
-				editable-select="$ctrl.data.scope"
+				editable-select="$ctrl.resource.dependency.scope"
 				e-multiple
-				e-ng-options="attr as attr.name for attr in $ctrl.data.attributes"
-				e-ng-change="ctrl.setScope()">
+				e-ng-options="attr as attr.name for attr in $ctrl.resource.dependency.attributes"
+				e-ng-change="$ctrl.scopeChanged()">
 				{{ $ctrl.showScope() }}
 			</a>
 		</div>
 	</div>
 	<div class="text-right">
-		<button class="btn btn-primary" ng-click="$ctrl.updateDependency()">Done</button>
+		<button class="btn btn-primary" ng-click="$ctrl.sendDependency()">Done</button>
 		<button class="btn btn-default" ng-click="$ctrl.cancel()">Cancel</button>
 	</div>
 </div>

@@ -10,6 +10,8 @@ import it.unibz.precise.model.Phase;
 @Projection(name="phaseSummary", types=Phase.class)
 public interface PhaseSummaryProjection {
 	
+	long getId();
+	
 	String getName();
 	
 	@Value("#{target.attributeHierarchyLevels.![attribute]}")

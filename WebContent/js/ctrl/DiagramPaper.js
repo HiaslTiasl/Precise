@@ -11,120 +11,281 @@ define([
 	TaskShape,
 	DependencyShape
 ) {
+	'use strict';
 	
-	var VIEW_TYPE_TASK = 'task',
-		VIEW_TYPE_DEPENDENCY = 'dependency';
+	var DependencyShapeView = joint.shapes.precise.DependencyShapeView;
 	
-	function getOtherType(type) {
-		return type === VIEW_TYPE_TASK ? VIEW_TYPE_DEPENDENCY : VIEW_TYPE_TASK;
+	var NS_DIAGRAM = 'diagram',
+		NS_TASK = 'task',
+		NS_DEPENDENCY = 'dependency';
+	
+	var nsToType = {},
+		typeToNs;
+	
+	nsToType[NS_TASK] = TaskShape.prototype.defaults.type;
+	nsToType[NS_DEPENDENCY] = DependencyShape.prototype.defaults.type;
+	
+	typeToNs = _.invert(nsToType);
+	
+	var defaultEditMode = {
+		className: 'default-mode',
+		listeners: {
+			'blank:pointerclick': function () {
+				this.unselect();
+			}
+		}
+	};
+	
+	var padding = {
+		top: 50,
+		right: 70,
+		bottom: 70,
+		left: 50
 	}
 	
 	function DiagramPaper(paper) {
 		this.paper = paper;
-		//this.editMode;
 		//this.selectedView;
-		//this.selectedViewType;
+		//this.selectedNS;
+		//this.editMode;
+		this.options = {
+			fitToContent: {
+				allowNewOrigin: 'any',
+				padding: padding,
+				minWidth: null,
+				minHeight: null
+			},
+			scaleContentToFit: {
+				fittingBBox: {
+					x: null,
+					y: null,
+					width: null,
+					height: null
+				}
+			}
+		};
 		this.attachListeners();
+		this.setEditMode(defaultEditMode);
 	}
 	
 	DiagramPaper.prototype = Object.create(Backbone.Events);
 	DiagramPaper.prototype.constructor = DiagramPaper;
 
-	DiagramPaper.isTaskView = function (cellView) {
-		return cellView && cellView.model.get('type') === 'precise.TaskShape';
+	DiagramPaper.prototype.fitToContentOptions = function () {
+		var opt = this.options.fitToContent,
+			pad = opt.padding || 0,
+			$wrapper = this.paper.$el.parent();
+		opt.minWidth = $wrapper.width() - (pad.left || 0) - (pad.right || 0);
+		opt.minHeight = $wrapper.height() - (pad.top || 0) - (pad.bottom || 0);
+		return opt;
+	};
+	
+	DiagramPaper.prototype.scaleContentToFitOptions = function () {
+		var opt = this.options.scaleContentToFit,
+			pad = this.options.fitToContent.padding || 0,
+			$wrapper = this.paper.$el.parent();
+		opt.x = pad.left || 0;
+		opt.y = pad.top || 0;
+		opt.width = $wrapper.width() - (pad.left || 0) - (pad.right || 0);
+		opt.height = $wrapper.height() - (pad.top || 0) - (pad.bottom || 0);
+		return opt;
 	};
 	
 	DiagramPaper.prototype.attachListeners = function (selector) {
-		
 		// Proxy all paper events
 		this.listenTo(this.paper, 'all', this.trigger);
-		
-		// Update selected task
-		this.paper.on('blank:pointerclick', function (event, x, y) {
-			this.select(this.selectedViewType, null);
-		}, this)
-		.on('element:pointerup', function (cellView, event, x, y) {
-			this.select('task', cellView);
-		}, this)
-		.on('link:pointerup', function (cellView, event, x, y) {
-			this.select('dependency', cellView);
-		}, this);
+		// Selecting cells
+		this.paper.on('cell:pointerup', this.onCellPointerup, this);
+		// React on internal operations
+		this.paper.model
+			//.on('add remove', this.fitPaperToContent, this)
+			.on('remove', this.onRemove, this)
+			.on('batch:stop', this.onBatchStop, this);
+	};
+	
+	DiagramPaper.prototype.onCellPointerup = function (cellView, event, x, y) {
+		this.select(cellView.model.graph && cellView);
+	};
+	
+	DiagramPaper.prototype.onRemove = function (cell) {
+		if (!cell.removedRemotely) {
+			if (this.selectedView && this.selectedView.model === cell)
+				this.select(null, this.selectedNS);
+			this.triggerNS('remove', typeToNs[cell.get('type')], [cell.get('data')])
+		}
+	};
+	
+	DiagramPaper.prototype.onBatchStop = function (options) {
+		var cell = options.other && options.other.cell;
+		if (cell) {
+			var data = cell.get('data'),
+				changedData,
+				changedNS;
+			switch (options.batchName) {
+			case 'vertices-change':
+				changedData = this.changedVerticesData(cell, data);
+				changedNS = NS_DEPENDENCY;
+				break;
+			case 'end-change':
+				changedData = this.changedEndData(cell, data);
+				changedNS = NS_DEPENDENCY;
+				break;
+			case 'position-change':
+				changedData = this.changedPositionData(cell, data);
+				changedNS = NS_TASK;
+				break;
+			}
+			if (changedData) {
+				this.triggerNS('change', changedNS, [_.defaults(changedData, data)]);	
+				//this.fitPaperToContent();
+			}
+		}
+	};
+	
+	DiagramPaper.prototype.changedVerticesData = function (cell, data) {
+		var vertices = cell.get('vertices');
+		return vertices === data.vertices ? null : { vertices: cell.get('vertices') };
+	},
+	
+	DiagramPaper.prototype.changedEndData = function (cell, data) {
+		var changedData,
+			end = options.other.end,
+			endInfo = DependencyShape.endInfo[end],
+			endVal = cell.get(end);
+		if (endVal.id) {
+			var endCell = this.paper.model.getCell(endVal.id),
+				endData = endCell.get('data');
+			if (endData.id !== data[endInfo.id]) {
+				changedData = {};
+				changedData[end] = endData
+				if (endVal.id === cell.get(endInfo.opposite).id && !data.vertices) {
+					var taskView = this.paper.findViewByModel(endCell);
+					changedData[vertices] = DependencyShapeView.computeLoopVertices(taskView);
+				}
+			}
+		}
+		else if (endVal !== data[endInfo.vertex]) {
+			changedData = {};
+			changedData[end] = null;
+			changedData[endInfo.vertex] = endVal
+		}
+		return changedData;
+	},
+	
+	DiagramPaper.prototype.changedPositionData = function (cell, data) {
+		var position = cell.get('position');
+		return position === data.position ? null : { position: position };
+	},
+	
+	DiagramPaper.prototype.triggerNS = function (eventName, ns, args) {
+		var nsEvent = ns + ':' + eventName,
+			defaultEvent = NS_DIAGRAM + ':' + eventName;
+		args.unshift(nsEvent);
+		this.trigger.apply(this, args);
+		args[0] = ns;
+		args.unshift(defaultEvent);
+		this.trigger.apply(this, args);
 	};
 	
 	DiagramPaper.prototype.updateDimensions = function () {
 		this.paper.setDimensions(this.paper.$el.width(), this.paper.$el.height());
 	};
 	
-	DiagramPaper.prototype.select = function (type, newView) {
-		var oldView = this.selectedView;
+	DiagramPaper.prototype.unselect = function () {
+		this.select(null, this.selectedNS);
+	};
+	
+	DiagramPaper.prototype.select = function (newView, namespace) {
+		var oldView = this.selectedView,
+			ns = namespace || (newView && typeToNs[newView.model.get('type')]);
 		if (newView !== oldView) {
-			var oldType = this.selectedViewType;
+			var oldNS = this.selectedNS;
 			if (oldView)
 				oldView.unhighlight();
 			if (newView) 
 				newView.highlight();
-			this.trigger(type + ':select', newView, oldType === type ? newView : null);
-			this.selectedViewType = type;
+			this.triggerNS('select', ns, [newView, oldNS === ns ? oldView : null]);
+			this.selectedNS = ns;
 			this.selectedView = newView;
 		}
 	};
 	
 	DiagramPaper.prototype.updateSelected = function (data) {
 		this.selectedView.model.set('data', data);
-		this.select('task', null);
 	};
 	
-	DiagramPaper.prototype.addTask = function (position, data) {
-		var task = new TaskShape({
-			position: position,
-			data: data
-		});
-		this.paper.model.addCell(task);
-		this.select('task', this.paper.findViewByModel(task));
+	DiagramPaper.prototype.getModelID = function (ns, data) {
+		return ns === NS_TASK
+			? TaskShape.toTaskID(data.id)
+			: DependencyShape.toDependencyID(data.id);
 	};
 	
-	DiagramPaper.prototype.addDependency = function (sourceView, targetView, data) {
-		this.paper.model.addCell(new DependencyShape({
-			source: { id: sourceView.model.id }, 
-			target: { id: targetView.model.id },
-			data: data
-		}));
+	DiagramPaper.prototype.addCell = function (ns, data) {
+		var args = {
+				id: this.getModelID(ns, data), 
+				data: data
+			},
+			cell = ns === NS_TASK ? new TaskShape(args) : new DependencyShape(args);
+		this.paper.model.addCell(cell);
+		this.select(this.paper.findViewByModel(cell), ns);
 	};
 	
-	DiagramPaper.prototype.removeSelected = function () {
+	DiagramPaper.prototype.removeCell = function (ns, data) {
 		this.resetEditMode();
-		if (this.selectedViews)
-			this.selectedViews.remove();
+		var model = this.paper.model.getCell(this.getModelID(ns, data));
+		if (model) {
+			model.removedRemotely = true;
+			model.remove();
+			if (model === this.selectedView.model)
+				this.select(null, ns);
+		}
 	};
 	
 	DiagramPaper.prototype.fromJSON = function (rawGraph) {
 		this.paper.model.fromJSON(rawGraph);
+		this.onRenderDone(function () {
+			//this.scaleContentToFitPaper();
+			//this.fitPaperToContent(/*_.assign({}, this.fitToContentOptions(), this.scaleContentToFitOptions())*/);
+		}, this);
+	};
+	
+	DiagramPaper.prototype.fitPaperToContent = function (opt) {
+		this.paper.fitToContent(opt || this.fitToContentOptions());
+	};
+	
+	DiagramPaper.prototype.scaleContentToFitPaper = function (opt) {
+		this.paper.scaleContentToFit(opt || this.scaleContentToFitOptions());
+	};
+	
+	DiagramPaper.prototype.onRenderDone = function (callback, thisArg, async) {
+		if (async != null ? async : this.paper.options.async)
+			this.paper.once('render:done', callback, thisArg);
+		else
+			callback.call(thisArg);
 	};
 	
 	DiagramPaper.prototype.setEditMode = function (editMode) {
-		if (!editMode)
-			this.resetEditMode();
-		else {
-			this.on(editMode.listeners, this);
-			this.paper.$el.addClass(editMode.className);
+		if (editMode !== this.editMode) {
+			if (this.editMode) {
+				this.off(this.editMode.listeners, this);
+				if (this.editMode.className)
+					this.paper.$el.removeClass(this.editMode.className);
+			}
+			if (editMode) {
+				this.on(editMode.listeners, this);
+				if (editMode.className)
+					this.paper.$el.addClass(editMode.className);
+			}
 			this.editMode = editMode;
 		}
 	};
 	
 	DiagramPaper.prototype.resetEditMode = function () {
-		if (this.editMode) {
-			this.off(this.editMode.listeners);
-			this.paper.$el.removeClass(this.editMode.className);
-			this.editMode = null;
-		}
+		this.setEditMode(defaultEditMode);
 	};
 	
 	DiagramPaper.prototype.toggleEditMode = function (editMode) {
-		this.resetEditMode();
-		if (this.editMode === editMode)
-			this.resetEditMode();
-		else
-			this.setEditMode(editMode);
+		this.setEditMode(this.editMode !== editMode ? editMode : defaultEditMode);
 	};
 	
 	DiagramPaper.prototype.invokeTool = function (toolDef) {
@@ -133,10 +294,14 @@ define([
 		if (toolDef.editMode)
 			this.toggleEditMode(toolDef.editMode);
 	};
-
-//	paper.scaleContentToFit({
-//		preserveAspectRatio: true,
-//	});
+	
+	DiagramPaper.prototype.canInvokeTool = function (toolDef) {
+		var reqSelView = toolDef.requiresSelected,
+			reqSelNS = typeof reqSelView === 'string' && reqSelView,
+			selView = this.selectedView,
+			selNS = this.selectedNS;
+		return !reqSelView || (selView && (!reqSelNS || reqSelNS === selNS));
+	};
 	
 	return DiagramPaper;
 	

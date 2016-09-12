@@ -7,23 +7,23 @@ import javax.persistence.Embeddable;
 public class Position {
 
 	@Column(nullable=true)
-	private float x;
+	private Float x;
 	@Column(nullable=true)
-	private float y;
+	private Float y;
 	
-	public float getX() {
+	public Float getX() {
 		return x;
 	}
 	
-	public void setX(float x) {
+	public void setX(Float x) {
 		this.x = x;
 	}
 	
-	public float getY() {
+	public Float getY() {
 		return y;
 	}
 	
-	public void setY(float y) {
+	public void setY(Float y) {
 		this.y = y;
 	}
 	

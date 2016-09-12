@@ -1,42 +1,71 @@
-define(['ctrl/DiagramPaper'], function (DiagramPaper) {
+define([
+	'lib/joint',
+	'ctrl/DiagramPaper'
+], function (
+	joint,
+	DiagramPaper
+) {
 	'use strict';
+	
+	var DependencyShapeView = joint.shapes.precise.DependencyShapeView;
 	
 	return [ {
 		title: 'Add task',
-		requiresSelectedTask: false,
+		requiresSelected: false,
 		editMode: {
 			className: 'add-task',
 			listeners: {
 				'blank:pointerclick': function (event, x, y) {
-					var data = { name: prompt('task name', '<enter name>') };
-					this.addTask({ x: x, y: y }, data);
-					this.resetEditMode();
+					this.trigger('task:new', {
+						position: { x: x, y: y }
+					});
 				}
 			}
 		},
 	}, {
+		title: 'Remove',
+		requiresSelected: true,
+		action: function () {
+			if (this.selectedView)
+				this.trigger('cell:delete', this.selectedNS, this.selectedView.model.get('data'));
+		}
+	}, {
 		title: 'Add dependency',
-		requiresSelectedTask: true,
+		requiresSelected: 'task',
 		editMode: {
 			className: 'add-dependency',
 			listeners: {
-				'task:select': function (newTaskView, oldTaskView) {
-					if (DiagramPaper.isTaskView(newTaskView) && DiagramPaper.isTaskView(oldTaskView)) {
-						var data = { kind: 'PRECEDENCE', scope: 'TASK' };
-						this.addDependency(oldTaskView, newTaskView, data);
-					}
+				'link:pointerdown': function () {
 					this.resetEditMode();
 				},
-				'blank:pointerclick': DiagramPaper.prototype.resetEditMode
+				'element:pointerdown': function (targetView) {
+					var sourceView = this.selectedView;
+					if (sourceView && this.selectedNS === 'task') {
+						var source = sourceView.model.get('data'),
+							target = targetView.model.get('data'),
+							changedData = {
+								source: source,
+								target: target
+							};
+						if (source === target)
+							changedData.vertices = DependencyShapeView.computeLoopVertices(sourceView);
+						this.trigger('dependency:new', changedData);
+					}
+				},
+				'blank:pointerclick': function (event, x, y) {
+					var sourceView = this.selectedView;
+					if (sourceView && this.selectedNS === 'task') {
+						this.trigger('dependency:new', {
+							source: sourceView.model.get('data'),
+							targetVertex: { x: x, y: y }
+						});
+					}
+				}
 			}
 		}
 	}, {
-		title: 'Remove selected task',
-		requiresSelectedTask: true,
-		action: DiagramPaper.prototype.removeSelected
-	}, {
 		title: 'Duplicate selected task',
-		requiresSelectedTask: true,
+		requiresSelected: 'task(TODO)',
 		action: null	// TODO
 	} ];
 

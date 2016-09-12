@@ -12,9 +12,13 @@ public interface DependencySummaryProjection {
 	
 	long getId();
 	
-	int getSourceID();
+	Long getSourceID();
 	
-	int getTargetID();
+	Long getTargetID();
+	
+	Position getSourceVertex();
+
+	Position getTargetVertex();
 	
 	boolean isAlternate();
 	

@@ -19,19 +19,15 @@ text {
 	opacity: initial;
 }
 
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+	.highlighted {
+		outline: none;
+	}
+}
+
 /******************************************
  * Highlighting
  ******************************************/
-
-/* .precise.TaskShape .outline {
-	visibility: hidden;
-}
-
-.precise.TaskShape.highlighted .outline {
-	visibility: visible;
-	stroke: black;
-	stroke-dasharray: 10,10;
-} */
 
 .precise.DependencyShape.highlighted .link-tools {
 	opacity: 1;
@@ -62,10 +58,8 @@ text {
 	cursor: pointer; 
 }
 
-.add-dependency .precise.TaskShape .outline {
-	visibility: visible;
-	fill: #ffff80;
-	stroke: none;
+.add-dependency .precise.TaskShape rect {
+	fill: #f1f1b8;
 }
 
 .add-precedence .precise.TaskShape.highlighted {

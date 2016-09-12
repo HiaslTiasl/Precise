@@ -33,7 +33,7 @@ define([
 			}
 			
 			var baseResource = preciseApi.fromBase(),
-				modelHref = model.link('self').href;
+				modelHref = preciseApi.linkTo(model).href;
 		
 			// Use 'search' method since projections are not exposed in associations
 			return $q.all({
@@ -69,7 +69,6 @@ define([
 			return {
 				id: TaskShape.toTaskID(task.id),
 				type: 'precise.TaskShape',
-				position: task.position,
 				data: task
 			};
 		}
@@ -78,10 +77,6 @@ define([
 			return {
 				id: DependencyShape.toDependencyID(dependency.id),
 				type: 'precise.DependencyShape',
-				source: { id: TaskShape.toTaskID(dependency.sourceID) },
-				target: { id: TaskShape.toTaskID(dependency.targetID) },
-				vertices: dependency.vertices,
-				//labels: []		// TODO check whether required
 				data: dependency
 			};
 		}

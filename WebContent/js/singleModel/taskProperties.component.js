@@ -7,56 +7,64 @@ define([
 ) {
 	'use strict';
 	
-	TaskPropertiesController.$inject = ['taskProperties'];
+	TaskPropertiesController.$inject = ['TaskResource'];
 	
-	function TaskPropertiesController(taskProperties) {
+	function TaskPropertiesController(TaskResource) {
 		var $ctrl = this;
 		
 		$ctrl.cancel = cancel;
 		$ctrl.addPattern = addPattern;
-		$ctrl.setGlobalExclusiveness = setGlobalExclusiveness;
-		$ctrl.setExclusiveness = setExclusiveness;
+		$ctrl.phaseChanged = phaseChanged;
+		$ctrl.globalExclusivenessChanged = globalExclusivenessChanged;
+		$ctrl.exclusivenessChanged = exclusivenessChanged;
 		$ctrl.showExclusiveness = showExclusiveness;
 		$ctrl.showOrder = showOrder;
 		$ctrl.removePattern = removePattern;
 		$ctrl.updatePattern = updatePattern;
-		$ctrl.updateTask = updateTask;
+		$ctrl.sendTask = sendTask;
 		$ctrl.isDisabledPatternEntry = isDisabledPatternEntry;
 		$ctrl.isDisabledOrderType = isDisabledOrderType;
-		$ctrl.orderTypes = taskProperties.getOrderTypes();
+		$ctrl.orderTypes = TaskResource.getOrderTypes();
 		
 		$ctrl.$onChanges = $onChanges;
-		
-		var taskResourceService;
 		
 		var getAttrName = _.property('name'),
 			exclParts,
 			orderParts;
 		
 		function $onChanges(changesObj) {
-			if (changesObj['resource']) {				
-				taskResourceService = taskProperties.ofResource($ctrl.resource);
-				taskResourceService.getData().then(function (data) {
-					$ctrl.data = data;
-				});
+			if ('resource' in changesObj) {
+				if (!$ctrl.resource.exists) {
+					$ctrl.resource.getPhases().then(function (phases) {
+						$ctrl.phases = phases;
+					});
+				}
 			}
 		}
 		
-		function setGlobalExclusiveness() {
-			if ($ctrl.data.globalExclusiveness)
-				util.limitArray($ctrl.data.exclusiveness, 0);
+		function phaseChanged() {
+			// Reset old list of task types first so they cannot be selected.
+			$ctrl.taskTypes = null;
+			$ctrl.resource.getTaskTypes($ctrl.phase).then(function (taskTypes) {
+				$ctrl.taskTypes = taskTypes;
+			});
 		}
 		
-		function setExclusiveness() {
-			$ctrl.data.globalExclusiveness = $ctrl.data.exclusiveness.length > 0;
+		function globalExclusivenessChanged() {
+			if ($ctrl.resource.task.globalExclusiveness)
+				util.limitArray($ctrl.resource.task.exclusiveness, 0);
+		}
+		
+		function exclusivenessChanged() {
+			$ctrl.resource.task.globalExclusiveness = $ctrl.resource.task.exclusiveness.length > 0;
 		}
 		
 		function showExclusiveness() {
-			if (!$ctrl.data)
+			if (!$ctrl.resource.task)
 				return undefined;
 			if (!exclParts)
 				exclParts = [];
-			util.mapInto(exclParts, $ctrl.data.exclusiveness, getAttrName);
+			util.mapInto(exclParts, $ctrl.resource.task.exclusiveness, getAttrName);
 			return exclParts.length ? exclParts.join(', ') : '(no attributes)';
 		}
 		
@@ -75,12 +83,12 @@ define([
 		}
 		
 		function showOrder() {
-			if (!$ctrl.data)
+			if (!$ctrl.resource.task)
 				return undefined;
 			if (!orderParts)
 				orderParts = [];
 			util.limitArray(orderParts, 0);
-			$ctrl.data.orderSpecifications.forEach(function (order) {
+			$ctrl.resource.task.orderSpecifications.forEach(function (order) {
 				var str = showOrderPart(order);
 				if (str != null)
 					orderParts.push(str);
@@ -89,27 +97,27 @@ define([
 		}
 		
 		function updatePattern(pattern, patternNum, attr, newValue) {
-			return taskResourceService.updatePattern(pattern, attr, newValue).then(function (checkedPattern) {
+			return $ctrl.resource.updatePattern(pattern, attr, newValue).then(function (checkedPattern) {
 				// Copy all properties from the checked pattern to the current one.
 				// N.B: In principle we could also just replace the whole pattern at once,
 				// but SmartTable does not notice that and the view is not updated.
 				// See https://github.com/lorenzofox3/Smart-Table/issues/205
-				_.assign($ctrl.data.locationPatterns[patternNum], checkedPattern.original());
+				_.assign($ctrl.resource.task.locationPatterns[patternNum], checkedPattern);
 			});
 		}
 		
 		function addPattern() {
-			return taskResourceService.globalPattern().then(function (checkedPattern) {
-				$ctrl.data.locationPatterns.push(checkedPattern.original());
+			return $ctrl.resource.globalPattern().then(function (checkedPattern) {
+				$ctrl.resource.task.locationPatterns.push(checkedPattern);
 			});
 		}
 		
 		function removePattern(index) {
-			$ctrl.data.locationPatterns.splice(index, 1);
+			$ctrl.resource.task.locationPatterns.splice(index, 1);
 		}
 		
-		function updateTask() {
-			return taskResourceService.updateTask($ctrl.data)
+		function sendTask() {
+			return $ctrl.resource.sendTask()
 				.then(function (result) {
 					$ctrl.done({ $result: result });
 				}, function (reason) {
@@ -122,7 +130,7 @@ define([
 		}
 		
 		function isDisabledOrderType(orderType, attribute) {
-			return !taskProperties.isAssignableTo(orderType, attribute);
+			return !TaskResource.isAssignableTo(orderType, attribute);
 		}
 		
 		function cancel() {

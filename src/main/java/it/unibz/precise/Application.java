@@ -14,10 +14,13 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import it.unibz.precise.model.Dependency;
+import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Task;
 import it.unibz.precise.model.projection.DependencySummaryProjection;
 import it.unibz.precise.model.projection.ExpandedTaskProjection;
+import it.unibz.precise.model.projection.PhaseSummaryProjection;
 import it.unibz.precise.rest.DependencyLinks;
+import it.unibz.precise.rest.PhaseLinks;
 import it.unibz.precise.rest.TaskLinks;
 
 @SpringBootApplication
@@ -28,6 +31,8 @@ public class Application extends SpringBootServletInitializer {
 	
 	@Autowired
 	private TaskLinks taskLinks;
+	@Autowired
+	private PhaseLinks phaseLinks;
 	@Autowired
 	private DependencyLinks dependencyLinks;
 
@@ -61,6 +66,24 @@ public class Application extends SpringBootServletInitializer {
 		return new ResourceProcessor<Resource<ExpandedTaskProjection>>() {
 			public Resource<ExpandedTaskProjection> process(Resource<ExpandedTaskProjection> resource) {
 				return taskLinks.withCustomLinks(resource, r -> r.getContent().getId());
+			}
+		};
+	}
+	
+	@Bean
+	public ResourceProcessor<Resource<Phase>> phaseProcessor() {
+		return new ResourceProcessor<Resource<Phase>>() {
+			public Resource<Phase> process(Resource<Phase> resource) {
+				return phaseLinks.withCustomLinks(resource, r -> r.getContent().getId());
+			}
+		};
+	}
+	
+	@Bean
+	public ResourceProcessor<Resource<PhaseSummaryProjection>> phaseSummaryProcessor() {
+		return new ResourceProcessor<Resource<PhaseSummaryProjection>>() {
+			public Resource<PhaseSummaryProjection> process(Resource<PhaseSummaryProjection> resource) {
+				return phaseLinks.withCustomLinks(resource, r -> r.getContent().getId());
 			}
 		};
 	}

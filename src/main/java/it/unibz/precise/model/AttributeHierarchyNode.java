@@ -117,14 +117,14 @@ public class AttributeHierarchyNode extends BaseEntity {
 	}
 	
 	public Map<String, PatternEntry> getPattern() {
-		return toPattern(this, level.getPhase());
+		return toPattern(this, level.getPhase().getAttributeHierarchyLevels());
 	}
 	
-	public static Map<String, PatternEntry> toPattern(AttributeHierarchyNode node, Phase phase) {
+	public static Map<String, PatternEntry> toPattern(AttributeHierarchyNode node, List<AttributeHierarchyLevel> levels) {
 		Map<String, PatternEntry> pattern = new LinkedHashMap<>();
 		if (node != null)
 			node.addAncestorsTo(pattern);
-		addWildcardsTo(pattern, phase.getAttributeHierarchyLevels());
+		addWildcardsTo(pattern, levels);
 		return pattern;
 	}
 	

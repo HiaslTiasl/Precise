@@ -2,21 +2,23 @@
 <a ui-sref="allModels">Exit</a>
 <div id="panels">
 	<div id="precise-diagram" precise-diagram model="$ctrl.model"></div>
-	<div id="properties" ng-switch on="$ctrl.viewType">
+	<div id="properties">
 		<h3>Properties</h3>
 		<task-properties
-			ng-switch-when="task"
-			resource="$ctrl.resource"
+			ng-if="$ctrl.taskResource"
+			resource="$ctrl.taskResource"
+			model="$ctrl.model"
 			done="$ctrl.done($result)"
 			cancelled="$ctrl.cancelled()">
 		</task-properties>
 		<dependency-properties
-			ng-switch-when="dependency"
-			resource="$ctrl.resource"
+			ng-if="$ctrl.dependencyResource"
+			resource="$ctrl.dependencyResource"
+			model="$ctrl.model"
 			done="$ctrl.done($result)"
 			cancelled="$ctrl.cancelled()">
 		</dependency-properties>
-		<div ng-switch-default>
+		<div ng-if="!$ctrl.activeResource">
 			Nothing selected.
 		</div>
 	</div>

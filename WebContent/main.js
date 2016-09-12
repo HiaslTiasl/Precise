@@ -1,7 +1,9 @@
 require.config({
 	baseUrl: 'js',
-	paths: {	// library paths
-		'jquery': './lib/jquery'			// jquery is a named module, so 'lib/jquery' does not work...
+	// Paths to named modules, where 'lib/<module>' does not work
+	paths: {	
+		'jquery': './lib/jquery',
+		'svg-pan-zoom': './lib/svg-pan-zoom'
 		//'lib/lodash': './lib/lodash.min'	// ... for production use
     },
     map: {

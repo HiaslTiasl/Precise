@@ -4,10 +4,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -29,11 +34,25 @@ public class Dependency extends BaseEntity {
 	@ManyToOne
 	private Task target;
 	
-	@ManyToMany
-	private List<Attribute> scope;
+	@Embedded
+	@AttributeOverrides({
+		@AttributeOverride(name="x", column=@Column(name="source_x")),
+		@AttributeOverride(name="y", column=@Column(name="source_y"))
+	})
+	private Position sourceVertex;
+
+	@Embedded
+	@AttributeOverrides({
+		@AttributeOverride(name="x", column=@Column(name="target_x")),
+		@AttributeOverride(name="y", column=@Column(name="target_y"))
+	})
+	private Position targetVertex;
 	
 	@ElementCollection
 	private List<Position> vertices;
+	
+	@ManyToMany
+	private List<Attribute> scope;
 	
 	private boolean globalScope;
 	
@@ -81,6 +100,30 @@ public class Dependency extends BaseEntity {
 	public void setChain(boolean chain) {
 		this.chain = chain;
 	}
+	
+	public List<Position> getVertices() {
+		return vertices;
+	}
+	
+	public void setVertices(List<Position> vertices) {
+		this.vertices = vertices;
+	}
+
+	public Position getSourceVertex() {
+		return sourceVertex;
+	}
+
+	public void setSourceVertex(Position sourceVertex) {
+		this.sourceVertex = sourceVertex;
+	}
+
+	public Position getTargetVertex() {
+		return targetVertex;
+	}
+
+	public void setTargetVertex(Position targetVertex) {
+		this.targetVertex = targetVertex;
+	}
 
 	public List<Attribute> getScope() {
 		return scope;
@@ -96,14 +139,6 @@ public class Dependency extends BaseEntity {
 
 	public void setGlobalScope(boolean globalScope) {
 		this.globalScope = globalScope;
-	}
-	
-	public List<Position> getVertices() {
-		return vertices;
-	}
-	
-	public void setVertices(List<Position> vertices) {
-		this.vertices = vertices;
 	}
 
 	public Model getModel() {
@@ -129,6 +164,18 @@ public class Dependency extends BaseEntity {
 	public List<Attribute> getAttributes() {
 		Stream<Attribute> sourceAttrs = attributesOf(source);
 		Stream<Attribute> targetAttrs = attributesOf(target);
-		return sourceAttrs.filter(targetAttrs.collect(Collectors.toSet())::contains).collect(Collectors.toList());
+		return (sourceAttrs == null ? targetAttrs
+			: targetAttrs == null ? sourceAttrs
+			: sourceAttrs.filter(targetAttrs.collect(Collectors.toSet())::contains)
+		).collect(Collectors.toList());
 	}
+	
+	@PrePersist
+	public void prePersist() {
+		if (source != null && sourceVertex != null)
+			sourceVertex = null;
+		if (target != null && targetVertex != null)
+			targetVertex = null;
+	}
+	
 }

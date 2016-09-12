@@ -1,4 +1,21 @@
 <div class="precise-diagram toolbar">
-	<button class="btn btn-default" ng-repeat="t in $ctrl.diagramToolset" ng-click="$ctrl.diaPaper.invokeTool(t)">{{::t.title}}</button>
+	<!--
+		Using a wrapper element since repeating on buttons directly
+		would eliminate whitespaces between them in the resulting markup
+		and therefore also in the view.
+	-->
+	<span ng-repeat="t in $ctrl.diagramToolset">
+		<button
+			class="btn btn-default"
+			ng-class="{'active': $ctrl.diaPaper.editMode === t.editMode}"
+			ng-click="$ctrl.diaPaper.invokeTool(t)"
+			ng-disabled="$ctrl.diaPaper.editMode !== t.editMode && !$ctrl.diaPaper.canInvokeTool(t)">
+			{{::t.title}}
+		</button>
+	</span>
+</div>
+<div class="zoom-options">
+	<span>{{100 * $ctrl.zoomScale | number:0}}%</span>
+	<a href ng-click="$ctrl.fitAndCenter()"><span class="glyphicon glyphicon-fullscreen"></span></a>
 </div>
 <div class="precise-diagram paper"></div>

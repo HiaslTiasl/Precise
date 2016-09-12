@@ -11,7 +11,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TaskLinks {
+public class PhaseLinks {
 	
 	@Autowired
 	private BasePathAwareLinks service;
@@ -20,7 +20,7 @@ public class TaskLinks {
 		long id = getID.apply(resource);
 		resource.add(
 			service.underBasePath(
-				linkTo(methodOn(CheckedPatternController.class).checkedPatternForTask(id, new HashMap<>()))
+				linkTo(methodOn(CheckedPatternController.class).checkedPatternForPhase(id, new HashMap<>()))
 			)
 			.withRel("checkedPattern")
 		);
