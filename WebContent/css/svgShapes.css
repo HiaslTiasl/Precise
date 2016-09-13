@@ -29,7 +29,15 @@ text {
  * Highlighting
  ******************************************/
 
-.precise.DependencyShape.highlighted .link-tools {
+/*
+ * Show all link tools on highlight rather than on hover,
+ * since hover does not make sense on touch devices.
+ */
+.precise.DependencyShape.highlighted .link-tools,
+.precise.DependencyShape.highlighted .marker-vertices,
+.precise.DependencyShape.highlighted .marker-vertex-remove,
+.precise.DependencyShape.highlighted .marker-vertex-remove-area,
+.precise.DependencyShape.highlighted .marker-arrowheads {
 	opacity: 1;
 }
 

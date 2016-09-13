@@ -1,4 +1,5 @@
 define([
+	'jquery',
 	'svg-pan-zoom',
 	'lib/lodash',
 	'lib/hammer',
@@ -8,6 +9,7 @@ define([
 	'shapes/DependencyShape'
 ],
 function (
+	$,
 	svgPanZoom,
 	_,
 	Hammer,
@@ -70,32 +72,60 @@ function (
 					contain: false,
 					center: false,
 					zoomScaleSensitivity: 0.1,
+					dblClickZoomEnabled: false,
 					panEnabled: false,
 					beforePan: beforePan,
 					onZoom: wrapInTimeout(onZoom),
 					// http://ariutta.github.io/svg-pan-zoom/demo/mobile.html
 					customEventsHandler: {
+						haltEventListeners: [/*'touchstart', 'touchend',*/ 'touchmove'/*, 'touchleave', 'touchcancel'*/],
 			        	init: function (options) {
 			        		var instance = options.instance,
+			        			initialScale = 1,
+			        			pannedX,
+			        			pannedY,
 				        		pinchCenter;
+			        		
+			        		function panBy(dx, dy) {
+			        			if (instance.isPanEnabled()) {
+			        				instance.panBy({ x: dx - pannedX, y: dy - pannedY });
+			        				pannedX = dx;
+			        				pannedY = dy;
+			        			}
+			        		}
+			        		
 			        		// Init Hammer
 			        		// Listen only for pointer and touch events
-			        		this.hammer = new Hammer.Manager(paper.svg, {
+			        		this.hammer = new Hammer.Manager(options.svgElement, {
 			        			inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
 			        		});
-			        		this.hammer.add(new Hammer.Pinch({ enable: true }));
+			        		this.hammer.add(new Hammer.Pinch());
+			        		this.hammer.add(new Hammer.Pan({ direction: Hammer.DIRECTION_ALL }));
+			        		this.hammer.add(new Hammer.Tap({ event: 'doubletap', taps: 2 }));
 			        		// Handle pinch
-			        		this.hammer.on('pinchstart pinchmove', function (ev) {
-			        			if (ev.type === 'pinchstart') {
-			        				pinchCenter = ev.center;
-			        				instance.disablePan();
-			        			}
-			        			instance.zoomAtPointBy(ev.scale, pinchCenter);
+			        		this.hammer.on('pinchstart', function (ev) {
+			        			initialScale = instance.getZoom();
+			        			pinchCenter = ev.center;
+			        		});
+			        		this.hammer.on('pinchmove', function (ev) {
+			        			instance.zoomAtPoint(initialScale * ev.scale, pinchCenter);
+			        		});
+			        		
+			        		this.hammer.on('panstart', function (ev) {
+			        			pannedX = 0;
+			        			pannedY = 0;
+			        			panBy(ev.deltaX, ev.deltaY);
+			        		});
+			        		this.hammer.on('panmove', function (ev) {
+			        			panBy(ev.deltaX, ev.deltaY);
+			        		});
+			        		this.hammer.on('doubletap', function (ev) {
+			        			paper.mousedblclick($.Event(ev.srcEvent));
 			        		});
 			        		// Prevent moving the page on some devices when panning over SVG
-			        		paper.svg.addEventListener('touchmove', function (e) {
-			        			e.preventDefault();
-			        		});
+//			        		options.svgElement.addEventListener('touchmove', function (e) {
+//			        			e.preventDefault();
+//			        		});
 			        	},
 			        	destroy: function() {
 			        		this.hammer.destroy();

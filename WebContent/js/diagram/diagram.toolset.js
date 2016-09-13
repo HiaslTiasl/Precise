@@ -15,7 +15,7 @@ define([
 		editMode: {
 			className: 'add-task',
 			listeners: {
-				'blank:pointerclick': function (event, x, y) {
+				'blank:pointerdown': function (event, x, y) {
 					this.trigger('task:new', {
 						position: { x: x, y: y }
 					});
@@ -52,7 +52,7 @@ define([
 						this.trigger('dependency:new', changedData);
 					}
 				},
-				'blank:pointerclick': function (event, x, y) {
+				'blank:pointerdown': function (event, x, y) {
 					var sourceView = this.selectedView;
 					if (sourceView && this.selectedNS === 'task') {
 						this.trigger('dependency:new', {

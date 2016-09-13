@@ -30,7 +30,7 @@ define([
 	var defaultEditMode = {
 		className: 'default-mode',
 		listeners: {
-			'blank:pointerclick': function () {
+			'blank:pointerdown': function () {
 				this.unselect();
 			}
 		}

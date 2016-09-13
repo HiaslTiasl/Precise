@@ -23,5 +23,14 @@
 <article id="page-main" class="container-fluid">
 	<ui-view></ui-view>
 </article>
+<!-- useful for debugging on mobile devices -->
+<!-- <pre id="console"></pre>
+<script src="js/lib/console.js"></script>
+<script>
+ConsoleJS.init({ selector: '#console' });
+window.onerror = function (err) {
+	console.error(err instanceof Error ? (err.name + '\n' + err.message + err.stack) : err);
+};
+</script> -->
 </body>
 </html>
