@@ -123,15 +123,15 @@ define([
 				changedNS;
 			switch (options.batchName) {
 			case 'vertices-change':
-				changedData = this.changedVerticesData(cell, data);
+				changedData = this.changedVerticesData(options, cell, data);
 				changedNS = NS_DEPENDENCY;
 				break;
 			case 'end-change':
-				changedData = this.changedEndData(cell, data);
+				changedData = this.changedEndData(options, cell, data);
 				changedNS = NS_DEPENDENCY;
 				break;
 			case 'position-change':
-				changedData = this.changedPositionData(cell, data);
+				changedData = this.changedPositionData(options, cell, data);
 				changedNS = NS_TASK;
 				break;
 			}
@@ -142,12 +142,12 @@ define([
 		}
 	};
 	
-	DiagramPaper.prototype.changedVerticesData = function (cell, data) {
+	DiagramPaper.prototype.changedVerticesData = function (options, cell, data) {
 		var vertices = cell.get('vertices');
 		return vertices === data.vertices ? null : { vertices: cell.get('vertices') };
 	},
 	
-	DiagramPaper.prototype.changedEndData = function (cell, data) {
+	DiagramPaper.prototype.changedEndData = function (options, cell, data) {
 		var changedData,
 			end = options.other.end,
 			endInfo = DependencyShape.endInfo[end],
@@ -172,7 +172,7 @@ define([
 		return changedData;
 	},
 	
-	DiagramPaper.prototype.changedPositionData = function (cell, data) {
+	DiagramPaper.prototype.changedPositionData = function (options, cell, data) {
 		var position = cell.get('position');
 		return position === data.position ? null : { position: position };
 	},
