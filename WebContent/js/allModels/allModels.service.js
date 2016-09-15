@@ -19,7 +19,7 @@ define([
 		
 		function importFile(file) {
 			return Upload.http({
-				url: '/files/' + file.name,
+				url: 'files/' + file.name,
 				method: 'PUT',
 				data: file,
 				headers: {

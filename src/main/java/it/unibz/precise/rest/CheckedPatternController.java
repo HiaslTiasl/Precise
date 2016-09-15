@@ -31,7 +31,7 @@ public class CheckedPatternController {
 			: new ResponseEntity<>(LocationPatterns.checkPattern(pattern, phase.getAttributeHierarchyLevels()), HttpStatus.OK);
 	}
 	
-	@RequestMapping(path="phases/{id}/checkedPattern", method=RequestMethod.PUT)
+	@RequestMapping(path="/phases/{id}/checkedPattern", method=RequestMethod.PUT)
 	public ResponseEntity<Map<String, PatternEntry>> checkedPatternForPhase(
 		@PathVariable("id") long id,
 		@RequestBody Map<String, PatternEntry> pattern)
@@ -39,7 +39,7 @@ public class CheckedPatternController {
 		return checkedPattern(phaseRepository.findOne(id), pattern);
 	}
 	
-	@RequestMapping(path="tasks/{id}/checkedPattern", method=RequestMethod.PUT)
+	@RequestMapping(path="/tasks/{id}/checkedPattern", method=RequestMethod.PUT)
 	public ResponseEntity<Map<String, PatternEntry>> checkedPatternForTask(
 			@PathVariable("id") long id,
 			@RequestBody Map<String, PatternEntry> pattern)

@@ -1,5 +1,7 @@
 package it.unibz.precise.rest.mdl.ast;
 
+import it.unibz.precise.model.Attribute;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -9,8 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator;
-
-import it.unibz.precise.model.Attribute;
 
 @JsonIdentityInfo(generator=PropertyGenerator.class, property="name", scope=MDLAttributeAST.class)
 @JsonIdentityReference(alwaysAsId=false)

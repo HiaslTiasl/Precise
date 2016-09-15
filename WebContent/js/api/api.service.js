@@ -15,7 +15,7 @@ define([
 		var getErrorMessage = _.property('message'),
 			getResponseData = _.property('data');
 		
-		this.baseUrl = baseUrl;
+		this.basePath = basePath;
 		this.linkTo = linkTo;
 		this.hrefTo = hrefTo;
 		this.from = from;
@@ -30,7 +30,7 @@ define([
 		this.asyncAlert = wrapAsync($window.alert, $window);
 		this.asyncConfirm = wrapAsync($window.confirm, $window, _.identity);
 		
-		var baseUrl = '/api';
+		var basePath = 'api';
 		
 		function linkTo(obj, rel, index) {
 			var r = rel || 'self',
@@ -50,7 +50,7 @@ define([
 		}
 		
 		function fromBase() {
-			return new RootResource(baseUrl);
+			return new RootResource(basePath);
 		}
 		
 		function continueFrom(res) {

@@ -21,7 +21,7 @@ public class DependencyAttributesController {
 	@Autowired
 	private DependencyRepository repository;
 	
-	@RequestMapping(path="dependencies/{id}/attributes", method=RequestMethod.GET)
+	@RequestMapping(path="/dependencies/{id}/attributes", method=RequestMethod.GET)
 	public ResponseEntity<Resources<PersistentEntityResource>> getAllowedAttributes(
 		@PathVariable("id") long id,
 		PersistentEntityResourceAssembler resourceAssembler)
