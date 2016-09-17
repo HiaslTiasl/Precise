@@ -1,12 +1,14 @@
 define([
 	'lib/lodash',
-	'lib/traverson-hal'
+	'lib/traverson-hal',
+	'util/util'
 ], function (
 	_,
-	JsonHalAdapter
+	JsonHalAdapter,
+	util
 ) {
 	
-	ApiService.$inject = ['$window', '$timeout', '$q', 'traverson']
+	ApiService.$inject = ['$window', '$timeout', '$q', 'traverson'];
 	
 	function ApiService($window, $timeout, $q, traverson) {
 		// register the traverson-hal plug-in for media type 'application/hal+json'
@@ -19,7 +21,7 @@ define([
 		this.linkTo = linkTo;
 		this.hrefTo = hrefTo;
 		this.from = from;
-		this.fromBase = fromBase;
+		this.fromBase = _.once(fromBase);
 		this.continueFrom = continueFrom;
 		this.resultOf = resultOf;
 		this.mapReason = mapReason;
@@ -46,19 +48,18 @@ define([
 		}
 		
 		function from(url) {
-			return new RootResource(url);
+			return new Request(url);
 		}
 		
 		function fromBase() {
-			return new RootResource(basePath);
+			return new Request(basePath);
 		}
 		
 		function continueFrom(res) {
-			return new RootResource(hrefTo(res));
+			return new Request(hrefTo(res));
 		}
 		
 		function resultOf(request) {
-			var promise = Array.isArray(request)
 			return request.result.then(resolveSuccess, mapReason(getResponseData));
 		}
 		
@@ -90,20 +91,26 @@ define([
 			return 200 <= status && status < 300;
 		}
 		
-		function RootResource(url) {
+		function Request(url) {
 			this.url = url;
 		}
 		
-		RootResource.prototype.traverse = function (callback) {
-			return resultOf(callback(createTraverson(this.url)));
-		};
-		
-		RootResource.prototype.followAndGet = function () {
-			var args = arguments
-			return this.traverse(function (builder) {
-				return builder.follow.apply(builder, args).get();
-			});
-		};
+		util.defineClass({
+			
+			constructor: Request,
+			
+			traverse: function (callback) {
+				return resultOf(callback(createTraverson(this.url)));
+			},
+			
+			followAndGet: function () {
+				var args = arguments;
+				return this.traverse(function (builder) {
+					return builder.follow.apply(builder, args).get();
+				});
+			}
+			
+		});
 		
 		function createTraverson(url) {
 			return traverson.from(url)

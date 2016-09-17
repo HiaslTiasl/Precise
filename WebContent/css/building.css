@@ -1,0 +1,42 @@
+.single-model-building .panels {
+	height: 100%;
+	position: relative;
+}
+
+#config-operations, #config-preview {
+	height: 100%;
+	position: absolute;
+}
+
+#config-preview {
+	left: 350px;
+	right: 0;
+}
+
+#config-operations {
+	left: 0;
+	top: 0;
+	width: 340px;
+	margin-right: 10px;
+	min-width: 200px;
+	/* border: thin solid #333; */
+	vertical-align: top;
+}
+
+/* Override json-formatter styles */
+
+/* Hide constructor names 'Object', 'Array' etc.*/
+.constructor-name {
+	display: none;
+}
+
+/* Hide root node */
+.json-formatter-row > a {
+	display: none;
+}
+
+/* Show all other nodes */
+.children > .json-formatter-row > a {
+	display: initial;
+}
+

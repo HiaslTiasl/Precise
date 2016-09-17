@@ -1,19 +1,40 @@
 define([
 	'lib/angular',
-	'./api.service',
-	'./TaskResource.factory',
-	'./DependencyResource.factory'
+	'./PreciseApi.service',
+	'./Files.service',
+	'./MDLFiles.service',
+	'./Pages.service',
+	'./Resources.service',
+	'./Models.service',
+	'./Tasks.service',
+	'./Phases.service',
+	'./Dependencies.service',
+	'./join.filter'
 ], function (
 	angular,
 	ApiService,
-	taskResourceFactory,
-	dependencyResourceFactory
+	FilesService,
+	MDLFilesService,
+	PagesService,
+	ResourcesService,
+	ModelsService,
+	TasksService,
+	PhasesService,
+	DependenciesService,
+	joinFilterFactory
 ) {
 	'use strict';
 	
 	return angular.module('precise.api', ['traverson'])
-		.service('preciseApi', ApiService)
-		.factory('TaskResource', taskResourceFactory)
-		.factory('DependencyResource', dependencyResourceFactory);
+		.service('PreciseApi', ApiService)
+		.service('Files', FilesService)
+		.service('MDLFiles', MDLFilesService)
+		.service('Pages', PagesService)
+		.service('Resources', ResourcesService)
+		.service('Models', ModelsService)
+		.service('Tasks', TasksService)
+		.service('Phases', PhasesService)
+		.service('Dependencies', DependenciesService)
+		.filter('join', joinFilterFactory);
 	
 });

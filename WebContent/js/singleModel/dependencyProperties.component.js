@@ -7,9 +7,9 @@ define([
 ) {
 	'use strict';
 	
-	DependencyPropertiesController.$inject = ['DependencyResource'];
+	DependencyPropertiesController.$inject = [];
 	
-	function DependencyPropertiesController(DependencyResource) {
+	function DependencyPropertiesController() {
 		var $ctrl = this;
 		
 		$ctrl.cancel = cancel;
@@ -30,25 +30,25 @@ define([
 		}
 		
 		function showScope() {
-			if (!$ctrl.resource.dependency)
+			if (!$ctrl.resource.data)
 				return undefined;
 			if (!scopeParts)
 				scopeParts = [];
-			util.mapInto(scopeParts, $ctrl.resource.dependency.scope, getAttrName);
+			util.mapInto(scopeParts, $ctrl.resource.data.scope, getAttrName);
 			return scopeParts.length ? scopeParts.join(', ') : '(no attributes)';
 		}
 		
 		function globalScopeChanged() {
-			if ($ctrl.resource.dependency.globalScope)
-				util.limitArray($ctrl.resource.dependency.scope, 0);
+			if ($ctrl.resource.data.globalScope)
+				util.limitArray($ctrl.resource.data.scope, 0);
 		}
 		
 		function scopeChanged() {
-			$ctrl.resource.dependency.globalScope = $ctrl.resource.dependency.scope.length > 0;
+			$ctrl.resource.data.globalScope = $ctrl.resource.data.scope.length > 0;
 		}
 		
 		function sendDependency() {
-			return $ctrl.resource.sendDependency()
+			return $ctrl.resource.send('dependencySummary')
 				.then(function (result) {
 					$ctrl.done({ $result: result });
 				}, function (reason) {
@@ -57,7 +57,7 @@ define([
 		}
 
 		function cancel() {
-			$ctrl.onCancel();
+			$ctrl.cancelled();
 		}
 	}
 	

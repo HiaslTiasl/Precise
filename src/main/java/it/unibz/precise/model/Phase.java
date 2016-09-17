@@ -23,7 +23,7 @@ public class Phase extends BaseEntity {
 	
 	private String description;
 	
-	@OneToMany(mappedBy="phase", cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="phase", cascade=CascadeType.ALL, orphanRemoval=true)
 	@OrderBy("position")
 	private List<AttributeHierarchyLevel> attributeHierarchyLevels = new ArrayList<>();
 	

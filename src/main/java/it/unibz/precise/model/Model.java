@@ -8,6 +8,9 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -81,6 +84,10 @@ public class Model extends BaseEntity {
 
 	public void setBuildingConfigured(boolean buildingConfigured) {
 		this.buildingConfigured = buildingConfigured;
+	}
+	
+	public void updateBuildingConfigured() {
+		buildingConfigured = phases.size() > 0 && attributes.size() > 0;
 	}
 
 	public List<Attribute> getAttributes() {
@@ -169,6 +176,13 @@ public class Model extends BaseEntity {
 	
 	public void addDependency(Dependency dependency) {
 		ModelToMany.DEPENDENCIES.addOneOfMany(this, dependency);
+	}
+	
+	@PostLoad
+	@PrePersist
+	@PreUpdate
+	public void updateDependentFields() {
+		updateBuildingConfigured();
 	}
 	
 }

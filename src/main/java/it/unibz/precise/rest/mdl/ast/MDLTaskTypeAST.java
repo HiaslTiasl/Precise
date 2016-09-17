@@ -23,7 +23,7 @@ public class MDLTaskTypeAST {
 	public MDLTaskTypeAST() {
 	}
 
-	public MDLTaskTypeAST(MDLFileAST context, TaskType taskType) {
+	public MDLTaskTypeAST(MDLFileContext context, TaskType taskType) {
 		this.taskType = taskType;
 		name = taskType.getName();
 		description = taskType.getDescription();

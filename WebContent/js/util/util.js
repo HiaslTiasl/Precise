@@ -65,11 +65,24 @@ define([
 		return -(low + 1);  // key not found.
 	}
 	
+	function defineClass(Parent, proto) {
+		if (!proto) {
+			proto = Parent;
+			Parent = Object;
+		}
+		var parentProto = typeof Parent === 'function'
+			? Parent.prototype
+			: Parent;
+		proto.constructor.prototype = _.create(parentProto, proto);
+		return proto.constructor;
+	}
+	
 	return {
 		limitArray: limitArray,
 		mapInto: mapInto,
 		strInsert: strInsert,
 		strInsertBefore: strInsertBefore,
 		set: set,
+		defineClass: defineClass
 	};
 });

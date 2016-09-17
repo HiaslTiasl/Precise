@@ -28,7 +28,7 @@ define([
 			'<path class="connection" stroke="black" d="M 0 0 0 0"/>',
 			'<path class="marker-source" fill="black" stroke="black" d="M 0 0 0 0"/>',
 			// An arrow marker
-			'<path class="marker-target" fill="black" stroke="black" d="m 0 10 l -24 10 l 24 10 z"/>',
+			'<path class="marker-target" fill="black" stroke="black" d="m 0 10 l -16 6 l 16 6 z"/>',
 			// the 'X' to indicate alternate precedences
 			'<path class="alt-cross" d="M 8 8 L -8 -8 M 8 -8 L -8 8"/>',
 			'<path class="connection-wrap" d="M 0 0 0 0"/>',
@@ -76,29 +76,6 @@ define([
 		
 		defaults: joint.util.deepSupplement({
 			type: 'precise.DependencyShape',
-//			attrs: {
-//				'.marker-target': {
-//					fill: 'black',
-//					'stroke-width': 1,
-//					d: ARROW_MARKER
-//				},
-//				'.marker-vertex': {
-//					r: 20,
-//				},
-//				'.marker-vertex-remove': {
-//					transform: 'scale(.8) translate(9.5, -37) scale(1.5) translate(7, -12)'
-//				},
-//				'.marker-vertex-remove-area': {
-//					transform: 'translate(5, -33) scale(1.5) translate(5, -10)'
-//				},
-//				'.tool-remove > circle': {
-//					r: 20
-//				},
-//				'.alt-cross': {
-//					'stroke': 'black',
-//					'stroke-width': 1
-//				}
-//			},
 		}, joint.dia.Link.prototype.defaults),
 		
 		initialize: function (options) {
@@ -133,27 +110,7 @@ define([
 					'stroke-width': data.chain ? 2 : 1
 				}
 			});
-		},
-		
-		localToRemoteEndpoints: function (data) {
-			var endpoints = {};
-			this.addRemoteEndpoint(endpoints, 'source', Array.prototype.unshift);
-			this.addRemoteEndpoint(endpoints, 'target', Array.prototype.push);
-			return endpoints;
-		},
-		
-		addRemoteEndpoint: function (endpoints, data, end, arrFn) {
-			var endVal = this.get(end);
-			if (endVal) {
-				if (endVal.id)
-					endpoints[end] = endVal;
-				else if (endVal.x || endVal.y) {
-					if (!endpoints.vertices)
-						endpoints.vertices = this.vertices ? this.vertices.slice() : [];
-					arrFn.call(endpoints.vertices, endVal);
-				}
-			}
-		},
+		}
 		
 	}, {
 		// Static properties
@@ -184,6 +141,7 @@ define([
 	
 	var defineFilter = _.once(function (paper, markup) {
 		joint.V(paper.defs).append(joint.V(markup));
+		console.log('defineFilter with markup: ' + markup);
 	});
 	
 	var intensify = [
@@ -242,7 +200,7 @@ define([
 		},
 		
 		addVertex: function (vertex) {
-			var opt = this.batchOptions['vertices-change']
+			var opt = this.batchOptions['vertices-change'];
 			this.model.trigger('batch:start', opt);
         	joint.dia.LinkView.prototype.addVertex.call(this, vertex);
         	this.model.trigger('batch:stop', opt);

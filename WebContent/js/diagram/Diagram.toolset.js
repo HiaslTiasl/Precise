@@ -49,12 +49,14 @@ define([
 							};
 						if (source === target)
 							changedData.vertices = DependencyShapeView.computeLoopVertices(sourceView);
+						this.resetEditMode();
 						this.trigger('dependency:new', changedData);
 					}
 				},
 				'blank:pointerdown': function (event, x, y) {
 					var sourceView = this.selectedView;
 					if (sourceView && this.selectedNS === 'task') {
+						this.resetEditMode();
 						this.trigger('dependency:new', {
 							source: sourceView.model.get('data'),
 							targetVertex: { x: x, y: y }

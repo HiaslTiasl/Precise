@@ -1,28 +1,40 @@
-<div class="toolbar">
-	<button class="btn btn-default" ng-click="$ctrl.createModel()">Create</button>
-	<button class="btn btn-default" ng-model="$ctrl.file" ngf-select="$ctrl.importFile($ctrl.file)">Import</button>
-	<span class="text-danger">{{$ctrl.fileErrorMsg}}</span>
+<nav class="navbar navbar-default navbar-fixed-top">
+	<div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<a class="navbar-brand" ui-sref="allModels">
+				Process Modelling
+			</a>
+		</div>
+	</div>
+</nav>
+<div class="container-fluid all-models">
+	<div class="toolbar">
+		<button class="btn btn-default" ng-click="$ctrl.createModel()">Create</button>
+		<button class="btn btn-default" ng-model="$ctrl.file" ngf-select="$ctrl.importFile($ctrl.file)">Import</button>
+		<span class="text-danger">{{$ctrl.fileErrorMsg}}</span>
+	</div>
+	<table id="all-models-table" class="table table-striped" st-table="$ctrl.coll" st-safe-src="$ctrl.models">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Description</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="m in $ctrl.coll">
+				<td>
+					<a href editable-text="m.name" onbeforesave="$ctrl.renameModel(m, $data)">{{m.name}}</a>
+				</td>
+				<td>{{m.description}}</td>
+				<td class="toolbar">
+					<a class="btn btn-default" ui-sref="singleModel.diagram({ name: m.name })">Open</a>
+					<a class="btn btn-default" ng-href="{{$ctrl.getFileURI(m)}}" target="_blank" download="{{$ctrl.getFileName(m)}}">Export</a>
+					<button class="btn btn-default" ng-click="$ctrl.duplicateModel(m)">Duplicate</button>
+					<button class="btn btn-default" ng-click="$ctrl.deleteModel(m)">Delete</button>
+				<td>
+			</tr>
+		</tbody>
+	</table>
 </div>
-<table id="all-models-table" class="table table-striped" st-table="$ctrl.coll" st-safe-src="$ctrl.models">
-	<thead>
-		<tr>
-			<th>Name</th>
-			<th>Description</th>
-			<th></th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr ng-repeat="m in $ctrl.coll">
-			<td>
-				<a href editable-text="m.name" onbeforesave="$ctrl.renameModel(m, $data)">{{m.name}}</a>
-			</td>
-			<td>{{m.description}}</td>
-			<td class="toolbar">
-				<a class="btn btn-default" ui-sref="singleModel({ name: m.name })">Open</a>
-				<a class="btn btn-default" ng-href="{{$ctrl.getFileURI(m)}}" target="_blank" download="{{$ctrl.getFileName(m)}}">Export</a>
-				<button class="btn btn-default" ng-click="$ctrl.duplicateModel(m)">Duplicate</button>
-				<button class="btn btn-default" ng-click="$ctrl.deleteModel(m)">Delete</button>
-			<td>
-		</tr>
-	</tbody>
-</table>

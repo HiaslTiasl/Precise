@@ -3,7 +3,7 @@
 		<label for="phase" class="col-sm-4 control-label">Phase</label>
 		<div class="col-sm-8">
 			<p ng-if="$ctrl.resource.exists" id="phase" class="form-control-static">
-				{{$ctrl.resource.task.type.phase.name}}
+				{{$ctrl.resource.data.type.phase.name}}
 			</p>
 			<select ng-if="!$ctrl.resource.exists"
 				id="phase"
@@ -19,12 +19,12 @@
 		<label for="type" class="col-sm-4 control-label">Task</label>
 		<div class="col-sm-8">
 			<p ng-if="$ctrl.resource.exists" id="type" class="form-control-static">
-				{{$ctrl.resource.task.type.name}}
+				{{$ctrl.resource.data.type.name}}
 			</p>
 			<select ng-if="!$ctrl.resource.exists"
 				id="type"
 				class="form-control"
-				ng-model="$ctrl.resource.task.type"
+				ng-model="$ctrl.resource.data.type"
 				ng-options="type as type.name for type in $ctrl.taskTypes"
 				ng-disabled="!$ctrl.taskTypes">
 				<option value="">-- Select a Task --</option>
@@ -34,7 +34,7 @@
 	<div class="form-group">
 		<label for="craft" class="col-sm-4 control-label">Craft</label>
 		<div class="col-sm-8">
-			<p id="craft" class="form-control-static">{{$ctrl.resource.task.type.craft}}</p>
+			<p id="craft" class="form-control-static">{{$ctrl.resource.data.type.craft}}</p>
 		</div>
 	</div>
 	<div class="form-group">
@@ -43,7 +43,7 @@
 			<input id="workers"
 				type="number"
 				class="form-control"
-				ng-model="$ctrl.resource.task.numberOfWorkersNeeded"/>
+				ng-model="$ctrl.resource.data.numberOfWorkersNeeded"/>
 		</div>
 	</div>
 	<div class="form-group">
@@ -53,7 +53,7 @@
 				type="number"
 				step="0.01"
 				class="form-control"
-				ng-model="$ctrl.resource.task.numberOfUnitsPerDay"/>
+				ng-model="$ctrl.resource.data.numberOfUnitsPerDay"/>
 		</div>
 	</div>
 	<div class="form-group">
@@ -61,15 +61,15 @@
 		<div class="col-sm-8">
 			<div class="checkbox">
 				<label>
-					<input type="checkbox" ng-model="$ctrl.resource.task.globalExclusiveness" ng-change="$ctrl.globalExclusivenessChanged()"> Global
+					<input type="checkbox" ng-model="$ctrl.resource.data.globalExclusiveness" ng-change="$ctrl.globalExclusivenessChanged()"> Global
 				</label>
 			</div>
 			<a href
-				editable-select="$ctrl.resource.task.exclusiveness"
+				editable-select="$ctrl.resource.data.exclusiveness"
 				e-multiple
-				e-ng-options="attr as attr.name for attr in $ctrl.resource.task.type.phase.attributes"
+				e-ng-options="attr as attr.name for attr in $ctrl.resource.data.type.phase.attributes"
 				e-ng-change="ctrl.exclusivenessChanged()"
-				ng-disabled="$ctrl.resource.task.globalExclusiveness">
+				ng-disabled="$ctrl.resource.data.globalExclusiveness">
 				{{ $ctrl.showExclusiveness() }}
 			</a>
 		</div>
@@ -84,7 +84,7 @@
 			</p>
 		</div>
 	</div>
-	<div class="form-group form-group-sm" ng-repeat="order in $ctrl.resource.task.orderSpecifications" ng-if="$ctrl.resource.exists" ng-show="$ctrl.showOrderForm">
+	<div class="form-group form-group-sm" ng-repeat="order in $ctrl.resource.data.orderSpecifications" ng-if="$ctrl.resource.exists" ng-show="$ctrl.showOrderForm">
 		<label for="attr-{{::order.attribute.name}}" class="col-sm-4 control-label">
 			{{::order.attribute.name}}
 		</label>
@@ -105,16 +105,16 @@
 			<span class="glyphicon glyphicon-plus"></span>
 		</a>
 	</div>
-	<table id="location-table" class="table table-striped" st-table="coll" st-safe-src="$ctrl.resource.task.locationPatterns">
+	<table id="location-table" class="table table-striped" st-table="coll" st-safe-src="$ctrl.resource.data.locationPatterns">
 		<thead>
 			<tr>
-				<th ng-repeat="attr in $ctrl.resource.task.type.phase.attributes">{{::attr.name}}</th>
+				<th ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">{{::attr.name}}</th>
 				<th></th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr ng-repeat="pattern in coll track by $index" ng-init="patternNum = $index">
-				<td ng-repeat="attr in $ctrl.resource.task.type.phase.attributes track by $index">
+				<td ng-repeat="attr in $ctrl.resource.data.type.phase.attributes track by $index">
 					<a href
 						editable-select="pattern[attr.name].value"
 						e-ng-options="value for value in pattern[attr.name].allowedValues"
@@ -136,7 +136,7 @@
 <div class="text-right">
 	<button class="btn btn-primary"
 		ng-click="$ctrl.sendTask()"
-		ng-disabled="$ctrl.mode === 'add' && !$ctrl.resource.task.type">
+		ng-disabled="$ctrl.mode === 'add' && !$ctrl.resource.data.type">
 		Done
 	</button>
 	<button class="btn btn-default" ng-click="$ctrl.cancel()">Cancel</button>

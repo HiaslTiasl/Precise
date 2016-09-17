@@ -7,12 +7,12 @@ define([
 ) {
 	'use strict';
 	
-	DiagramController.$inject = ['$scope', '$rootScope', '$timeout', 'preciseApi', 'preciseDiagram', 'diagramToolset'];
+	DiagramController.$inject = ['$scope', '$rootScope', '$timeout', 'PreciseApi', 'PreciseDiagram', 'DiagramToolset'];
 	
-	function DiagramController($scope, $rootScope, $timeout, preciseApi, preciseDiagram, diagramToolset) {
+	function DiagramController($scope, $rootScope, $timeout, PreciseApi, PreciseDiagram, DiagramToolset) {
 		var $ctrl = this;
 		
-		$ctrl.diagramToolset = diagramToolset;
+		$ctrl.diagramToolset = DiagramToolset;
 		$ctrl.onPaperInit = onPaperInit;
 		
 		// remote -> diagram
@@ -34,7 +34,7 @@ define([
 		function onPaperInit(paper) {
 			$ctrl.diaPaper = new DiagramPaper(paper);
 			$ctrl.diaPaper.on('all', broadcast);
-			preciseDiagram.toRawGraph($ctrl.model, paper.getArea()).then(function (rawGraph) {
+			PreciseDiagram.toRawGraph($ctrl.model, paper.getArea()).then(function (rawGraph) {
 				$ctrl.diaPaper.fromJSON(rawGraph);
 			});
 		}
@@ -56,7 +56,7 @@ define([
 		}
 		
 		function onDiagramRemove(event, type, data) {
-			preciseApi.deleteResource(data)['catch'](function () {
+			PreciseApi.deleteResource(data)['catch'](function () {
 				$ctrl.diaPaper.addCell(type, data);
 			});
 		}

@@ -13,13 +13,13 @@ define([
 ) {
 	'use strict';
 	
-	DiagramService.$inject = ['$q', 'preciseApi'];
+	DiagramService.$inject = ['$q', 'PreciseApi', 'Pages'];
 	
-	function DiagramService($q, preciseApi) {
+	function DiagramService($q, PreciseApi, Pages) {
 		
 		this.toRawGraph = toRawGraph;
 		
-		function toRawGraph(model, bbox) {
+		function toRawGraph(modelResource, bbox) {
 			
 			var randomBBox = _.defaults({
 				width: bbox.width - TaskShape.WIDTH,
@@ -32,31 +32,35 @@ define([
 				return task;
 			}
 			
-			var baseResource = preciseApi.fromBase(),
-				modelHref = preciseApi.linkTo(model).href;
+//			var baseResource = PreciseApi.fromBase(),
+//				modelHref = PreciseApi.linkTo(modelResource).href;
 		
 			// Use 'search' method since projections are not exposed in associations
 			return $q.all({
-				tasks: baseResource
-					.traverse(function (builder) {
-						return builder.follow('tasks', 'search', 'findByModel', 'tasks[$all]')
-							.withTemplateParameters({
-								model: modelHref,
-								projection: 'expandedTask'
-							})
-							.get();
-					})
+//				tasks: baseResource
+//					.traverse(function (builder) {
+//						return builder.follow('tasks', 'search', 'findByModel', 'tasks[$all]')
+//							.withTemplateParameters({
+//								model: modelHref,
+//								projection: 'expandedTask'
+//							})
+//							.get();
+//					})
+				tasks: modelResource.getTasks({ projection: 'expandedTask' })
+					.then(Pages.collectRemaining)
 					.then(mapArrUsing(_.flow(taskToCell, checkPosition))),
-				dependencies: baseResource
-					.traverse(function (builder) {
-						return builder
-							.follow('dependencies', 'search', 'findByModel', 'dependencies[$all]')
-							.withTemplateParameters({
-								model: modelHref,
-								projection: 'dependencySummary'
-							})
-							.get()
-					})
+//				dependencies: baseResource
+//					.traverse(function (builder) {
+//						return builder
+//							.follow('dependencies', 'search', 'findByModel', 'dependencies[$all]')
+//							.withTemplateParameters({
+//								model: modelHref,
+//								projection: 'dependencySummary'
+//							})
+//							.get()
+//					})
+				dependencies: modelResource.getDependencies({ projection: 'dependencySummary' })
+					.then(Pages.collectRemaining)
 					.then(mapArrUsing(dependencyToCell))
 			}).then(function (cells) {
 				return {

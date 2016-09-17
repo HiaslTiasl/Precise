@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelController.$inject = ['$scope', 'model', 'preciseApi', 'singleModel', 'TaskResource', 'DependencyResource'];
+	SingleModelDiagramController.$inject = ['$scope', 'model', 'PreciseApi', 'SingleModel', 'Tasks', 'Dependencies'];
 	
-	function SingleModelController($scope, model, preciseApi, singleModel, TaskResource, DependencyResource) {
+	function SingleModelDiagramController($scope, model, PreciseApi, SingleModel, Tasks, Dependencies) {
 		
 		var $ctrl = this;
 		
@@ -25,10 +25,10 @@ define([
 		$scope.$on('dependency:change', diagramDependencyChangeHandler);
 		
 		function diagramTaskChangeHandler(event, data) {
-			TaskResource
-				.ofExisting($ctrl.model, data)
+			Tasks
+				.existingResource($ctrl.model, data)
 				.then(function (resource) {
-					return resource.sendTask();
+					return resource.send('expandedTask');
 				})
 				.then(function (task) {
 					$scope.$broadcast('properties:change', 'task', task);
@@ -36,10 +36,10 @@ define([
 		}
 		
 		function diagramDependencyChangeHandler(event, data) {
-			DependencyResource
-				.ofExisting($ctrl.model, data)
+			Dependencies
+				.existingResource($ctrl.model, data)
 				.then(function (resource) {
-					return resource.sendDependency();
+					return resource.send('dependencySummary');
 				})
 				.then(function (dependency) {
 					$scope.$broadcast('properties:change', 'dependency', dependency);
@@ -47,15 +47,15 @@ define([
 		}
 		
 		function deleteCell(event, type, data) {
-			preciseApi.deleteResource(data)
+			PreciseApi.deleteResource(data)
 				.then(function () {
 					$scope.$broadcast('cell:deleted', type, data);
 				});
 		}
 		
 		function newTaskHandler(event, data) {
-			TaskResource
-				.ofNew($ctrl.model, data)
+			Tasks
+				.newResource($ctrl.model, data)
 				.then(function (resource) {
 					$ctrl.resourceType = 'task';
 					$ctrl.activeResource = $ctrl.taskResource = resource;
@@ -64,10 +64,10 @@ define([
 		}
 		
 		function newDependencyHandler(event, data) {
-			DependencyResource
-				.ofNew($ctrl.model, data)
+			Dependencies
+				.newResource($ctrl.model, data)
 				.then(function (resource) {
-					return resource.sendDependency();
+					return resource.send('dependencySummary');
 				})
 				.then(function (dependency) {
 					$scope.$broadcast('properties:created', 'dependency', dependency);
@@ -82,7 +82,7 @@ define([
 				$ctrl.resourceType = null;
 			}
 			else {
-				TaskResource.ofExisting($ctrl.model, data).then(function (res) {
+				Tasks.existingResource($ctrl.model, data).then(function (res) {
 					$ctrl.resourceType = 'task';
 					$ctrl.activeResource = $ctrl.taskResource = res;
 					$ctrl.dependencyResource = null;
@@ -97,7 +97,7 @@ define([
 				$ctrl.resourceType = null;
 			}
 			else {
-				DependencyResource.ofExisting($ctrl.model, data).then(function (res) {
+				Dependencies.existingResource($ctrl.model, data).then(function (res) {
 					$ctrl.resourceType = 'dependency';
 					$ctrl.activeResource = $ctrl.dependencyResource = res;
 					$ctrl.taskResource = null;
@@ -117,5 +117,5 @@ define([
 		}
 	}
 	
-	return SingleModelController;
+	return SingleModelDiagramController;
 });

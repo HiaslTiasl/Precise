@@ -39,5 +39,15 @@ public class MapBidirection<Key, One, OneOfMany, Many extends Map<Key, OneOfMany
 	protected boolean containsImpl(Many many, OneOfMany oneOfMany) {
 		return many != null && many.containsKey(getKey.apply(oneOfMany));
 	}
+	
+	@Override
+	protected void clear(Many many) {
+		many.clear();
+	}
+
+	@Override
+	protected void addAll(Many many, Many more) {
+		many.putAll(more);
+	}
 
 }

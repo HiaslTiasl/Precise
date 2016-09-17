@@ -27,7 +27,7 @@ public class MDLAttributeAST {
 	public MDLAttributeAST() {
 	}
 
-	public MDLAttributeAST(MDLFileAST context, Attribute attribute) {
+	public MDLAttributeAST(MDLFileContext context, Attribute attribute) {
 		this.attribute = attribute;
 		List<String> range = attribute.getRange();
 		name = attribute.getName();

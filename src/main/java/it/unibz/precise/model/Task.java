@@ -46,12 +46,6 @@ public class Task extends BaseEntity {
 	private float numberOfUnitsPerDay;
 	
 	private boolean globalExclusiveness;
-	
-	@PostLoad
-	public void postLoad() {
-		updateLocationPatterns();
-		updateOrderSpecifications();
-	}
 
 	@ManyToOne
 	private Model model;
@@ -186,6 +180,12 @@ public class Task extends BaseEntity {
 
 	void internalSetModel(Model model) {
 		this.model = model;
+	}
+	
+	@PostLoad
+	public void updateDependentFields() {
+		updateLocationPatterns();
+		updateOrderSpecifications();
 	}
 	
 }

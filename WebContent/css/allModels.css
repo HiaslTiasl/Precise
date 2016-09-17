@@ -1,3 +1,10 @@
+nav + .container-fluid {
+	margin-top: 50px;
+}
+
+.all-models .toolbar {
+	margin-top: 10px;
+}
 
 #all-models-table th,
 #all-models-table td {

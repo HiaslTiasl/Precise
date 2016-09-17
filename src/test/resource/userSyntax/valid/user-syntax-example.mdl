@@ -33,7 +33,7 @@
 	],
 	"phases": [
 		{
-			"name": "Scaffolding",
+			"name": "Skeleton",
 			"attributes": ["sector", "level"],
 			"valueTree": {
 				"A": [
@@ -105,12 +105,12 @@
 	"taskTypes": [
 		{
 			"name": "Construction Site Preparation",
-			"phase": "Scaffolding",
+			"phase": "Skeleton",
 			"craft": "SE"
 		},
 		{
 			"name": "Excavation",
-			"phase": "Scaffolding",
+			"phase": "Skeleton",
 			"craft": "Di"
 		},
 		{
@@ -130,12 +130,12 @@
 		},
 		{
 			"name": "Fill Excavation",
-			"phase": "Scaffolding",
+			"phase": "Skeleton",
 			"craft": "Di"
 		},
 		{
-			"name": "Scaffolding Installation",
-			"phase": "Scaffolding",
+			"name": "Skeleton Installation",
+			"phase": "Skeleton",
 			"craft": "Sc"
 		},
 		{
@@ -239,7 +239,7 @@
 		},
 		{
 			"id": 7,
-			"type": "Scaffolding Installation",
+			"type": "Skeleton Installation",
 			"numberOfWorkersNeeded": 4,
 			"numberOfUnitsPerDay": 0.333,
 			"order": {

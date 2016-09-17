@@ -1,11 +1,26 @@
 
-#panels {
-	height: 100%;
-	position: relative;
+nav {
+	height: 50px;
 }
 
-#precise-diagram, #properties {
+.navbar-fixed-top + ui-view {
+	position: absolute;
+	top: 60px;
+	right: 0;
+	bottom: 10px;
+	left: 0;
+	margin: 0;
+}
+
+.single-model-diagram,
+.single-model-diagram .panels,
+#precise-diagram,
+#properties {
 	height: 100%;
+}
+
+.single-model-diagram .panels {
+	position: relative;
 }
 
 #precise-diagram {

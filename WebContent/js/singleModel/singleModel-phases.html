@@ -1,0 +1,19 @@
+<div class="toolbar">
+	<button class="btn btn-default" ng-click="$ctrl.createPhase()">Create</button>
+	<span class="text-danger">{{$ctrl.fileErrorMsg}}</span>
+</div>
+<table id="phase-table" class="table table-striped" st-table="$ctrl.coll" st-safe-src="$ctrl.phases">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="p in $ctrl.coll">
+			<td>{{p.name}}</td>
+			<td>{{p.description}}</td>
+			<td>
+		</tr>
+	</tbody>
+</table>

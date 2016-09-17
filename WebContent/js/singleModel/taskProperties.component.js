@@ -7,9 +7,9 @@ define([
 ) {
 	'use strict';
 	
-	TaskPropertiesController.$inject = ['TaskResource'];
+	TaskPropertiesController.$inject = ['Tasks', 'Phases', 'Pages'];
 	
-	function TaskPropertiesController(TaskResource) {
+	function TaskPropertiesController(Tasks, Phases, Pages) {
 		var $ctrl = this;
 		
 		$ctrl.cancel = cancel;
@@ -24,7 +24,7 @@ define([
 		$ctrl.sendTask = sendTask;
 		$ctrl.isDisabledPatternEntry = isDisabledPatternEntry;
 		$ctrl.isDisabledOrderType = isDisabledOrderType;
-		$ctrl.orderTypes = TaskResource.getOrderTypes();
+		$ctrl.orderTypes = Tasks.getOrderTypes();
 		
 		$ctrl.$onChanges = $onChanges;
 		
@@ -33,38 +33,40 @@ define([
 			orderParts;
 		
 		function $onChanges(changesObj) {
-			if ('resource' in changesObj) {
-				if (!$ctrl.resource.exists) {
-					$ctrl.resource.getPhases().then(function (phases) {
+			if ('resource' in changesObj && !$ctrl.resource.exists) {
+				$ctrl.resource.model.getPhases()
+					.then(Pages.collectRemaining)
+					.then(function (phases) {
 						$ctrl.phases = phases;
 					});
-				}
 			}
 		}
 		
 		function phaseChanged() {
 			// Reset old list of task types first so they cannot be selected.
 			$ctrl.taskTypes = null;
-			$ctrl.resource.getTaskTypes($ctrl.phase).then(function (taskTypes) {
-				$ctrl.taskTypes = taskTypes;
-			});
+			Phases.existingResource($ctrl.model, $ctrl.phase).getTaskTypes()
+				.then(Pages.collectRemaining)
+				.then(function (taskTypes) {
+					$ctrl.taskTypes = taskTypes;
+				});
 		}
 		
 		function globalExclusivenessChanged() {
-			if ($ctrl.resource.task.globalExclusiveness)
-				util.limitArray($ctrl.resource.task.exclusiveness, 0);
+			if ($ctrl.resource.data.globalExclusiveness)
+				util.limitArray($ctrl.resource.data.exclusiveness, 0);
 		}
 		
 		function exclusivenessChanged() {
-			$ctrl.resource.task.globalExclusiveness = $ctrl.resource.task.exclusiveness.length > 0;
+			$ctrl.resource.data.globalExclusiveness = $ctrl.resource.data.exclusiveness.length > 0;
 		}
 		
 		function showExclusiveness() {
-			if (!$ctrl.resource.task)
+			if (!$ctrl.resource.data)
 				return undefined;
 			if (!exclParts)
 				exclParts = [];
-			util.mapInto(exclParts, $ctrl.resource.task.exclusiveness, getAttrName);
+			util.mapInto(exclParts, $ctrl.resource.data.exclusiveness, getAttrName);
 			return exclParts.length ? exclParts.join(', ') : '(no attributes)';
 		}
 		
@@ -83,12 +85,12 @@ define([
 		}
 		
 		function showOrder() {
-			if (!$ctrl.resource.task)
+			if (!$ctrl.resource.data)
 				return undefined;
 			if (!orderParts)
 				orderParts = [];
 			util.limitArray(orderParts, 0);
-			$ctrl.resource.task.orderSpecifications.forEach(function (order) {
+			$ctrl.resource.data.orderSpecifications.forEach(function (order) {
 				var str = showOrderPart(order);
 				if (str != null)
 					orderParts.push(str);
@@ -102,22 +104,22 @@ define([
 				// N.B: In principle we could also just replace the whole pattern at once,
 				// but SmartTable does not notice that and the view is not updated.
 				// See https://github.com/lorenzofox3/Smart-Table/issues/205
-				_.assign($ctrl.resource.task.locationPatterns[patternNum], checkedPattern);
+				_.assign($ctrl.resource.data.locationPatterns[patternNum], checkedPattern);
 			});
 		}
 		
 		function addPattern() {
 			return $ctrl.resource.globalPattern().then(function (checkedPattern) {
-				$ctrl.resource.task.locationPatterns.push(checkedPattern);
+				$ctrl.resource.data.locationPatterns.push(checkedPattern);
 			});
 		}
 		
 		function removePattern(index) {
-			$ctrl.resource.task.locationPatterns.splice(index, 1);
+			$ctrl.resource.data.locationPatterns.splice(index, 1);
 		}
 		
 		function sendTask() {
-			return $ctrl.resource.sendTask()
+			return $ctrl.resource.send('expandedTask')
 				.then(function (result) {
 					$ctrl.done({ $result: result });
 				}, function (reason) {
@@ -130,7 +132,7 @@ define([
 		}
 		
 		function isDisabledOrderType(orderType, attribute) {
-			return !TaskResource.isAssignableTo(orderType, attribute);
+			return !Tasks.isAssignableTo(orderType, attribute);
 		}
 		
 		function cancel() {

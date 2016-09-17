@@ -23,6 +23,7 @@ require.config({
     		exports: 'angular'
     	},
     	'lib/angular-ui-router': ['lib/angular'],
+    	'lib/ui-bootstrap': ['lib/angular'],
     	'lib/traverson-angular': ['lib/angular'],
     	'lib/smart-table': ['lib/angular'],
     	'lib/ng-file-upload': {
@@ -30,7 +31,8 @@ require.config({
     		exports: 'ngFileUpload'
     	},
     	'lib/xeditable': ['lib/angular'],
-    	'lib/select': ['lib/angular']
+//    	'lib/select': ['lib/angular'],
+    	'lib/json-formatter': ['lib/angular']
     }
 });
 

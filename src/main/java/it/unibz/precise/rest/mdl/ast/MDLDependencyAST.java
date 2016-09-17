@@ -25,7 +25,7 @@ public class MDLDependencyAST {
 	public MDLDependencyAST() {
 	}
 	
-	public MDLDependencyAST(MDLFileAST context, Dependency dependency) {
+	public MDLDependencyAST(MDLFileContext context, Dependency dependency) {
 		this.dependency = dependency;
 		alternate = dependency.isAlternate();
 		chain = dependency.isChain();

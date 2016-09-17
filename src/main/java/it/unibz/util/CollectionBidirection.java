@@ -35,5 +35,15 @@ public class CollectionBidirection<One, OneOfMany, Many extends Collection<OneOf
 	protected boolean containsImpl(Many many, OneOfMany oneOfMany) {
 		return many != null && many.contains(oneOfMany);
 	}
+	
+	@Override
+	protected void clear(Many many) {
+		many.clear();
+	}
+
+	@Override
+	protected void addAll(Many many, Many more) {
+		many.addAll(more);
+	}
 
 }

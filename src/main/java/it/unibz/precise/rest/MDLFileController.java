@@ -32,7 +32,7 @@ public class MDLFileController {
 	@Autowired
 	private Validator validator;
 	
-	public static final String RESOURCE_NAME = "files";
+	public static final String RESOURCE_NAME = "/files";
 	
 	@RequestMapping(
 		path="/{name}.mdl",

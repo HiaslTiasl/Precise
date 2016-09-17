@@ -18,11 +18,12 @@
 	top: 3em;
 	bottom: 0;
 	width: 100%;
-	border: thin solid #333;
-	/* overflow: scroll; */
+	/* top: 10px;
+	right: 10px;
+	bottom: 10px;
+	left: 10px; */
+	border: thin solid #aaa;
+	background-color: white;
+	box-shadow: 1px 1px 4px 1px #888;
 }
 
-.precise-diagram.paper + .split-pane-divider {
-	right: 300px;
-	width: 5px;
-}

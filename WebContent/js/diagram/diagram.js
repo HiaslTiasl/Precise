@@ -1,9 +1,9 @@
 define([
 	'lib/angular',
 	'api/api',
-	'./diagram.toolset',
-	'./diagram.service',
-	'./diagram.controller',
+	'./Diagram.toolset',
+	'./Diagram.service',
+	'./Diagram.controller',
 	'./diagram.directive',
 	'lib/traverson-angular'
 ], function (
@@ -17,8 +17,8 @@ define([
 	'use strict';
 	
 	return angular.module('precise.diagram', [api.name])
-		.constant('diagramToolset', diagramToolset)
-		.service('preciseDiagram', DiagramService)
+		.constant('DiagramToolset', diagramToolset)
+		.service('PreciseDiagram', DiagramService)
 		.controller('DiagramController', DiagramController)
 		.directive('preciseDiagram', diagramDirective);
 	

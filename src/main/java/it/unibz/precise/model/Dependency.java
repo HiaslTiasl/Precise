@@ -12,7 +12,9 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -116,6 +118,11 @@ public class Dependency extends BaseEntity {
 	public void setSourceVertex(Position sourceVertex) {
 		this.sourceVertex = sourceVertex;
 	}
+	
+	public void updateSourceVertex() {
+		if (source != null && sourceVertex != null)
+			sourceVertex = null;
+	}
 
 	public Position getTargetVertex() {
 		return targetVertex;
@@ -123,6 +130,11 @@ public class Dependency extends BaseEntity {
 
 	public void setTargetVertex(Position targetVertex) {
 		this.targetVertex = targetVertex;
+	}
+	
+	public void updateTargetVertex() {
+		if (target != null && targetVertex != null)
+			targetVertex = null;
 	}
 
 	public List<Attribute> getScope() {
@@ -139,6 +151,10 @@ public class Dependency extends BaseEntity {
 
 	public void setGlobalScope(boolean globalScope) {
 		this.globalScope = globalScope;
+	}
+	
+	public void updateGlobalScope() {
+		globalScope = scope == null || scope.size() == 0;
 	}
 
 	public Model getModel() {
@@ -170,12 +186,13 @@ public class Dependency extends BaseEntity {
 		).collect(Collectors.toList());
 	}
 	
+	@PostLoad
 	@PrePersist
-	public void prePersist() {
-		if (source != null && sourceVertex != null)
-			sourceVertex = null;
-		if (target != null && targetVertex != null)
-			targetVertex = null;
+	@PreUpdate
+	public void updateDependentFields() {
+		updateSourceVertex();
+		updateTargetVertex();
+		updateGlobalScope();
 	}
 	
 }

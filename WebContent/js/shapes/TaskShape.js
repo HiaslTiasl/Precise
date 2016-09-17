@@ -207,7 +207,7 @@ define([
 				// Remove shapes that have been removed
 				for (var i = actualLocationCount; i < renderedLocationCount; i++) {
 					this.rotatableNode.find('.loc-num-' + i).forEach(function (vShape) {
-						vShape.remove()
+						vShape.remove();
 					});
 				}
 			}

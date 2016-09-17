@@ -2,8 +2,9 @@ define([
 	'lib/angular',
 	'api/api',
 	'singleModel/singleModel',
-	'./allModels.service',
-	'./allModels.controller',
+	'./AllModels.service',
+	'./AllModels.controller',
+	'./AllModelsCreateDialog.controller',
 	'./allModels.run',
 	'lib/smart-table',
 	'lib/ng-file-upload',
@@ -14,13 +15,15 @@ define([
 	singleModel,
 	AllModelsService,
 	AllModelsController,
+	AllModelsCreateDialogController,
 	runner
 ) {
 	'use strict';
 	
 	return angular.module('precise.allModels', ['smart-table', 'ngFileUpload', 'xeditable', api.name, singleModel.name])
-		.service('allModels', AllModelsService)
+		.service('AllModels', AllModelsService)
 		.controller('AllModelsController', AllModelsController)
+		.controller('AllModelsCreateDialogController', AllModelsCreateDialogController)
 		.run(runner);
 	
 });

@@ -19,6 +19,23 @@ text {
 	opacity: initial;
 }
 
+.connection-wrap {
+	stroke-width: 24;
+	cursor: pointer;
+}
+
+.marker-vertices,
+.link-tools {
+   display: none;
+}
+
+/* For marker arrowheads, display: none causes problems*/
+.marker-arrowheads,
+.link:hover .marker-arrowheads {
+	opacity: 0;
+	pointer-events: none;
+}
+
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
 	.highlighted {
 		outline: none;
@@ -38,20 +55,14 @@ text {
 .precise.DependencyShape.highlighted .marker-vertex-remove,
 .precise.DependencyShape.highlighted .marker-vertex-remove-area,
 .precise.DependencyShape.highlighted .marker-arrowheads {
+	display: inline;
 	opacity: 1;
+	pointer-events: auto;
 }
 
 .precise.DependencyShape.highlighted .connection-wrap {
 	opacity: .4;
 	stroke-opacity: .4;
-}
-
-.precise.LocationShape {
-	pointer-events: none;
-}
-
-.precise.LocationShape.highlightable {
-	pointer-events: visible;
 }
 
 /******************************************

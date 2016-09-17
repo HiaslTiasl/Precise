@@ -1,37 +1,48 @@
-define(function () {
+define([
+], function (
+) {
 	'use strict';
 	
-	resolveAllModels.$inject = ['allModels'];
+	resolveAllModels.$inject = ['AllModels'];
 	
-	function resolveAllModels(allModels) {
-		return allModels.getModels();
+	function resolveAllModels(AllModels) {
+		return AllModels.getModels();
 	}
 	
-	resolveSingleModel.$inject = ['$stateParams', '$state', 'singleModel'];
+	resolveSingleModel.$inject = ['$stateParams', '$state', 'SingleModel'];
 	
-	function resolveSingleModel($stateParams, $state, singleModel) {
-		return singleModel.findByName($stateParams.name)
+	function resolveSingleModel($stateParams, $state, SingleModel) {
+		return SingleModel.findByName($stateParams.name)
 			['catch'](function () {
 				$state.go('allModels');
 			});
 	}
 	
-	onEnterSingleModel.$inject = ['$window', '$timeout', '$q', 'model'];
+	resolvePhases.$inject = ['model', 'Pages'];
 	
-	function onEnterSingleModel($window, $timeout, $q, model) {
-		return $q(function (resolve, reject) {
-			$timeout(function () {
-				var okToEnter = $window.confirm([
-					'enter model ' + model.name + ':',
-					'building ' + model.buildingConfigured ? 'configured' : 'not configured'
-				].join('\n'));
-				
-				if (okToEnter)
-					resolve();
-				else
-					reject();
-			});
-		});
+	function resolvePhases(model, Pages) {
+		return model.getPhases()
+			.then(Pages.collectRemaining);
+	}
+
+	resolveTaskTypes.$inject = ['model', 'Pages'];
+	
+	function resolveTaskTypes(model, Pages) {
+		return model.getTaskTypes()
+			.then(Pages.collectRemaining);
+	}	
+	
+	checkBuildingConfigured.$inject = ['$stateParams', '$state', 'model'];
+	
+	function checkBuildingConfigured($stateParams, $state, model) {
+		if (!model.data.buildingConfigured)
+			$state.go('singleModel.building', $stateParams);
+	}
+	
+	clearCache.$inject = ['$stateParams', 'SingleModel'];
+	
+	function clearCache($stateParams, SingleModel) {
+		SingleModel.cache['delete']($stateParams.name);
 	}
 	
 	onExitSingleModel.$inject = ['$window', '$timeout', '$q', 'model'];
@@ -55,32 +66,70 @@ define(function () {
 		$stateProvider
 			.state('allModels', {
 				url: '/models',
+				templateUrl: 'js/allModels/allModels.html',
 				controller: 'AllModelsController',
 				controllerAs: '$ctrl',
-				templateUrl: 'js/allModels/allModels.html',
 				resolve: {
 					'models': resolveAllModels
 				}
 			})
 			.state('singleModel', {
 				url: '/models/:name',
+				templateUrl: 'js/singleModel/singleModel.html',
 				controller: 'SingleModelController',
 				controllerAs: '$ctrl',
-				templateUrl: 'js/singleModel/singleModel.html',
-				//onEnter: onEnterSingleModel,
-				//onExit: onExitSingleModel,
+				abstract: true,
 				resolve: {
 					'model': resolveSingleModel
-				}
+				},
+				onExit: clearCache
 			})
 			.state('singleModel.building', {
-				
+				url: '/building',
+				templateUrl: 'js/singleModel/singleModel-building.html',
+				controller: 'SingleModelBuildingController',
+				controllerAs: '$ctrl',
+				data: {
+					title: 'Building'
+				},
+				resolve: {
+					'models': resolveAllModels
+				}
+			})
+			.state('singleModel.phases', {
+				url: '/phases',
+				templateUrl: 'js/singleModel/singleModel-phases.html',
+				controller: 'SingleModelPhasesController',
+				controllerAs: '$ctrl',
+				data: {
+					title: 'Phases'
+				},
+				resolve: {
+					'phases': resolvePhases
+				}
 			})
 			.state('singleModel.taskTypes', {
-				
+				url: '/tasks',
+				templateUrl: 'js/singleModel/singleModel-taskTypes.html',
+				controller: 'SingleModelTaskTypesController',
+				controllerAs: '$ctrl',
+				data: {
+					title: 'Tasks'
+				},
+				resolve: {
+					'taskTypes': resolveTaskTypes
+				}
 			})
-			.state('singleModel.flow', {
-				
+			.state('singleModel.diagram', {
+				url: '/diagram',
+				templateUrl: 'js/singleModel/singleModel-diagram.html',
+				controller: 'SingleModelDiagramController',
+				controllerAs: '$ctrl',
+				onEnter: checkBuildingConfigured,
+				data: {
+					title: 'Diagram'
+				}
+				//onExit: onExitSingleModel,
 			});
 		
 		$urlRouterProvider.otherwise('/models');

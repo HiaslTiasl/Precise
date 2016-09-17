@@ -70,5 +70,5 @@ define([
 		withRefsToSameClass: withRefsToSameClass,
 		markup: markup,
 		compile: cachingCompile
-	}
+	};
 });

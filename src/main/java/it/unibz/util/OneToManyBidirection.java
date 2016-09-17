@@ -29,8 +29,15 @@ public abstract class OneToManyBidirection<One, OneOfMany, Many> {
 	}
 	
 	public void setMany(One one, Many many) {
-		adjustManyToOne(one, many);
-		setMany.accept(one, many);
+		if (one != null) {
+			Many oldMany = getMany.apply(one);
+			if (oldMany == null)
+				setMany.accept(one, many);
+			else
+				clear(oldMany);
+			if (many != null)
+				adjustManyToOne(one, many);
+		}
 	}
 	
 	public One getOne(OneOfMany oneOfMany) {
@@ -41,8 +48,10 @@ public abstract class OneToManyBidirection<One, OneOfMany, Many> {
 		One oldOne = getOne.apply(oneOfMany);
 		if (oldOne != null)
 			removeImpl(getMany.apply(oldOne), oneOfMany);
-		setOne.accept(oneOfMany, one);
-		addIfAbsent(getMany.apply(one), oneOfMany);
+		if (one != null) {
+			setOne.accept(oneOfMany, one);
+			addIfAbsent(getMany.apply(one), oneOfMany);
+		}
 	}
 	
 	public void addOneOfMany(One one, OneOfMany oneOfMany) {
@@ -51,7 +60,7 @@ public abstract class OneToManyBidirection<One, OneOfMany, Many> {
 	}
 	
 	protected void addIfAbsent(Many many, OneOfMany oneOfMany) {
-		if (many != null && containsImpl(many, oneOfMany))
+		if (many != null && !containsImpl(many, oneOfMany))
 			addImpl(many, oneOfMany);
 	}
 	
@@ -59,6 +68,9 @@ public abstract class OneToManyBidirection<One, OneOfMany, Many> {
 	protected abstract boolean containsImpl(Many many, OneOfMany oneOfMany);
 	protected abstract void addImpl(Many many, OneOfMany oneOfMany);
 	protected abstract Stream<OneOfMany> stream(Many many);
+	
+	protected abstract void clear(Many many);
+	protected abstract void addAll(Many many, Many more);
 	
 	protected void adjustManyToOne(One one, Many many) {
 		if (many != null)

@@ -1,32 +1,62 @@
-<h2>Model '{{::$ctrl.model.name}}'</h2>
-<a ui-sref="allModels">Exit</a>
-<div id="panels">
-	<div id="precise-diagram" precise-diagram model="$ctrl.model"></div>
-	<div id="properties">
-		<h3>Properties</h3>
-		<task-properties
-			ng-if="$ctrl.taskResource"
-			resource="$ctrl.taskResource"
-			model="$ctrl.model"
-			done="$ctrl.done($result)"
-			cancelled="$ctrl.cancelled()">
-		</task-properties>
-		<dependency-properties
-			ng-if="$ctrl.dependencyResource"
-			resource="$ctrl.dependencyResource"
-			model="$ctrl.model"
-			done="$ctrl.done($result)"
-			cancelled="$ctrl.cancelled()">
-		</dependency-properties>
-		<div ng-if="!$ctrl.activeResource">
-			Nothing selected.
+<nav class="navbar navbar-default navbar-fixed-top">
+	<div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button
+				class="navbar-toggle"
+				ng-click="$ctrl.menuOpen = !$ctrl.menuOpen"
+				aria-expanded="false">
+				
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" ui-sref="allModels">
+				Process Modelling
+			</a>
+			<p class="navbar-text">|</p>
+			<p class="navbar-text">{{::$ctrl.model.data.name}}</p>
+			<p class="navbar-text">|</p>
+		</div>
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" uib-collapse="!$ctrl.menuOpen">
+			<ul class="nav navbar-nav">
+				<!-- Comment out to remove dropdown -->
+				<li>
+					<div class="btn-group navbar-btn" uib-dropdown>
+						<button class="btn btn-default" >
+							{{$ctrl.$state.$current.data.title}} 
+						</button>
+						<button class="btn btn-default" uib-dropdown-toggle><span class="caret"></span></button>
+						<ul class="dropdown-menu" uib-dropdown-menu>
+							<!--  -->
+
+							<li ng-class="{active: $ctrl.$state.is('singleModel.building')}">
+								<a ui-sref="singleModel.building({name: $ctrl.model.data.name})">
+									Building
+								</a>
+							</li>
+							<li ng-class="{active: $ctrl.$state.is('singleModel.phases')}">
+								<a ui-sref="singleModel.phases({name: $ctrl.model.data.name})">
+									Phases
+								</a>
+							</li>
+							<li ng-class="{active: $ctrl.$state.is('singleModel.taskTypes')}">
+								<a ui-sref="singleModel.taskTypes({name: $ctrl.model.data.name})">
+									Tasks
+								</a>
+							</li>
+							<li ng-class="{active: $ctrl.$state.is('singleModel.diagram')}">
+								<a ui-sref="singleModel.diagram({name: $ctrl.model.data.name})">
+									Diagram
+								</a>
+							</li>
+						</ul>
+				   </div>
+				</li>
+			</ul>
 		</div>
 	</div>
-	<div id="warnings">
-		<ul>
-			<li ng-repeat="w in $ctrl.warnings" class="warning-message">
-				{{$ctrl.warningMessage(w)}}
-			</li>
-		</ul>
-	</div>
-</div>
+</nav>
+<ui-view class="container-fluid"></ui-view>

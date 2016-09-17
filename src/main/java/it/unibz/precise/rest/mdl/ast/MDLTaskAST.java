@@ -40,7 +40,7 @@ public class MDLTaskAST {
 	public MDLTaskAST() {
 	}
 	
-	public MDLTaskAST(MDLFileAST context, Task task) {
+	public MDLTaskAST(MDLFileContext context, Task task) {
 		this.task = task;
 		TaskType taskType = task.getType();
 		type = context.translate(taskType);

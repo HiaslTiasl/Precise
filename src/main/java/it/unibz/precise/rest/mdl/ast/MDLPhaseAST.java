@@ -1,6 +1,6 @@
 package it.unibz.precise.rest.mdl.ast;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,7 +31,7 @@ public class MDLPhaseAST {
 	public MDLPhaseAST() {
 	}
 	
-	public MDLPhaseAST(MDLFileAST context, Phase phase) {
+	public MDLPhaseAST(MDLFileContext context, Phase phase) {
 		this.phase = phase;
 		List<AttributeHierarchyLevel> levelList = phase.getAttributeHierarchyLevels();
 		name = phase.getName();
@@ -89,7 +89,7 @@ public class MDLPhaseAST {
 	}
 	
 	private Object createTree(Map<String, AttributeHierarchyNode> nodes) {
-		Map<String, Object> tree = new HashMap<>();
+		Map<String, Object> tree = new LinkedHashMap<>();
 		boolean hasSubTrees = false;
 		for (AttributeHierarchyNode node : nodes.values()) {
 			Object subTree = null;

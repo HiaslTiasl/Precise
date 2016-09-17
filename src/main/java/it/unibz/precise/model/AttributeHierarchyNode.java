@@ -22,7 +22,7 @@ public class AttributeHierarchyNode extends BaseEntity {
 	@ManyToOne
 	private AttributeHierarchyNode parent;
 
-	@OneToMany(mappedBy="parent", cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="parent", cascade=CascadeType.ALL, orphanRemoval=true)
 	@MapKey(name="value")
 	private Map<String, AttributeHierarchyNode> children = new HashMap<>();
 	
