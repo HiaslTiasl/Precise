@@ -47,8 +47,8 @@
 									Tasks
 								</a>
 							</li>
-							<li ng-class="{active: $ctrl.$state.is('singleModel.diagram')}">
-								<a ui-sref="singleModel.diagram({name: $ctrl.model.data.name})">
+							<li ng-class="{active: $ctrl.$state.is('singleModel.diagram'), disabled: !$ctrl.model.data.buildingConfigured}">
+								<a ui-sref="singleModel.diagram({name: $ctrl.model.data.name})" ng-disabled="!$ctrl.model.data.buildingConfigured">
 									Diagram
 								</a>
 							</li>
