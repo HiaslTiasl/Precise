@@ -5,13 +5,11 @@ define([
 ) {
 	'use strict';
 	
-	AllModelsController.$inject = ['$scope', '$q', '$uibModal', 'PreciseApi', 'AllModels', 'MDLFiles', 'models'];
+	AllModelsController.$inject = ['$scope', '$q', '$uibModal', 'PreciseApi', 'AllModels', 'MDLFiles'];
 	
-	function AllModelsController($scope, $q, $uibModal, PreciseApi, AllModels, MDLFiles, models) {
+	function AllModelsController($scope, $q, $uibModal, PreciseApi, AllModels, MDLFiles) {
 		
 		var $ctrl = this;
-		
-		$ctrl.models = models;
 		
 		$ctrl.refreshModels = refreshModels;
 		$ctrl.getFileName = MDLFiles.getModelFileName;
@@ -21,6 +19,12 @@ define([
 		$ctrl.renameModel = renameModel;
 		$ctrl.duplicateModel = duplicateModel;
 		$ctrl.deleteModel = deleteModel;
+		
+		$ctrl.$onInit = $onInit;
+		
+		function $onInit() {
+			refreshModels();
+		}
 		
 		function setModels(models) {
 			$ctrl.models = models;
@@ -33,9 +37,7 @@ define([
 		
 		function createModel(model) {
 			var modalInstance = $uibModal.open({
-				templateUrl: 'js/allModels/allModels.create-dialog.html',
-				controller: 'AllModelsCreateDialogController',
-				controllerAs: '$ctrl'
+				component: 'preciseCreateModel'
 			});
 			
 			modalInstance.result.then(refreshModels);
@@ -72,5 +74,10 @@ define([
 		}
 	}
 	
-	return AllModelsController;
+	return {
+		templateUrl: 'js/allModels/allModels.html',
+		controller: AllModelsController,
+		controllerAs: '$ctrl'
+	};
+	
 });

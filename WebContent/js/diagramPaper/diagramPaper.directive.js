@@ -26,7 +26,7 @@ function (
 	
 	function diagramDirective($window, $timeout) {
 		return {
-			templateUrl: 'js/diagram/diagram.html',
+			templateUrl: 'js/diagramPaper/diagramPaper.html',
 	        scope: {
 	            height: '@',
 	            width: '@',
@@ -34,12 +34,12 @@ function (
 	            model: '<',
 	            tools: '<'
 	        },
-	        controller: 'DiagramController',
+	        controller: 'DiagramPaperController',
 	        controllerAs: '$ctrl',
 	        bindToController: true,
 	        link: function (scope, element, attrs) {
 	        	var $ctrl = scope.$ctrl,
-	        		$paperEl = element.find('.precise-diagram.paper'),
+	        		$paperEl = element.find('.paper'),
 	        		model = new joint.dia.Graph();
 	        	
 	        	$ctrl.enablePan = enablePan;

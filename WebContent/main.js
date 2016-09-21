@@ -3,7 +3,8 @@ require.config({
 	// Paths to named modules, where 'lib/<module>' does not work
 	paths: {	
 		'jquery': './lib/jquery',
-		'svg-pan-zoom': './lib/svg-pan-zoom'
+		'svg-pan-zoom': './lib/svg-pan-zoom',
+		'angular-ui-router': './lib/angular-ui-router'
 		//'lib/lodash': './lib/lodash.min'	// ... for production use
     },
     map: {
@@ -22,7 +23,7 @@ require.config({
     		deps: ['lib/jquery'],
     		exports: 'angular'
     	},
-    	'lib/angular-ui-router': ['lib/angular'],
+    	'angular-ui-router': ['lib/angular'],
     	'lib/ui-bootstrap': ['lib/angular'],
     	'lib/traverson-angular': ['lib/angular'],
     	'lib/smart-table': ['lib/angular'],

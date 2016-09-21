@@ -1,48 +1,60 @@
-
-nav {
-	height: 50px;
-}
-
-.navbar-fixed-top + ui-view {
+.navbar-fixed-top + .content {
 	position: absolute;
-	top: 60px;
+	top: 10px;
 	right: 0;
 	bottom: 10px;
 	left: 0;
-	margin: 0;
 }
 
-.single-model-diagram,
-.single-model-diagram .panels,
-#precise-diagram,
-#properties {
+.nav-tabs {
+	margin-bottom: 10px;
+}
+
+precise-diagram,
+precise-diagram > .panels,
+#properties-wrapper {
 	height: 100%;
 }
 
-.single-model-diagram .panels {
+precise-diagram > .panels {
 	position: relative;
 }
 
-#precise-diagram {
-	margin-right: 350px;
+precise-diagram-paper {
+	position: absolute;
+	top: 0;
+	right: 350px;
+	bottom: 0;
+	left: 0;
 }
 
-.properties-wrapper {
-	margin: 0.25em;
-}
-
-#properties {
+#properties-wrapper {
 	position: absolute;
 	right: 0;
 	top: 0;
 	width: 340px;
 	margin-left: 10px;
 	min-width: 200px;
-	/* border: thin solid #333; */
 	vertical-align: top;
 }
 
-#properties .form-group {
+#properties-wrapper > header {
+	height: 40px;
+	font-size: 20px;
+}
+
+.properties {
+	position: absolute;
+	top: 40px;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	padding: 5px;
+}
+
+.properties .form-group {
 	margin-bottom: 10px;
 }
 

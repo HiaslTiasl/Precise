@@ -139,11 +139,6 @@ define([
 		
 	}));
 	
-	var defineFilter = _.once(function (paper, markup) {
-		joint.V(paper.defs).append(joint.V(markup));
-		console.log('defineFilter with markup: ' + markup);
-	});
-	
 	var intensify = [
 		1, 0, 0,  0, 0, 
 		0, 1, 0,  0, 0,
@@ -184,12 +179,6 @@ define([
 				};
 			}, {}, this);
 			joint.dia.LinkView.prototype.initialize.apply(this, arguments);
-		},
-		
-		render: function () {
-			joint.dia.LinkView.prototype.render.apply(this, arguments);
-			if (this.model.get('data').chain)
-				defineFilter(this.paper, this.filterMarkup);
 		},
 		
 		removeVertex: function (idx) {
@@ -234,6 +223,7 @@ define([
         update: function () {
         	joint.dia.LinkView.prototype.update.apply(this, arguments);
         	this.updateAltCrossPosition();
+        	this.updateFilter();
         	return this;
         },
         
@@ -246,6 +236,24 @@ define([
             	angle = 90 - joint.g.point(startCoords).theta(coords);
         		
         	this._V.altCross.attr('transform', '').rotate(angle).translate(coords.x, coords.y);
+        },
+        
+        updateFilter: function () {
+        	if (this.model.get('data').chain) {
+        		var vDefs = joint.V(this.paper.defs),
+        			vFilter = vDefs.findOne('#' + CHAIN_FILTER_ID);
+        		if (!vFilter) {
+        			vFilter = joint.V(this.filterMarkup);
+        			vDefs.append(vFilter);
+        		}
+        		var bbox = this.paper.viewport.getBBox();
+        		vFilter.attr({
+        			x: bbox.x,
+        			y: bbox.y,
+        			width: bbox.width,
+        			height: bbox.height
+        		});
+        	}
         }
         
 	}, {

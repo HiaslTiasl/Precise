@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelBuildingController.$inject = ['$scope', '$http', '$state', 'Files', 'MDLFiles', 'SingleModel', 'model', 'models'];
+	SingleModelBuildingController.$inject = ['$http', '$state', 'Files', 'MDLFiles', 'AllModels', 'SingleModel'];
 	
-	function SingleModelBuildingController($scope, $http, $state, Files, MDLFiles, SingleModel, model, models) {
+	function SingleModelBuildingController($http, $state, Files, MDLFiles, AllModels, SingleModel) {
 		
 		var $ctrl = this;
 		
@@ -17,12 +17,25 @@ define([
 		$ctrl.sendConfig = sendConfig;
 		$ctrl.cancel = cancel;
 		
-		$ctrl.model = model;
-		$ctrl.models = models;
-		$ctrl.selectedModel = $ctrl.model.data.buildingConfigured ? $ctrl.model.data : null;
+		$ctrl.$onInit = $onInit;
+		$ctrl.$onChanges = $onChanges;
 		
-		// init
-		modelChanged();
+		function $onInit() {
+			loadModels();
+		}
+		
+		function $onChanges(changes) {
+			if (changes.model) {
+				$ctrl.selectedModel = $ctrl.model.data.buildingConfigured ? $ctrl.model.data : null;
+				modelChanged();
+			}
+		}
+		
+		function loadModels() {
+			return AllModels.getModels().then(function (models) {
+				$ctrl.models = models;
+			});
+		}
 		
 		function showConfigPreview(mdl) {
 			$ctrl.config = mdl;
@@ -71,5 +84,14 @@ define([
 		
 	}
 	
-	return SingleModelBuildingController;
+	return {
+		templateUrl: 'js/singleModel/singleModel-building.html',
+		controller: SingleModelBuildingController,
+		controllerAs: '$ctrl',
+		bindings: {
+			model: '<',
+			models: '<'
+		}
+	};
+	
 });

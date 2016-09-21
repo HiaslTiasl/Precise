@@ -8,66 +8,11 @@ html {
 	font-family: Helvetica sans-serif;
 }
 
-button {
-	cursor: pointer;
+.navbar-fixed-top {
+	height: 50px;
+	margin-bottom: 0;
 }
 
-a[disabled] {
-	pointer-events: none;
-	color: inherit;
-	border: none;
+.navbar-fixed-top + .content {
+	margin-top: 50px;
 }
-
-/* .toolbar {
-	margin: 0.25em -0.25em;
-}
-
-.toolbar .btn {
-	color: #aa4400;
-	border: 2px solid #aa4400;
-	border-radius: 3px;
-	background: none;
-	padding: 0.25em 0.5em;
-	margin: 0.25em;
-}
-
-.toolbar .btn:hover,
-.toolbar .btn.selected {
-	color: #fff;
-	background: #aa4400;
-}
-
-.toolbar .btn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
-
-.btn:hover {
-	box-shadow: 0 0 2px 1px #aa4400;
-} */
-
-#page-header {
-	font-size: 1.6em;
-	text-align: center;
-	padding: 0.25em;
-	color: white;
-	background-color: navy;
-	margin-bottom: 0.5em;
-}
-
-#page-header h1 {
-	margin: 0;
-	font-size: 1em;
-}
-
-#page-main {
-	height: 500px;
-	height: 80vh;
-	box-sizing: border-box;
-}
-
-ng-view {
-	height: 100%;
-}
-
-

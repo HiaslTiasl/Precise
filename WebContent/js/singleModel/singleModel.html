@@ -22,34 +22,25 @@
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<div class="collapse navbar-collapse" uib-collapse="!$ctrl.menuOpen">
 			<ul class="nav navbar-nav">
+			
 				<!-- Comment out to remove dropdown -->
 				<li>
 					<div class="btn-group navbar-btn" uib-dropdown>
-						<button class="btn btn-default" >
-							{{$ctrl.$state.$current.data.title}} 
+						<button class="btn btn-default">
+							{{$ctrl.$state.$current.data.title}}
 						</button>
 						<button class="btn btn-default" uib-dropdown-toggle><span class="caret"></span></button>
 						<ul class="dropdown-menu" uib-dropdown-menu>
 							<!--  -->
 
-							<li ng-class="{active: $ctrl.$state.is('singleModel.building')}">
-								<a ui-sref="singleModel.building({name: $ctrl.model.data.name})">
-									Building
-								</a>
-							</li>
-							<li ng-class="{active: $ctrl.$state.is('singleModel.phases')}">
-								<a ui-sref="singleModel.phases({name: $ctrl.model.data.name})">
-									Phases
-								</a>
-							</li>
-							<li ng-class="{active: $ctrl.$state.is('singleModel.taskTypes')}">
-								<a ui-sref="singleModel.taskTypes({name: $ctrl.model.data.name})">
-									Tasks
+							<li ng-class="{active: $ctrl.$state.is('singleModel.config')}">
+								<a ui-sref="singleModel.config({name: $ctrl.model.data.name})">
+									{{$ctrl.$state.get('singleModel.config').data.title}}
 								</a>
 							</li>
 							<li ng-class="{active: $ctrl.$state.is('singleModel.diagram'), disabled: !$ctrl.model.data.buildingConfigured}">
 								<a ui-sref="singleModel.diagram({name: $ctrl.model.data.name})" ng-disabled="!$ctrl.model.data.buildingConfigured">
-									Diagram
+									{{$ctrl.$state.get('singleModel.diagram').data.title}}
 								</a>
 							</li>
 						</ul>
@@ -59,4 +50,4 @@
 		</div>
 	</div>
 </nav>
-<ui-view class="container-fluid"></ui-view>
+<ui-view class="content container-fluid"></ui-view>

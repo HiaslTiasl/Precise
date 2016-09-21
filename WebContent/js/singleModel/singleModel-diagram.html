@@ -1,30 +1,30 @@
-<div class="single-model-diagram">
-	<div class="panels">
-		<div id="precise-diagram" precise-diagram model="$ctrl.model"></div>
-		<div id="properties">
-			<h3>Properties</h3>
-			<task-properties
-				ng-if="$ctrl.taskResource"
-				resource="$ctrl.taskResource"
-				done="$ctrl.done($result)"
-				cancelled="$ctrl.cancelled()">
-			</task-properties>
-			<dependency-properties
-				ng-if="$ctrl.dependencyResource"
-				resource="$ctrl.dependencyResource"
-				done="$ctrl.done($result)"
-				cancelled="$ctrl.cancelled()">
-			</dependency-properties>
-			<div ng-if="!$ctrl.activeResource">
-				Nothing selected.
-			</div>
-		</div>
-		<div id="warnings">
-			<ul>
-				<li ng-repeat="w in $ctrl.warnings" class="warning-message">
-					{{$ctrl.warningMessage(w)}}
-				</li>
-			</ul>
+<div class="panels">
+	<precise-diagram-paper model="$ctrl.model"></precise-diagram-paper>
+	<div id="properties-wrapper">
+		<h3>Properties</h3>
+		<task-properties
+			class="properties"
+			ng-if="$ctrl.taskResource"
+			resource="$ctrl.taskResource"
+			done="$ctrl.done($result)"
+			cancelled="$ctrl.cancelled()">
+		</task-properties>
+		<dependency-properties
+			class="properties"
+			ng-if="$ctrl.dependencyResource"
+			resource="$ctrl.dependencyResource"
+			done="$ctrl.done($result)"
+			cancelled="$ctrl.cancelled()">
+		</dependency-properties>
+		<div ng-if="!$ctrl.activeResource">
+			Nothing selected.
 		</div>
 	</div>
 </div>
+	<div id="warnings">
+		<ul>
+			<li ng-repeat="w in $ctrl.warnings" class="warning-message">
+				{{$ctrl.warningMessage(w)}}
+			</li>
+		</ul>
+	</div>

@@ -1,13 +1,13 @@
 define([
 	'lib/angular',
-	'diagram/diagram',
+	'diagramPaper/diagramPaper',
 	'api/api',
 	'./SingleModel.service',
-	'./SingleModel.controller',
-	'./SingleModel-building.controller',
-	'./SingleModel-phases.controller',
-	'./SingleModel-taskTypes.controller',
-	'./SingleModel-diagram.controller',
+	'./SingleModel.component',
+	'./SingleModel-diagram.component',
+	'./SingleModel-config.component',
+	'./SingleModel-building.component',
+	'./SingleModel-taskTypes.component',
 	'./taskProperties.component',
 	'./dependencyProperties.component',
 	'lib/ui-bootstrap',
@@ -15,25 +15,25 @@ define([
 ], function (
 	angular,
 	preciseApi,
-	preciseDiagram,
+	preciseDiagramPaper,
 	SinlgeModelService,
-	SingleModelController,
-	SingleModelBuildingController,
-	SingleModelPhasesController,
-	SingleModelTaskTypesController,
-	SingleModelDiagramController,
+	singleModelComponent,
+	singleModelDiagramComponent,
+	singleModelConfigComponent,
+	singleModelBuildingComponent,
+	singleModelTaskTypesComponent,
 	taskPropertiesComponent,
 	dependencyPropertiesComponent
 ) {
 	'use strict';
 	
-	return angular.module('precise.singleModel', ['ui.bootstrap', 'jsonFormatter', preciseApi.name, preciseDiagram.name])
+	return angular.module('precise.singleModel', ['ui.bootstrap', 'jsonFormatter', preciseApi.name, preciseDiagramPaper.name])
 		.service('SingleModel', SinlgeModelService)
-		.controller('SingleModelController', SingleModelController)
-		.controller('SingleModelBuildingController', SingleModelBuildingController)
-		.controller('SingleModelPhasesController', SingleModelPhasesController)
-		.controller('SingleModelTaskTypesController', SingleModelTaskTypesController)
-		.controller('SingleModelDiagramController', SingleModelDiagramController)
+		.component('preciseSingleModel', singleModelComponent)
+		.component('preciseDiagram', singleModelDiagramComponent)
+		.component('preciseConfig', singleModelConfigComponent)
+		.component('preciseBuilding', singleModelBuildingComponent)
+		.component('preciseTaskTypes', singleModelTaskTypesComponent)
 		.component('taskProperties', taskPropertiesComponent)
 		.component('dependencyProperties', dependencyPropertiesComponent);
 	

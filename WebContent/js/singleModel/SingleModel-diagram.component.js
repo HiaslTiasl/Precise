@@ -5,16 +5,16 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelDiagramController.$inject = ['$scope', 'model', 'PreciseApi', 'SingleModel', 'Tasks', 'Dependencies'];
+	SingleModelDiagramController.$inject = ['$scope', 'PreciseApi', 'Tasks', 'Dependencies'];
 	
-	function SingleModelDiagramController($scope, model, PreciseApi, SingleModel, Tasks, Dependencies) {
+	function SingleModelDiagramController($scope, PreciseApi, Tasks, Dependencies) {
 		
 		var $ctrl = this;
 		
-		$ctrl.model = model;
-		
 		$ctrl.done = done;
 		$ctrl.cancelled = cancelled;
+		
+		$ctrl.$onChanges = $onChanges;
 		
 		$scope.$on('cell:delete', deleteCell);
 		$scope.$on('task:new', newTaskHandler);
@@ -23,6 +23,16 @@ define([
 		$scope.$on('dependency:select', selectDependencyHandler);
 		$scope.$on('task:change', diagramTaskChangeHandler);
 		$scope.$on('dependency:change', diagramDependencyChangeHandler);
+		
+		function $onChanges(changes) {
+			if (changes.model)
+				resetResources();
+		}
+		
+		function resetResources() {
+			$ctrl.resourceType = null;
+			$ctrl.activeResource = $ctrl.dependencyResource = $ctrl.taskResource = null;
+		}
 		
 		function diagramTaskChangeHandler(event, data) {
 			Tasks
@@ -77,10 +87,8 @@ define([
 		function selectTaskHandler(event, selectedView) {
 			var data = selectedView && selectedView.model.get('data');
 			$ctrl.dependencyResource = null;
-			if (!data) {
-				$ctrl.activeResource = $ctrl.taskResource = $ctrl.dependencyResource = null;
-				$ctrl.resourceType = null;
-			}
+			if (!data)
+				resetResources();
 			else {
 				Tasks.existingResource($ctrl.model, data).then(function (res) {
 					$ctrl.resourceType = 'task';
@@ -92,10 +100,8 @@ define([
 		
 		function selectDependencyHandler(event, selectedView) {
 			var data = selectedView && selectedView.model.get('data');
-			if (!data) {
-				$ctrl.activeResource = $ctrl.dependencyResource = $ctrl.taskResource = null;
-				$ctrl.resourceType = null;
-			}
+			if (!data)
+				resetResources();
 			else {
 				Dependencies.existingResource($ctrl.model, data).then(function (res) {
 					$ctrl.resourceType = 'dependency';
@@ -117,5 +123,12 @@ define([
 		}
 	}
 	
-	return SingleModelDiagramController;
+	return {
+		templateUrl: 'js/singleModel/singleModel-diagram.html',
+		controller: SingleModelDiagramController,
+		controllerAs: '$ctrl',
+		bindings: {
+			model: '<'
+		}
+	};
 });

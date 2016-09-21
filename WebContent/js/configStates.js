@@ -3,12 +3,6 @@ define([
 ) {
 	'use strict';
 	
-	resolveAllModels.$inject = ['AllModels'];
-	
-	function resolveAllModels(AllModels) {
-		return AllModels.getModels();
-	}
-	
 	resolveSingleModel.$inject = ['$stateParams', '$state', 'SingleModel'];
 	
 	function resolveSingleModel($stateParams, $state, SingleModel) {
@@ -66,65 +60,27 @@ define([
 		$stateProvider
 			.state('allModels', {
 				url: '/models',
-				templateUrl: 'js/allModels/allModels.html',
-				controller: 'AllModelsController',
-				controllerAs: '$ctrl',
-				resolve: {
-					'models': resolveAllModels
-				}
+				component: 'preciseAllModels'
 			})
 			.state('singleModel', {
 				url: '/models/:name',
-				templateUrl: 'js/singleModel/singleModel.html',
-				controller: 'SingleModelController',
-				controllerAs: '$ctrl',
+				component: 'preciseSingleModel',
 				abstract: true,
+				onExit: clearCache,
 				resolve: {
 					'model': resolveSingleModel
-				},
-				onExit: clearCache
-			})
-			.state('singleModel.building', {
-				url: '/building',
-				templateUrl: 'js/singleModel/singleModel-building.html',
-				controller: 'SingleModelBuildingController',
-				controllerAs: '$ctrl',
-				data: {
-					title: 'Building'
-				},
-				resolve: {
-					'models': resolveAllModels
 				}
 			})
-			.state('singleModel.phases', {
-				url: '/phases',
-				templateUrl: 'js/singleModel/singleModel-phases.html',
-				controller: 'SingleModelPhasesController',
-				controllerAs: '$ctrl',
+			.state('singleModel.config', {
+				url: '/config',
+				component: 'preciseConfig',
 				data: {
-					title: 'Phases'
-				},
-				resolve: {
-					'phases': resolvePhases
-				}
-			})
-			.state('singleModel.taskTypes', {
-				url: '/tasks',
-				templateUrl: 'js/singleModel/singleModel-taskTypes.html',
-				controller: 'SingleModelTaskTypesController',
-				controllerAs: '$ctrl',
-				data: {
-					title: 'Tasks'
-				},
-				resolve: {
-					'taskTypes': resolveTaskTypes
+					title: 'Configuration'
 				}
 			})
 			.state('singleModel.diagram', {
 				url: '/diagram',
-				templateUrl: 'js/singleModel/singleModel-diagram.html',
-				controller: 'SingleModelDiagramController',
-				controllerAs: '$ctrl',
+				component: 'preciseDiagram',
 				onEnter: checkBuildingConfigured,
 				data: {
 					title: 'Diagram'

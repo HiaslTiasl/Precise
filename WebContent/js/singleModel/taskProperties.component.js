@@ -1,7 +1,7 @@
 define([
 	'lib/lodash',
 	'util/util'
-],function (
+], function (
 	_,
 	util
 ) {
@@ -33,13 +33,16 @@ define([
 			orderParts;
 		
 		function $onChanges(changesObj) {
-			if ('resource' in changesObj && !$ctrl.resource.exists) {
-				$ctrl.resource.model.getPhases()
-					.then(Pages.collectRemaining)
-					.then(function (phases) {
-						$ctrl.phases = phases;
-					});
-			}
+			if (changesObj.resource && !$ctrl.resource.exists)
+				loadPhases();
+		}
+		
+		function loadPhases() {
+			$ctrl.resource.model.getPhases()
+				.then(Pages.collectRemaining)
+				.then(function (phases) {
+					$ctrl.phases = phases;
+				});
 		}
 		
 		function phaseChanged() {

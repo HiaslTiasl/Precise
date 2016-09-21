@@ -18,16 +18,8 @@ define([
 		$ctrl.globalScopeChanged = globalScopeChanged;
 		$ctrl.scopeChanged = scopeChanged;
 		
-		$ctrl.$onChanges = $onChanges;
-		
 		var getAttrName = _.property('name'),
 			scopeParts;
-		
-		function $onChanges(changesObj) {
-			if (changesObj['resource']) {				
-				// Nothing to do here
-			}
-		}
 		
 		function showScope() {
 			if (!$ctrl.resource.data)

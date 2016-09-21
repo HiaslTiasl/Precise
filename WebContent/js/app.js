@@ -4,7 +4,7 @@ define([
 	'allModels/allModels',
 	'singleModel/singleModel',
 	'configStates',
-	'lib/angular-ui-router',
+	'angular-ui-router',
 ], function (
 	angular,
 	api,
