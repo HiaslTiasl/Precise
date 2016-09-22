@@ -38,8 +38,8 @@
 									{{$ctrl.$state.get('singleModel.config').data.title}}
 								</a>
 							</li>
-							<li ng-class="{active: $ctrl.$state.is('singleModel.diagram'), disabled: !$ctrl.model.data.buildingConfigured}">
-								<a ui-sref="singleModel.diagram({name: $ctrl.model.data.name})" ng-disabled="!$ctrl.model.data.buildingConfigured">
+							<li ng-class="{active: $ctrl.$state.is('singleModel.diagram'), disabled: !$ctrl.model.data.diagramInfo.editable}">
+								<a ui-sref="singleModel.diagram({name: $ctrl.model.data.name})" ng-disabled="!$ctrl.model.data.diagramInfo.editable">
 									{{$ctrl.$state.get('singleModel.diagram').data.title}}
 								</a>
 							</li>

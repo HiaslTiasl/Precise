@@ -3,40 +3,23 @@ define([
 ) {
 	'use strict';
 	
-	resolveSingleModel.$inject = ['$stateParams', '$state', 'SingleModel'];
+	resolveSingleModel.$inject = ['$transition$', 'SingleModel'];
 	
-	function resolveSingleModel($stateParams, $state, SingleModel) {
-		return SingleModel.findByName($stateParams.name)
-			['catch'](function () {
-				$state.go('allModels');
-			});
+	function resolveSingleModel($transition$, SingleModel) {
+		return SingleModel.findByName($transition$.params().name);
 	}
 	
-	resolvePhases.$inject = ['model', 'Pages'];
+	checkDiagramEditable.$inject = ['$transition$', 'model'];
 	
-	function resolvePhases(model, Pages) {
-		return model.getPhases()
-			.then(Pages.collectRemaining);
-	}
-
-	resolveTaskTypes.$inject = ['model', 'Pages'];
-	
-	function resolveTaskTypes(model, Pages) {
-		return model.getTaskTypes()
-			.then(Pages.collectRemaining);
-	}	
-	
-	checkBuildingConfigured.$inject = ['$stateParams', '$state', 'model'];
-	
-	function checkBuildingConfigured($stateParams, $state, model) {
-		if (!model.data.buildingConfigured)
-			$state.go('singleModel.building', $stateParams);
+	function checkDiagramEditable($transition$, model) {
+		return model.data.diagramInfo.editable
+			|| $transition$.router.stateService.target('singleModel.config', $transition$.params());
 	}
 	
-	clearCache.$inject = ['$stateParams', 'SingleModel'];
+	clearCache.$inject = ['$transition$', 'SingleModel'];
 	
-	function clearCache($stateParams, SingleModel) {
-		SingleModel.cache['delete']($stateParams.name);
+	function clearCache($transition$, SingleModel) {
+		SingleModel.cache['delete']($transition$.params().name);
 	}
 	
 	onExitSingleModel.$inject = ['$window', '$timeout', '$q', 'model'];
@@ -54,9 +37,9 @@ define([
 		});
 	}
 	
-	configStates.$inject = ['$stateProvider', '$urlRouterProvider'];
+	configStates.$inject = ['$stateProvider', '$urlRouterProvider', '$transitionsProvider'];
 	
-	function configStates($stateProvider, $urlRouterProvider) {
+	function configStates($stateProvider, $urlRouterProvider, $transitionsProvider) {
 		$stateProvider
 			.state('allModels', {
 				url: '/models',
@@ -81,7 +64,7 @@ define([
 			.state('singleModel.diagram', {
 				url: '/diagram',
 				component: 'preciseDiagram',
-				onEnter: checkBuildingConfigured,
+				onEnter: checkDiagramEditable,
 				data: {
 					title: 'Diagram'
 				}
@@ -89,6 +72,13 @@ define([
 			});
 		
 		$urlRouterProvider.otherwise('/models');
+		
+		$transitionsProvider.onError({
+			entering: 'singleModel'
+		}, function (trans) {
+			if (trans.error().statusCode == 404)
+				trans.router.stateService.go('allModels')
+		});
 	}
 	
 	return configStates;

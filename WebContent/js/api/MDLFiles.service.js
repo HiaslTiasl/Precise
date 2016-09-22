@@ -7,44 +7,40 @@ define([], function () {
 		
 		var svc = this;
 		
-		svc.getFileName = getFileName;
-		svc.getModelFileURI = getModelFileURI;
-		svc.getConfigFileURI = getConfigFileURI;
-		svc.importModelFile = importModelFile;
-		svc.importConfigFile = importConfigFile;
+		svc.fileNameOf = fileNameOf;
+		svc.urlToModel = urlToModel;
+		svc.importJSON = importJSON;
 		svc.clearConfig = clearConfig;
 		
 		var basePath = 'files/',
 			configPath = '/config';
 		
-		function getFileName(model) {
-			return model.name + '.mdl';
+		function fileNameOf(model) {
+			var name = typeof model === 'object' ? model.name : model;
+			return name + '.mdl';
 		}
 		
-		function getModelFileURI(model) {
-			return basePath + getFileName(model);
+		function appendConfigPath(fileURL) {
+			return fileURL + configPath;
 		}
 		
-		function getConfigFileURI(model) {
-			return getModelFileURI(model) + configPath;
+		function urlToFile(fileName, config) {
+			var url = basePath + fileName;
+			return config ? appendConfigPath(url) : url;
 		}
 		
-		function importModelFile(model, json) {
-			return importFile(getModelFileURI(model), json);
-		}
-		
-		function importConfigFile(model, json) {
-			return importFile(getConfigFileURI(model), json);
+		function urlToModel(model, config) {
+			return urlToFile(fileNameOf(model), config);
 		}
 		
 		function clearConfig(model) {
 			return $http({
-				url: getConfigFileURI(model),
+				url: urlToModel(model, true),
 				method: 'DELETE',
 			}).then(PreciseApi.getResponseData);
 		}
 		
-		function importFile(uri, json) {
+		function importJSON(uri, json) {
 			return $http({
 				url: uri,
 				method: 'PUT',
@@ -54,15 +50,6 @@ define([], function () {
 					'Accept': 'application/json'
 				}
 			}).then(PreciseApi.getResponseData);
-//			return Upload.http({
-//				url: uri,
-//				method: 'PUT',
-//				data: file,
-//				headers: {
-//					'Content-Type': 'application/json',
-//					'Accept': 'application/json'
-//				}
-//			}).then(preciseApi.getResponseData);
 		}
 		
 	}

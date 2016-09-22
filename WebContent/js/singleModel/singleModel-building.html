@@ -1,9 +1,9 @@
 <div class="panels">
 	<aside id="config-operations">
-		<div ng-if="$ctrl.model.data.buildingConfigured">
+		<div ng-if="!$ctrl.model.data.configInfo.empty && $ctrl.model.data.configInfo.editable">
 			<button class="btn btn-danger" ng-click="$ctrl.clearConfig()">Clear configuration</button>
 		</div>
-		<div ng-if="!$ctrl.model.data.buildingConfigured">
+		<div ng-if="$ctrl.model.data.configInfo.editable">
 			<h3>Choose</h3>
 			<form class="form">
 				<div class="form-group">
@@ -12,7 +12,7 @@
 						id="model-config"
 						class="form-control"
 						ng-model="$ctrl.selectedModel"
-						ng-options="m as m.name for m in $ctrl.models"
+						ng-options="m as m.name for m in $ctrl.selectableModels"
 						ng-change="$ctrl.modelChanged()">
 						<option value="">-- Select a model --</option>
 					</select>

@@ -44,7 +44,7 @@ define([
 				.then(function (result) {
 					$ctrl.done({ $result: result });
 				}, function (reason) {
-					alert(preciseApi.extractErrorMessage(reason));
+					alert(preciseApi.toErrorMessage(reason));
 				});
 		}
 

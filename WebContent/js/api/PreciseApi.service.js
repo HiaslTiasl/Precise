@@ -20,13 +20,15 @@ define([
 		this.basePath = basePath;
 		this.linkTo = linkTo;
 		this.hrefTo = hrefTo;
+		this.embeddedArray = embeddedArray;
 		this.from = from;
 		this.fromBase = _.once(fromBase);
 		this.continueFrom = continueFrom;
 		this.resultOf = resultOf;
 		this.mapReason = mapReason;
-		this.extractErrorMessage = extractErrorMessage;
 		this.getResponseData = getResponseData;
+		this.responseErrorMessage = responseErrorMessage;
+		this.toErrorMessage = toErrorMessage;
 		this.deleteResource = deleteResource;
 		
 		this.asyncAlert = wrapAsync($window.alert, $window);
@@ -36,15 +38,17 @@ define([
 		
 		function linkTo(obj, rel, index) {
 			var r = rel || 'self',
-				link = obj && typeof obj.link === 'function'
-					? obj.link(r)
-					: obj._links && obj._links[r];
+				link = obj && obj._links && obj._links[r];
 			return Array.isArray(link) ? link[index || 0] : link;
 		}
 		
 		function hrefTo(obj, rel, index) {
 			var link = obj && linkTo(obj, rel, index);
 			return link && link.href;
+		}
+		
+		function embeddedArray(obj, rel) {
+			return _.get(obj, ['_embedded', rel]);
 		}
 		
 		function from(url) {
@@ -60,7 +64,7 @@ define([
 		}
 		
 		function resultOf(request) {
-			return request.result.then(resolveSuccess, mapReason(getResponseData));
+			return request.result.then(resolveSuccess);
 		}
 		
 		function mapReason(mapper) {
@@ -70,25 +74,40 @@ define([
 		}
 		
 		// TODO: improve
-		function extractErrorMessage(errReason) {
-			return errReason
-				&& errReason.errors && errReason.errors.map(getErrorMessage).join('. ')		// Multiple Validation errors
-				|| getErrorMessage(errReason)												// Exception message 
-				|| 'Error';																	// Fallback
+		function responseErrorMessage(response) {
+			var data = response.data;
+			return !data
+				? [response.config.method, response.config.url, response.status, response.statusText].join(' ')		// No error message -> report HTTP failure
+				: data.errors && data.errors.map(getErrorMessage).join('. ')										// Multiple Validation errors
+					|| getErrorMessage(data)																		// Exception message
+					|| data;																						// Something else
+		}
+		
+		function toErrorMessage(reason) {
+			var msg;
+			switch (typeof reason) {
+			case 'string':
+				msg = reason;
+				break;
+			case 'object':
+				if (reason instanceof Error)
+					msg = reason.message;
+				else if ('status' in reason && 'statusText' in reason)
+					msg = responseErrorMessage(reason);
+				break;
+			}
+			return msg || 'Error';
 		}
 		
 		function resolveSuccess(response) {
 			var data = response.body;
 			if (data && typeof data === 'string')
-				data = JSON.parse(data);
-			return isSuccess(response.statusCode) ? data : $q.reject(data);
+				data = response.body = response.data = JSON.parse(data);
+			return isSuccess(response) ? data : $q.reject(response);
 		}
 		
-		/**
-		 * https://github.com/angular/angular.js/blob/master/src/ng/http.js#L235
-		 */
-		function isSuccess(status) {
-			return 200 <= status && status < 300;
+		function isSuccess(response) {
+			return _.inRange(response.statusCode, 200, 300);
 		}
 		
 		function Request(url) {
@@ -115,6 +134,7 @@ define([
 		function createTraverson(url) {
 			return traverson.from(url)
 				.jsonHal()
+				.useAngularHttp()
 				.withRequestOptions({
 					headers: {
 						'Content-Type': 'application/json',

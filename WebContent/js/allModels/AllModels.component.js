@@ -12,8 +12,8 @@ define([
 		var $ctrl = this;
 		
 		$ctrl.refreshModels = refreshModels;
-		$ctrl.getFileName = MDLFiles.getModelFileName;
-		$ctrl.getFileURI = MDLFiles.getModelFileURI;
+		$ctrl.getFileName = MDLFiles.fileNameOf;
+		$ctrl.getFileURI = MDLFiles.urlToModel;
 		$ctrl.createModel = createModel;
 		$ctrl.importFile = importFile;
 		$ctrl.renameModel = renameModel;
@@ -47,13 +47,13 @@ define([
 			$ctrl.fileErrorMsg = null;
 			return file && AllModels.importFile(file)
 				.then(refreshModels, function (errReason) {
-					$ctrl.fileErrorMsg = PreciseApi.extractErrorMessage(errReason);
+					$ctrl.fileErrorMsg = errReason;
 				});
 		}
 		
 		function renameModel(model, newName) {
 			return AllModels.renameModel(model, newName)
-				['catch'](PreciseApi.mapReason(PreciseApi.extractErrorMessage));
+				['catch'](PreciseApi.mapReason(PreciseApi.toErrorMessage));
 		}
 		
 		function duplicateModel(model) {
@@ -68,7 +68,7 @@ define([
 			.then(function () {
 				return AllModels.deleteModel(model)
 					.then(refreshModels, function (reason) {
-						PreciseApi.asyncAlert(PreciseApi.extractErrorMessage(reason));
+						PreciseApi.asyncAlert(PreciseApi.toErrorMessage(reason));
 					});
 			});
 		}

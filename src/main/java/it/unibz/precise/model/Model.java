@@ -2,31 +2,82 @@ package it.unibz.precise.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(uniqueConstraints=@UniqueConstraint(name="UC_MODEL_NAME", columnNames="name"))
+@JsonIgnoreProperties(value={"state"}, allowGetters=true)
 public class Model extends BaseEntity {
 	
-	public enum ConfigState {
-		EMPTY,
-		TEMPORARY,
-		FINAL
+	/**
+	 * The state of the model.
+	 * 
+	 * There are 3 possible states depending on which among configuration and diagram is empty
+	 * 
+	 * state       | config    | diagram 
+	 * ------------|-----------|----------
+	 * EMPTY       |     empty |     empty
+	 * CONFIGURING | not empty |     empty
+	 * MODELLING   | not empty | not empty
+	 * 
+	 * Each state contains information about each part (config and diagram) via a PartInfo object.
+	 */
+	public static enum State {
+		
+		EMPTY(true, true),
+		CONFIGURING(false, true),
+		MODELLING(false, false);
+		
+		private PartInfo configInfo;
+		private PartInfo diagramInfo;
+		
+		private State(boolean emptyConfig, boolean emptyDiagram) {
+			this.configInfo  = new PartInfo(emptyConfig, emptyDiagram);
+			this.diagramInfo = new PartInfo(emptyDiagram, !emptyConfig);
+		}
+
+		public PartInfo getConfigInfo() {
+			return configInfo;
+		}
+
+		public PartInfo getDiagramInfo() {
+			return diagramInfo;
+		}
+		
+	}
+	
+	/**
+	 * Encapsulates information about a model part, i.e. configuration or diagram.
+	 */
+	public static class PartInfo {
+		
+		private boolean empty;
+		private boolean editable;
+		
+		public PartInfo(boolean empty, boolean editable) {
+			this.empty = empty;
+			this.editable = editable;
+		}
+		
+		public boolean isEmpty() {
+			return empty;
+		}
+		
+		public boolean isEditable() {
+			return editable;
+		}
+		
 	}
 	
 	@Column(nullable=false)
@@ -36,15 +87,6 @@ public class Model extends BaseEntity {
 	private String name;
 	
 	private String description;
-	
-	/**
-	 * Indicates whether the model has a building configuration (i.e. Attributes,
-	 * Phases, and relations among them), and that this configuration cannot be
-	 * changed anymore unless it is erased.
-	 */
-	private boolean buildingConfigured;
-	
-	private ConfigState configState;
 	
 	// Building configuration
 	//---------------------------------------------------
@@ -86,24 +128,18 @@ public class Model extends BaseEntity {
 		this.description = description;
 	}
 	
-	public ConfigState getConfigState() {
-		return configState;
-	}
-
-	public void setConfigState(ConfigState configState) {
-		this.configState = configState;
-	}
-
-	public boolean isBuildingConfigured() {
-		return buildingConfigured;
-	}
-
-	public void setBuildingConfigured(boolean buildingConfigured) {
-		this.buildingConfigured = buildingConfigured;
+	private boolean isDiagramEmpty() {
+		return tasks.isEmpty() && dependencies.isEmpty();
 	}
 	
-	public void updateBuildingConfigured() {
-		buildingConfigured = phases.size() > 0 && attributes.size() > 0;
+	private boolean isConfigEmpty() {
+		return phases.isEmpty() && attributes.isEmpty() && taskTypes.isEmpty();
+	}
+	
+	public State getState() {
+		return isConfigEmpty() ? State.EMPTY
+			: isDiagramEmpty() ? State.CONFIGURING
+			: State.MODELLING;
 	}
 
 	public List<Attribute> getAttributes() {
@@ -137,6 +173,22 @@ public class Model extends BaseEntity {
 	public void addPhase(Phase phase) {
 		ModelToMany.PHASES.addOneOfMany(this, phase);
 	}
+
+	public List<TaskType> getTaskTypes() {
+		return taskTypes;
+	}
+
+	public void setTaskTypes(List<TaskType> taskTypes) {
+		ModelToMany.TYPES.setMany(this, taskTypes);
+	}
+	
+	void internalSetTaskTypes(List<TaskType> taskTypes) {
+		this.taskTypes = taskTypes;
+	}
+	
+	public void addTaskType(TaskType taskType) {
+		ModelToMany.TYPES.addOneOfMany(this, taskType);
+	}
 	
 	public List<Task> getTasks() {
 		return tasks;
@@ -154,30 +206,6 @@ public class Model extends BaseEntity {
 		this.tasks = tasks;
 	}
 
-	@JsonIgnore
-	public List<Location> getLocations() {
-		return tasks.stream()
-			.map(Task::getLocations)
-			.flatMap(List::stream)
-			.collect(Collectors.toList());
-	}
-
-	public List<TaskType> getTaskTypes() {
-		return taskTypes;
-	}
-
-	public void setTaskTypes(List<TaskType> taskTypes) {
-		ModelToMany.TYPES.setMany(this, taskTypes);
-	}
-	
-	void internalSetTaskTypes(List<TaskType> taskTypes) {
-		this.taskTypes = taskTypes;
-	}
-	
-	public void addTaskType(TaskType taskType) {
-		ModelToMany.TYPES.addOneOfMany(this, taskType);
-	}
-
 	public List<Dependency> getDependencies() {
 		return dependencies;
 	}
@@ -192,13 +220,6 @@ public class Model extends BaseEntity {
 	
 	public void addDependency(Dependency dependency) {
 		ModelToMany.DEPENDENCIES.addOneOfMany(this, dependency);
-	}
-	
-	@PostLoad
-	@PrePersist
-	@PreUpdate
-	public void updateDependentFields() {
-		updateBuildingConfigured();
 	}
 	
 }

@@ -21,23 +21,39 @@ define([
 		Models.resource = resource;
 		Models.Resource = ModelResource;
 		
+		var REL_SINGULAR = 'model',
+			REL_PLURAL = 'models',
+			DEFAULT_PROJECTION = 'modelSummary';
+		
+		var projectionTemplateParams = {
+			projection: DEFAULT_PROJECTION
+		}
+		
 		function firstPage() {
 			return PreciseApi.fromBase().traverse(function (builder) {
-				return builder.follow('models').get();
-			}).then(Pages.wrapper('models'));
+				return builder
+					.follow(REL_PLURAL)
+					.withTemplateParameters(projectionTemplateParams)
+					.get();
+			}).then(Pages.wrapper(REL_PLURAL));
 		}
 		
 		function findAll() {
 			return firstPage()
-				.then(Pages.collectRemaining);
+				.then(function (page) {
+					return page.collectRemaining(projectionTemplateParams);
+				});
 		}
 		
 		function findByName(name) {
 			return PreciseApi.fromBase()
 				.traverse(function (builder) {
 					return builder
-						.follow('models', 'search', 'findByName')
-						.withTemplateParameters({ name: name })
+						.follow(REL_PLURAL, 'search', 'findByName')
+						.withTemplateParameters({
+							name: name,
+							projection: DEFAULT_PROJECTION
+						})
 						.get()
 				}).then(Models.existingResource);
 		}
@@ -55,7 +71,7 @@ define([
 		}
 		
 		function ModelResource(data, existing) {
-			Resources.Base.call(this, data, 'model', existing);
+			Resources.Base.call(this, data, existing);
 		}
 		
 		util.defineClass(Resources.Base, {
@@ -63,11 +79,11 @@ define([
 			constructor: ModelResource,
 
 			rels: {
-				singular: 'model',
-				plural: 'models'
+				singular: REL_SINGULAR,
+				plural: REL_PLURAL
 			},
 			
-			defaultProjection: null,
+			defaultProjection: DEFAULT_PROJECTION,
 		
 			searchByModel: function (rel, params) {
 				var templateParams = _.assign({
@@ -109,8 +125,8 @@ define([
 				return this.getList('phases', params);
 			},
 			
-			getTaskTypes: function (parapms) {
-				return this.getList('taskTypes');
+			getTaskTypes: function (params) {
+				return this.getList('taskTypes', params);
 			}
 		
 		});

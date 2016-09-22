@@ -50,7 +50,7 @@ public class MDLConfigController {
 	@Transactional
 	public void set(@PathVariable String name, @RequestBody MDLConfigAST config) {
 		Model model = modelRepository.findByName(name);
-		if (model.isBuildingConfigured())
+		if (!model.getState().getConfigInfo().isEditable())
 			throw new IllegalStateException("Cannot configure an already configured model");
 		config.applyTo(model);
 		phaseRepository.save(model.getPhases());

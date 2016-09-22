@@ -30,14 +30,14 @@ define([
 			return svc.cachedModels ? $q.when(svc.cachedModels) : Models.findAll().then(cacheModels);
 		}
 		
-		function importFile(model, file) {
+		function importFile(file) {
 			return Files.newReader()
 				.readAsText(file)
 				.then(JSON.parse)
 				.then(function (json) {
-					return MDLFiles.importModelFile(model, json)
+					return MDLFiles.importJSON(MDLFiles.urlToFile(file.name), json)
 				})
-				.then(clearCache, PreciseApi.extractErrorMessage);
+				.then(clearCache, PreciseApi.mapReason(PreciseApi.toErrorMessage));
 		}
 		
 		function renameModel(model, newName) {

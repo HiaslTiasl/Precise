@@ -26,15 +26,25 @@ define([
 		
 		function $onChanges(changes) {
 			if (changes.model) {
-				$ctrl.selectedModel = $ctrl.model.data.buildingConfigured ? $ctrl.model.data : null;
+				$ctrl.selectedModel = $ctrl.model.data.configInfo.empty ? null : $ctrl.model.data;
 				modelChanged();
 			}
 		}
 		
+		function canUseConfigOf(model) {
+			return model.name !== $ctrl.model.data.name;
+		}
+		
+		function filterSelectableModels(models) {
+			return models.filter(canUseConfigOf);
+		}
+		
 		function loadModels() {
-			return AllModels.getModels().then(function (models) {
-				$ctrl.models = models;
-			});
+			return AllModels.getModels()
+				.then(filterSelectableModels)
+				.then(function (models) {
+					$ctrl.selectableModels = models;
+				});
 		}
 		
 		function showConfigPreview(mdl) {
@@ -57,7 +67,7 @@ define([
 		function modelChanged() {
 			if ($ctrl.selectedModel) {
 				$ctrl.file = null;
-				$http.get(MDLFiles.getConfigFileURI($ctrl.selectedModel)).then(function (response) {
+				$http.get(MDLFiles.urlToModel($ctrl.selectedModel, true)).then(function (response) {
 					showConfigPreview(response.data);
 				});
 			}
@@ -69,7 +79,7 @@ define([
 		}
 		
 		function sendConfig() {
-			MDLFiles.importConfigFile($ctrl.model.data, $ctrl.config)
+			MDLFiles.importJSON(MDLFiles.urlToModel($ctrl.model.data, true), $ctrl.config)
 				.then(reload);
 		}
 		

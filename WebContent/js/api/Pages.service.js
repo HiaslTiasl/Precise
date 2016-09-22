@@ -23,26 +23,21 @@ define([
 		});
 		
 		var NEXT = 'next',
-			PREV = 'prev',
-			ALL_EMBEDDED = '[$all]';
+			PREV = 'prev';
 		
-		function guessExisting(data) {
-			return !!PreciseApi.linkTo(data);
+		function collectRemaining(page, templateParams) {
+			return page.collectRemaining(templateParams);
 		}
 		
-		function collectRemaining(page) {
-			return page.collectRemaining();
-		}
-		
-		function collectRemainingImpl(page, result) {
+		function collectRemainingImpl(page, templateParams, result) {
 			result = result.then(function (resultItems) {
 				return page.items().then(function (items) {
 					Array.prototype.push.apply(resultItems, items);
 					return resultItems;
 				});
 			});
-			return !page.hasNext() ? result : page.next().then(function (nextPage) {
-				return collectRemainingImpl(nextPage, result);
+			return !page.hasNext() ? result : page.next(templateParams).then(function (nextPage) {
+				return collectRemainingImpl(nextPage, templateParams, result);
 			});
 		}
 		
@@ -66,15 +61,11 @@ define([
 			constructor: PageWrapper,
 			
 			items: function () {
-				var rel = this.rel;
-				return PreciseApi.continueFrom(this.data)
-					.traverse(function (builder) {
-						return builder.follow(rel + ALL_EMBEDDED).get();
-					});
+				return $q.when(PreciseApi.embeddedArray(this.data, this.rel));
 			},
 			
 			hrefTo: function (rel) {
-				return PreciseApi.linkTo(this.data, rel);
+				return PreciseApi.hrefTo(this.data, rel);
 			},
 			
 			has: function (rel) {
@@ -89,28 +80,28 @@ define([
 				return this.has(PREV);
 			},
 			
-			navigate: function (direction) {
+			navigate: function (direction, templateParams) {
 				var rel = this.rel,
 					href = this.hrefTo(direction);
 				return !href ? $q.reject(new NoSuchPageError())
 					: PreciseApi
-						.continueFrom(href)
-						.followAndGet()
-						.then(function (page) {
-							return new PageWrapper(page, rel);
-						});
+						.from(href)
+						.traverse(function (builder) {
+							return builder.withTemplateParameters(templateParams).get();
+						})
+						.then(wrapper(rel));
 			},
 			
-			next: function () {
-				return this.navigate(NEXT);
+			next: function (templateParams) {
+				return this.navigate(NEXT, templateParams);
 			},
 			
-			prev: function () {
-				return this.navigate(PREV);
+			prev: function (templateParams) {
+				return this.navigate(PREV, templateParams);
 			},
 			
-			collectRemaining: function () {
-				return collectRemainingImpl(this, $q.when([]));
+			collectRemaining: function (templateParams) {
+				return collectRemainingImpl(this, templateParams, $q.when([]));
 			}
 			
 		});
