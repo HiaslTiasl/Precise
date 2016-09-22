@@ -23,6 +23,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(uniqueConstraints=@UniqueConstraint(name="UC_MODEL_NAME", columnNames="name"))
 public class Model extends BaseEntity {
 	
+	public enum ConfigState {
+		EMPTY,
+		TEMPORARY,
+		FINAL
+	}
+	
 	@Column(nullable=false)
 	@NotNull(message="{model.name.notempty}")
 	@Size(min=1, message="{model.name.notempty}")
@@ -37,6 +43,8 @@ public class Model extends BaseEntity {
 	 * changed anymore unless it is erased.
 	 */
 	private boolean buildingConfigured;
+	
+	private ConfigState configState;
 	
 	// Building configuration
 	//---------------------------------------------------
@@ -76,6 +84,14 @@ public class Model extends BaseEntity {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	public ConfigState getConfigState() {
+		return configState;
+	}
+
+	public void setConfigState(ConfigState configState) {
+		this.configState = configState;
 	}
 
 	public boolean isBuildingConfigured() {

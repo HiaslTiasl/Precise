@@ -49,7 +49,7 @@ define([
 					.readAsText(file)
 					.then(JSON.parse)
 					.then(function (json) {
-						showConfigPreview(_.pick(json, 'attributes', 'phases'));
+						showConfigPreview(_.pick(json, 'attributes', 'phases', 'taskTypes'));
 					});
 			}
 		}

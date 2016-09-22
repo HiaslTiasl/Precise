@@ -22,7 +22,6 @@ public class MDLFileAST {
 	@JsonIgnore
 	private MDLConfigAST config;
 	
-	private List<MDLTaskTypeAST> taskTypes;
 	private List<MDLTaskAST> tasks;
 	private List<MDLDependencyAST> dependencies;
 	
@@ -35,7 +34,6 @@ public class MDLFileAST {
 	public MDLFileAST(Model model) {
 		this.model = model;
 		config = new MDLConfigAST(context, model);
-		taskTypes = Util.mapToList(model.getTaskTypes(), context::translate);
 		tasks = Util.mapToList(model.getTasks(), context::translate);
 		dependencies = Util.mapToList(model.getDependencies(), context::translate);
 	}
@@ -43,9 +41,6 @@ public class MDLFileAST {
 	public Model toModel(String name) {
 		model.setName(name);
 		config.applyTo(model);
-		taskTypes.stream()
-			.map(MDLTaskTypeAST::toTaskType)
-			.forEach(model::addTaskType);
 		tasks.stream()
 			.map(MDLTaskAST::toTask)
 			.forEach(model::addTask);
@@ -75,20 +70,22 @@ public class MDLFileAST {
 		this.config.setPhases(phases);
 	}
 	
+	@JsonProperty("taskTypes")
+	public List<MDLTaskTypeAST> getTaskTypes() {
+		return config.getTaskTypes();
+	}
+	
+	@JsonProperty("taskTypes")
+	public void setTaskTypes(List<MDLTaskTypeAST> taskTypes) {
+		config.setTaskTypes(taskTypes);
+	}
+	
 	public Model getModel() {
 		return model;
 	}
 	
 	public void setModel(Model model) {
 		this.model = model;
-	}
-
-	public List<MDLTaskTypeAST> getTaskTypes() {
-		return taskTypes;
-	}
-	
-	public void setTaskTypes(List<MDLTaskTypeAST> taskTypes) {
-		this.taskTypes = taskTypes;
 	}
 	
 	public List<MDLTaskAST> getTasks() {

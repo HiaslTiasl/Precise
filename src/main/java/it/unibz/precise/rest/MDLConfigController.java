@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.unibz.precise.model.Model;
@@ -39,7 +38,6 @@ public class MDLConfigController {
 		path=BASE_PATH,
 		method=RequestMethod.GET
 	)
-	@Transactional
 	public ResponseEntity<MDLConfigAST> get(@PathVariable String name) {
 		MDLConfigAST config = configByName(name);
 		return new ResponseEntity<>(config, HttpStatus.OK);
@@ -50,7 +48,7 @@ public class MDLConfigController {
 		method=RequestMethod.PUT
 	)
 	@Transactional
-	public void set(@PathVariable String name, @RequestBody MDLConfigAST config/*, @RequestParam("srcName") String srcName*/) {
+	public void set(@PathVariable String name, @RequestBody MDLConfigAST config) {
 		Model model = modelRepository.findByName(name);
 		if (model.isBuildingConfigured())
 			throw new IllegalStateException("Cannot configure an already configured model");
@@ -65,8 +63,7 @@ public class MDLConfigController {
 	@Transactional
 	public ResponseEntity<Model> clear(@PathVariable String name) {
 		Model model = modelRepository.findByName(name);
-		model.setAttributes(null);
-		model.setPhases(null);
+		MDLConfigAST.clearConfigOf(model);
 		return new ResponseEntity<>(model, HttpStatus.OK);
 	}
 
