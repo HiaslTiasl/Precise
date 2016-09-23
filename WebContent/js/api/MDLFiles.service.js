@@ -9,6 +9,7 @@ define([], function () {
 		
 		svc.fileNameOf = fileNameOf;
 		svc.urlToModel = urlToModel;
+		svc.urlToFile = urlToFile;
 		svc.importJSON = importJSON;
 		svc.clearConfig = clearConfig;
 		

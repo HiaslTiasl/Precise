@@ -6,7 +6,14 @@ define([], function () {
 	function FilesService($q) {
 		var svc = this;
 		
+		svc.readJSON = readJSON;
 		svc.newReader = newReader;
+		
+		function readJSON(file) {
+			return newReader()
+				.readAsText(file)
+				.then(JSON.parse)
+		}
 		
 		function newReader() {
 			return new Reader();

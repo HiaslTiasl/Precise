@@ -31,9 +31,16 @@ define([
 		}
 		
 		function importFile(file) {
+			// TODO: ------------------------- Discuss ----------------------------
+			// Here we read the file content as plain text and let the server do the parsing.
+			// This is the cleaner approach as the server decides what is valid, plus we only
+			// parse the JSON once. 
+			// However, if we already parse it before sending, we can avoid sending the file
+			// at the first place. Additionally, parsing on the client is also done when importing
+			// the building configuration, so we would get the same kind of error messages
+			// (Unless we change that, too).
 			return Files.newReader()
 				.readAsText(file)
-				.then(JSON.parse)
 				.then(function (json) {
 					return MDLFiles.importJSON(MDLFiles.urlToFile(file.name), json)
 				})

@@ -16,7 +16,7 @@ import it.unibz.util.Util;
 @Validated
 public class MDLFileAST {
 	
-	@JsonIgnoreProperties({"id", "name", "attributes", "phases", "taskTypes", "tasks", "dependencies"})
+	@JsonIgnoreProperties({"id", "name", "state", "attributes", "phases", "taskTypes", "tasks", "dependencies"})
 	private Model model;
 
 	@JsonIgnore
