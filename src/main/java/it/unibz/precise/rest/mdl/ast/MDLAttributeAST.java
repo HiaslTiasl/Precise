@@ -20,6 +20,7 @@ public class MDLAttributeAST {
 	private Attribute attribute;
 	
 	private String name;
+	private String shortName;
 	private String description;
 	private Object range;
 	private boolean ordered;
@@ -31,6 +32,7 @@ public class MDLAttributeAST {
 		this.attribute = attribute;
 		List<String> range = attribute.getRange();
 		name = attribute.getName();
+		shortName = attribute.getShortName();
 		description = attribute.getDescription();
 		this.range = attribute.isValuesMatchPositions() ? range.size() : range;
 		ordered = attribute.isOrdered();
@@ -40,6 +42,7 @@ public class MDLAttributeAST {
 		if (attribute == null) {
 			attribute = new Attribute();
 			attribute.setName(name);
+			attribute.setShortName(shortName);
 			attribute.setDescription(description);
 			attribute.setRange(resolveRange(attribute, range));
 			attribute.setOrdered(ordered);
@@ -53,6 +56,14 @@ public class MDLAttributeAST {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getShortName() {
+		return shortName;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
 	}
 
 	public String getDescription() {

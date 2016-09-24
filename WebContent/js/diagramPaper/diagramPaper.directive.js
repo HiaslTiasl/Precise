@@ -22,9 +22,9 @@ function (
 	
 	var GUTTER_WIDTH = 100;
 	
-	diagramDirective.$inject = ['$window', '$timeout'];
+	diagramPaperDirective.$inject = ['$window', '$timeout'];
 	
-	function diagramDirective($window, $timeout) {
+	function diagramPaperDirective($window, $timeout) {
 		return {
 			templateUrl: 'js/diagramPaper/diagramPaper.html',
 	        scope: {
@@ -32,7 +32,8 @@ function (
 	            width: '@',
 	            gridSize: '@',
 	            model: '<',
-	            tools: '<'
+	            tools: '<',
+				onStructureChanged: '&'
 	        },
 	        controller: 'DiagramPaperController',
 	        controllerAs: '$ctrl',
@@ -210,6 +211,6 @@ function (
 	    };
 	}
 	
-	return diagramDirective;
+	return diagramPaperDirective;
 	
 });

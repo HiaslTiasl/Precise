@@ -2,20 +2,21 @@
 	<button class="btn btn-default" ng-click="$ctrl.createTaskType()">Create</button>
 	<span class="text-danger">{{$ctrl.fileErrorMsg}}</span>
 </div>
-<table id="phase-table" class="table table-striped" st-table="$ctrl.coll" st-safe-src="$ctrl.taskTypes">
+<table id="phase-table" class="table table-striped" st-table="$ctrl.coll" st-safe-src="$ctrl.config.taskTypes">
 	<thead>
 		<tr>
 			<th>Name</th>
-			<th>Craft</th>
 			<th>Description</th>
+			<th>Craft</th>
+			<th>Phase</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr ng-repeat="tt in $ctrl.coll">
 			<td>{{tt.name}}</td>
-			<td>{{tt.craft}}</td>
 			<td>{{tt.description}}</td>
-			<td>
+			<td>{{tt.craft}}</td>
+			<td>{{tt.phase}}</td>
 		</tr>
 	</tbody>
 </table>

@@ -70,7 +70,7 @@ define([
 			if (!exclParts)
 				exclParts = [];
 			util.mapInto(exclParts, $ctrl.resource.data.exclusiveness, getAttrName);
-			return exclParts.length ? exclParts.join(', ') : '(no attributes)';
+			return !exclParts.length ? null : exclParts.join(', ');
 		}
 		
 		function showOrderPart(order) {

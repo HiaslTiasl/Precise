@@ -16,7 +16,7 @@ define([
 	var ARROW_MARKER = 'm 0 10 l -24 10 l 24 10 z',
 		CHAIN_FILTER_ID = 'chain-precedence';
 	
-	var getScopeName = _.property('name');
+	var getScopeLabel = _.property('shortName');
 	
 	var DependencyShape = util.set(joint.shapes, ['precise', 'DependencyShape'], joint.dia.Link.extend(BaseMixin).extend({
 		
@@ -93,7 +93,7 @@ define([
 				position: 0.5,
 				attrs: {
 					text: {
-						text: data.scope && data.scope.map(getScopeName).join(','),
+						text: data.scope && data.scope.map(getScopeLabel).join(', '),
 						transform: 'translate(-10, -10)'
 					}
 				}

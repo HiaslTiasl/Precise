@@ -14,7 +14,7 @@ define([
 		$ctrl.done = done;
 		$ctrl.cancelled = cancelled;
 		
-		$ctrl.$onChanges = $onChanges;
+		//$ctrl.$onChanges = $onChanges;
 		
 		$scope.$on('cell:delete', deleteCell);
 		$scope.$on('task:new', newTaskHandler);
@@ -70,7 +70,7 @@ define([
 					$ctrl.resourceType = 'task';
 					$ctrl.activeResource = $ctrl.taskResource = resource;
 					$ctrl.dependencyResource = null;
-				})
+				});
 		}
 		
 		function newDependencyHandler(event, data) {
@@ -127,8 +127,12 @@ define([
 		templateUrl: 'js/singleModel/singleModel-diagram.html',
 		controller: SingleModelDiagramController,
 		controllerAs: '$ctrl',
+		require: {
+			singleModel: '^preciseSingleModel'
+		},
 		bindings: {
-			model: '<'
+			model: '<',
+			reload: '<'
 		}
 	};
 });

@@ -9,6 +9,8 @@ public interface AttributeSummaryProjection {
 
 	String getName();
 	
+	String getShortName();
+	
 	boolean isOrdered();
 	
 	boolean isValuesMatchPositions();

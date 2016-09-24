@@ -5,13 +5,23 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelController.$inject = ['$state'];
+	SingleModelController.$inject = ['$state', 'Models'];
 	
-	function SingleModelController($state) {
+	function SingleModelController($state, Models) {
 		
 		var $ctrl = this;
 		
 		$ctrl.$state = $state;
+		
+		$ctrl.reload = reload;
+		
+		function reload() {
+			return $ctrl.model.reload('modelSummary')
+				.then(Models.existingResource)
+				.then(function (model) {
+					return $ctrl.model = model;
+				});
+		}
 		
 	}
 	

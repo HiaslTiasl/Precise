@@ -11,6 +11,8 @@ public interface ExpandedTaskTypeProjection {
 	
 	String getCraft();
 	
+	String getCraftShort();
+	
 	PhaseSummaryProjection getPhase();
 	
 }

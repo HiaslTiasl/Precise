@@ -15,15 +15,6 @@ define([
 		$ctrl.diagramToolset = DiagramPaperToolset;
 		$ctrl.onPaperInit = onPaperInit;
 		
-		// remote -> diagram
-		$scope.$on('properties:created', onPropertiesCreated);
-		$scope.$on('properties:change', onPropertiesChange);
-		$scope.$on('properties:cancel', onPropertiesCancel);
-		$scope.$on('cell:deleted', onCellDeleted);
-		
-		// diagram -> remote
-		$scope.$on('diagram:remove', onDiagramRemove);
-		
 		function broadcast() {
 			var args = arguments;
 			$timeout(function () {
@@ -33,14 +24,30 @@ define([
 		
 		function onPaperInit(paper) {
 			$ctrl.diaPaper = new DiagramPaper(paper);
-			$ctrl.diaPaper.on('all', broadcast);
+			attachListeners();
 			PreciseDiagraPaper.toRawGraph($ctrl.model, paper.getArea()).then(function (rawGraph) {
 				$ctrl.diaPaper.fromJSON(rawGraph);
 			});
 		}
 		
+		function attachListeners() {
+			
+			// paper events -> scope events
+			$ctrl.diaPaper.on('all', broadcast);
+			
+			// remote -> diagram
+			$scope.$on('properties:created', onPropertiesCreated);
+			$scope.$on('properties:change', onPropertiesChange);
+			$scope.$on('properties:cancel', onPropertiesCancel);
+			$scope.$on('cell:deleted', onCellDeleted);
+			
+			// diagram -> remote
+			$scope.$on('diagram:remove', onDiagramRemove);
+		}
+		
 		function onPropertiesCreated(event, type, data) {
 			$ctrl.diaPaper.addCell(type, data);
+			$ctrl.onStructureChanged();
 		}
 		
 		function onPropertiesChange(event, type, data) {
@@ -53,12 +60,14 @@ define([
 		
 		function onCellDeleted(event, type, data) {
 			$ctrl.diaPaper.removeCell(type, data);
+			$ctrl.onStructureChanged();
 		}
 		
 		function onDiagramRemove(event, type, data) {
 			PreciseApi.deleteResource(data)['catch'](function () {
 				$ctrl.diaPaper.addCell(type, data);
-			});
+			})
+			.then($ctrl.onStructureChanged);
 		}
 		
 	}

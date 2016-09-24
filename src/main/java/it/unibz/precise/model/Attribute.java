@@ -19,6 +19,8 @@ public class Attribute extends BaseEntity {
 	@Column(nullable=false)
 	private String name;
 	
+	private String shortName;
+	
 	private String description;
 	
 	@ElementCollection
@@ -48,6 +50,14 @@ public class Attribute extends BaseEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getShortName() {
+		return shortName != null ? shortName : name;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
 	}
 
 	public String getDescription() {

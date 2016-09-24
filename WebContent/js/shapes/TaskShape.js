@@ -116,7 +116,7 @@ define([
 				'text.task-id':             { text: data.id },
 				'text.task-workers-needed': { text: data.numberOfWorkersNeeded },
 				'text.task-units-per-day':  { text: data.numberOfUnitsPerDay },
-				'text.task-type-craft':     { text: data.type.craft },
+				'text.task-type-craft':     { text: data.type.craftShort },
 				'text.task-type-name':      { text: joint.util.breakText(data.type.name, { width: WIDTH, height: NAME_HEIGHT }) }
 			});
 			if (locationPatterns) {

@@ -1,5 +1,5 @@
 <div class="panels">
-	<precise-diagram-paper model="$ctrl.model"></precise-diagram-paper>
+	<precise-diagram-paper model="$ctrl.model" on-structure-changed="$ctrl.reload()"></precise-diagram-paper>
 	<div id="properties-wrapper">
 		<h3>Properties</h3>
 		<task-properties

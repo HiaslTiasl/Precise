@@ -16,8 +16,9 @@ public class MDLTaskTypeAST {
 
 	private String name;
 	private String description;
-	private String craft;
 	private MDLPhaseAST phase;
+	private String craft;
+	private String craftShort;
 	
 	
 	public MDLTaskTypeAST() {
@@ -27,8 +28,9 @@ public class MDLTaskTypeAST {
 		this.taskType = taskType;
 		name = taskType.getName();
 		description = taskType.getDescription();
-		craft = taskType.getCraft();
 		phase = context.translate(taskType.getPhase());
+		craft = taskType.getCraft();
+		craftShort = taskType.getCraftShort();
 	}
 	
 	public TaskType toTaskType() {
@@ -36,8 +38,9 @@ public class MDLTaskTypeAST {
 			taskType = new TaskType();
 			taskType.setName(name);
 			taskType.setDescription(description);
-			taskType.setCraft(craft);
 			taskType.setPhase(phase.toPhase());
+			taskType.setCraft(craft);
+			taskType.setCraftShort(craftShort);
 		}
 		return taskType;
 	}
@@ -57,6 +60,14 @@ public class MDLTaskTypeAST {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
+	public MDLPhaseAST getPhase() {
+		return phase;
+	}
+	
+	public void setPhase(MDLPhaseAST phase) {
+		this.phase = phase;
+	}
 
 	public String getCraft() {
 		return craft;
@@ -66,12 +77,12 @@ public class MDLTaskTypeAST {
 		this.craft = craft;
 	}
 
-	public MDLPhaseAST getPhase() {
-		return phase;
+	public String getCraftShort() {
+		return craftShort;
 	}
 
-	public void setPhase(MDLPhaseAST phase) {
-		this.phase = phase;
+	public void setCraftShort(String craftShort) {
+		this.craftShort = craftShort;
 	}
 	
 }

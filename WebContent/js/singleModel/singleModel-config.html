@@ -1,8 +1,54 @@
+
+<div>
+	<button
+		class="btn btn-primary"
+		ng-click="$ctrl.chooseOptionsOpen = !$ctrl.chooseOptionsOpen"
+		ng-disabled="!$ctrl.model.data.configInfo.editable">
+		Choose <span class="caret"></span>
+	</button>
+	<button
+		class="btn btn-danger"
+		ng-click="$ctrl.clearConfig()"
+		ng-disabled="!$ctrl.model.data.configInfo.editable || $ctrl.model.data.configInfo.empty">
+		Clear
+	</button>
+</div>
+
+<form class="form" uib-collapse="!$ctrl.chooseOptionsOpen">
+	<div class="form-group">
+		<label for="model-config" class="control-label">Use config of existing model:</label>
+		<select
+			id="model-config"
+			class="form-control"
+			ng-model="$ctrl.selectedModel"
+			ng-options="m as m.name for m in $ctrl.selectableModels"
+			ng-change="$ctrl.modelChanged()">
+			<option value="">-- Select a model --</option>
+		</select>
+	</div>
+	<div class="form-group">
+		<label for="file-config" class="control-label">Import from file:</label>
+		<div id="file-config" class="input-group">
+			<span class="input-group-btn">			
+				<button class="btn btn-default" ng-model="$ctrl.file" ngf-select="$ctrl.selectFile($ctrl.file)">Browse</button>
+			</span>
+			<input type="text" class="form-control" ng-model="$ctrl.file.name" readonly/>
+		</div>
+	</div>
+	<div class="text-right">
+		<button
+			class="btn btn-primary"
+			ng-click="$ctrl.sendConfig()"
+			ng-disabled="!$ctrl.selectedModel && !$ctrl.file">Done</button>
+		<button class="btn btn-default" ng-click="$ctrl.cancel()">Cancel</button>
+	</div>
+</form>
+
 <uib-tabset>
 	<uib-tab heading="Building">
-		<precise-building model="$ctrl.model"></precise-building>
+		<precise-building config="$ctrl.config"></precise-building>
 	</uib-tab>
 	<uib-tab heading="Task Types">
-		<precise-task-types model="$ctrl.model"></precise-task-types>
+		<precise-task-types config="$ctrl.config"></precise-task-types>
 	</uib-tab>
 </uib-tabset>

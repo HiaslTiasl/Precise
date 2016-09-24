@@ -9,6 +9,7 @@ define([
 	'./Tasks.service',
 	'./Phases.service',
 	'./Dependencies.service',
+	'./withShortName.filter',
 	'./join.filter'
 ], function (
 	angular,
@@ -21,6 +22,7 @@ define([
 	TasksService,
 	PhasesService,
 	DependenciesService,
+	withShortNameFilterFactory,
 	joinFilterFactory
 ) {
 	'use strict';
@@ -35,6 +37,7 @@ define([
 		.service('Tasks', TasksService)
 		.service('Phases', PhasesService)
 		.service('Dependencies', DependenciesService)
+		.filter('withShortName', withShortNameFilterFactory)
 		.filter('join', joinFilterFactory);
 	
 });

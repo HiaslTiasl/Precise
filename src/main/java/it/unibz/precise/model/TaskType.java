@@ -17,6 +17,7 @@ public class TaskType extends BaseEntity {
 	private String name;
 	private String description;
 	private String craft;
+	private String craftShort;
 	
 	@ManyToOne
 	private Phase phase;
@@ -46,6 +47,14 @@ public class TaskType extends BaseEntity {
 
 	public void setCraft(String craft) {
 		this.craft = craft;
+	}
+
+	public String getCraftShort() {
+		return craftShort != null ? craftShort : craft;
+	}
+
+	public void setCraftShort(String craftShort) {
+		this.craftShort = craftShort;
 	}
 
 	public Phase getPhase() {

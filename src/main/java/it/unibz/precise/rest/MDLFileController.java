@@ -5,7 +5,10 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.rep.ModelRepository;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
+import it.unibz.util.ResponseEntityHelper;
 
 @RestController
 @ExposesResourceFor(MDLFileAST.class)
@@ -36,14 +40,12 @@ public class MDLFileController {
 	
 	public static final String RESOURCE_NAME = "/files";
 	
-	public static final String PATH_TO_FILE = "/{fileName}";
+	public static final String PATH_TO_FILE = "/{name}.mdl";
 	
-	public static final String MDL_FILE_EXT = ".mdl";
-	
-	private String getModelNameFor(String fileName) {
-		return fileName.endsWith(MDL_FILE_EXT)
-			? fileName.substring(0, fileName.length() - MDL_FILE_EXT.length())
-			: null;
+
+	@RequestMapping("/**")
+	public ResponseEntity<?> fallback() {
+		return ResponseEntityHelper.notFound(new HttpHeaders());
 	}
 	
 	@RequestMapping(
@@ -51,8 +53,11 @@ public class MDLFileController {
 		method=RequestMethod.GET,
 		produces=MediaType.APPLICATION_JSON_VALUE
 	)
-	public MDLFileAST findOne(@PathVariable("fileName") String fileName) {
-		return MDLFileAST.translate(repository.findByName(getModelNameFor(fileName)));
+	public ResponseEntity<?> findOne(@PathVariable("name") String name) {
+		MDLFileAST mdl = MDLFileAST.translate(repository.findByName(name));
+		return mdl == null
+			? ResponseEntityHelper.notFound(new HttpHeaders())
+			: ResponseEntityHelper.response(HttpStatus.OK, new HttpHeaders(), mdl);
 	}
 	
 	@Transactional
@@ -60,17 +65,15 @@ public class MDLFileController {
 		path=PATH_TO_FILE,
 		method=RequestMethod.PUT
 	)
-	public void save(
-		@PathVariable("fileName") String fileName,
+	public ResponseEntity<?> save(
+		@PathVariable("name") String name,
 		@Valid @RequestBody MDLFileAST modelDTO,
 		Errors errors,
 		@RequestParam(defaultValue="false") boolean update)
 	{
-		String modelName = getModelNameFor(fileName);
-		
 		if (update) {
 			// If explicitly requested, allow to overwrite a model with the given name
-			Model oldModel = repository.findByName(modelName);
+			Model oldModel = repository.findByName(name);
 			if (oldModel != null) {
 				// Delete old model before inserting the new one to avoid name conflict.
 				// Flush to ensure proper order: first delete, then insert.
@@ -80,12 +83,13 @@ public class MDLFileController {
 				repository.flush();		 
 			}
 		}
-		Model newModel = modelDTO.toModel(modelName);
+		Model newModel = modelDTO.toModel(name);
 		validator.validate(newModel, errors);
 		if (errors.hasErrors())
 			throw new RepositoryConstraintViolationException(errors);
 		else
 			repository.save(newModel);
+		return ResponseEntityHelper.response(HttpStatus.CREATED, new HttpHeaders());
 	}
 	
 }

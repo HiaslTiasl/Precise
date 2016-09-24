@@ -9,8 +9,12 @@ define([
 	
 	function SingleModelService(Models) {
 		
-		this.findByName = _.memoize(Models.findByName);
-		this.cache = this.findByName.cache;
+		this.findByName = Models.findByName;
+		this.findSummaryByName = findByNameWithPartInfos;
+		
+		function findByNameWithPartInfos() {
+			return Models.findByName({ projection: 'modelSummary' });
+		}
 		
 	}
 	

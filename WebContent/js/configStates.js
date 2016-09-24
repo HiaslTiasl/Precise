@@ -3,17 +3,20 @@ define([
 ) {
 	'use strict';
 	
-	resolveSingleModel.$inject = ['$transition$', 'SingleModel'];
+	resolveSingleModelWithPartInfos.$inject = ['$transition$', 'Models'];
 	
-	function resolveSingleModel($transition$, SingleModel) {
-		return SingleModel.findByName($transition$.params().name);
+	function resolveSingleModelWithPartInfos($transition$, Models) {
+		return Models.findByNameWithPartInfos($transition$.params().name);
 	}
 	
-	checkDiagramEditable.$inject = ['$transition$', 'model'];
+	checkDiagramEditable.$inject = ['$transition$', 'Models'];
 	
-	function checkDiagramEditable($transition$, model) {
-		return model.data.diagramInfo.editable
-			|| $transition$.router.stateService.target('singleModel.config', $transition$.params());
+	function checkDiagramEditable($transition$, Models) {
+		return Models.findByNameWithPartInfos($transition$.params().name)
+			.then(function (model) {
+				return model.data.diagramInfo.editable
+					|| $transition$.router.stateService.target('singleModel.config', $transition$.params());
+			});
 	}
 	
 	clearCache.$inject = ['$transition$', 'SingleModel'];
@@ -49,21 +52,27 @@ define([
 				url: '/models/:name',
 				component: 'preciseSingleModel',
 				abstract: true,
-				onExit: clearCache,
-				resolve: {
-					'model': resolveSingleModel
+				resolve: [{
+					token: 'model',
+					resolveFn: resolveSingleModelWithPartInfos,
+					deps: resolveSingleModelWithPartInfos.$inject
+				}],
+				resolvePolicy: {
+					'model': {
+						when: 'EAGER'	
+					}
 				}
 			})
 			.state('singleModel.config', {
 				url: '/config',
-				component: 'preciseConfig',
+				template: '<precise-config model="$ctrl.model" reload="$ctrl.reload"></precise-config',
 				data: {
 					title: 'Configuration'
 				}
 			})
 			.state('singleModel.diagram', {
 				url: '/diagram',
-				component: 'preciseDiagram',
+				template: '<precise-diagram model="$ctrl.model" reload="$ctrl.reload"></precise-diagram>',
 				onEnter: checkDiagramEditable,
 				data: {
 					title: 'Diagram'

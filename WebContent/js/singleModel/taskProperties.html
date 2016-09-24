@@ -34,7 +34,7 @@
 	<div class="form-group">
 		<label for="craft" class="col-sm-5 control-label">Craft</label>
 		<div class="col-sm-7">
-			<p id="craft" class="form-control-static">{{$ctrl.resource.data.type.craft}}</p>
+			<p id="craft" class="form-control-static">{{$ctrl.resource.data.type | withShortName:'craft':'craftShort'}}</p>
 		</div>
 	</div>
 	<div class="form-group">
@@ -70,7 +70,7 @@
 				e-ng-options="attr as attr.name for attr in $ctrl.resource.data.type.phase.attributes"
 				e-ng-change="ctrl.exclusivenessChanged()"
 				ng-disabled="$ctrl.resource.data.globalExclusiveness">
-				{{ $ctrl.showExclusiveness() }}
+				{{ $ctrl.showExclusiveness() || '(no attributes)' }}
 			</a>
 		</div>
 	</div>

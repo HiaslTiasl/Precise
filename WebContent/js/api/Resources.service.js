@@ -38,16 +38,31 @@ define([
 				return this.data;
 			},
 			
+			getTemplateParams: function (requestedProjection) {
+				var projection = requestedProjection !== undefined ? requestedProjection : self.defaultProjection;
+				return projection && {
+					projection: projection
+				};
+			},
+			
 			create: function (projection) {
 				var self = this;
 				return PreciseApi.fromBase()
 					.traverse(function (builder) {
 						return builder
 							.follow(self.rels.plural)
-							.withTemplateParameters({
-								projection: projection || self.defaultProjection
-							})
+							.withTemplateParameters(self.getTemplateParams(projection))
 							.post(self.getRequestData());
+					});
+			},
+			
+			reload: function (projection) {
+				var self = this;
+				return PreciseApi.from(PreciseApi.hrefTo(self.data, self.rels.singular))
+					.traverse(function (builder) {
+						return builder
+							.withTemplateParameters(self.getTemplateParams(projection))
+							.get();
 					});
 			},
 			
@@ -56,9 +71,7 @@ define([
 				return PreciseApi.from(PreciseApi.hrefTo(self.data, self.rels.singular))
 					.traverse(function (builder) {
 						return builder
-							.withTemplateParameters({
-								projection: projection || self.defaultProjection
-							})
+							.withTemplateParameters(self.getTemplateParams(projection))
 							.patch(self.getRequestData());
 					});
 			},

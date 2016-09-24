@@ -16,46 +16,47 @@ define([
 		Models.findAll = findAll;
 		Models.firstPage = firstPage;
 		Models.findByName = findByName;
+		Models.findByNameWithPartInfos = findByNameWithPartInfos;
 		Models.newResource = newResource;
 		Models.existingResource = existingResource;
 		Models.resource = resource;
 		Models.Resource = ModelResource;
 		
 		var REL_SINGULAR = 'model',
-			REL_PLURAL = 'models',
-			DEFAULT_PROJECTION = 'modelSummary';
+			REL_PLURAL = 'models';
 		
-		var projectionTemplateParams = {
-			projection: DEFAULT_PROJECTION
-		}
-		
-		function firstPage() {
+		function firstPage(templateParams) {
 			return PreciseApi.fromBase().traverse(function (builder) {
 				return builder
 					.follow(REL_PLURAL)
-					.withTemplateParameters(projectionTemplateParams)
+					.withTemplateParameters(templateParams)
 					.get();
 			}).then(Pages.wrapper(REL_PLURAL));
 		}
 		
-		function findAll() {
-			return firstPage()
+		function findAll(templateParams) {
+			return firstPage(templateParams)
 				.then(function (page) {
-					return page.collectRemaining(projectionTemplateParams);
+					return page.collectRemaining(templateParams);
 				});
 		}
 		
-		function findByName(name) {
+		function findByName(name, templateParams) {
 			return PreciseApi.fromBase()
 				.traverse(function (builder) {
 					return builder
 						.follow(REL_PLURAL, 'search', 'findByName')
-						.withTemplateParameters({
-							name: name,
-							projection: DEFAULT_PROJECTION
-						})
+						.withTemplateParameters(_.defaults({
+							name: name
+						}, templateParams))
 						.get()
 				}).then(Models.existingResource);
+		}
+		
+		function findByNameWithPartInfos(name) {
+			return findByName(name, {
+				projection: 'modelSummary'
+			});
 		}
 		
 		function newResource(model) {
@@ -83,7 +84,7 @@ define([
 				plural: REL_PLURAL
 			},
 			
-			defaultProjection: DEFAULT_PROJECTION,
+			defaultProjection: null,
 		
 			searchByModel: function (rel, params) {
 				var templateParams = _.assign({

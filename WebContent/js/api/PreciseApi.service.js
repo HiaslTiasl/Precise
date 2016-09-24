@@ -73,14 +73,23 @@ define([
 			};
 		}
 		
+		function httpErrorMessage(response) {
+			return [
+				response.config.method,
+				response.config.url,
+				response.status === -1 ? 'aborted' : response.status,
+				response.statusText
+			].join(' ');
+		}
+		
 		// TODO: improve
 		function responseErrorMessage(response) {
 			var data = response.data;
 			return !data
-				? [response.config.method, response.config.url, response.status, response.statusText].join(' ')		// No error message -> report HTTP failure
-				: data.errors && data.errors.map(getErrorMessage).join('. ')										// Multiple Validation errors
-					|| getErrorMessage(data)																		// Exception message
-					|| data;																						// Something else
+				? httpErrorMessage(response)									// No error message -> report HTTP failure
+				: data.errors && data.errors.map(getErrorMessage).join('. ')	// Multiple Validation errors
+					|| getErrorMessage(data)									// Exception message
+					|| data;													// Something else
 		}
 		
 		function toErrorMessage(reason) {
