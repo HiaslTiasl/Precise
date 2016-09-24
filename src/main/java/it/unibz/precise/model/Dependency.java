@@ -1,5 +1,6 @@
 package it.unibz.precise.model;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -180,10 +181,15 @@ public class Dependency extends BaseEntity {
 	public List<Attribute> getAttributes() {
 		Stream<Attribute> sourceAttrs = attributesOf(source);
 		Stream<Attribute> targetAttrs = attributesOf(target);
-		return (sourceAttrs == null ? targetAttrs
-			: targetAttrs == null ? sourceAttrs
-			: sourceAttrs.filter(targetAttrs.collect(Collectors.toSet())::contains)
-		).collect(Collectors.toList());
+		boolean noSourceAttrs = sourceAttrs == null;
+		boolean noTargetAttrs = targetAttrs == null;
+		
+		return noSourceAttrs && noTargetAttrs ? Collections.emptyList()
+			: noSourceAttrs ? targetAttrs.collect(Collectors.toList())
+			: noTargetAttrs ? sourceAttrs.collect(Collectors.toList())
+			: sourceAttrs.filter(
+				targetAttrs.collect(Collectors.toSet())::contains)
+			.collect(Collectors.toList());
 	}
 	
 	@PostLoad
