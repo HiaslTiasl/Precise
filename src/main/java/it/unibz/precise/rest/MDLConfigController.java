@@ -52,6 +52,8 @@ public class MDLConfigController {
 		Model model = modelRepository.findByName(name);
 		if (!model.getState().getConfigInfo().isEditable())
 			throw new IllegalStateException("Cannot configure an already configured model");
+		MDLConfigAST.clearConfigOf(model);
+		modelRepository.flush();
 		config.applyTo(model);
 		phaseRepository.save(model.getPhases());
 	}
