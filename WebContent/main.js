@@ -12,7 +12,8 @@ require.config({
         '*': {
         	'lodash': 'lib/lodash',
         	'underscore': 'lib/lodash',		// Use lodash instead of underscore
-        	'backbone': 'lib/backbone'
+        	'backbone': 'lib/backbone',
+        	'tinycolor2': 'lib/tinycolor'
         }
     },
     shim: {
@@ -32,7 +33,6 @@ require.config({
     		exports: 'ngFileUpload'
     	},
     	'lib/xeditable': ['lib/angular'],
-//    	'lib/select': ['lib/angular'],
     	'lib/json-formatter': ['lib/angular']
     }
 });

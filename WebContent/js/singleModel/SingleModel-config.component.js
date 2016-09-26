@@ -75,6 +75,7 @@ define([
 		
 		function clearConfig() {
 			MDLFiles.clearConfig($ctrl.model.data)
+				.then(showConfigPreview)
 				.then($ctrl.reload);
 		}
 		

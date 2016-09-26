@@ -11,7 +11,8 @@ define([
 	'./taskProperties.component',
 	'./dependencyProperties.component',
 	'lib/ui-bootstrap',
-	'lib/json-formatter'
+	'lib/json-formatter',
+	'lib/angularjs-color-picker'
 ], function (
 	angular,
 	preciseApi,
@@ -27,7 +28,7 @@ define([
 ) {
 	'use strict';
 	
-	return angular.module('precise.singleModel', ['ui.bootstrap', 'jsonFormatter', preciseApi.name, preciseDiagramPaper.name])
+	return angular.module('precise.singleModel', ['ui.bootstrap', 'jsonFormatter', 'color.picker', preciseApi.name, preciseDiagramPaper.name])
 		.service('SingleModel', SinlgeModelService)
 		.component('preciseSingleModel', singleModelComponent)
 		.component('preciseDiagram', singleModelDiagramComponent)

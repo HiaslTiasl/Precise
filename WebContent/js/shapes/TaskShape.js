@@ -3,12 +3,14 @@ define([
 	'lib/joint',
 	'shapes/BaseShape',
 	'shapes/TemplateUtil',
+	'api/colors',
 	'util/util'
 ], function (
 	_,
 	joint,
 	BaseShape,
 	TemplateUtil,
+	colors,
 	util
 ) {
 	
@@ -118,7 +120,7 @@ define([
 					height: height,
 					transform: exclusive ? 'translate(-5,-5)' : ''
 				},
-				'rect.task-type-name':      { fill: this.colorToCss(data.type.phase.color) },
+				'rect.task-type-name':      { fill: colors.toCSS(data.type.phase.color) },
 				'rect.task-locations':      { height: locationsHeight },
 				'text.task-id':             { text: data.id },
 				'text.task-workers-needed': { text: data.numberOfWorkersNeeded },
@@ -151,10 +153,6 @@ define([
 					}
 				}
 			}
-		},
-		
-		colorToCss: function (color) {
-			return 'rgb(' + [color.red, color.green, color.blue].join(',') + ')'
 		}
 		
 	}, {
