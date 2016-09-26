@@ -5,35 +5,47 @@
 	"attributes": [
 		{
 			"name": "sector",
+			"shortName": "sr",
 			"range": ["A"]
 		},
 		{
 			"name": "orientation",
+			"shortName": "o",
 			"range": ["N", "E", "S", "W"],
 			"ordered": true
 		},
 		{
 			"name": "level",
+			"shortName": "l",
 			"range": ["u1", "f0", "f1", "f2"],
 			"ordered": true
 		},
 		{
 			"name": "section",
+			"shortName": "sn",
 			"range": ["en", "r", "c"]
 		},
 		{
 			"name": "unit",
+			"shortName": "u",
 			"range": 10,
 			"ordered": true
 		},
 		{
 			"name": "face",
+			"shortName": "fc",
 			"range": 2
 		}
 	],
 	"phases": [
 		{
 			"name": "Skeleton",
+			"description": "Early phase at a coarse level.",
+			"color": {
+				"red": 255,
+				"green": 220,
+				"blue": 200
+			},
 			"attributes": ["sector", "level"],
 			"valueTree": {
 				"A": [
@@ -46,6 +58,12 @@
 		},
 		{
 			"name": "Exterior",
+			"description": "Advanced phase concerning the exterior of the building.",
+			"color": {
+				"red": 206,
+				"green": 255,
+				"blue": 153
+			},
 			"attributes": ["sector", "orientation", "level", "face"],
 			"valueTree": {
 				"A": {
@@ -78,6 +96,12 @@
 		},
 		{
 			"name": "Interior",
+			"description": "Advanced phase concerning the interior of the building.",
+			"color": {
+				"red": 188,
+				"green": 210,
+				"blue": 255
+			},
 			"attributes": ["sector", "level", "section", "unit"],
 			"valueTree": {
 				"A": {
@@ -106,42 +130,50 @@
 		{
 			"name": "Construction Site Preparation",
 			"phase": "Skeleton",
-			"craft": "SE"
+			"craft": "Site Equipper",
+			"craftShort": "SE"
 		},
 		{
 			"name": "Excavation",
 			"phase": "Skeleton",
-			"craft": "Di"
+			"craft": "Digger",
+			"craftShort": "Di"
 		},
 		{
 			"name": "Concrete Pouring",
 			"phase": "Interior",
-			"craft": "Br"
+			"craft": "Brick Layer",
+			"craftShort": "Br"
 		},
 		{
 			"name": "Electricity Connection",
 			"phase": "Interior",
-			"craft": "El"
+			"craft": "Electrician",
+			"craftShort": "El"
 		},
 		{
 			"name": "Water and Gas Connection",
 			"phase": "Interior",
-			"craft": "Pl"
+			"craft": "Plumber",
+			"craftShort": "Pl"
 		},
 		{
 			"name": "Fill Excavation",
 			"phase": "Skeleton",
-			"craft": "Di"
+			"craft": "Digger",
+			"craftShort": "Di"
 		},
 		{
-			"name": "Skeleton Installation",
-			"phase": "Skeleton",
-			"craft": "Sc"
+			"name": "Scaffolding Installation",
+			"phase": "Exterior",
+			"craft": "Scaffolder",
+			"craftShort": "Sc"
 		},
 		{
 			"name": "Pipes Installation",
 			"phase": "Interior",
-			"craft": "Pl"
+			"craft": "Plumber",
+			"craftShort": "Pl"
 		}
 	],
 	"tasks": [
@@ -178,7 +210,7 @@
 			"type": "Concrete Pouring",
 			"numberOfWorkersNeeded": 3,
 			"numberOfUnitsPerDay": 0.025,
-			"order": {
+			"orderSpecification": {
 				"level": "ASCENDING"
 			},
 			"position": {
@@ -239,10 +271,10 @@
 		},
 		{
 			"id": 7,
-			"type": "Skeleton Installation",
+			"type": "Scaffolding Installation",
 			"numberOfWorkersNeeded": 4,
 			"numberOfUnitsPerDay": 0.333,
-			"order": {
+			"orderSpecification": {
 				"level": "ASCENDING"
 			},
 			"position": {
@@ -252,14 +284,62 @@
 			"locations": [
 				{
 					"sector": "A",
+					"orientation": "N",
 					"level": "f0"
 				},
 				{
 					"sector": "A",
+					"orientation": "N",
 					"level": "f1"
 				},
 				{
 					"sector": "A",
+					"orientation": "N",
+					"level": "f2"
+				},
+				{
+					"sector": "A",
+					"orientation": "E",
+					"level": "f0"
+				},
+				{
+					"sector": "A",
+					"orientation": "E",
+					"level": "f1"
+				},
+				{
+					"sector": "A",
+					"orientation": "E",
+					"level": "f2"
+				},
+				{
+					"sector": "A",
+					"orientation": "S",
+					"level": "f0"
+				},
+				{
+					"sector": "A",
+					"orientation": "S",
+					"level": "f1"
+				},
+				{
+					"sector": "A",
+					"orientation": "S",
+					"level": "f2"
+				},
+				{
+					"sector": "A",
+					"orientation": "W",
+					"level": "f0"
+				},
+				{
+					"sector": "A",
+					"orientation": "W",
+					"level": "f1"
+				},
+				{
+					"sector": "A",
+					"orientation": "W",
 					"level": "f2"
 				}
 			]
