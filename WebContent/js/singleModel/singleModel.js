@@ -8,6 +8,7 @@ define([
 	'./SingleModel-config.component',
 	'./SingleModel-building.component',
 	'./SingleModel-taskTypes.component',
+	'./singleModel-taskTypes.create-dialog.component',
 	'./taskProperties.component',
 	'./dependencyProperties.component',
 	'lib/ui-bootstrap',
@@ -23,6 +24,7 @@ define([
 	singleModelConfigComponent,
 	singleModelBuildingComponent,
 	singleModelTaskTypesComponent,
+	singleModelTaskTypesCreateDialogComponent,
 	taskPropertiesComponent,
 	dependencyPropertiesComponent
 ) {
@@ -35,6 +37,7 @@ define([
 		.component('preciseConfig', singleModelConfigComponent)
 		.component('preciseBuilding', singleModelBuildingComponent)
 		.component('preciseTaskTypes', singleModelTaskTypesComponent)
+		.component('preciseCreateTaskType', singleModelTaskTypesCreateDialogComponent)
 		.component('taskProperties', taskPropertiesComponent)
 		.component('dependencyProperties', dependencyPropertiesComponent);
 	

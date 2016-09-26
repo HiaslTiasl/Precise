@@ -30,6 +30,9 @@ define([
 		};
 		
 		function $onChanges(changes) {
+			if (changes.model) {
+				$ctrl.color.options.disabled = !$ctrl.model.data.configInfo.editable;
+			}
 			if (changes.config) {
 				if ($ctrl.config && $ctrl.config.phases && $ctrl.config.phases.length)
 					$ctrl.phase = $ctrl.config.phases[0];
@@ -54,6 +57,7 @@ define([
 		controller: SingleModelBuildingController,
 		controllerAs: '$ctrl',
 		bindings: {
+			model: '<',
 			config: '<'
 		}
 	};

@@ -1,5 +1,5 @@
 <div class="toolbar">
-	<button class="btn btn-default" ng-click="$ctrl.createTaskType()">Create</button>
+	<button class="btn btn-default" ng-click="$ctrl.createTaskType()" ng-disabled="!$ctrl.model.data.configInfo.editable || !$ctrl.config">Create</button>
 	<span class="text-danger">{{$ctrl.fileErrorMsg}}</span>
 </div>
 <table id="phase-table" class="table table-striped" st-table="$ctrl.coll" st-safe-src="$ctrl.config.taskTypes">
@@ -9,6 +9,7 @@
 			<th>Description</th>
 			<th>Craft</th>
 			<th>Phase</th>
+			<th></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -17,6 +18,14 @@
 			<td>{{tt.description}}</td>
 			<td>{{tt.craft}}</td>
 			<td>{{tt.phase}}</td>
+			<td>
+				<button
+					class="btn btn-default"
+					ng-click="$ctrl.deleteTaskType($index)"
+					ng-disabled="!$ctrl.model.data.configInfo.editable">
+					Delete
+				</button>
+			</td>
 		</tr>
 	</tbody>
 </table>
