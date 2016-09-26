@@ -1,5 +1,6 @@
 package it.unibz.precise.rest.mdl.ast;
 
+import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class MDLPhaseAST {
 	
 	private String name;
 	private String description;
+	private Color color;
 	private List<MDLAttributeAST> attributes;
 	private Object valueTree;
 	
@@ -36,6 +38,7 @@ public class MDLPhaseAST {
 		List<AttributeHierarchyLevel> levelList = phase.getAttributeHierarchyLevels();
 		name = phase.getName();
 		description = phase.getDescription();
+		color = phase.getColor();
 		attributes = phase.getAttributeHierarchyLevels().stream()
 			.map(AttributeHierarchyLevel::getAttribute)
 			.map(context::translate)
@@ -48,6 +51,7 @@ public class MDLPhaseAST {
 			phase = new Phase();
 			phase.setName(name);
 			phase.setDescription(description);
+			phase.setColor(color);
 			attributes.stream()
 				.map(MDLAttributeAST::toAttribute)
 				.forEach(phase::addAttribute);
@@ -72,6 +76,14 @@ public class MDLPhaseAST {
 		this.description = description;
 	}
 
+	public Color getColor() {
+		return color;
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
+	}
+
 	public List<MDLAttributeAST> getAttributes() {
 		return attributes;
 	}
@@ -87,7 +99,7 @@ public class MDLPhaseAST {
 	public void setValueTree(Object valueTree) {
 		this.valueTree = valueTree;
 	}
-	
+
 	private Object createTree(Map<String, AttributeHierarchyNode> nodes) {
 		Map<String, Object> tree = new LinkedHashMap<>();
 		boolean hasSubTrees = false;

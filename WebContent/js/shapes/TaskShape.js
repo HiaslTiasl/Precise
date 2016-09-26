@@ -14,9 +14,10 @@ define([
 	
 	var LOC_COL_WIDTH = 20,
 		LOC_ROW_HEIGHT = LOC_COL_WIDTH,
-		DEFAULT_LOC_HEIGHT = 1 * LOC_ROW_HEIGHT;
+		DEFAULT_LOC_HEIGHT = 1 * LOC_ROW_HEIGHT,
+		MAX_LOC_COL_COUNT = 8;
 	
-	var WIDTH = 8 * LOC_COL_WIDTH,
+	var WIDTH = MAX_LOC_COL_COUNT * LOC_COL_WIDTH,
 		HEADER_ROW_HEIGHT = LOC_ROW_HEIGHT,
 		HEADER_COL_WIDTH = WIDTH / 4,
 		NAME_HEIGHT = 2 * HEADER_ROW_HEIGHT,
@@ -76,6 +77,11 @@ define([
 					height: LOC_ROW_HEIGHT,
 					'stroke-width': 1,
 					'follow-scale': true
+				},
+				'text.trunc': {
+					x: (MAX_LOC_COL_COUNT - 0.5) * LOC_COL_WIDTH,
+					'text-anchor': 'middle',
+					'y-alignment': 'middle'
 				}
 			}, TemplateUtil.withRefsToSameClass('text', 'rect', textClasses, {
 				 'ref-y': .5,
@@ -112,12 +118,14 @@ define([
 					height: height,
 					transform: exclusive ? 'translate(-5,-5)' : ''
 				},
+				'rect.task-type-name':      { fill: this.colorToCss(data.type.phase.color) },
 				'rect.task-locations':      { height: locationsHeight },
 				'text.task-id':             { text: data.id },
 				'text.task-workers-needed': { text: data.numberOfWorkersNeeded },
 				'text.task-units-per-day':  { text: data.numberOfUnitsPerDay },
 				'text.task-type-craft':     { text: data.type.craftShort },
-				'text.task-type-name':      { text: joint.util.breakText(data.type.name, { width: WIDTH, height: NAME_HEIGHT }) }
+				'text.task-type-name':      { text: joint.util.breakText(data.type.name, { width: WIDTH, height: NAME_HEIGHT }) },
+				'text.trunc':               { y: LOC_POS_Y + locationsHeight / 2 }
 			});
 			if (locationPatterns) {
 				for (var i = 0, locLen = locationPatterns.length; i < locLen; i++) {
@@ -143,6 +151,10 @@ define([
 					}
 				}
 			}
+		},
+		
+		colorToCss: function (color) {
+			return 'rgb(' + [color.red, color.green, color.blue].join(',') + ')'
 		}
 		
 	}, {
@@ -161,28 +173,30 @@ define([
 	// http://stackoverflow.com/a/30275325
 	util.set(joint.shapes, 'precise.TaskShapeView', joint.dia.ElementView.extend({
 		
-		locRectsTemplate: [
+		locRectsTemplate: _.template([
 			'<% _.forEach(attributes, function (attr) { %>',
 				'<rect class="loc-num-${num} loc-entry ${attr.name}"/>',
 			'<% }); %>'
-		].join(''),
+		].join('')),
 		
-		locTextsTemplate: [
+		locTextsTemplate: _.template([
    			'<% _.forEach(attributes, function (attr) { %>',
    				'<text class="loc-num-${num} loc-entry ${attr.name}">',
    					'${pattern[attr.name].value}',
 				'</text>',
    			'<% }); %>'
-   		].join(''),
+   		].join('')),
+   		
+   		truncMarkup: '<text class="trunc">...</text>',
    		
    	    initialize: function() {
-
-   	        _.bindAll(this, 'renderLocations');
 
    	        this.positionChangeBatchOptions = { batchName: 'position-change', other: { cell: this.model }};
    	        joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
-   	        this.listenTo(this.model, 'change:data', this.renderLocations);
+   	        this.listenTo(this.model, 'change:data', function () {
+   	        	this.update();
+   	        }, this);
    	    },
    	    
    	    render: function () {
@@ -201,29 +215,38 @@ define([
 				attributes = data.type.phase.attributes,
 				locationPatterns = data.locationPatterns,
 				actualLocationCount = locationPatterns ? locationPatterns.length : 0,
-				renderedLocationCount = this.scalableNode.find('.loc-entry').length / attributes.length;
+				truncateLocations = actualLocationCount > MAX_LOC_COL_COUNT,
+				targetRenderCount = truncateLocations ? MAX_LOC_COL_COUNT - 1 : actualLocationCount, 
+				currentLocationCount = this.scalableNode.find('.loc-entry').length / attributes.length,
+				truncNode = this.truncNode;
 			
-			if (actualLocationCount < renderedLocationCount) {				
+			if (targetRenderCount < currentLocationCount) {				
 				// Remove shapes that have been removed
-				for (var i = actualLocationCount; i < renderedLocationCount; i++) {
+				for (var i = targetRenderCount; i < currentLocationCount; i++) {
 					this.rotatableNode.find('.loc-num-' + i).forEach(function (vShape) {
 						vShape.remove();
 					});
 				}
 			}
-			else if (actualLocationCount > renderedLocationCount) {
+			else if (targetRenderCount > currentLocationCount) {
 				// Add shapes for new locations
-				var rectsTemplateFn = TemplateUtil.compile(this.locRectsTemplate),
-					textsTemplateFn = TemplateUtil.compile(this.locTextsTemplate),
-					args = {
-						attributes: attributes
-					};
-				for (var i = renderedLocationCount; i < actualLocationCount; i++) {
+				var args = {
+					attributes: attributes
+				};
+				for (var i = currentLocationCount; i < targetRenderCount; i++) {
 					args.pattern = locationPatterns[i];
 					args.num = i;
-					this.scalableNode.append(joint.V(rectsTemplateFn(args)));				
-					this.rotatableNode.append(joint.V(textsTemplateFn(args)));				
+					this.scalableNode.append(joint.V(this.locRectsTemplate(args)));				
+					this.rotatableNode.append(joint.V(this.locTextsTemplate(args)));				
 				}
+			}
+			if (truncateLocations && !this.truncNode) {
+				this.truncNode = joint.V(this.truncMarkup);
+				this.rotatableNode.append(this.truncNode);
+			}
+			else if (!truncateLocations && this.truncNode) {
+				this.truncNode.remove();
+				this.truncNode = null;
 			}
 		},
 		

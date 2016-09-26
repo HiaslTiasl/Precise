@@ -28,5 +28,5 @@ public class BasePathAwareLinks {
 			.slash(restBaseURI)
 			.slash(contextBaseURI.relativize(URI.create(linkBuilder.toUri().getPath())));
 	}
-	
+
 }

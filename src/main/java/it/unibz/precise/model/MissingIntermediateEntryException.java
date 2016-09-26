@@ -12,7 +12,7 @@ public class MissingIntermediateEntryException extends InvalidLocationException 
 
 	public MissingIntermediateEntryException(Map<String, PatternEntry> pattern, String attrName) {
 		super(pattern, String.format(
-			"Attribute '%s' has no value, but other attributes lower in the hierarchy do", attrName
+			"Attribute '%s' has a value, but other attributes higher in the hierarchy do not", attrName
 		));
 	}
 

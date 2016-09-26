@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.deser.UnresolvedForwardReference;
 import com.fasterxml.jackson.databind.deser.UnresolvedId;
 
+import it.unibz.precise.model.InvalidLocationException;
 import it.unibz.precise.rest.MDLFileController;
 import it.unibz.util.ResponseEntityHelper;
 
@@ -25,6 +26,11 @@ public class HttpMessageConversionExceptionHandler {
     @ExceptionHandler
     ResponseEntity<ExceptionMessage> handle(HttpMessageConversionException e) {
     	return ResponseEntityHelper.badRequest(new HttpHeaders(), mapException(e.getMostSpecificCause()));
+    }
+    
+    @ExceptionHandler
+    ResponseEntity<ExceptionMessage> handle(InvalidLocationException e) {
+    	return ResponseEntityHelper.badRequest(new HttpHeaders(), e);
     }
     
     private static Throwable mapException(Throwable e) {

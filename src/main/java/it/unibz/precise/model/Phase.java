@@ -1,10 +1,12 @@
 package it.unibz.precise.model;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -17,11 +19,14 @@ import javax.persistence.UniqueConstraint;
 	@UniqueConstraint(columnNames={"model_id", "name"})
 })
 public class Phase extends BaseEntity {
-
+	
 	@Column(nullable=false)
 	private String name;
 	
 	private String description;
+	
+	@Convert(converter=ColorConverter.class)
+	private Color color;
 	
 	@OneToMany(mappedBy="phase", cascade=CascadeType.ALL, orphanRemoval=true)
 	@OrderBy("position")
@@ -36,6 +41,14 @@ public class Phase extends BaseEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public Color getColor() {
+		return color;
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
 	}
 
 	public String getDescription() {

@@ -1,5 +1,6 @@
 package it.unibz.precise.model.projection;
 
+import java.awt.Color;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,8 @@ public interface PhaseSummaryProjection {
 	long getId();
 	
 	String getName();
+	
+	Color getColor();
 	
 	@Value("#{target.attributeHierarchyLevels.![attribute]}")
 	List<AttributeSummaryProjection> getAttributes();

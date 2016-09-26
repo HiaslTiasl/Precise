@@ -1,0 +1,22 @@
+
+.config-operations {
+	margin-bottom: 1em;
+}
+
+/* Override json-formatter styles */
+
+/* Hide constructor names 'Object', 'Array' etc.*/
+.constructor-name {
+	display: none;
+}
+
+/* Hide root node */
+.json-formatter-row > a {
+	display: none;
+}
+
+/* Show all other nodes */
+.children > .json-formatter-row > a {
+	display: initial;
+}
+
