@@ -35,7 +35,7 @@ define([
 			this.model = model;
 		}
 		
-		util.defineClass({
+		util.defineClass(Resources.Base, {
 			
 			constructor: PhaseResource,
 
