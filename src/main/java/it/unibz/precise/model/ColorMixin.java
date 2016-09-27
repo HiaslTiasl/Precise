@@ -3,7 +3,6 @@ package it.unibz.precise.model;
 import java.awt.Color;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonAutoDetect(
@@ -16,7 +15,6 @@ public abstract class ColorMixin extends Color {
 	
 	private static final long serialVersionUID = 1L;
 	
-	@JsonCreator
 	public ColorMixin(@JsonProperty("r") int red, @JsonProperty("g") int green, @JsonProperty("b") int blue) {
 		super(red, green, blue);
 	}
