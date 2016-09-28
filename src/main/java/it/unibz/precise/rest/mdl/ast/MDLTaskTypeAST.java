@@ -20,31 +20,6 @@ public class MDLTaskTypeAST {
 	private String craft;
 	private String craftShort;
 	
-	
-	public MDLTaskTypeAST() {
-	}
-
-	public MDLTaskTypeAST(MDLFileContext context, TaskType taskType) {
-		this.taskType = taskType;
-		name = taskType.getName();
-		description = taskType.getDescription();
-		phase = context.translate(taskType.getPhase());
-		craft = taskType.getCraft();
-		craftShort = taskType.getCraftShort();
-	}
-	
-	public TaskType toTaskType() {
-		if (taskType == null) {
-			taskType = new TaskType();
-			taskType.setName(name);
-			taskType.setDescription(description);
-			taskType.setPhase(phase.toPhase());
-			taskType.setCraft(craft);
-			taskType.setCraftShort(craftShort);
-		}
-		return taskType;
-	}
-
 	public String getName() {
 		return name;
 	}

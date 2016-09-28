@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.unibz.precise.model.Model;
 import it.unibz.precise.rep.ModelRepository;
-import it.unibz.precise.rep.PhaseRepository;
 import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
-import it.unibz.precise.rest.mdl.ast.MDLFileContext;
+import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
 @RestController
 @ExposesResourceFor(MDLConfigAST.class)
@@ -26,12 +26,9 @@ public class MDLConfigController {
 	@Autowired
 	private ModelRepository modelRepository;
 	
-	@Autowired
-	private PhaseRepository phaseRepository;
-	
-	private MDLConfigAST configByName(String name) {
+	private MDLConfigAST configByName(MDLContext context, String name) {
 		Model model = modelRepository.findByName(name);
-		return new MDLConfigAST(new MDLFileContext(), model);
+		return context.configs().toMDL(model);
 	}
 	
 	@RequestMapping(
@@ -39,7 +36,7 @@ public class MDLConfigController {
 		method=RequestMethod.GET
 	)
 	public ResponseEntity<MDLConfigAST> get(@PathVariable String name) {
-		MDLConfigAST config = configByName(name);
+		MDLConfigAST config = configByName(new MDLContext(), name);
 		return new ResponseEntity<>(config, HttpStatus.OK);
 	}
 	
@@ -48,14 +45,25 @@ public class MDLConfigController {
 		method=RequestMethod.PUT
 	)
 	@Transactional
-	public void set(@PathVariable String name, @RequestBody MDLConfigAST config) {
+	public void set(
+		@PathVariable String name,
+		@RequestBody(required=false) MDLConfigAST config,
+		@RequestParam(name="use", required=false) String srcName
+	) {
 		Model model = modelRepository.findByName(name);
+		
 		if (!model.getState().getConfigInfo().isEditable())
 			throw new IllegalStateException("Cannot configure an already configured model");
-		MDLConfigAST.clearConfigOf(model);
+		
+		MDLContext context = new MDLContext();
+		context.configs().updateEntity(MDLConfigAST.EMPTY_CONFIG, model);
 		modelRepository.flush();
-		config.applyTo(model);
-		phaseRepository.save(model.getPhases());
+		
+		if (config == null && srcName != null)
+			config = configByName(context, srcName);
+		
+		context.configs().updateEntity(config, model);
+		modelRepository.save(model);
 	}
 	
 	@RequestMapping(
@@ -65,7 +73,7 @@ public class MDLConfigController {
 	@Transactional
 	public ResponseEntity<Model> clear(@PathVariable String name) {
 		Model model = modelRepository.findByName(name);
-		MDLConfigAST.clearConfigOf(model);
+		new MDLContext().configs().updateEntity(MDLConfigAST.EMPTY_CONFIG, model);
 		return new ResponseEntity<>(model, HttpStatus.OK);
 	}
 

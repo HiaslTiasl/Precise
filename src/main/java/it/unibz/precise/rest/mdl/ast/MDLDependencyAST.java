@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Position;
-import it.unibz.util.Util;
 
 public class MDLDependencyAST {
 
@@ -21,38 +20,6 @@ public class MDLDependencyAST {
 	private boolean globalScope;
 	private List<MDLAttributeAST> scope;
 	private List<Position> vertices;
-
-	public MDLDependencyAST() {
-	}
-	
-	public MDLDependencyAST(MDLFileContext context, Dependency dependency) {
-		this.dependency = dependency;
-		alternate = dependency.isAlternate();
-		chain = dependency.isChain();
-		source = context.translate(dependency.getSource());
-		target = context.translate(dependency.getTarget());
-		sourceVertex = dependency.getSourceVertex();
-		targetVertex = dependency.getTargetVertex();
-		vertices = dependency.getVertices();
-		globalScope = dependency.isGlobalScope();
-		scope = Util.mapToList(dependency.getScope(), context::translate);
-	}
-	
-	public Dependency toDependency() {
-		if (dependency == null) {
-			dependency = new Dependency();
-			dependency.setAlternate(alternate);
-			dependency.setChain(chain);
-			dependency.setSource(source.toTask());
-			dependency.setTarget(target.toTask());
-			dependency.setSourceVertex(sourceVertex);
-			dependency.setTargetVertex(targetVertex);
-			dependency.setVertices(vertices);
-			dependency.setGlobalScope(globalScope);
-			dependency.setScope(Util.mapToList(scope, MDLAttributeAST::toAttribute));
-		}
-		return dependency;
-	}
 
 	public boolean isAlternate() {
 		return alternate;
@@ -125,6 +92,5 @@ public class MDLDependencyAST {
 	public void setScope(List<MDLAttributeAST> scope) {
 		this.scope = scope;
 	}
-
 	
 }

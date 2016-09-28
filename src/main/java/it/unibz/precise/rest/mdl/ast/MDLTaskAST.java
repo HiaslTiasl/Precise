@@ -2,24 +2,15 @@ package it.unibz.precise.rest.mdl.ast;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.IntSequenceGenerator;
 
-import it.unibz.precise.model.Attribute;
-import it.unibz.precise.model.AttributeHierarchyLevel;
-import it.unibz.precise.model.OrderSpecification;
 import it.unibz.precise.model.OrderType;
-import it.unibz.precise.model.PatternEntry;
-import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Position;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
-import it.unibz.util.Util;
 
 @JsonIdentityInfo(generator=IntSequenceGenerator.class, property="id", scope=MDLTaskAST.class)
 @JsonIdentityReference(alwaysAsId=false)
@@ -36,50 +27,6 @@ public class MDLTaskAST {
 	private Map<String, OrderType> order;
 	private Position position;
 	private List<Map<String, String>> locations;
-	
-	public MDLTaskAST() {
-	}
-	
-	public MDLTaskAST(MDLFileContext context, Task task) {
-		this.task = task;
-		TaskType taskType = task.getType();
-		type = context.translate(taskType);
-		numberOfWorkersNeeded = task.getNumberOfWorkersNeeded();
-		numberOfUnitsPerDay = task.getNumberOfUnitsPerDay();
-		globalExclusiveness = task.isGlobalExclusiveness();
-		exclusiveness = Util.mapToList(task.getExclusiveness(), context::translate);
-		order = Util.mapToMap(task.getOrderSpecifications(),
-			os -> os.getAttribute().getName(),
-			OrderSpecification::getOrderType
-		);
-		position = task.getPosition();
-		locations = Util.mapToList(task.getLocationPatterns(), this::toSimplePattern);
-	}
-	
-	public Task toTask() {
-		if (task == null) {
-			task = new Task();
-	
-			TaskType taskType = type.toTaskType();
-			Phase phase = taskType.getPhase();
-			
-			task.setType(taskType);
-			task.setNumberOfWorkersNeeded(numberOfWorkersNeeded);
-			task.setNumberOfUnitsPerDay(numberOfUnitsPerDay);
-			task.setGlobalExclusiveness(globalExclusiveness);
-			task.setExclusiveness(Util.mapToList(exclusiveness, MDLAttributeAST::toAttribute));
-			task.setOrderSpecifications(
-				order == null ? null : phase.getAttributeHierarchyLevels().stream()
-					.map(AttributeHierarchyLevel::getAttribute)
-					.filter(a -> order.containsKey(a.getName()))
-					.map(a -> new OrderSpecification(a, order.get(a.getName())))
-					.collect(Collectors.toList())
-			);
-			task.setPosition(position);
-			task.setLocationPatterns(Util.mapToList(locations, p -> toPattern(p, phase.getAttributeHierarchyLevels())));
-		}
-		return task;
-	}
 	
 	public MDLTaskTypeAST getType() {
 		return type;
@@ -145,22 +92,4 @@ public class MDLTaskAST {
 		this.locations = locations;
 	}
 
-	private Map<String, String> toSimplePattern(Map<String, PatternEntry> pattern) {
-		return pattern.values().stream()
-			.collect(Collectors.toMap(
-				PatternEntry::getAttributeName,
-				PatternEntry::getValue
-			));
-	}
-
-	private Map<String, PatternEntry> toPattern(Map<String, String> simplePattern, List<AttributeHierarchyLevel> levels) {
-		return levels.stream()
-			.map(AttributeHierarchyLevel::getAttribute)
-			.map(Attribute::getName)
-			.collect(Collectors.toMap(
-				Function.identity(),
-				a -> new PatternEntry(a, simplePattern.get(a))
-			));
-	}
-	
 }

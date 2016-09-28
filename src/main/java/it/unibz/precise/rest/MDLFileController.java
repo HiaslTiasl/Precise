@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.rep.ModelRepository;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
+import it.unibz.precise.rest.mdl.conversion.MDLContext;
 import it.unibz.util.ResponseEntityHelper;
 
 @RestController
@@ -54,7 +55,7 @@ public class MDLFileController {
 		produces=MediaType.APPLICATION_JSON_VALUE
 	)
 	public ResponseEntity<?> findOne(@PathVariable("name") String name) {
-		MDLFileAST mdl = MDLFileAST.translate(repository.findByName(name));
+		MDLFileAST mdl = new MDLContext().files().toMDL(repository.findByName(name));
 		return mdl == null
 			? ResponseEntityHelper.notFound(new HttpHeaders())
 			: ResponseEntityHelper.response(HttpStatus.OK, new HttpHeaders(), mdl);
@@ -83,7 +84,8 @@ public class MDLFileController {
 				repository.flush();		 
 			}
 		}
-		Model newModel = modelDTO.toModel(name);
+		Model newModel = new MDLContext().files().toEntity(modelDTO);
+		newModel.setName(name);
 		validator.validate(newModel, errors);
 		if (errors.hasErrors())
 			throw new RepositoryConstraintViolationException(errors);

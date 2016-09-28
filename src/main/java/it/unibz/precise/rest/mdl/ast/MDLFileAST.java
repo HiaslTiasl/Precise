@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import it.unibz.precise.model.Model;
-import it.unibz.util.Util;
 
 @JsonPropertyOrder({"model", "attributes", "phases", "taskTypes", "tasks", "dependencies"})
 @Validated
@@ -25,31 +24,20 @@ public class MDLFileAST {
 	private List<MDLTaskAST> tasks;
 	private List<MDLDependencyAST> dependencies;
 	
-	private MDLFileContext context = new MDLFileContext();
-
 	public MDLFileAST() {
 		config = new MDLConfigAST();
 	}
 	
-	public MDLFileAST(Model model) {
-		this.model = model;
-		config = new MDLConfigAST(context, model);
-		tasks = Util.mapToList(model.getTasks(), context::translate);
-		dependencies = Util.mapToList(model.getDependencies(), context::translate);
+	@JsonIgnore
+	public MDLConfigAST getConfig() {
+		return config;
 	}
-	
-	public Model toModel(String name) {
-		model.setName(name);
-		config.applyTo(model);
-		tasks.stream()
-			.map(MDLTaskAST::toTask)
-			.forEach(model::addTask);
-		dependencies.stream()
-			.map(MDLDependencyAST::toDependency)
-			.forEach(model::addDependency);
-		return model;
+
+	@JsonIgnore
+	public void setConfig(MDLConfigAST config) {
+		this.config = config;
 	}
-	
+
 	@JsonProperty("attributes")
 	public List<MDLAttributeAST> getAttributes() {
 		return config.getAttributes();
@@ -102,10 +90,6 @@ public class MDLFileAST {
 	
 	public void setDependencies(List<MDLDependencyAST> dependencies) {
 		this.dependencies = dependencies;
-	}
-	
-	public static MDLFileAST translate(Model model) {
-		return model == null ? null : new MDLFileAST(model);
 	}
 	
 }
