@@ -33,7 +33,8 @@ require.config({
     		exports: 'ngFileUpload'
     	},
     	'lib/xeditable': ['lib/angular'],
-    	'lib/json-formatter': ['lib/angular']
+    	'lib/json-formatter': ['lib/angular'],
+    	'lib/angularjs-color-picker': ['lib/tinycolor', 'lib/angular']
     }
 });
 
