@@ -7,11 +7,14 @@ define([
 ) {
 	'use strict';
 	
-	function SingleModelBuildingController() {
+	SingleModelBuildingController.$inject = ['Phases'];
+	
+	function SingleModelBuildingController(Phases) {
 		
 		var $ctrl = this;
 		
 		$ctrl.phaseChanged = phaseChanged;
+		$ctrl.sendPhase = sendPhase;
 		
 		$ctrl.$onChanges = $onChanges;
 		
@@ -30,16 +33,18 @@ define([
 		};
 		
 		function $onChanges(changes) {
-			if (changes.model) {
-				$ctrl.color.options.disabled = !$ctrl.model.data.configInfo.editable;
+			if (changes.phases) {
+				//$ctrl.color.options.disabled = !$ctrl.model.data.configInfo.editable;
+				phasesChanged();
 			}
-			if (changes.config) {
-				if ($ctrl.config && $ctrl.config.phases && $ctrl.config.phases.length)
-					$ctrl.phase = $ctrl.config.phases[0];
-				else
-					$ctrl.phase = null;
-				phaseChanged();
-			}
+		}
+		
+		function phasesChanged() {
+			if ($ctrl.phases && $ctrl.phases.length)
+				$ctrl.phase = $ctrl.phases[0];
+			else
+				$ctrl.phase = null;
+			phaseChanged();
 		}
 		
 		function phaseChanged() {
@@ -48,6 +53,16 @@ define([
 		
 		function colorChanged() {
 			$ctrl.phase.color = colors.fromCSS($ctrl.color.value);
+			sendPhase();
+		}
+		
+		function sendPhase() {
+			Phases
+				.existingResource($ctrl.model, $ctrl.phase)
+				.then(function (resource) {
+					return resource.update({ projection: 'expandedPhase' });
+				})
+				.then($ctrl.reload);
 		}
 		
 	}
@@ -58,7 +73,8 @@ define([
 		controllerAs: '$ctrl',
 		bindings: {
 			model: '<',
-			config: '<'
+			phases: '<',
+			reload: '&'
 		}
 	};
 	

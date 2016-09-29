@@ -3,6 +3,14 @@
 	margin-bottom: 1em;
 }
 
+#attributes {
+	width: auto;
+}
+
+#attributes .ordered {
+	text-align: center;
+}
+
 /* Override json-formatter styles */
 
 /* Hide constructor names 'Object', 'Array' etc.*/

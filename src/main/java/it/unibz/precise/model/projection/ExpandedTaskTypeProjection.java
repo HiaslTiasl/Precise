@@ -9,6 +9,8 @@ public interface ExpandedTaskTypeProjection {
 
 	String getName();
 	
+	String getDescription();
+	
 	String getCraft();
 	
 	String getCraftShort();

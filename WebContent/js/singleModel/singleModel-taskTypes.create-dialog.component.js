@@ -1,8 +1,9 @@
 define([], function () {
 	'use strict';
 	
+	SingleModelTaskTypeCreateDialogController.$inject = ['TaskTypes'];
 	
-	function SingleModelTaskTypeCreateDialogController() {
+	function SingleModelTaskTypeCreateDialogController(TaskTypes) {
 		
 		var $ctrl = this;
 		
@@ -18,7 +19,12 @@ define([], function () {
 		}
 		
 		function createTaskType() {
-			$ctrl.modalInstance.close($ctrl.taskType);
+			TaskTypes
+				.newResource($ctrl.resolve.model, $ctrl.taskType)
+				.then(function (resource) {
+					return resource.create();
+				})
+				.then($ctrl.modalInstance.close);
 		}
 		
 		function cancel() {

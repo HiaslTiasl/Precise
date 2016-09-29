@@ -14,7 +14,7 @@
 		</div>
 		<div class="form-group">
 			<label for="taskType-phase">Phase</label>
-			<select id="taskType-phase" class="form-control" ng-model="$ctrl.taskType.phase" ng-options="p.name as p.name for p in $ctrl.phases">
+			<select id="taskType-phase" class="form-control" ng-model="$ctrl.taskType.phase" ng-options="p as p.name for p in $ctrl.phases">
 				<option value="">-- Select a phase --</option>
 			</select>
 		</div>

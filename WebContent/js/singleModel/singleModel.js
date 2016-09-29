@@ -6,6 +6,7 @@ define([
 	'./SingleModel.component',
 	'./SingleModel-diagram.component',
 	'./SingleModel-config.component',
+	'./singleModel-config.import-dialog.component',
 	'./SingleModel-building.component',
 	'./SingleModel-taskTypes.component',
 	'./singleModel-taskTypes.create-dialog.component',
@@ -22,6 +23,7 @@ define([
 	singleModelComponent,
 	singleModelDiagramComponent,
 	singleModelConfigComponent,
+	singleModelConfigImportDialogComponent,
 	singleModelBuildingComponent,
 	singleModelTaskTypesComponent,
 	singleModelTaskTypesCreateDialogComponent,
@@ -35,6 +37,7 @@ define([
 		.component('preciseSingleModel', singleModelComponent)
 		.component('preciseDiagram', singleModelDiagramComponent)
 		.component('preciseConfig', singleModelConfigComponent)
+		.component('preciseImportConfig', singleModelConfigImportDialogComponent)
 		.component('preciseBuilding', singleModelBuildingComponent)
 		.component('preciseTaskTypes', singleModelTaskTypesComponent)
 		.component('preciseCreateTaskType', singleModelTaskTypesCreateDialogComponent)

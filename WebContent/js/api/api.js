@@ -7,6 +7,7 @@ define([
 	'./Resources.service',
 	'./Models.service',
 	'./Tasks.service',
+	'./TaskTypes.service',
 	'./Phases.service',
 	'./Dependencies.service',
 	'./withShortName.filter',
@@ -20,6 +21,7 @@ define([
 	ResourcesService,
 	ModelsService,
 	TasksService,
+	TaskTypesService,
 	PhasesService,
 	DependenciesService,
 	withShortNameFilterFactory,
@@ -35,6 +37,7 @@ define([
 		.service('Resources', ResourcesService)
 		.service('Models', ModelsService)
 		.service('Tasks', TasksService)
+		.service('TaskTypes', TaskTypesService)
 		.service('Phases', PhasesService)
 		.service('Dependencies', DependenciesService)
 		.filter('withShortName', withShortNameFilterFactory)

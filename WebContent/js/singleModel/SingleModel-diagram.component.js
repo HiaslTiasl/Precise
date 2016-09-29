@@ -127,12 +127,9 @@ define([
 		templateUrl: 'js/singleModel/singleModel-diagram.html',
 		controller: SingleModelDiagramController,
 		controllerAs: '$ctrl',
-		require: {
-			singleModel: '^preciseSingleModel'
-		},
 		bindings: {
 			model: '<',
-			reload: '<'
+			reload: '&'
 		}
 	};
 });

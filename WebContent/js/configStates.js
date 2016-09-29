@@ -65,14 +65,14 @@ define([
 			})
 			.state('singleModel.config', {
 				url: '/config',
-				template: '<precise-config model="$ctrl.model" reload="$ctrl.reload"></precise-config',
+				template: '<precise-config model="$ctrl.model" reload="$ctrl.reload()"></precise-config',
 				data: {
 					title: 'Configuration'
 				}
 			})
 			.state('singleModel.diagram', {
 				url: '/diagram',
-				template: '<precise-diagram model="$ctrl.model" reload="$ctrl.reload"></precise-diagram>',
+				template: '<precise-diagram model="$ctrl.model" reload="$ctrl.reload()"></precise-diagram>',
 				onEnter: checkDiagramEditable,
 				data: {
 					title: 'Diagram'

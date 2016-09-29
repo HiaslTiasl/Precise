@@ -5,9 +5,9 @@
 			<select
 				class="form-control"
 				ng-model="$ctrl.phase"
-				ng-options="p as p.name for p in $ctrl.config.phases"
+				ng-options="p as p.name for p in $ctrl.phases"
 				ng-change="$ctrl.phaseChanged()"
-				ng-disabled="!$ctrl.config.phases">
+				ng-disabled="!$ctrl.phases">
 				<!-- <option value="">-- Select a phase --</option> -->
 			</select>
 		</div>
@@ -21,16 +21,29 @@
 	<div class="form-group">
 		<label for="attributes" class="col-sm-2 control-label">Attributes:</label>
 		<div class="col-sm-10">
-			<p id="phase" class="form-control-static">
-				{{$ctrl.phase.attributes | join:', '}}
-			</p>
+			<table id="attributes" class="table">
+				<thead>
+					<tr>
+						<th class="name">Name</th>
+						<th class="ordered">Ordered</th>
+						<th class="range">Range</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="a in $ctrl.phase.attributes">
+						<td class="name">{{a.name}}</td>
+						<td class="ordered"><span ng-if="a.ordered" class="glyphicon glyphicon-ok"></span></td>
+						<td class="range">{{a.range | join:', '}}</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 	</div>
 	<div class="form-group">
 		<label for="building" class="col-sm-2 control-label">Building:</label>
 		<div class="col-sm-10">
 			<p id="building" class="form-control-static">
-				<json-formatter ng-show="$ctrl.phase" json="$ctrl.phase.valueTree" open="3"></json-formatter>
+				<json-formatter ng-show="$ctrl.phase" json="$ctrl.phase.buildingTree" open="3"></json-formatter>
 			</p>
 		</div>
 	</div>

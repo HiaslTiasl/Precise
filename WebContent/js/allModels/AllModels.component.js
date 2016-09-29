@@ -36,11 +36,9 @@ define([
 		}
 		
 		function createModel(model) {
-			var modalInstance = $uibModal.open({
+			$uibModal.open({
 				component: 'preciseCreateModel'
-			});
-			
-			modalInstance.result.then(refreshModels);
+			}).result.then(refreshModels);
 		}
 		
 		function importFile(file) {

@@ -98,23 +98,6 @@ define([
 			
 			defaultProjection: 'expandedTask',
 			
-			getPhases: function () {
-				return PreciseApi.from(PreciseApi.hrefTo(this.model, 'phases'))
-					.followAndGet('phases[$all]');
-			},
-			
-			getTaskTypes: function (phase) {
-				return PreciseApi.fromBase()
-					.traverse(function (builder) {
-						return builder
-							.follow('taskTypes', 'search', 'findByPhase', 'taskTypes[$all]')
-							.withTemplateParameters({
-								phase: PreciseApi.hrefTo(phase)
-							})
-							.get();
-					});
-			},
-			
 			checkPattern: function (pattern) {
 				return PreciseApi.from(PreciseApi.hrefTo(this.data, 'checkedPattern'))
 					.traverse(function (builder) {

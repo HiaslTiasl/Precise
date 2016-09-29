@@ -7,9 +7,9 @@ define([
 ) {
 	'use strict';
 	
-	PhasesService.$inject = ['PreciseApi', 'Resources', 'Pages'];
+	PhasesService.$inject = ['$q', 'PreciseApi', 'Resources', 'Pages'];
 	
-	function PhasesService(PreciseApi, Resources, Pages) {
+	function PhasesService($q, PreciseApi, Resources, Pages) {
 		
 		var Phases = this;
 		
@@ -27,7 +27,7 @@ define([
 		}
 		
 		function resource(model, phase, existing) {
-			return new PhaseResource(model, phase, existing);
+			return $q.when(new PhaseResource(model, phase, existing));
 		}
 		
 		function PhaseResource(model, data, existing) {

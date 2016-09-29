@@ -48,7 +48,10 @@ define([
 		function phaseChanged() {
 			// Reset old list of task types first so they cannot be selected.
 			$ctrl.taskTypes = null;
-			Phases.existingResource($ctrl.model, $ctrl.phase).getTaskTypes()
+			Phases.existingResource($ctrl.model, $ctrl.phase)
+				.then(function (resource) {
+					return resource.getTaskTypes();
+				})
 				.then(Pages.collectRemaining)
 				.then(function (taskTypes) {
 					$ctrl.taskTypes = taskTypes;
