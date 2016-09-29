@@ -42,9 +42,9 @@
 			"name": "Skeleton",
 			"description": "Early phase at a coarse level.",
 			"color": {
-				"red": 255,
-				"green": 220,
-				"blue": 200
+				"r": 255,
+				"g": 220,
+				"b": 200
 			},
 			"attributes": ["sector", "level"],
 			"valueTree": {
@@ -60,9 +60,9 @@
 			"name": "Exterior",
 			"description": "Advanced phase concerning the exterior of the building.",
 			"color": {
-				"red": 206,
-				"green": 255,
-				"blue": 153
+				"r": 206,
+				"g": 255,
+				"b": 153
 			},
 			"attributes": ["sector", "orientation", "level", "face"],
 			"valueTree": {
@@ -98,9 +98,9 @@
 			"name": "Interior",
 			"description": "Advanced phase concerning the interior of the building.",
 			"color": {
-				"red": 188,
-				"green": 210,
-				"blue": 255
+				"r": 188,
+				"g": 210,
+				"b": 255
 			},
 			"attributes": ["sector", "level", "section", "unit"],
 			"valueTree": {
@@ -210,7 +210,7 @@
 			"type": "Concrete Pouring",
 			"numberOfWorkersNeeded": 3,
 			"numberOfUnitsPerDay": 0.025,
-			"orderSpecification": {
+			"order": {
 				"level": "ASCENDING"
 			},
 			"position": {
@@ -274,7 +274,7 @@
 			"type": "Scaffolding Installation",
 			"numberOfWorkersNeeded": 4,
 			"numberOfUnitsPerDay": 0.333,
-			"orderSpecification": {
+			"order": {
 				"level": "ASCENDING"
 			},
 			"position": {
