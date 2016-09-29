@@ -34,12 +34,12 @@ class AttributeTranslator extends AbstractMDLTranslator<Attribute, MDLAttributeA
 	}
 	
 	@Override
-	public Attribute createEntity() {
+	public Attribute createEntity(MDLAttributeAST mdl) {
 		return new Attribute();
 	}
 	
 	@Override
-	public MDLAttributeAST createMDL() {
+	public MDLAttributeAST createMDL(Attribute entity) {
 		return new MDLAttributeAST();
 	}
 	

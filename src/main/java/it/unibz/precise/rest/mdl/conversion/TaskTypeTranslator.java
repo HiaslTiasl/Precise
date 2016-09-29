@@ -28,12 +28,12 @@ class TaskTypeTranslator extends AbstractMDLTranslator<TaskType, MDLTaskTypeAST>
 	}
 
 	@Override
-	public TaskType createEntity() {
+	public TaskType createEntity(MDLTaskTypeAST mdl) {
 		return new TaskType();
 	}
 
 	@Override
-	public MDLTaskTypeAST createMDL() {
+	public MDLTaskTypeAST createMDL(TaskType entity) {
 		return new MDLTaskTypeAST();
 	}
 

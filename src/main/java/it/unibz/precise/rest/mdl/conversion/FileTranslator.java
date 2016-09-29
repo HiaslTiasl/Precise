@@ -12,6 +12,7 @@ class FileTranslator extends AbstractMDLTranslator<Model, MDLFileAST> {
 
 	@Override
 	public void updateMDL(Model model, MDLFileAST mdlFile) {
+		mdlFile.setModel(context().models().toMDL(model));
 		mdlFile.setConfig(context().configs().toMDL(model));
 		mdlFile.setTasks(Util.mapToList(model.getTasks(), context().tasks()::toMDL));
 		mdlFile.setDependencies(Util.mapToList(model.getDependencies(), context().dependencies()::toMDL));
@@ -20,6 +21,7 @@ class FileTranslator extends AbstractMDLTranslator<Model, MDLFileAST> {
 	@Override
 	public void updateEntity(MDLFileAST mdlFile, Model model) {
 		//model.setName(name);
+		context().models().updateEntity(mdlFile.getModel(), model);
 		context().configs().updateEntity(mdlFile.getConfig(), model);
 		mdlFile.getTasks().stream()
 			.map(context().tasks()::toEntity)
@@ -30,12 +32,12 @@ class FileTranslator extends AbstractMDLTranslator<Model, MDLFileAST> {
 	}
 
 	@Override
-	public Model createEntity() {
-		return new Model();
+	public Model createEntity(MDLFileAST mdl) {
+		return context().models().toEntity(mdl.getModel());
 	}
 
 	@Override
-	public MDLFileAST createMDL() {
+	public MDLFileAST createMDL(Model entity) {
 		return new MDLFileAST();
 	}
 	

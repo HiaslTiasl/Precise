@@ -37,12 +37,12 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 	}
 
 	@Override
-	public Dependency createEntity() {
+	public Dependency createEntity(MDLDependencyAST mdl) {
 		return new Dependency();
 	}
 
 	@Override
-	public MDLDependencyAST createMDL() {
+	public MDLDependencyAST createMDL(Dependency entity) {
 		return new MDLDependencyAST();
 	}
 	

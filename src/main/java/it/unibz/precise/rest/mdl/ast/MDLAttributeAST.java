@@ -2,18 +2,12 @@ package it.unibz.precise.rest.mdl.ast;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator;
-
-import it.unibz.precise.model.Attribute;
 
 @JsonIdentityInfo(generator=PropertyGenerator.class, property="name", scope=MDLAttributeAST.class)
 @JsonIdentityReference(alwaysAsId=false)
 public class MDLAttributeAST {
 
-	@JsonIgnore
-	private Attribute attribute;
-	
 	private String name;
 	private String shortName;
 	private String description;

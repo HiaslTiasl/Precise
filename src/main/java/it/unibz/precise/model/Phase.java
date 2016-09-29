@@ -2,7 +2,9 @@ package it.unibz.precise.model;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -96,6 +98,34 @@ public class Phase extends BaseEntity {
 		int nextIndex = prev == null ? 0 : prev.getPosition();		// N.B. position == index + 1
 		return nextIndex < attributeHierarchyLevels.size()
 			? attributeHierarchyLevels.get(nextIndex) : null;
+	}
+	
+	public Object buildingTree() {
+		AttributeHierarchyLevel firstLevel = attributeHierarchyLevels.isEmpty() ? null : nextLevel(null);
+		return firstLevel == null ? null : createTree(firstLevel, firstLevel.getNodes());
+	}
+	
+	private Object createTree(AttributeHierarchyLevel level, Map<String, AttributeHierarchyNode> nodes) {
+		Map<String, Object> tree = new LinkedHashMap<>();
+		Attribute attribute = level.getAttribute();
+		AttributeHierarchyLevel nextLevel = level.next();
+		boolean hasSubTrees = false;
+		for (String v : attribute.getRange()) {
+			AttributeHierarchyNode node = nodes.get(v);
+			if (node != null) {
+				Object subTree = null;
+				Map<String, AttributeHierarchyNode> children = node.getChildren();
+				if (!children.isEmpty()) {
+					hasSubTrees = true;
+					if (node.isValuesMatchPositions())
+						subTree = children.size();
+					else
+						subTree = createTree(nextLevel, children);
+				}
+				tree.put(v, subTree);
+			}
+		}
+		return hasSubTrees ? tree : tree.keySet();
 	}
 	
 }

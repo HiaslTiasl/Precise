@@ -25,12 +25,12 @@ class ConfigTranslator extends AbstractMDLTranslator<Model, MDLConfigAST> {
 	}
 
 	@Override
-	public Model createEntity() {
+	public Model createEntity(MDLConfigAST mdl) {
 		return new Model();
 	}
 
 	@Override
-	public MDLConfigAST createMDL() {
+	public MDLConfigAST createMDL(Model entity) {
 		return new MDLConfigAST();
 	}
 

@@ -1,6 +1,5 @@
 package it.unibz.precise.rest.mdl.conversion;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,7 +19,6 @@ public class PhaseTranslator extends AbstractMDLTranslator<Phase, MDLPhaseAST> {
 
 	@Override
 	public void updateMDL(Phase phase, MDLPhaseAST mdlPhase) {
-		List<AttributeHierarchyLevel> levelList = phase.getAttributeHierarchyLevels();
 		mdlPhase.setName(phase.getName());
 		mdlPhase.setDescription(phase.getDescription());
 		mdlPhase.setColor(phase.getColor());
@@ -28,7 +26,7 @@ public class PhaseTranslator extends AbstractMDLTranslator<Phase, MDLPhaseAST> {
 			.map(AttributeHierarchyLevel::getAttribute)
 			.map(context().attributes()::toMDL)
 			.collect(Collectors.toList()));
-		mdlPhase.setValueTree(levelList.isEmpty() ? null : createTree(levelList.get(0).getNodes()));
+		mdlPhase.setValueTree(phase.buildingTree());
 	}
 	
 	@Override
@@ -43,33 +41,15 @@ public class PhaseTranslator extends AbstractMDLTranslator<Phase, MDLPhaseAST> {
 	}
 	
 	@Override
-	public Phase createEntity() {
+	public Phase createEntity(MDLPhaseAST mdl) {
 		return new Phase();
 	}
 
 	@Override
-	public MDLPhaseAST createMDL() {
+	public MDLPhaseAST createMDL(Phase entity) {
 		return new MDLPhaseAST();
 	}
 	
-	private Object createTree(Map<String, AttributeHierarchyNode> nodes) {
-		Map<String, Object> tree = new LinkedHashMap<>();
-		boolean hasSubTrees = false;
-		for (AttributeHierarchyNode node : nodes.values()) {
-			Object subTree = null;
-			Map<String, AttributeHierarchyNode> children = node.getChildren();
-			if (!children.isEmpty()) {
-				hasSubTrees = true;
-				if (node.isValuesMatchPositions())
-					subTree = children.size();
-				else
-					subTree = createTree(children);
-			}
-			tree.put(node.getValue(), subTree);
-		}
-		return hasSubTrees ? tree : tree.keySet();
-	}
-
 	private void walkTree(List<AttributeHierarchyLevel> levels, int levelIndex, Object tree, AttributeHierarchyNode parent) {
 		if (tree instanceof Integer)
 			walkTreeLevel(levels, levelIndex, (int)tree, parent);

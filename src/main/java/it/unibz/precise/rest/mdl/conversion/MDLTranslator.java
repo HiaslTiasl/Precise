@@ -4,8 +4,8 @@ public interface MDLTranslator<E, MDL> {
 	
 	MDLContext context();
 	
-	E createEntity();
-	MDL createMDL();
+	E createEntity(MDL mdl);
+	MDL createMDL(E entity);
 	
 	void updateEntity(MDL mdl, E entity);
 	void updateMDL(E entity, MDL mdl);

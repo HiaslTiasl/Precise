@@ -10,6 +10,7 @@ import it.unibz.precise.rest.mdl.ast.MDLAttributeAST;
 import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
 import it.unibz.precise.rest.mdl.ast.MDLDependencyAST;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
+import it.unibz.precise.rest.mdl.ast.MDLModelAST;
 import it.unibz.precise.rest.mdl.ast.MDLPhaseAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskTypeAST;
@@ -19,6 +20,7 @@ public class MDLContext {
 	private static final boolean CONCURRENT_TRANSLATORS = false;
 	
 	private final MDLTranslator<Model, MDLFileAST> fileTranslator;
+	private final MDLTranslator<Model, MDLModelAST> modelTranslator;
 	private final MDLTranslator<Model, MDLConfigAST> configTranslator;
 	private final MDLTranslator<Attribute, MDLAttributeAST> attributeTranslator;
 	private final MDLTranslator<Phase, MDLPhaseAST> phaseTranslator;
@@ -28,6 +30,7 @@ public class MDLContext {
 	
 	public MDLContext() {
 		fileTranslator       = cache(new FileTranslator(this));
+		modelTranslator      = cache(new ModelTranslator(this));
 		configTranslator     = cache(new ConfigTranslator(this));
 		attributeTranslator  = cache(new AttributeTranslator(this));
 		phaseTranslator      = cache(new PhaseTranslator(this));
@@ -42,6 +45,10 @@ public class MDLContext {
 		
 	public MDLTranslator<Model, MDLFileAST> files() {
 		return fileTranslator;
+	}
+	
+	public MDLTranslator<Model, MDLModelAST> models() {
+		return modelTranslator;
 	}
 
 	public MDLTranslator<Model, MDLConfigAST> configs() {

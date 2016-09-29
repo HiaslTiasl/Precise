@@ -92,4 +92,8 @@ public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
 		return nodes.get(value);
 	}
 	
+	public AttributeHierarchyLevel next() {
+		return phase.nextLevel(this);
+	}
+	
 }

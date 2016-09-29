@@ -2,15 +2,10 @@ package it.unibz.precise.rest.mdl.ast;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Position;
 
 public class MDLDependencyAST {
 
-	@JsonIgnore
-	private Dependency dependency;
 	private boolean alternate;
 	private boolean chain;
 	private MDLTaskAST source;

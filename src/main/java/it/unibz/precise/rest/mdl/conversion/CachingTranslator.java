@@ -33,13 +33,13 @@ public class CachingTranslator<E, MDL> extends AbstractMDLTranslator<E, MDL> {
 	}
 
 	@Override
-	public E createEntity() {
-		return delegate.createEntity();
+	public E createEntity(MDL mdl) {
+		return delegate.createEntity(null);
 	}
 
 	@Override
-	public MDL createMDL() {
-		return delegate.createMDL();
+	public MDL createMDL(E entity) {
+		return delegate.createMDL(null);
 	}
 
 	@Override

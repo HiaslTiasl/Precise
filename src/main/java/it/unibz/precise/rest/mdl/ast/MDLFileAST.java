@@ -5,19 +5,15 @@ import java.util.List;
 import org.springframework.validation.annotation.Validated;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import it.unibz.precise.model.Model;
 
 @JsonPropertyOrder({"model", "attributes", "phases", "taskTypes", "tasks", "dependencies"})
 @Validated
 public class MDLFileAST {
 	
-	@JsonIgnoreProperties({"id", "name", "state", "attributes", "phases", "taskTypes", "tasks", "dependencies"})
-	private Model model;
-
+	private MDLModelAST model;
+	
 	@JsonIgnore
 	private MDLConfigAST config;
 	
@@ -68,11 +64,11 @@ public class MDLFileAST {
 		config.setTaskTypes(taskTypes);
 	}
 	
-	public Model getModel() {
+	public MDLModelAST getModel() {
 		return model;
 	}
 	
-	public void setModel(Model model) {
+	public void setModel(MDLModelAST model) {
 		this.model = model;
 	}
 	
