@@ -28,23 +28,20 @@ define([
 				swatchBootstrap: false
 			},
 			eventApi: {
-				onChange: colorChanged
+				onClose: colorChanged
 			}
 		};
 		
 		function $onChanges(changes) {
 			if (changes.phases) {
-				//$ctrl.color.options.disabled = !$ctrl.model.data.configInfo.editable;
 				phasesChanged();
+				phaseChanged();
 			}
 		}
 		
 		function phasesChanged() {
-			if ($ctrl.phases && $ctrl.phases.length)
+			if ($ctrl.phases && !$ctrl.phase)
 				$ctrl.phase = $ctrl.phases[0];
-			else
-				$ctrl.phase = null;
-			phaseChanged();
 		}
 		
 		function phaseChanged() {

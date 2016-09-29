@@ -21,7 +21,7 @@
 	</button>
 </div>
 
-<uib-tabset>
+<uib-tabset ng-if="$ctrl.phases && $ctrl.phases.length">
 	<uib-tab heading="Building">
 		<precise-building model="$ctrl.model" phases="$ctrl.phases" reload="$ctrl.reload()"></precise-building>
 	</uib-tab>

@@ -5,7 +5,7 @@
 			<select
 				class="form-control"
 				ng-model="$ctrl.phase"
-				ng-options="p as p.name for p in $ctrl.phases"
+				ng-options="p as p.name for p in $ctrl.phases track by p.name"
 				ng-change="$ctrl.phaseChanged()"
 				ng-disabled="!$ctrl.phases">
 				<!-- <option value="">-- Select a phase --</option> -->
