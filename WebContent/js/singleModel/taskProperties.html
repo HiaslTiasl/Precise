@@ -118,6 +118,7 @@
 					<a href
 						editable-select="pattern[attr.name].value"
 						e-ng-options="value for value in pattern[attr.name].allowedValues"
+						ng-class="{disabled: $ctrl.isDisabledPatternEntry(pattern[attr.name])}"
 						ng-disabled="$ctrl.isDisabledPatternEntry(pattern[attr.name])"
 						buttons="no"
 						onbeforesave="$ctrl.updatePattern(pattern, patternNum, attr, $data)">
@@ -136,7 +137,7 @@
 <div class="text-right">
 	<button class="btn btn-primary"
 		ng-click="$ctrl.sendTask()"
-		ng-disabled="$ctrl.mode === 'add' && !$ctrl.resource.data.type">
+		ng-disabled="!$ctrl.resource.data.type">
 		Done
 	</button>
 	<button class="btn btn-default" ng-click="$ctrl.cancel()">Cancel</button>

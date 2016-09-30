@@ -9,10 +9,12 @@ import java.util.stream.Collectors;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -23,7 +25,10 @@ import it.unibz.util.Util;
 @JsonPropertyOrder(value={"type"})
 public class Task extends BaseEntity {
 
+	
 	@ManyToOne
+	@JoinColumn(nullable=false)
+	@NotNull(message="{task.type.required}")
 	private TaskType type;
 	
 	@Embedded
@@ -101,13 +106,15 @@ public class Task extends BaseEntity {
 	}
 	
 	public void setLocationPatterns(List<Map<String, PatternEntry>> patterns) {
-		List<AttributeHierarchyLevel> levels = type.getPhase().getAttributeHierarchyLevels();
-		this.locations = patterns.stream()
-			.map(p -> LocationPatterns.patternToNode(p, levels))
-			.map(Location::new)
-			.collect(Collectors.toList());
-		// Only add pattern if it is a valid location
-		this.locationPatterns = patterns;
+		if (type != null) {
+			List<AttributeHierarchyLevel> levels = type.getPhase().getAttributeHierarchyLevels();
+			this.locations = patterns.stream()
+					.map(p -> LocationPatterns.patternToNode(p, levels))
+					.map(Location::new)
+					.collect(Collectors.toList());
+			// Only add pattern if it is a valid location
+			this.locationPatterns = patterns;
+		}
 	}
 	
 	public void updateOrderSpecifications() {
