@@ -105,7 +105,9 @@ define([
 						return builder
 							.withTemplateParameters(params)
 							.get();				
-					}).then(Pages.wrapper(rel));
+					}).then(function (res) {
+						return PreciseApi.embeddedArray(res, rel);
+					});
 			},
 			
 			getList: function (rel, params) {
@@ -128,6 +130,10 @@ define([
 			
 			getTaskTypes: function (params) {
 				return this.getList('taskTypes', params);
+			},
+			
+			getWarnings: function () {
+				return this.followToList('warnings');
 			}
 		
 		});

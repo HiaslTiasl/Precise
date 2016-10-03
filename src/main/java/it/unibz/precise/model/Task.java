@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
@@ -51,6 +52,12 @@ public class Task extends BaseEntity {
 	private float numberOfUnitsPerDay;
 	
 	private boolean globalExclusiveness;
+	
+	@OneToMany(mappedBy="target")
+	private List<Dependency> in = new ArrayList<>();
+	
+	@OneToMany(mappedBy="source")
+	private List<Dependency> out = new ArrayList<>();
 
 	@ManyToOne
 	private Model model;
@@ -189,6 +196,30 @@ public class Task extends BaseEntity {
 		this.model = model;
 	}
 	
+	public List<Dependency> getIn() {
+		return in;
+	}
+	
+	public void setIn(List<Dependency> in) {
+		TaskToMany.IN_DEPENDENCIES.setMany(this, in);
+	}
+
+	void internalSetIn(List<Dependency> in) {
+		this.in = in;
+	}
+
+	public List<Dependency> getOut() {
+		return out;
+	}
+
+	public void setOut(List<Dependency> out) {
+		TaskToMany.OUT_DEPENDENCIES.setMany(this, out);
+	}
+
+	void internalSetOut(List<Dependency> out) {
+		this.out = out;
+	}
+
 	@PostLoad
 	public void updateDependentFields() {
 		updateLocationPatterns();

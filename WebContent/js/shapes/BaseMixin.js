@@ -12,11 +12,7 @@ define([
 		}, joint.shapes.basic.Generic.prototype.defaults),
 		
 		initialize: function() {
-	        this.on('change:data', function() {
-	            this.update();
-	            this.trigger('precise-update');
-	        }, this);
-
+	        this.on('change:data', this.update, this);
 	        this.update();
 
 	        joint.shapes.basic.Generic.prototype.initialize.apply(this, arguments);

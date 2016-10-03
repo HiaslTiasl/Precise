@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Util {
 	
@@ -21,6 +22,12 @@ public class Util {
 	public static <T, K, V> Map<K, V> mapToMap(Collection<T> coll, Function<T, K> keyMapper, Function<T, V> valMapper) {
 		return coll == null ? null
 			: coll.stream().collect(Collectors.toMap(keyMapper, valMapper));
+	}
+	
+	public static <T> Map<T, Integer> mapToIndex(List<T> list) {
+		return IntStream.range(0, list.size())
+			.mapToObj(Integer::valueOf)
+			.collect(Collectors.toMap(list::get, Function.identity()));
 	}
 
 	public static Collector<Integer, BitSet, BitSet> toBitSetCollector() {

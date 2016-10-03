@@ -146,11 +146,11 @@ define([
 		0, 0, 0, 10, 0
 	].join(' ');
 	
-	var invertColors = [
-		 -1,  0,  0, 0, 1, 
-		  0, -1,  0, 0, 1,
-		  0,  0, -1, 0, 1,
-		  0,  0,  0, 1, 0
+	var visibleToWhite = [
+		0, 0, 0, 0, 1, 
+		0, 0, 0, 0, 1,
+		0, 0, 0, 0, 1,
+		0, 0, 0, 1, 0
 	].join(' ');
 	
 	util.set(joint.shapes, 'precise.DependencyShapeView', joint.dia.LinkView.extend({
@@ -158,10 +158,10 @@ define([
 			'<filter id="' + CHAIN_FILTER_ID + '" filterUnits="userSpaceOnUse">',
 				'<feColorMatrix in="SourceGraphic" result="inner" type="matrix" values="' + intensify + '"/>',
 				'<feMorphology in="inner" result="outer" operator="dilate" radius="2"/>',
-				'<feColorMatrix in="inner" result="innerInv" type="matrix" values="' + invertColors + '"/>',
+				'<feColorMatrix in="inner" result="innerWhite" type="matrix" values="' + visibleToWhite + '"/>',
 				'<feMerge>',
 					'<feMergeNode in="outer"/>',
-					'<feMergeNode in="innerInv"/>',
+					'<feMergeNode in="innerWhite"/>',
 				'</feMerge>',
 			'</filter>'
 		].join(''),

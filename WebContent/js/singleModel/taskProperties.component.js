@@ -7,9 +7,9 @@ define([
 ) {
 	'use strict';
 	
-	TaskPropertiesController.$inject = ['Tasks', 'Phases', 'Pages'];
+	TaskPropertiesController.$inject = ['PreciseApi', 'Tasks', 'Phases', 'Pages'];
 	
-	function TaskPropertiesController(Tasks, Phases, Pages) {
+	function TaskPropertiesController(PreciseApi, Tasks, Phases, Pages) {
 		var $ctrl = this;
 		
 		$ctrl.cancel = cancel;
@@ -39,7 +39,6 @@ define([
 		
 		function loadPhases() {
 			$ctrl.resource.model.getPhases()
-				.then(Pages.collectRemaining)
 				.then(function (phases) {
 					$ctrl.phases = phases;
 				});
@@ -129,7 +128,7 @@ define([
 				.then(function (result) {
 					$ctrl.done({ $result: result });
 				}, function (reason) {
-					alert(preciseApi.toErrorMessage(reason));
+					alert(PreciseApi.toErrorMessage(reason));
 				});
 		}
 

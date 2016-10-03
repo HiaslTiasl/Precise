@@ -45,6 +45,8 @@ define([
 			//this.selectedView;
 			//this.selectedNS;
 			//this.editMode;
+			//this.warningTasks;
+			//this.warningDependencies;
 			this.attachListeners();
 			this.setEditMode(defaultEditMode);
 		},
@@ -204,6 +206,64 @@ define([
 		
 		fromJSON: function (rawGraph) {
 			this.paper.model.fromJSON(rawGraph);
+		},
+		
+		toggleHideLocations: function (hideLocations) {
+			this.paper.model.getCells().forEach(function (cell) {
+				cell.set('hideLocations', hideLocations);
+			});
+		},
+		
+		resetWarnings: function () {
+			var paper = this.paper;
+			if (this.warningTasks) {
+				this.warningTasks.forEach(function (t) {
+					paper.findViewByModel(TaskShape.toTaskID(t.id)).vel.toggleClass('warning', false);
+				});
+				this.warningTasks = null;
+			}
+			if (this.warningDependencies) {
+				this.warningDependencies.forEach(function (d) {
+					paper.findViewByModel(DependencyShape.toDependencyID(d.id)).vel.toggleClass('warning', false);
+				});
+				this.warningDependencies = null;
+			}
+		},
+		
+		showWarningForTasks: function (tasks, withDependencies) {
+			this.resetWarnings();
+			var paper = this.paper,
+				graph = paper.model;
+			tasks.forEach(function (t) {
+				var id = TaskShape.toTaskID(t.id),
+					cell = graph.getCell(id),
+					cellView = paper.findViewByModel(id);
+				cellView.vel.toggleClass('warning', true)
+			});
+			this.warningTasks = tasks;
+			if (withDependencies) {
+				var dependencies = [];
+				tasks.forEach(function (t) {
+					graph.getConnectedLinks(graph.getCell(TaskShape.toTaskID(t.id)), {
+						outbound: true,
+						inbound: false
+					}).forEach(function (d) {
+						var target = d.get('target');
+						if (target.id) {
+							var targetView = paper.findViewByModel(target.id);
+							if (targetView.vel.hasClass('warning')) {
+								paper.findViewByModel(d).vel.toggleClass('warning', true);
+								dependencies.push(d.get('data'));
+							}
+						}
+					});
+				})
+				this.warningDependencies = dependencies;
+			}
+		},
+		
+		toggleWarningClass: function (cellView, warning) {
+			cellView.vel.toggleClass('warning', warning);
 		},
 		
 		setEditMode: function (editMode) {

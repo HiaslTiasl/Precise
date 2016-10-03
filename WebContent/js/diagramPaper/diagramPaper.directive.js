@@ -33,6 +33,8 @@ function (
 	            gridSize: '@',
 	            model: '<',
 	            tools: '<',
+	            hideLocations: '<',
+	            currentWarning: '<',
 				onStructureChanged: '&'
 	        },
 	        controller: 'DiagramPaperController',

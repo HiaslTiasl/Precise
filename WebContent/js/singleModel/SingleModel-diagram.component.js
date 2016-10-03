@@ -11,10 +11,12 @@ define([
 		
 		var $ctrl = this;
 		
+		$ctrl.showWarning = showWarning;
+
 		$ctrl.done = done;
 		$ctrl.cancelled = cancelled;
 		
-		//$ctrl.$onChanges = $onChanges;
+		$ctrl.$onChanges = $onChanges;
 		
 		$scope.$on('cell:delete', deleteCell);
 		$scope.$on('task:new', newTaskHandler);
@@ -25,8 +27,10 @@ define([
 		$scope.$on('dependency:change', diagramDependencyChangeHandler);
 		
 		function $onChanges(changes) {
-			if (changes.model)
+			if (changes.model) {
 				resetResources();
+				loadWarnings();
+			}
 		}
 		
 		function resetResources() {
@@ -109,6 +113,16 @@ define([
 					$ctrl.taskResource = null;
 				});
 			}
+		}
+		
+		function loadWarnings() {
+			$ctrl.model.getWarnings().then(function (warnings) {
+				$ctrl.warnings = warnings;
+			});
+		}
+		
+		function showWarning(w) {
+			$ctrl.currentWarning = $ctrl.currentWarning !== w ? w : null;
 		}
 		
 		function done(result) {

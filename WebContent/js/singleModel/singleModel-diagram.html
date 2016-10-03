@@ -1,5 +1,10 @@
 <div class="panels">
-	<precise-diagram-paper model="$ctrl.model" on-structure-changed="$ctrl.reload()"></precise-diagram-paper>
+	<precise-diagram-paper
+		model="$ctrl.model"
+		hide-locations="$ctrl.hideLocations"
+		current-warning="$ctrl.currentWarning"
+		on-structure-changed="$ctrl.reload()">
+	</precise-diagram-paper>
 	<div id="properties-wrapper">
 		<h3>Properties</h3>
 		<task-properties
@@ -21,10 +26,24 @@
 		</div>
 	</div>
 </div>
-	<div id="warnings">
-		<ul>
-			<li ng-repeat="w in $ctrl.warnings" class="warning-message">
-				{{$ctrl.warningMessage(w)}}
-			</li>
-		</ul>
-	</div>
+<div id="warnings" class="panel panel-default">
+	<header class="panel-heading" ng-click="$ctrl.warningsOpen = !$ctrl.warningsOpen">
+		<a href>
+			<span class="glyphicon glyphicon-warning-sign"></span>
+			Warnings
+			<span class="badge" ng-show="$ctrl.warnings.length">{{$ctrl.warnings.length}}</span>
+		</a>
+	</header>
+	<article uib-collapse="!$ctrl.warningsOpen" ng-if="$ctrl.warnings.length" class="list-group">
+		<a href
+			class="list-group-item"
+			ng-class="{'list-group-item-danger': w === $ctrl.currentWarning}"
+			ng-repeat="w in $ctrl.warnings"
+			ng-click="$ctrl.showWarning(w)">
+			{{w.message}}
+		</a>
+	</article>
+	<article uib-collapse="!$ctrl.warningsOpen" ng-if="!$ctrl.warnings.length" class="panel-body">
+		<p class="text-muted">No warnings in model</p> 
+	</article>
+</div>

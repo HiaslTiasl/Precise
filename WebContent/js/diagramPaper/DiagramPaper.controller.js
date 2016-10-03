@@ -14,6 +14,19 @@ define([
 		
 		$ctrl.diagramToolset = DiagramPaperToolset;
 		$ctrl.onPaperInit = onPaperInit;
+
+		$ctrl.hideLocationsChanged = hideLocationsChanged;
+		
+		$ctrl.$onChanges = $onChanges;
+		
+		function $onChanges(changes) {
+			if ($ctrl.diaPaper) {
+				if (changes.currentWarning)
+					warningsChanged();
+				if (changes.hideLocations)
+					hideLocationsChanged();
+			}
+		}
 		
 		function broadcast() {
 			var args = arguments;
@@ -36,6 +49,7 @@ define([
 			$ctrl.diaPaper.on('all', broadcast);
 			
 			// remote -> diagram
+			$scope.$on('render:done', onRenderDone);
 			$scope.$on('properties:created', onPropertiesCreated);
 			$scope.$on('properties:change', onPropertiesChange);
 			$scope.$on('properties:cancel', onPropertiesCancel);
@@ -43,6 +57,11 @@ define([
 			
 			// diagram -> remote
 			$scope.$on('diagram:remove', onDiagramRemove);
+		}
+		
+		function onRenderDone(event) {
+			warningsChanged();
+			hideLocationsChanged();
 		}
 		
 		function onPropertiesCreated(event, type, data) {
@@ -68,6 +87,17 @@ define([
 				$ctrl.diaPaper.addCell(type, data);
 			})
 			.then($ctrl.onStructureChanged);
+		}
+		
+		function warningsChanged() {
+			if ($ctrl.currentWarning)
+				$ctrl.diaPaper.showWarningForTasks($ctrl.currentWarning.entities, true);
+			else
+				$ctrl.diaPaper.resetWarnings();
+		}
+		
+		function hideLocationsChanged() {
+			$ctrl.diaPaper.toggleHideLocations($ctrl.hideLocations);
 		}
 		
 	}

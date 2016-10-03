@@ -14,6 +14,8 @@ define([
 	util
 ) {
 	
+	var hideLocations = true;
+	
 	var LOC_COL_WIDTH = 20,
 		LOC_ROW_HEIGHT = LOC_COL_WIDTH,
 		DEFAULT_LOC_HEIGHT = 1 * LOC_ROW_HEIGHT,
@@ -95,19 +97,26 @@ define([
 		
 		initialize: function (options) {
 			this.set('id', TaskShape.toTaskID(options.data.id));
+			this.on('change:hideLocations', this.update, this);
 			BaseShape.prototype.initialize.apply(this, arguments);
 		},
 		
 		update: function () {
 			var data = this.get('data'),
+				hideLocations = this.get('hideLocations'),
 				attributes = data.type.phase.attributes,
 				attrCount = attributes.length,
-				exclusive = data.globalExclusiveness || data.exclusiveness.length,
+				exclusive = !hideLocations && (data.globalExclusiveness || data.exclusiveness.length),
 				locationsHeight = attrCount * LOC_ROW_HEIGHT,
 				locationPatterns = data.locationPatterns,
 				width = WIDTH,
-				height = LOC_POS_Y + locationsHeight;
-			if (exclusive) {
+				height = LOC_POS_Y + locationsHeight,
+				nameHeight = NAME_HEIGHT,
+				nameFontSize = 'normal';
+			
+			if (hideLocations)
+				nameHeight += locationsHeight;
+			else if (exclusive) {
 				width += 10;
 				height += 10;
 			}
@@ -120,16 +129,25 @@ define([
 					height: height,
 					transform: exclusive ? 'translate(-5,-5)' : ''
 				},
-				'rect.task-type-name':      { fill: colors.toCSS(data.type.phase.color) },
-				'rect.task-locations':      { height: locationsHeight },
-				'text.task-id':             { text: data.id },
-				'text.task-workers-needed': { text: data.numberOfWorkersNeeded },
-				'text.task-units-per-day':  { text: data.numberOfUnitsPerDay },
-				'text.task-type-craft':     { text: data.type.craftShort },
-				'text.task-type-name':      { text: joint.util.breakText(data.type.name, { width: WIDTH, height: NAME_HEIGHT }) },
-				'text.trunc':               { y: LOC_POS_Y + locationsHeight / 2 }
+				'rect.task-type-name':       { fill: colors.toCSS(data.type.phase.color), height: nameHeight },
+				'rect.task-locations':       { height: locationsHeight },
+				'text.task-id':              { text: data.id },
+				'text.task-workers-needed':  { text: data.numberOfWorkersNeeded },
+				'text.task-units-per-day':   { text: data.numberOfUnitsPerDay },
+				'text.task-type-craft':      { text: data.type.craftShort },
+				'text.task-type-name':       {
+					text: joint.util.breakText(data.type.name, {
+						width: WIDTH,
+						height: nameHeight
+					})
+				}
 			});
 			if (locationPatterns) {
+				var displayLocations = hideLocations ? 'none' : 'inline';
+				this.attr('text.trunc', {
+					display: displayLocations,
+					y: LOC_POS_Y + locationsHeight / 2
+				});
 				for (var i = 0, locLen = locationPatterns.length; i < locLen; i++) {
 					var pattern = locationPatterns[i];
 					for (var j = 0; j < attrCount; j++) {
@@ -138,10 +156,12 @@ define([
 							rectSelector = 'rect.loc-entry.loc-num-' + i + '.' + attrName,
 							textSelector = 'text.loc-entry.loc-num-' + i + '.' + attrName;
 						this.attr(rectSelector, {
+							display: displayLocations,
 							x: i * LOC_COL_WIDTH,
 							y: j * LOC_ROW_HEIGHT + LOC_POS_Y
 						});
 						this.attr(textSelector, {
+							display: displayLocations,
 							'ref-x': .5,
 							'ref-y': .5,
 							'text-anchor': 'middle',

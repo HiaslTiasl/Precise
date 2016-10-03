@@ -67,6 +67,10 @@ public class Dependency extends BaseEntity {
 	}
 
 	public void setSource(Task source) {
+		TaskToMany.OUT_DEPENDENCIES.setOne(this, source);
+	}
+	
+	public void internalSetSource(Task source) {
 		this.source = source;
 	}
 	
@@ -80,6 +84,10 @@ public class Dependency extends BaseEntity {
 	}
 
 	public void setTarget(Task target) {
+		TaskToMany.IN_DEPENDENCIES.setOne(this, target);
+	}
+	
+	void internalSetTarget(Task target) {
 		this.target = target;
 	}
 	

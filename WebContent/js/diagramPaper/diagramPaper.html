@@ -14,10 +14,16 @@
 				{{::t.title}}
 			</button>
 		</span>
+		<!-- <div class="checkbox-inline">
+			<label>
+				<input type="checkbox" ng-model="$ctrl.hideLocations" ng-change="$ctrl.hideLocationsChanged()">
+				Hide Locations
+			</label>
+		</div> -->
 		<div class="zoom-options">
 			<span>{{100 * $ctrl.zoomScale | number:0}}%</span>
 			<a href ng-click="$ctrl.fitAndCenter()"><span class="glyphicon glyphicon-fullscreen"></span></a>
 		</div>
 	</div>
-	<div class="paper"></div>
+	<div class="paper" ng-class="{'hide-locations': $ctrl.hideLocations}"></div>
 </div>

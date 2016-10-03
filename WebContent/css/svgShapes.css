@@ -7,6 +7,10 @@ text {
 	font-size: 12px;
 }
 
+.alt-cross {
+	stroke: black;
+}
+
 /******************************************
  * Override JointJS styles
  ******************************************/
@@ -63,6 +67,29 @@ text {
 .precise.DependencyShape.highlighted .connection-wrap {
 	opacity: .4;
 	stroke-opacity: .4;
+}
+
+/******************************************
+ * Warnings
+ ******************************************/
+ 
+.precise.TaskShape.warning rect,
+.precise.DependencyShape.warning .connection,
+.precise.DependencyShape.warning .marker-target {
+	stroke: red;
+	stroke-width: 3;
+}
+
+.precise.DependencyShape.warning .marker-target {
+	fill: red;
+}
+
+/******************************************
+ * Alternative views
+ ******************************************/
+
+.hide-locations text.task-type-name {
+	font-size: x-large;	
 }
 
 /******************************************

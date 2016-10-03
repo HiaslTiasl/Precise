@@ -66,3 +66,50 @@ precise-diagram-paper {
 #location-table td {
 	text-align: center;
 }
+
+#warnings {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: auto;
+	max-width: 100%;
+	margin-bottom: 0;
+	border-color: #a94442;
+	border-width: 2px 2px 0px 0px;
+	border-radius: 0;
+	box-shadow: 1px 1px 4px 1px #a94442;
+	color: red;
+}
+
+#warnings header.panel-heading,
+#warnings header.panel-heading a {
+	background-color: #a94442;
+	color: white;
+}
+#warnings header.panel-heading a .badge {
+	background-color: white;
+	color: #a94442;
+}
+
+#warnings article {
+	height: 100px;
+	min-width: 400px;
+	overflow-y: scroll;
+}
+
+#warnings.panel,
+#warnings > .panel-heading,
+#warnings > .panel-body,
+#warnings > .list-group,
+#warnings > .list-group > .list-group-item {
+	border-radius: 0;
+}
+
+#warnings ul {
+	list-style: none;
+	padding: 0;
+}
+
+#warnings .warning-message {
+	color: red;
+}

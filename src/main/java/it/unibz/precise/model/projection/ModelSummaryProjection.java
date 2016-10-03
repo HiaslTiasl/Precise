@@ -8,7 +8,7 @@ import it.unibz.precise.model.Model;
 @Projection(name="modelSummary", types=Model.class)
 public interface ModelSummaryProjection {
 
-	
+	long getId();
 	
 	String getName();
 	
