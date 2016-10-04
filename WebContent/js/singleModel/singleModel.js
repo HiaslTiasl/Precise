@@ -5,6 +5,7 @@ define([
 	'./SingleModel.service',
 	'./SingleModel.component',
 	'./SingleModel-diagram.component',
+	'./singleModel-diagram.create-task-dialog.component',
 	'./SingleModel-config.component',
 	'./singleModel-config.import-dialog.component',
 	'./SingleModel-building.component',
@@ -22,6 +23,7 @@ define([
 	SinlgeModelService,
 	singleModelComponent,
 	singleModelDiagramComponent,
+	singleModelDiagramCreateTaskDialogComponent,
 	singleModelConfigComponent,
 	singleModelConfigImportDialogComponent,
 	singleModelBuildingComponent,
@@ -36,6 +38,7 @@ define([
 		.service('SingleModel', SinlgeModelService)
 		.component('preciseSingleModel', singleModelComponent)
 		.component('preciseDiagram', singleModelDiagramComponent)
+		.component('preciseCreateTask', singleModelDiagramCreateTaskDialogComponent)
 		.component('preciseConfig', singleModelConfigComponent)
 		.component('preciseImportConfig', singleModelConfigImportDialogComponent)
 		.component('preciseBuilding', singleModelBuildingComponent)

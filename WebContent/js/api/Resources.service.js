@@ -39,7 +39,7 @@ define([
 			},
 			
 			getTemplateParams: function (requestedProjection) {
-				var projection = requestedProjection !== undefined ? requestedProjection : self.defaultProjection;
+				var projection = requestedProjection !== undefined ? requestedProjection : this.defaultProjection;
 				return projection && {
 					projection: projection
 				};

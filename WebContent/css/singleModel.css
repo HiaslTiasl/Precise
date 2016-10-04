@@ -81,6 +81,10 @@ precise-diagram-paper {
 	color: red;
 }
 
+#warnings header.panel-heading {
+	border-bottom: 0;
+}
+
 #warnings header.panel-heading,
 #warnings header.panel-heading a {
 	background-color: #a94442;

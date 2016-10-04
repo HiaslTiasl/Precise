@@ -29,7 +29,6 @@
 <div id="warnings" class="panel panel-default">
 	<header class="panel-heading" ng-click="$ctrl.warningsOpen = !$ctrl.warningsOpen">
 		<a href>
-			<span class="glyphicon glyphicon-warning-sign"></span>
 			Warnings
 			<span class="badge" ng-show="$ctrl.warnings.length">{{$ctrl.warnings.length}}</span>
 		</a>
@@ -44,6 +43,6 @@
 		</a>
 	</article>
 	<article uib-collapse="!$ctrl.warningsOpen" ng-if="!$ctrl.warnings.length" class="panel-body">
-		<p class="text-muted">No warnings in model</p> 
+		<p class="text-muted">No warnings</p> 
 	</article>
 </div>

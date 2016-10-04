@@ -2,33 +2,17 @@
 	<div class="form-group">
 		<label for="phase" class="col-sm-5 control-label">Phase</label>
 		<div class="col-sm-7">
-			<p ng-if="$ctrl.resource.exists" id="phase" class="form-control-static">
+			<p id="phase" class="form-control-static">
 				{{$ctrl.resource.data.type.phase.name}}
 			</p>
-			<select ng-if="!$ctrl.resource.exists"
-				id="phase"
-				class="form-control"
-				ng-model="$ctrl.phase"
-				ng-options="phase as phase.name for phase in $ctrl.phases"
-				ng-change="$ctrl.phaseChanged()">
-				<option value="">-- Select a Phase --</option>
-			</select>
 		</div>
 	</div>
 	<div class="form-group">
 		<label for="type" class="col-sm-5 control-label">Task</label>
 		<div class="col-sm-7">
-			<p ng-if="$ctrl.resource.exists" id="type" class="form-control-static">
+			<p id="type" class="form-control-static">
 				{{$ctrl.resource.data.type.name}}
 			</p>
-			<select ng-if="!$ctrl.resource.exists"
-				id="type"
-				class="form-control"
-				ng-model="$ctrl.resource.data.type"
-				ng-options="type as type.name for type in $ctrl.taskTypes"
-				ng-disabled="!$ctrl.taskTypes">
-				<option value="">-- Select a Task --</option>
-			</select>
 		</div>
 	</div>
 	<div class="form-group">
@@ -61,30 +45,30 @@
 		<div class="col-sm-7">
 			<div class="checkbox">
 				<label>
-					<input type="checkbox" ng-model="$ctrl.resource.data.globalExclusiveness" ng-change="$ctrl.globalExclusivenessChanged()"> Global
+					<input type="checkbox" ng-model="$ctrl.resource.data.globalExclusiveness" ng-change="$ctrl.resource.updateExlusiveness()"> Global
 				</label>
 			</div>
 			<a href
 				editable-select="$ctrl.resource.data.exclusiveness"
 				e-multiple
 				e-ng-options="attr as attr.name for attr in $ctrl.resource.data.type.phase.attributes"
-				e-ng-change="ctrl.exclusivenessChanged()"
+				onaftersave="$ctrl.resource.updateGlobalExclusiveness()"
 				ng-disabled="$ctrl.resource.data.globalExclusiveness">
-				{{ $ctrl.showExclusiveness() || '(no attributes)' }}
+				{{ $ctrl.resource.showExclusiveness() || '(no attributes)' }}
 			</a>
 		</div>
 	</div>
-	<div class="form-group" ng-if="$ctrl.resource.exists">
+	<div class="form-group">
 		<label for="order" class="col-sm-5 control-label">Order</label>
 		<div class="col-sm-7">
 			<p id="order" class="form-control-static">
 				<a href ng-click="$ctrl.showOrderForm = !$ctrl.showOrderForm">
-					{{ $ctrl.showOrder() }}
+					{{ $ctrl.resource.showOrder() || '(no order)' }}
 				</a>
 			</p>
 		</div>
 	</div>
-	<div class="form-group form-group-sm" ng-repeat="order in $ctrl.resource.data.orderSpecifications" ng-if="$ctrl.resource.exists" ng-show="$ctrl.showOrderForm">
+	<div class="form-group form-group-sm" ng-repeat="order in $ctrl.resource.data.orderSpecifications" ng-show="$ctrl.showOrderForm">
 		<label for="attr-{{::order.attribute.name}}" class="col-sm-5 control-label">
 			{{::order.attribute.name}}
 		</label>
@@ -97,7 +81,7 @@
 		</div>
 	</div>
 </div>
-<fieldset ng-if="$ctrl.resource.exists">
+<fieldset>
 	<legend>Locations</legend>
 	<!-- <label for="location-table" class="control-label">Locations</label> -->
 	<div class="toolbar">

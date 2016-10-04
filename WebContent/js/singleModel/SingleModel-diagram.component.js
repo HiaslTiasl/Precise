@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelDiagramController.$inject = ['$scope', 'PreciseApi', 'Tasks', 'Dependencies'];
+	SingleModelDiagramController.$inject = ['$scope', '$uibModal', 'PreciseApi', 'Tasks', 'Dependencies'];
 	
-	function SingleModelDiagramController($scope, PreciseApi, Tasks, Dependencies) {
+	function SingleModelDiagramController($scope, $uibModal, PreciseApi, Tasks, Dependencies) {
 		
 		var $ctrl = this;
 		
@@ -68,13 +68,14 @@ define([
 		}
 		
 		function newTaskHandler(event, data) {
-			Tasks
-				.newResource($ctrl.model, data)
-				.then(function (resource) {
-					$ctrl.resourceType = 'task';
-					$ctrl.activeResource = $ctrl.taskResource = resource;
-					$ctrl.dependencyResource = null;
-				});
+			$uibModal.open({
+				component: 'preciseCreateTask',
+				resolve: {
+					resource: _.constant(Tasks.newResource($ctrl.model, data))
+				}
+			}).result.then(function (result) {
+				$scope.$broadcast('properties:created', 'task', result);
+			});
 		}
 		
 		function newDependencyHandler(event, data) {
@@ -126,10 +127,7 @@ define([
 		}
 		
 		function done(result) {
-			if ($ctrl.activeResource.exists)
-				$scope.$broadcast('properties:change', $ctrl.resourceType, result);
-			else
-				$scope.$broadcast('properties:created', $ctrl.resourceType, result);
+			$scope.$broadcast('properties:change', $ctrl.resourceType, result);
 		}
 		
 		function cancelled() {
