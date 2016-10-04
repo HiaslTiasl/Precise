@@ -14,14 +14,14 @@ class ConfigTranslator extends AbstractMDLTranslator<Model, MDLConfigAST> {
 	public void updateMDL(Model model, MDLConfigAST mdlAttribute) {
 		mdlAttribute.setAttributes(Util.mapToList(model.getAttributes(), context().attributes()::toMDL));
 		mdlAttribute.setPhases(Util.mapToList(model.getPhases(), context().phases()::toMDL));
-		mdlAttribute.setTaskTypes(Util.mapToList(model.getTaskTypes(), context().taskTypes()::toMDL));
+		mdlAttribute.setTaskDefinitions(Util.mapToList(model.getTaskTypes(), context().taskTypes()::toMDL));
 	}
 	
 	@Override
 	public void updateEntity(MDLConfigAST mdlAttribute, Model model) {
 		model.setAttributes(Util.mapToList(mdlAttribute.getAttributes(), context().attributes()::toEntity));
 		model.setPhases(Util.mapToList(mdlAttribute.getPhases(), context().phases()::toEntity));
-		model.setTaskTypes(Util.mapToList(mdlAttribute.getTaskTypes(), context().taskTypes()::toEntity));
+		model.setTaskTypes(Util.mapToList(mdlAttribute.getTaskDefinitions(), context().taskTypes()::toEntity));
 	}
 
 	@Override

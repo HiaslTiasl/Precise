@@ -54,14 +54,14 @@ public class MDLFileAST {
 		this.config.setPhases(phases);
 	}
 	
-	@JsonProperty("taskTypes")
-	public List<MDLTaskTypeAST> getTaskTypes() {
-		return config.getTaskTypes();
+	@JsonProperty("taskDefinitions")
+	public List<MDLTaskTypeAST> getTaskDefinitions() {
+		return config.getTaskDefinitions();
 	}
 	
-	@JsonProperty("taskTypes")
-	public void setTaskTypes(List<MDLTaskTypeAST> taskTypes) {
-		config.setTaskTypes(taskTypes);
+	@JsonProperty("taskDefinitions")
+	public void setTaskDefinitions(List<MDLTaskTypeAST> taskDefinitions) {
+		config.setTaskDefinitions(taskDefinitions);
 	}
 	
 	public MDLModelAST getModel() {

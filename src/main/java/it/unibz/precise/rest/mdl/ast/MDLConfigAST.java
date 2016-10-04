@@ -4,14 +4,14 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"attributes", "phases"})
+@JsonPropertyOrder({"attributes", "phases", "taskDefinitions"})
 public class MDLConfigAST {
 	
 	public static final MDLConfigAST EMPTY_CONFIG = new MDLConfigAST();
 	
 	private List<MDLAttributeAST> attributes;
 	private List<MDLPhaseAST> phases;
-	private List<MDLTaskTypeAST> taskTypes;
+	private List<MDLTaskTypeAST> taskDefinitions;
 	
 	public List<MDLAttributeAST> getAttributes() {
 		return attributes;
@@ -29,12 +29,12 @@ public class MDLConfigAST {
 		this.phases = phases;
 	}
 
-	public List<MDLTaskTypeAST> getTaskTypes() {
-		return taskTypes;
+	public List<MDLTaskTypeAST> getTaskDefinitions() {
+		return taskDefinitions;
 	}
 
-	public void setTaskTypes(List<MDLTaskTypeAST> taskTypes) {
-		this.taskTypes = taskTypes;
+	public void setTaskDefinitions(List<MDLTaskTypeAST> taskDefinitions) {
+		this.taskDefinitions = taskDefinitions;
 	}
 	
 }
