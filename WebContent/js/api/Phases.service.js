@@ -44,7 +44,7 @@ define([
 				plural: 'phases'
 			},
 			
-			defaultProjection: null,
+			defaultProjection: 'phaseSummary',
 		
 			getTaskTypes: function () {
 				var self = this;

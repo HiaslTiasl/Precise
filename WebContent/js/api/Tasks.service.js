@@ -27,7 +27,8 @@ define([
 			{ name: 'DESCENDING', requiresOrdered: true }
 		];
 		
-		var dontSendDirectly = ['exclusiveness', 'orderSpecifications', 'type', 'model', '_links'];
+		var getAttrName = _.property('name'),
+			dontSendDirectly = ['exclusiveness', 'orderSpecifications', 'type', 'model', '_links'];
 		
 		function getOrderTypes() {
 			return orderTypes;
@@ -97,6 +98,54 @@ define([
 			},
 			
 			defaultProjection: 'expandedTask',
+			
+			showExclusiveness: function () {
+				if (!this.data)
+					return undefined;
+				if (!this.exclParts)
+					this.exclParts = [];
+				util.mapInto(this.exclParts, this.data.exclusiveness, getAttrName);
+				return !this.exclParts.length ? null : this.exclParts.join(', ');
+			},
+			
+			showOrderPart: function (order) {
+				var attrName = order.attribute.name;
+				switch (order.orderType) {
+				case 'PARALLEL':
+					return '|' + attrName + '|';
+				case 'ASCENDING':
+					return attrName + '\u2191'; 	// ↑
+				case 'DESCENDING':
+					return attrName + '\u2193'; 	// ↓
+				default:
+					return null;
+				}
+			},
+			
+			showOrder: function () {
+				if (!this.data)
+					return undefined;
+				if (!this.orderParts)
+					this.orderParts = [];
+				var count = 0;
+				this.data.orderSpecifications.forEach(function (order) {
+					var str = this.showOrderPart(order);
+					if (str != null)
+						this.orderParts[count++] = str;
+				}, this);
+				util.limitArray(this.orderParts, count);
+				return !this.orderParts.length ? null : this.orderParts.join(', ');
+			},
+			
+			updateExlusiveness: function () {
+				if (this.data.globalExclusiveness)
+					util.limitArray(this.data.exclusiveness, 0);
+			},
+			
+			updateGlobalExclusiveness: function () {
+				if (this.data.exclusiveness.length)
+					this.data.globalExclusiveness = false;
+			},
 			
 			checkPattern: function (pattern) {
 				return PreciseApi.from(PreciseApi.hrefTo(this.data, 'checkedPattern'))
