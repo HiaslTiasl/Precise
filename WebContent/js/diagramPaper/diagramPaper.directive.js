@@ -74,10 +74,11 @@ function (
 					fit: false,
 					contain: false,
 					center: false,
-					zoomScaleSensitivity: 0.1,
+					zoomScaleSensitivity: 0.05,
 					dblClickZoomEnabled: false,
 					panEnabled: false,
 					beforePan: beforePan,
+					minZoom: 0.1,
 					onZoom: wrapInTimeout(onZoom),
 					// http://ariutta.github.io/svg-pan-zoom/demo/mobile.html
 					customEventsHandler: {
@@ -149,14 +150,17 @@ function (
 					return _.partial($timeout, fn, 0, true);
 				}
 				
+				// http://ariutta.github.io/svg-pan-zoom/demo/limit-pan.html
 				function beforePan(oldPan, newPan) {
 					var sizes = paperPanZoom.getSizes(),
-						xMin = -sizes.viewBox.x * sizes.realZoom - GUTTER_WIDTH, 
-						xMax = sizes.width - ((sizes.viewBox.x + sizes.viewBox.width) * sizes.realZoom) + GUTTER_WIDTH,
-						yMin = -sizes.viewBox.y * sizes.realZoom - GUTTER_WIDTH,
-						yMax = sizes.height - ((sizes.viewBox.y + sizes.viewBox.height) * sizes.realZoom) + GUTTER_WIDTH,
-		          		xOK = _.inRange(newPan.x, xMin, xMax),
-		          		yOK = _.inRange(newPan.y, yMin, yMax);
+					
+						leftLimit = -((sizes.viewBox.x + sizes.viewBox.width) * sizes.realZoom) + GUTTER_WIDTH,
+			            rightLimit = sizes.width - GUTTER_WIDTH - (sizes.viewBox.x * sizes.realZoom),
+			            topLimit = -((sizes.viewBox.y + sizes.viewBox.height) * sizes.realZoom) + GUTTER_WIDTH,
+			            bottomLimit = sizes.height - GUTTER_WIDTH - (sizes.viewBox.y * sizes.realZoom),
+					
+		          		xOK = _.inRange(newPan.x, leftLimit, rightLimit),
+		          		yOK = _.inRange(newPan.y, topLimit, bottomLimit);
 		          		
 		          return xOK === yOK ? xOK : { x: xOK, y: yOK };
 				}

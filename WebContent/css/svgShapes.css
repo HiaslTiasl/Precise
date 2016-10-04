@@ -80,6 +80,11 @@ text {
 	stroke-width: 3;
 }
 
+.precise.DependencyShape.warning .alt-cross {
+	stroke: red;
+	stroke-width: 2;
+}
+
 .precise.DependencyShape.warning .marker-target {
 	fill: red;
 }
