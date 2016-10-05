@@ -7,15 +7,16 @@ define([
 ) {
 	'use strict';
 	
-	DiagramController.$inject = ['$scope', '$rootScope', '$timeout', 'PreciseApi', 'PreciseDiagramPaper', 'DiagramPaperToolset'];
+	DiagramController.$inject = ['$scope', '$rootScope', '$timeout', '$uibModal', 'PreciseApi', 'PreciseDiagramPaper', 'DiagramPaperToolset'];
 	
-	function DiagramController($scope, $rootScope, $timeout, PreciseApi, PreciseDiagraPaper, DiagramPaperToolset) {
+	function DiagramController($scope, $rootScope, $timeout, $uibModal, PreciseApi, PreciseDiagraPaper, DiagramPaperToolset) {
 		var $ctrl = this;
 		
 		$ctrl.diagramToolset = DiagramPaperToolset;
 		$ctrl.onPaperInit = onPaperInit;
 
 		$ctrl.hideLocationsChanged = hideLocationsChanged;
+		$ctrl.openLegend = openLegend;
 		
 		$ctrl.$onChanges = $onChanges;
 		
@@ -98,6 +99,10 @@ define([
 		
 		function hideLocationsChanged() {
 			$ctrl.diaPaper.toggleHideLocations($ctrl.hideLocations);
+		}
+		
+		function openLegend() {
+			$uibModal.open({templateUrl: 'js/diagramPaper/diagramPaper.legend.html'});
 		}
 		
 	}

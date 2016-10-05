@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -28,7 +27,6 @@ public class Task extends BaseEntity {
 
 	
 	@ManyToOne
-	@JoinColumn(nullable=false)
 	@NotNull(message="{task.type.required}")
 	private TaskType type;
 	

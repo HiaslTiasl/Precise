@@ -11,7 +11,8 @@ define([
 	'./Phases.service',
 	'./Dependencies.service',
 	'./withShortName.filter',
-	'./join.filter'
+	'./join.filter',
+	'lib/traverson-angular'
 ], function (
 	angular,
 	ApiService,

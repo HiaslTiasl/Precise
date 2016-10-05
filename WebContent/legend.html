@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Process Modelling - Info</title>
+<link rel="stylesheet" href="css/bootstrap.css"/>
+<link rel="stylesheet" href="css/app.css"/>
+</head>
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+	<div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<a class="navbar-brand" href="./">
+				Process Modelling
+			</a>
+		</div>
+	</div>
+</nav>
+
+<article class="container content">
+	<header class="page-header">
+		<h1>
+			Process Modelling - Diagram Legend<br>
+		</h1>
+	</header>
+	
+	Contents:
+	<ul>
+		<li><a href="#tasks">Tasks</a></li>
+		<li><a href="#dependencies">Dependencies</a></li>
+	</ul>
+	
+	<section id="tasks">
+		<h2>Tasks</h2>
+		
+		<figure>
+			<img src="img/task.png"/>
+			<figcaption>Graphical representation of a task.</figcaption>
+		</figure>
+		
+		<p>
+		A task represents work that is foreseen in certain locations by some craft.
+		
+		Whenever a task is present in a diagram, this means that the corresponding activity
+		has to be executed in all its locations in order to successfully complete the project.
+		Then, we can add more constraints to a task using the concepts of Order and Exclusiveness.
+		
+		<h3>Order</h3>
+		
+		By default, the order in which a task is executed in its locations is not specified, any order is fine.
+		To change that, we can define an explicit order to change that.
+		For each attribute of the task's phase, we assign one of four possible order types that define how this
+		attribute contributes to the ordering:
+		<ul>
+			<li><code>NONE</code>:
+				Ignore this attribute (default)
+			<li><code>PARALLEL</code>:
+				Partition/Parallelize values of this attribute.
+				All following specifications only apply within the same value of this attribute.
+			<li><code>ASCENDING</code>:
+				Values of this attribute are ordered ascending.
+			<li><code>DESCENDING</code>:
+				Values of this attribute are ordered descending.
+		</ul>
+		
+		For an example, consider a project with two sectors <em>A</em> and <em>B</em> representing two separate buildings.
+		To express that the task <em>Scaffolding Installation</em> should be performed from bottom to top,
+		we can then set the attribute <em>level</em> to <code>ASCENDING</code> and leave all other attributes to <code>NONE</code>.
+		This means that the first level must be finished in both sectors <em>A</em> and <em>B</em> before we can progress to the
+		next level.
+		However, if <em>A</em> and <em>B</em> are in fact two independent buildings that can be built in parallel, this might
+		be too restrictive.
+		Instead, we want to apply the order on the level only within each building, so for progressing to the next level
+		we do not have to wait until the level is finished in other sectors.
+		We can express this by also setting the attribute <em>sector</em> to <code>PARALLEL</code>
+		
+		<h3>Exclusiveness</h3>
+		
+		<figure>
+			<img src="img/task-exclusive.png"/>
+			<figcaption>Graphical representation of a task with an explicit exclusiveness constraint.</figcaption>
+		</figure>
+
+		<p>
+		Another aspect of tasks is the scope of their exclusiveness.
+		By default, every task is exclusive at unit scope, meaning no to tasks can be performed in one construction unit at the same time.
+		To increase the scope of the exclusiveness of a task, we can explicitly select attributes to which a task is exclusive.
+		
+		If for instance we say that the Task <em>Scaffolding Installation</em> is exclusive at <em>sector</em> and <em>level</em>,
+		once we start that task in a location, no other tasks can be executed in the same level in the same section until
+		<em>Scaffolding Installation</em> finished there.
+		
+	</section>
+	
+	<section id="dependencies">
+		<h2>Dependencies</h2>
+		
+		<figure>
+			<img src="img/dependency.png"/>
+			<figcaption>Graphical representation of a dependency.</figcaption>
+		</figure>
+		
+		Dependencies represent precedence constraints among tasks.
+		Graphically, they are represented as arrows to indicate that the source task needs to be finished
+		before the target task can start.
+		In the example above, we need to finish <em>Concrete Pouring</em> in all locations before we can start
+		<em>Pipes Installation</em> anywhere.
+		
+		<h3>Scope</h3>
+
+		<figure>
+			<img src="img/dependency-scope.png"/>
+			<figcaption>Graphical representation of a dependency with a scope.</figcaption>
+		</figure>
+		
+		The scope of a dependency can be refined by providing a list of attributes.
+		For example, the above figure shows a dependency that only applies within common <em>levels</em>.
+		As a result, in each levels we need to perform <em>Scaffolding Installation</em> before <em>Concrete Pouring</em>.
+		If we wanted to further narrow down the scope of the dependencies to levels per sector, we could label the dependency 
+		with both attributes <em>sector</em> and <em>level</em>.
+		
+		<h3>Alternate Precedence</h3>
+		
+		<figure>
+			<img src="img/dependency-alternate.png"/>
+			<figcaption>Graphical representation of an alternate precedence.</figcaption>
+		</figure>
+		
+		An alternate precedence is a scoped dependency with an additional constraint:
+		When the source task is finished in a location of the given scope, it must also wait for the target task to be finished there
+		until it can proceed to the next location.
+		The graphical representation indicates this waiting behavior by the cross near the source task.
+		We can think of it as some sort of waiting constraint on the source task, which is indicated by the cross near the source task.
+		In the above example, we have an alternate precedence from <em>Scaffolding Installation</em> to <em>Concrete Pouring</em>
+		at the scope.
+		This means that in each level we must perform <em>Scaffolding Installation</em> before <em>Concrete Pouring</em>,
+		and that <em>Concrete Pouring</em> must be finished in a level in order to start with <em>Scaffolding Installation</em>
+		in another level.
+		
+		<h3>Chain Precedence</h3>
+		
+		<figure>
+			<img src="img/dependency-chain.png"/>
+			<figcaption>Graphical representation of a chain precedence.</figcaption>
+		</figure>
+		
+		A chain precedence is a scoped dependency with an additional constraint:
+		When the source task is finished in the given scope, no other tasks can be performed until the target task is started.
+		By default, dependencies only require that the source must be executed before the target, but they do not prevent
+		other tasks to be executed in between.
+		By using chain precedences, we can change that.
+		In the above example, when we finished <em>Scaffolding Installation</em> in some level, we cannot perform other tasks
+		in that level until we started <em>Concrete Pouring there</em>.
+
+	</section>
+	
+</article>
+
+</body>
+</html>

@@ -5,7 +5,7 @@ define([
 	'./DiagramPaper.service',
 	'./DiagramPaper.controller',
 	'./diagramPaper.directive',
-	'lib/traverson-angular'
+	'lib/ui-bootstrap'
 ], function (
 	angular,
 	api,
@@ -16,7 +16,7 @@ define([
 ) {
 	'use strict';
 	
-	return angular.module('precise.diagram.paper', [api.name])
+	return angular.module('precise.diagram.paper', ['ui.bootstrap', api.name])
 		.constant('DiagramPaperToolset', diagramPaperToolset)
 		.service('PreciseDiagramPaper', DiagramPaperService)
 		.controller('DiagramPaperController', DiagramPaperController)

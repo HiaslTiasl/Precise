@@ -1,0 +1,68 @@
+<header class="modal-header">
+	<h3 class="modal-title">Legend</h3>
+</header>
+<article class="modal-body legend">
+	<h2>Tasks</h2>
+	
+	<figure>
+		<img src="img/task.png"/>
+		<figcaption>A task to be executed in the given locations by the given craft.</figcaption>
+	</figure>
+	
+	<h3>Order</h3>
+	
+	Each attribute can be assigned to an order type:
+	<ul>
+		<li><code>NONE</code>:
+			Ignore this attribute (default)
+		<li><code>PARALLEL</code>:
+			Partition/Parallelize values of this attribute.
+			All following specifications only apply within the same value of this attribute.
+		<li><code>ASCENDING</code>:
+			Values of this attribute are ordered ascending.
+		<li><code>DESCENDING</code>:
+			Values of this attribute are ordered descending.
+	</ul>
+	
+	<h3>Exclusiveness</h3>
+	
+	<figure>
+		<img src="img/task-exclusive.png"/>
+	</figure>
+	In locations of the given scope (in the properties), while this task is being executed,
+	no other tasks can be performed
+	
+	
+	<h2>Dependencies</h2>
+	
+	<figure>
+		<img src="img/dependency.png"/>
+	</figure>
+	Finish the source task in every location before starting the target task in any location.
+	
+	<h3>Scope</h3>
+	
+	<figure>
+		<img src="img/dependency-scope.png"/>
+	</figure>
+	For all common locations of the given scope, finish the source task in that location
+	before starting the target task in that location.
+	
+	<h3>Alternate Precedence</h3>
+	
+	<figure>
+		<img src="img/dependency-alternate.png"/>
+	</figure>
+	When the source task is finished in a location of the given scope, wait for the target task to be finished there
+	before proceeding to the next location.
+	
+	<h3>Chain Precedence</h3>
+	
+	<figure>
+		<img src="img/dependency-chain.png"/>
+	</figure>
+	When the source task is finished in the given scope, do not performed other tasks until the target task is started there.
+</article>
+<footer class="modal-footer">
+	<a href="legend.html">Read more</a>
+</footer>

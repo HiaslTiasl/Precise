@@ -16,3 +16,12 @@ html {
 .navbar-fixed-top + .content {
 	margin-top: 50px;
 }
+
+figure {
+	margin: 2em;
+	text-align: center;
+}
+
+.container.content {
+	margin-bottom: 2em;
+}

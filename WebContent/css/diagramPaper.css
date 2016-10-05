@@ -11,7 +11,7 @@ precise-diagram-paper .toolbar {
 	width: 100%;
 }
 
-precise-diagram-paper .zoom-options {
+precise-diagram-paper .other-tools {
 	float: right;
 }
 
@@ -29,3 +29,6 @@ precise-diagram-paper .paper {
 	box-shadow: 1px 1px 4px 1px #888;
 }
 
+.legend img {
+	max-width: 100%;
+}
