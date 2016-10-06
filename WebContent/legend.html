@@ -42,10 +42,23 @@
 		
 		<p>
 		A task represents work that is foreseen in certain locations by some craft.
-		
 		Whenever a task is present in a diagram, this means that the corresponding activity
 		has to be executed in all its locations in order to successfully complete the project.
 		Then, we can add more constraints to a task using the concepts of Order and Exclusiveness.
+		
+		<p>
+		To create a new task, first click <button class="btn btn-default">Add task</button> and then
+		click at the position in the diagram where you want to create the task.
+		A popup window will appear where you can further specify the task.
+		You must at least specify a task definition by first selecting the phase to which the task belongs
+		and then selecting the task definition.
+		If you are done, click on <button class="btn btn-primary">Create</button> to confirm and the task
+		will appear at the specified position.
+		You can then select the task by clicking on it, which opens the task's properties on the right.
+		Here you can change the properties, define the task's locations, and specify
+		further constraints on the task (see sections below).
+		When you are done, click <button class="btn btn-primary">Done</button> to confirm.
+		You can remove a task by selecting it and then clicking on <button class="btn btn-default">Remove</button>. 
 		
 		<h3>Order</h3>
 		
@@ -108,6 +121,19 @@
 		In the example above, we need to finish <em>Concrete Pouring</em> in all locations before we can start
 		<em>Pipes Installation</em> anywhere.
 		
+		<p>
+		To create a new dependency, first click on the source task, then on <button class="btn btn-default">Add dependency</button>,
+		then on the target task.
+		The new dependency will immediately appear.
+		or on the red cross symbol on top of the dependency.
+		To modify properties of the dependencies (see sections below), click on it to select it and show it in the properties panel.
+		There you can edit the properties and click on <button class="btn btn-primary">Done</button> to confirm.
+		To change the layout, you can use control points.
+		Click on a dependency to select it and you will see its control points, which can be moved around.
+		To create a new control point, double-click at the dependency.
+		To remove it afterwards, click on the bubble near the control point.
+		You can remove a dependency by selecting it and then clicking either on <button class="btn btn-default">Remove</button>
+		 
 		<h3>Scope</h3>
 
 		<figure>
