@@ -15,7 +15,16 @@ precise-diagram-paper .other-tools {
 	float: right;
 }
 
-precise-diagram-paper .paper {
+precise-diagram-paper .other-tools .divider {
+	margin-left: 0.5em;
+	margin-right: 0.5em;
+}
+
+precise-diagram-paper .other-tools .divider::after {
+	content: "|";
+}
+
+precise-diagram-paper .joint-paper {
 	position: absolute;
 	top: 3em;
 	bottom: 0;

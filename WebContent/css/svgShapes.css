@@ -9,11 +9,26 @@ text {
 
 .alt-cross {
 	stroke: black;
+	stroke-width: 2px;
+}
+
+.joint-element rect {
+	stroke-width: 2px;
+	stroke: black;
+}
+
+.joint-element rect.loc-entry {
+	stroke-width: 1px;
+	fill: transparent;
 }
 
 /******************************************
  * Override JointJS styles
  ******************************************/
+ 
+.joint-link .connection {
+	stroke-width: 2px;
+}
 
 .label rect {
 	display: none;
@@ -35,7 +50,7 @@ text {
 
 /* For marker arrowheads, display: none causes problems*/
 .marker-arrowheads,
-.link:hover .marker-arrowheads {
+.joint-link:hover .marker-arrowheads {
 	opacity: 0;
 	pointer-events: none;
 }
@@ -54,17 +69,17 @@ text {
  * Show all link tools on highlight rather than on hover,
  * since hover does not make sense on touch devices.
  */
-.precise.DependencyShape.highlighted .link-tools,
-.precise.DependencyShape.highlighted .marker-vertices,
-.precise.DependencyShape.highlighted .marker-vertex-remove,
-.precise.DependencyShape.highlighted .marker-vertex-remove-area,
-.precise.DependencyShape.highlighted .marker-arrowheads {
+.joint-type-precise-dependencyshape.highlighted .link-tools,
+.joint-type-precise-dependencyshape.highlighted .marker-vertices,
+.joint-type-precise-dependencyshape.highlighted .marker-vertex-remove,
+.joint-type-precise-dependencyshape.highlighted .marker-vertex-remove-area,
+.joint-type-precise-dependencyshape.highlighted .marker-arrowheads {
 	display: inline;
 	opacity: 1;
 	pointer-events: auto;
 }
 
-.precise.DependencyShape.highlighted .connection-wrap {
+.joint-type-precise-dependencyshape.highlighted .connection-wrap {
 	opacity: .4;
 	stroke-opacity: .4;
 }
@@ -73,19 +88,25 @@ text {
  * Warnings
  ******************************************/
  
-.precise.TaskShape.warning rect,
-.precise.DependencyShape.warning .connection,
-.precise.DependencyShape.warning .marker-target {
+.joint-type-precise-taskshape.warning rect,
+.joint-type-precise-dependencyshape.warning .connection,
+.joint-type-precise-dependencyshape.warning .marker-target,
+.joint-type-precise-dependencyshape.warning .alt-cross {
 	stroke: red;
-	stroke-width: 3;
 }
 
-.precise.DependencyShape.warning .alt-cross {
-	stroke: red;
-	stroke-width: 2;
+.joint-type-precise-taskshape.warning rect,
+.joint-type-precise-dependencyshape.warning .connection,
+.joint-type-precise-dependencyshape.warning .marker-target {
+	stroke-width: 3px;	
 }
 
-.precise.DependencyShape.warning .marker-target {
+.joint-type-precise-dependencyshape.warning .alt-cross,
+.joint-type-precise-taskshape.warning rect.loc-entry {
+	stroke-width: 2px;
+}
+
+.joint-type-precise-dependencyshape.warning .marker-target {
 	fill: red;
 }
 
@@ -93,9 +114,9 @@ text {
  * Alternative views
  ******************************************/
 
-.hide-locations text.task-type-name {
+/* .hide-locations text.task-type-name {
 	font-size: x-large;	
-}
+} */
 
 /******************************************
  * Edit Modes
@@ -105,19 +126,19 @@ text {
 	cursor: crosshair;
 }
 
-.add-dependency .precise.TaskShape {
+.add-dependency .joint-type-precise-taskshape {
 	cursor: pointer; 
 }
 
-.add-dependency .precise.TaskShape rect {
+.add-dependency .joint-type-precise-taskshape rect {
 	fill: #f1f1b8;
 }
 
-.add-precedence .precise.TaskShape.highlighted {
+.add-precedence .joint-type-precise-taskshape.highlighted {
 	cursor: move; 
 }
 
-.add-precedence .precise.TaskShape.highlighted .outline {
+.add-precedence .joint-type-precise-taskshape.highlighted .outline {
 	fill: transparent;
 	stroke: black;
 	stroke-dasharray: 10,10;

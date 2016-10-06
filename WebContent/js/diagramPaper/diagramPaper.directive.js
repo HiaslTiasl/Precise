@@ -42,7 +42,7 @@ function (
 	        bindToController: true,
 	        link: function (scope, element, attrs) {
 	        	var $ctrl = scope.$ctrl,
-	        		$paperEl = element.find('.paper'),
+	        		$paperEl = element.find('.joint-paper'),
 	        		model = new joint.dia.Graph();
 	        	
 	        	$ctrl.enablePan = enablePan;
@@ -60,6 +60,14 @@ function (
 	                async: true,
 	                defaultConnector: {
 	                	name: 'jumpover'
+	                },
+	                highlighting: {
+	                	'default': {
+	                		name: 'addClass',
+	                		options: {
+	                			className: 'highlighted'
+	                		}
+	                	}
 	                },
 	                interactive: {
 	                	vertexAdd: false,

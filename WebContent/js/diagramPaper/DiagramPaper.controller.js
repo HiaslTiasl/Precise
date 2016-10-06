@@ -16,9 +16,13 @@ define([
 		$ctrl.onPaperInit = onPaperInit;
 
 		$ctrl.hideLocationsChanged = hideLocationsChanged;
+		$ctrl.hideLabelsChanged = hideLabelsChanged;
 		$ctrl.openLegend = openLegend;
 		
 		$ctrl.$onChanges = $onChanges;
+		
+		$ctrl.showLocations = true;
+		$ctrl.showLabels = true;
 		
 		function $onChanges(changes) {
 			if ($ctrl.diaPaper) {
@@ -98,7 +102,11 @@ define([
 		}
 		
 		function hideLocationsChanged() {
-			$ctrl.diaPaper.toggleHideLocations($ctrl.hideLocations);
+			$ctrl.diaPaper.toggleHideLocations(!$ctrl.showLocations);
+		}
+		
+		function hideLabelsChanged() {
+			$ctrl.diaPaper.toggleHideLabels(!$ctrl.showLabels);
 		}
 		
 		function openLegend() {

@@ -1,24 +1,23 @@
 define([
 	'lib/lodash',
 	'lib/joint',
-	'shapes/BaseMixin',
 	'shapes/TaskShape',
 	'util/util'
 ], function (
 	_,
 	joint,
-	BaseMixin,
 	TaskShape,
 	util
 ) {
 	'use strict';
 	
 	var ARROW_MARKER = 'm 0 10 l -24 10 l 24 10 z',
-		CHAIN_FILTER_ID = 'chain-precedence';
+		CHAIN_FILTER_ID = 'chain-precedence',
+		ALT_CROSS_SIZE = 16;
 	
 	var getScopeLabel = _.property('shortName');
 	
-	var DependencyShape = util.set(joint.shapes, ['precise', 'DependencyShape'], joint.dia.Link.extend(BaseMixin).extend({
+	var DependencyShape = util.set(joint.shapes, ['precise', 'DependencyShape'], joint.dia.Link.extend({
 		
 		// --------------------- Custom markup -------------------------
 		//
@@ -75,20 +74,32 @@ define([
 		].join(''),
 		
 		defaults: joint.util.deepSupplement({
-			type: 'precise.DependencyShape',
+			type: 'precise.DependencyShape'
 		}, joint.dia.Link.prototype.defaults),
 		
 		initialize: function (options) {
 			this.set('id', DependencyShape.toDependencyID(options.data.id));
-			BaseMixin.initialize.apply(this, arguments);
+			
+			this.on('change:data', this.update, this);
+			this.on('change:hideLabels', this.updateHideLabels, this);
+			
+	        this.update();
+	        
+	        joint.dia.Cell.prototype.initialize.apply(this, arguments);
+		},
+		
+		updateHideLabels: function (model, hideLabels) {
+			this.attr('.labels/display', hideLabels ? 'none' : 'inline')
 		},
 		
 		update: function () {
 			var data = this.get('data') || {};
 			
-			this.set('source', data.sourceID ? DependencyShape.idToEndpoint(data.sourceID) : data.sourceVertex);
-			this.set('target', data.targetID ? DependencyShape.idToEndpoint(data.targetID) : data.targetVertex);
-			this.set('vertices', data.vertices);
+			this.set({
+				source: data.sourceID ? DependencyShape.idToEndpoint(data.sourceID) : data.sourceVertex,
+				target: data.targetID ? DependencyShape.idToEndpoint(data.targetID) : data.targetVertex,
+				vertices: data.vertices
+			});
 			this.label(0, {
 				position: 0.5,
 				attrs: {
@@ -98,18 +109,20 @@ define([
 					}
 				}
 			});
-			this.attr({
-				'.alt-cross, .connection': {
-					filter: data.chain ? 'url(#' + CHAIN_FILTER_ID + ')' : 'none',
-				},
+			var attrs = {
 				'.alt-cross': {
 					'visibility': data.alternate ? 'visible' : 'hidden',
-					'stroke-width': data.chain ? Math.SQRT2 : 1
+					style: { 'stroke-width': data.chain ? ('4px') : undefined },
+					'transform': data.chain ? 'scale(1.4)' : ''
 				},
 				'.connection': {
-					'stroke-width': data.chain ? 2 : 1
+					filter: data.chain ? 'url(#' + CHAIN_FILTER_ID + ')' : 'none',
+					style: { 'stroke-width': data.chain ? '3px' : undefined }
 				}
-			});
+			};
+			
+			this.attr(attrs);
+			this.updateHideLabels(this, this.get('hideLabels'));
 		}
 		
 	}, {
@@ -140,10 +153,10 @@ define([
 	}));
 	
 	var intensify = [
-		1, 0, 0,  0, 0, 
-		0, 1, 0,  0, 0,
-		0, 0, 1,  0, 0,
-		0, 0, 0, 10, 0
+		1, 0, 0,    0, 0, 
+		0, 1, 0,    0, 0,
+		0, 0, 1,    0, 0,
+		0, 0, 0, 1000, 0
 	].join(' ');
 	
 	var visibleToWhite = [
@@ -233,20 +246,24 @@ define([
             	connectionLength = this.getConnectionLength(),
             	startCoords = this.getPointAtLength(0),
             	coords = this.getPointAtLength(20),
-            	angle = 90 - joint.g.point(startCoords).theta(coords);
-        		
-        	this._V.altCross.attr('transform', '').rotate(angle).translate(coords.x, coords.y);
+            	angle = 90 - joint.g.point(startCoords).theta(coords),
+            	prevTransform = joint.V.decomposeMatrix(this._V.altCross.transform());
+        	
+        	this._V.altCross.attr('transform', '')
+	        	.rotate(angle)
+	        	.translate(coords.x, coords.y)
+	        	.scale(prevTransform.scaleX, prevTransform.scaleY);
         },
         
         updateFilter: function () {
         	if (this.model.get('data').chain) {
         		var vDefs = joint.V(this.paper.defs),
-        			vFilter = vDefs.findOne('#' + CHAIN_FILTER_ID);
+        			vFilter = vDefs.findOne('#' + CHAIN_FILTER_ID),
+        			bbox = this.paper.viewport.getBBox();
         		if (!vFilter) {
         			vFilter = joint.V(this.filterMarkup);
         			vDefs.append(vFilter);
         		}
-        		var bbox = this.paper.viewport.getBBox();
         		vFilter.attr({
         			x: bbox.x,
         			y: bbox.y,

@@ -209,8 +209,14 @@ define([
 		},
 		
 		toggleHideLocations: function (hideLocations) {
-			this.paper.model.getCells().forEach(function (cell) {
-				cell.set('hideLocations', hideLocations);
+			this.paper.model.getElements().forEach(function (taskCell, i) {
+				taskCell.set('hideLocations', hideLocations);
+			});
+		},
+		
+		toggleHideLabels: function (hideLabels) {
+			this.paper.model.getLinks().forEach(function (taskCell, i) {
+				taskCell.set('hideLabels', hideLabels);
 			});
 		},
 		

@@ -14,17 +14,20 @@
 				{{::t.title}}
 			</button>
 		</span>
-		<!-- <div class="checkbox-inline">
-			<label>
-				<input type="checkbox" ng-model="$ctrl.hideLocations" ng-change="$ctrl.hideLocationsChanged()">
-				Hide Locations
-			</label>
-		</div> -->
+		<label class="checkbox-inline">
+			<input type="checkbox" ng-model="$ctrl.showLocations" ng-change="$ctrl.hideLocationsChanged()">
+			Locations
+		</label>
+		<label class="checkbox-inline">
+			<input type="checkbox" ng-model="$ctrl.showLabels" ng-change="$ctrl.hideLabelsChanged()">
+			Labels
+		</label>
 		<div class="other-tools">
 			<span>{{100 * $ctrl.zoomScale | number:0}}%</span>
 			<a href ng-click="$ctrl.fitAndCenter()"><span class="glyphicon glyphicon-fullscreen"></span></a>
+			<span class="divider"></span>
 			<a href ng-click="$ctrl.openLegend()"><span class="glyphicon glyphicon-info-sign"></span></a>
 		</div>
 	</div>
-	<div class="paper" ng-class="{'hide-locations': $ctrl.hideLocations}"></div>
+	<div class="joint-paper"></div>
 </div>

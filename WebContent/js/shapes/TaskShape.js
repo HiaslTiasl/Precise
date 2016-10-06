@@ -1,14 +1,12 @@
 define([
 	'lib/lodash',
 	'lib/joint',
-	'shapes/BaseShape',
 	'shapes/TemplateUtil',
 	'api/colors',
 	'util/util'
 ], function (
 	_,
 	joint,
-	BaseShape,
 	TemplateUtil,
 	colors,
 	util
@@ -28,6 +26,11 @@ define([
 		LOC_POS_Y = HEADER_ROW_HEIGHT + NAME_HEIGHT,
 		DEFAULT_HEIGHT = LOC_POS_Y + DEFAULT_LOC_HEIGHT;
 	
+	var NAME_PADDING = {
+		x: 10,
+		y: 2
+	};
+	
 	var WILDCARD_VALUE = "*";
 	
 	var textClasses = [
@@ -42,7 +45,7 @@ define([
 	
 	var rectClasses = ['outline', 'task-locations'].concat(textClasses);
 	
-	var TaskShape = util.set(joint.shapes, ['precise', 'TaskShape'], BaseShape.extend(/*_.extend({}, joint.plugins.precise.TaskToolsShape,*/ {
+	var TaskShape = util.set(joint.shapes, ['precise', 'TaskShape'], joint.shapes.basic.Generic.extend({
 		markup: [
 			'<g class="rotatable">',
 				'<g class="scalable">',
@@ -78,14 +81,12 @@ define([
 				'rect.task-locations': { y: LOC_POS_Y,  height: DEFAULT_LOC_HEIGHT },
 				'rect.loc-entry': {
 					width: LOC_COL_WIDTH,
-					height: LOC_ROW_HEIGHT,
-					'stroke-width': 1,
-					'follow-scale': true
+					height: LOC_ROW_HEIGHT
 				},
 				'text.trunc': {
 					x: (MAX_LOC_COL_COUNT - 0.5) * LOC_COL_WIDTH,
 					'text-anchor': 'middle',
-					'y-alignment': 'middle'
+					//'y-alignment': 'middle'
 				}
 			}, TemplateUtil.withRefsToSameClass('text', 'rect', textClasses, {
 				 'ref-y': .5,
@@ -93,86 +94,103 @@ define([
 				 'text-anchor': 'middle',
 				 'y-alignment': 'middle'
 			}))
-		}, BaseShape.prototype.defaults),
+		}, joint.shapes.basic.Generic.prototype.defaults),
 		
 		initialize: function (options) {
+			this.attrCount = options.data.type.phase.attributes.length;
+			this.locationsHeight = this.attrCount * LOC_ROW_HEIGHT;
+
 			this.set('id', TaskShape.toTaskID(options.data.id));
-			this.on('change:hideLocations', this.update, this);
-			BaseShape.prototype.initialize.apply(this, arguments);
+			
+			this.on('change:data', this.update, this);
+			this.on('change:hideLocations', this.updateHideLocations, this);
+
+			this.update();
+			
+			joint.shapes.basic.Generic.prototype.initialize.apply(this, arguments);
+		},
+		
+		updateHideLocations: function (model, hideLocations) {
+			var nameHeight = hideLocations ? model.locationsHeight + NAME_HEIGHT : NAME_HEIGHT,
+				fontSize = hideLocations ? '150%' : '100%',
+				nameStyle = { 'font-size': fontSize };
+			this.attr({
+				'rect.task-type-name': { height: nameHeight },
+				'text.task-type-name':       {
+					style: nameStyle,
+					text: joint.util.breakText(model.get('data').type.name, {
+						width: WIDTH - 2 * NAME_PADDING.x,
+						height: nameHeight - 2 * NAME_PADDING.y
+					}, {
+						'style': 'font-size:' + fontSize
+					})
+				},
+				'.loc-entry, .trunc': { display: hideLocations ? 'none' : 'inline' }
+			});
+			
 		},
 		
 		update: function () {
 			var data = this.get('data'),
-				hideLocations = this.get('hideLocations'),
 				attributes = data.type.phase.attributes,
-				attrCount = attributes.length,
-				exclusive = !hideLocations && (data.globalExclusiveness || data.exclusiveness.length),
-				locationsHeight = attrCount * LOC_ROW_HEIGHT,
+				exclusive = data.globalExclusiveness || data.exclusiveness.length,
 				locationPatterns = data.locationPatterns,
 				width = WIDTH,
-				height = LOC_POS_Y + locationsHeight,
-				nameHeight = NAME_HEIGHT,
-				nameFontSize = 'normal';
-			
-			if (hideLocations)
-				nameHeight += locationsHeight;
-			else if (exclusive) {
+				height = LOC_POS_Y + this.locationsHeight;
+
+			if (exclusive) {
 				width += 10;
 				height += 10;
 			}
 			
-			this.set('size', { width: width, height: height });
-			this.set('position', data.position);
-			this.attr({
+			this.set({
+				'position': data.position,
+				'size': { width: width, height: height }
+			});
+			var attrs = {
 				'rect.outline': {
 					width: width,
 					height: height,
 					transform: exclusive ? 'translate(-5,-5)' : ''
 				},
-				'rect.task-type-name':       { fill: colors.toCSS(data.type.phase.color), height: nameHeight },
-				'rect.task-locations':       { height: locationsHeight },
+				'rect.task-type-name':       { fill: colors.toCSS(data.type.phase.color) },
+				'rect.task-locations':       { height: this.locationsHeight },
 				'text.task-id':              { text: data.id },
 				'text.task-workers-needed':  { text: data.numberOfWorkersNeeded },
 				'text.task-units-per-day':   { text: data.numberOfUnitsPerDay },
-				'text.task-type-craft':      { text: data.type.craftShort },
-				'text.task-type-name':       {
-					text: joint.util.breakText(data.type.name, {
-						width: WIDTH,
-						height: nameHeight
-					})
-				}
-			});
+				'text.task-type-craft':      { text: data.type.craftShort }
+			};
 			if (locationPatterns) {
-				var displayLocations = hideLocations ? 'none' : 'inline';
-				this.attr('text.trunc', {
-					display: displayLocations,
-					y: LOC_POS_Y + locationsHeight / 2
-				});
-				for (var i = 0, locLen = locationPatterns.length; i < locLen; i++) {
+				attrs['text.trunc'] = {
+					y: LOC_POS_Y + this.locationsHeight / 2
+				};
+				var locLen = Math.min(locationPatterns.length, MAX_LOC_COL_COUNT);
+				for (var i = 0; i < locLen; i++) {
 					var pattern = locationPatterns[i];
-					for (var j = 0; j < attrCount; j++) {
+					for (var j = 0; j < this.attrCount; j++) {
 						var attrName = attributes[j].name,
 							value = pattern[attrName].value,
 							rectSelector = 'rect.loc-entry.loc-num-' + i + '.' + attrName,
 							textSelector = 'text.loc-entry.loc-num-' + i + '.' + attrName;
-						this.attr(rectSelector, {
-							display: displayLocations,
+
+						attrs[rectSelector] = {
 							x: i * LOC_COL_WIDTH,
 							y: j * LOC_ROW_HEIGHT + LOC_POS_Y
-						});
-						this.attr(textSelector, {
-							display: displayLocations,
+						};
+						attrs[textSelector] = {
 							'ref-x': .5,
 							'ref-y': .5,
 							'text-anchor': 'middle',
 							'y-alignment': 'middle',
 							'ref': rectSelector,
 							'text': value
-						});
+						};
 						
 					}
 				}
+				this.attr(attrs);
 			}
+			this.updateHideLocations(this, this.get('hideLocations'));
 		}
 		
 	}, {
@@ -211,20 +229,25 @@ define([
 
    	        this.positionChangeBatchOptions = { batchName: 'position-change', other: { cell: this.model }};
    	        joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-
-   	        this.listenTo(this.model, 'change:data', function () {
-   	        	this.update();
-   	        }, this);
+   	        
+   	 		 // N.B. don't messup update parameters
+   	        this.listenTo(this.model, 'change:data', _.ary(this.update, 0));
+   	        this.listenTo(this.model, 'change:hideLocations', this.toggleHideLocations);
    	    },
    	    
    	    render: function () {
    	    	joint.dia.ElementView.prototype.render.apply(this, arguments);
    	    	this.update();
    	    },
+   	    
+   	    toggleHideLocations: function (hideLocations) {
+   	    	this.vel.toggleClass('hide-locations', hideLocations);
+   	    },
    		
 		update: function () {
 			// Update attributes for new elements
 			this.renderLocations();
+			
 			joint.dia.ElementView.prototype.update.apply(this, arguments);
 		},
 		
@@ -235,7 +258,7 @@ define([
 				actualLocationCount = locationPatterns ? locationPatterns.length : 0,
 				truncateLocations = actualLocationCount > MAX_LOC_COL_COUNT,
 				targetRenderCount = truncateLocations ? MAX_LOC_COL_COUNT - 1 : actualLocationCount, 
-				currentLocationCount = this.scalableNode.find('.loc-entry').length / attributes.length,
+				currentLocationCount = this.renderedLocCount || 0,
 				truncNode = this.truncNode;
 			
 			if (targetRenderCount < currentLocationCount) {				
@@ -266,6 +289,9 @@ define([
 				this.truncNode.remove();
 				this.truncNode = null;
 			}
+			
+			this.renderedLocCount = targetRenderCount;
+			
 		},
 		
 		pointerdown: function () {
