@@ -11,7 +11,6 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
@@ -21,6 +20,8 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import it.unibz.precise.model.Scope.Type;
 
 @Entity
 @Table(uniqueConstraints={
@@ -54,8 +55,8 @@ public class Dependency extends BaseEntity {
 	@ElementCollection
 	private List<Position> vertices;
 	
-	@ManyToMany
-	private List<Attribute> scope;
+	@Embedded
+	private Scope scope = new Scope(Type.GLOBAL);
 	
 	private boolean globalScope;
 	
@@ -146,12 +147,17 @@ public class Dependency extends BaseEntity {
 			targetVertex = null;
 	}
 
-	public List<Attribute> getScope() {
+	public Scope getScope() {
 		return scope;
 	}
 
-	public void setScope(List<Attribute> scope) {
+	public void setScope(Scope scope) {
 		this.scope = scope;
+	}
+	
+	public void updateScope() {
+		scope.updateType();
+		scope.onEmptyAttributes(Scope.Type.GLOBAL);
 	}
 
 	public boolean isGlobalScope() {
@@ -162,10 +168,6 @@ public class Dependency extends BaseEntity {
 		this.globalScope = globalScope;
 	}
 	
-	public void updateGlobalScope() {
-		globalScope = scope == null || scope.size() == 0;
-	}
-
 	public Model getModel() {
 		return model;
 	}
@@ -206,7 +208,7 @@ public class Dependency extends BaseEntity {
 	public void updateDependentFields() {
 		updateSourceVertex();
 		updateTargetVertex();
-		updateGlobalScope();
+		scope.updateType();
 	}
 	
 }

@@ -3,6 +3,7 @@ define([
 	'./PreciseApi.service',
 	'./Files.service',
 	'./MDLFiles.service',
+	'./Scopes.service',
 	'./Pages.service',
 	'./Resources.service',
 	'./Models.service',
@@ -18,6 +19,7 @@ define([
 	ApiService,
 	FilesService,
 	MDLFilesService,
+	ScopesService,
 	PagesService,
 	ResourcesService,
 	ModelsService,
@@ -34,6 +36,7 @@ define([
 		.service('PreciseApi', ApiService)
 		.service('Files', FilesService)
 		.service('MDLFiles', MDLFilesService)
+		.service('Scopes', ScopesService)
 		.service('Pages', PagesService)
 		.service('Resources', ResourcesService)
 		.service('Models', ModelsService)

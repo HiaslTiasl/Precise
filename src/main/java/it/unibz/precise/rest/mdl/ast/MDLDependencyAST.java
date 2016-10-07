@@ -13,7 +13,7 @@ public class MDLDependencyAST {
 	private Position sourceVertex;
 	private Position targetVertex;
 	private boolean globalScope;
-	private List<MDLAttributeAST> scope;
+	private MDLScopeAST scope;
 	private List<Position> vertices;
 
 	public boolean isAlternate() {
@@ -80,11 +80,11 @@ public class MDLDependencyAST {
 		this.globalScope = globalScope;
 	}
 
-	public List<MDLAttributeAST> getScope() {
+	public MDLScopeAST getScope() {
 		return scope;
 	}
 
-	public void setScope(List<MDLAttributeAST> scope) {
+	public void setScope(MDLScopeAST scope) {
 		this.scope = scope;
 	}
 	

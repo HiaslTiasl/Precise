@@ -7,9 +7,9 @@ define([
 ) {
 	'use strict';
 	
-	DependenciesService.$inject = ['$q', 'PreciseApi', 'Resources'];
+	DependenciesService.$inject = ['$q', 'PreciseApi', 'Resources', 'Scopes'];
 	
-	function DependenciesService($q, PreciseApi, Resources) {
+	function DependenciesService($q, PreciseApi, Resources, Scopes) {
 		
 		var Dependencies = this;
 		
@@ -41,18 +41,8 @@ define([
 		function cloneExistingData(dependency) {
 			var data = _.cloneDeep(dependency);
 			return allowedAttributes(dependency).then(function (attributes) {
-				var scope = data.scope || (data.scope = []),
-				scopeLen = scope.length,
-				attrLen = attributes.length;
-				for (var scopeIdx = 0, attrIdx = 0; scopeIdx < scopeLen; scopeIdx++) {
-					var s = scope[scopeIdx];
-					if (s != null) {
-						while (attrIdx < attrLen && attributes[attrIdx].name !== s.name)
-							attrIdx++;
-						scope[scopeIdx] = attributes[attrIdx];
-					}
-				}
 				data.attributes = attributes;
+				Scopes.rereferenceAttributes(data.scope, attributes);
 				return data;
 			});
 		}
@@ -86,11 +76,8 @@ define([
 				var processed = _.omit(this.data, dontSendDirectly);
 				if (!this.exists)
 					processed.model = PreciseApi.hrefTo(this.model.data);
-				else {
-					processed.scope = this.data.scope.map(function (attr) {
-						return PreciseApi.hrefTo(attr);
-					});
-				}
+				else
+					processed.scope = Scopes.toRequestRepresentation(this.data.scope);
 				if (typeof this.data.source === 'object')
 					processed.source = PreciseApi.hrefTo(this.data.source);
 				if (typeof this.data.target === 'object')

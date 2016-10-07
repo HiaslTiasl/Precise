@@ -2,7 +2,6 @@ package it.unibz.precise.rest.mdl.conversion;
 
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.rest.mdl.ast.MDLDependencyAST;
-import it.unibz.util.Util;
 
 class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependencyAST> {
 	
@@ -20,7 +19,7 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 		mdlDependency.setTargetVertex(dependency.getTargetVertex());
 		mdlDependency.setVertices(dependency.getVertices());
 		mdlDependency.setGlobalScope(dependency.isGlobalScope());
-		mdlDependency.setScope(Util.mapToList(dependency.getScope(), context().attributes()::toMDL));
+		mdlDependency.setScope(context().scopes().toMDL(dependency.getScope()));
 	}
 	
 	@Override
@@ -33,7 +32,7 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 		dependency.setTargetVertex(mdlDependency.getTargetVertex());
 		dependency.setVertices(mdlDependency.getVertices());
 		dependency.setGlobalScope(mdlDependency.isGlobalScope());
-		dependency.setScope(Util.mapToList(mdlDependency.getScope(), context().attributes()::toEntity));
+		dependency.setScope(context().scopes().toEntity(mdlDependency.getScope()));
 	}
 
 	@Override

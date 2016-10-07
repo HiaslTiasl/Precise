@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
@@ -42,8 +41,8 @@ public class Task extends BaseEntity {
 	@ElementCollection
 	private List<OrderSpecification> orderSpecifications = new ArrayList<>();
 	
-	@ManyToMany
-	private List<Attribute> exclusiveness = new ArrayList<>();
+	@Embedded
+	private Scope exclusiveness = new Scope();
 	
 	private float numberOfWorkersNeeded;
 	
@@ -166,11 +165,15 @@ public class Task extends BaseEntity {
 		this.numberOfUnitsPerDay = numberOfUnitsPerDay;
 	}
 
-	public List<Attribute> getExclusiveness() {
+	public Scope getExclusiveness() {
 		return exclusiveness;
 	}
+	
+	public void updateExclusiveness() {
+		exclusiveness.updateType();
+	}
 
-	public void setExclusiveness(List<Attribute> exclusiveness) {
+	public void setExclusiveness(Scope exclusiveness) {
 		this.exclusiveness = exclusiveness;
 	}
 
@@ -222,6 +225,7 @@ public class Task extends BaseEntity {
 	public void updateDependentFields() {
 		updateLocationPatterns();
 		updateOrderSpecifications();
+		updateExclusiveness();
 	}
 	
 }

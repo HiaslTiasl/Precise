@@ -5,19 +5,46 @@ define([
 ) {
 	'use strict';
 	
-	TaskPropertiesController.$inject = ['PreciseApi', 'Tasks', 'Phases', 'Pages'];
+	TaskPropertiesController.$inject = ['PreciseApi', 'Tasks', 'Scopes', 'Phases', 'Pages'];
 	
-	function TaskPropertiesController(PreciseApi, Tasks, Phases, Pages) {
+	function TaskPropertiesController(PreciseApi, Tasks, Scopes, Phases, Pages) {
 		var $ctrl = this;
 		
 		$ctrl.cancel = cancel;
+		$ctrl.updateExlusivenessType = updateExlusivenessType;
 		$ctrl.addPattern = addPattern;
 		$ctrl.removePattern = removePattern;
 		$ctrl.updatePattern = updatePattern;
 		$ctrl.sendTask = sendTask;
 		$ctrl.isDisabledPatternEntry = isDisabledPatternEntry;
 		$ctrl.isDisabledOrderType = isDisabledOrderType;
-		$ctrl.orderTypes = Tasks.getOrderTypes();
+		
+		$ctrl.scopeTypes = [
+			Scopes.Types.NONE,
+			Scopes.Types.GLOBAL,
+			Scopes.Types.ATTRIBUTES
+		];
+		
+		$ctrl.orderTypes = [
+			Tasks.OrderTypes.NONE,
+			Tasks.OrderTypes.PARALLEL,
+			Tasks.OrderTypes.ASCENDING,
+			Tasks.OrderTypes.DESCENDING
+		];
+
+		$ctrl.$onChanges = $onChanges;
+		
+		function $onChanges() {
+			if ($ctrl.resource) {
+				$ctrl.exclusiveness = Scopes.toLocalRepresentation($ctrl.resource.data.exclusiveness);
+			}
+		}
+		
+		function updateExlusivenessType() {
+			$ctrl.exclusiveness.type = _.some($ctrl.exclusiveness.attributes)
+				? Scopes.Types.ATTRIBUTES
+				: Scopes.Types.GLOBAL;
+		}
 		
 		function updatePattern(pattern, patternNum, attr, newValue) {
 			return $ctrl.resource.updatePattern(pattern, attr, newValue).then(function (checkedPattern) {
@@ -40,6 +67,9 @@ define([
 		}
 		
 		function sendTask() {
+			var attributes = $ctrl.resource.data.type.phase.attributes,
+				exclusiveness = Scopes.fromLocalRepresentation($ctrl.exclusiveness, attributes);
+			$ctrl.resource.data.exclusiveness = exclusiveness;
 			return $ctrl.resource.send('expandedTask')
 				.then(function (result) {
 					$ctrl.done({ $result: result });

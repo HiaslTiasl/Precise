@@ -1,29 +1,29 @@
 <div class="form-horizontal">
 	<div class="form-group">
-		<label for="phase" class="col-sm-5 control-label">Phase</label>
-		<div class="col-sm-7">
+		<label for="phase" class="col-sm-4 control-label">Phase</label>
+		<div class="col-sm-8">
 			<p id="phase" class="form-control-static">
 				{{$ctrl.resource.data.type.phase.name}}
 			</p>
 		</div>
 	</div>
 	<div class="form-group">
-		<label for="type" class="col-sm-5 control-label">Definition</label>
-		<div class="col-sm-7">
+		<label for="type" class="col-sm-4 control-label">Definition</label>
+		<div class="col-sm-8">
 			<p id="type" class="form-control-static">
 				{{$ctrl.resource.data.type.name}}
 			</p>
 		</div>
 	</div>
 	<div class="form-group">
-		<label for="craft" class="col-sm-5 control-label">Craft</label>
-		<div class="col-sm-7">
+		<label for="craft" class="col-sm-4 control-label">Craft</label>
+		<div class="col-sm-8">
 			<p id="craft" class="form-control-static">{{$ctrl.resource.data.type | withShortName:'craft':'craftShort'}}</p>
 		</div>
 	</div>
 	<div class="form-group">
-		<label for="workers" class="col-sm-5 control-label">Workers needed</label>
-		<div class="col-sm-7">
+		<label for="workers" class="col-sm-4 control-label">Workers needed</label>
+		<div class="col-sm-8">
 			<input id="workers"
 				type="number"
 				class="form-control"
@@ -31,8 +31,8 @@
 		</div>
 	</div>
 	<div class="form-group">
-		<label for="units" class="col-sm-5 control-label">Units/day</label>
-		<div class="col-sm-7">
+		<label for="units" class="col-sm-4 control-label">Units/day</label>
+		<div class="col-sm-8">
 			<input id="units"
 				type="number"
 				step="0.01"
@@ -40,84 +40,98 @@
 				ng-model="$ctrl.resource.data.numberOfUnitsPerDay"/>
 		</div>
 	</div>
-	<div class="form-group">
-		<label for="workers" class="col-sm-5 control-label">Exclusiveness</label>
-		<div class="col-sm-7">
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" ng-model="$ctrl.resource.data.globalExclusiveness" ng-change="$ctrl.resource.updateExlusiveness()"> Global
-				</label>
+	<fieldset>
+		<legend>Exclusiveness</legend>
+		<div class="form-group">
+			<label for="exclusiveness-type" class="col-sm-4 control-label">Type</label>
+			<div id="exclusiveness-type" class="col-sm-8">
+				<div class="radio" ng-repeat="st in $ctrl.scopeTypes">
+					<label>
+						<input type="radio" ng-model="$ctrl.exclusiveness.type" ng-value="st"/>
+						{{st.displayName}}
+					</label>
+				</div>
 			</div>
-			<a href
-				editable-select="$ctrl.resource.data.exclusiveness"
-				e-multiple
-				e-ng-options="attr as attr.name for attr in $ctrl.resource.data.type.phase.attributes"
-				onaftersave="$ctrl.resource.updateGlobalExclusiveness()"
-				ng-disabled="$ctrl.resource.data.globalExclusiveness">
-				{{ $ctrl.resource.showExclusiveness() || '(no attributes)' }}
+		</div>
+		<div class="form-group">
+			<label for="exclusiveness-attributes" class="col-sm-4 control-label">Attributes</label>
+			<div class="col-sm-8">
+				<div class="row">
+					<div class="checkbox col-sm-6" ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">
+						<label>
+							<input type="checkbox"
+								ng-model="$ctrl.exclusiveness.attributes[attr.name]"
+								ng-change="$ctrl.updateExlusivenessType()">
+								{{attr.name}}
+						</label>
+					</div>
+				</div>
+			</div>
+		</div>
+	</fieldset>
+	<fieldset>
+		<legend>Order</legend>
+		<div class="form-group">
+			<label for="order" class="col-sm-4 control-label">Order</label>
+			<div class="col-sm-8">
+				<p id="order" class="form-control-static">
+					<a href ng-click="$ctrl.showOrderForm = !$ctrl.showOrderForm">
+						{{ $ctrl.resource.showOrder() || '(no order)' }}
+					</a>
+				</p>
+			</div>
+		</div>
+		<div class="form-group form-group-sm" ng-repeat="order in $ctrl.resource.data.orderSpecifications" ng-show="$ctrl.showOrderForm">
+			<label for="attr-{{::order.attribute.name}}" class="col-sm-4 control-label">
+				{{::order.attribute.name}}
+			</label>
+			<div class="col-sm-8">
+				<select id="attr-{{::order.attribute.name}}"
+					class="form-control"
+					ng-model="order.orderType"
+					ng-options="t.name as t.displayName disable when $ctrl.isDisabledOrderType(t, order.attribute) for t in $ctrl.orderTypes">
+				</select>
+			</div>
+		</div>
+	</fieldset>
+	<fieldset>
+		<legend>Locations</legend>
+		<!-- <label for="location-table" class="control-label">Locations</label> -->
+		<div class="toolbar">
+			<a href ng-click="$ctrl.addPattern()">
+				<span class="glyphicon glyphicon-plus"></span>
 			</a>
 		</div>
-	</div>
-	<div class="form-group">
-		<label for="order" class="col-sm-5 control-label">Order</label>
-		<div class="col-sm-7">
-			<p id="order" class="form-control-static">
-				<a href ng-click="$ctrl.showOrderForm = !$ctrl.showOrderForm">
-					{{ $ctrl.resource.showOrder() || '(no order)' }}
-				</a>
-			</p>
-		</div>
-	</div>
-	<div class="form-group form-group-sm" ng-repeat="order in $ctrl.resource.data.orderSpecifications" ng-show="$ctrl.showOrderForm">
-		<label for="attr-{{::order.attribute.name}}" class="col-sm-5 control-label">
-			{{::order.attribute.name}}
-		</label>
-		<div class="col-sm-7">
-			<select id="attr-{{::order.attribute.name}}"
-				class="form-control"
-				ng-model="order.orderType"
-				ng-options="t.name as t.name disable when $ctrl.isDisabledOrderType(t, order.attribute) for t in $ctrl.orderTypes">
-			</select>
-		</div>
-	</div>
-</div>
-<fieldset>
-	<legend>Locations</legend>
-	<!-- <label for="location-table" class="control-label">Locations</label> -->
-	<div class="toolbar">
-		<a href ng-click="$ctrl.addPattern()">
-			<span class="glyphicon glyphicon-plus"></span>
-		</a>
-	</div>
-	<table id="location-table" class="table table-striped" st-table="coll" st-safe-src="$ctrl.resource.data.locationPatterns">
-		<thead>
-			<tr>
-				<th ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">{{::attr.name}}</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr ng-repeat="pattern in coll track by $index" ng-init="patternNum = $index">
-				<td ng-repeat="attr in $ctrl.resource.data.type.phase.attributes track by $index">
-					<a href
-						editable-select="pattern[attr.name].value"
-						e-ng-options="value for value in pattern[attr.name].allowedValues"
-						ng-class="{disabled: $ctrl.isDisabledPatternEntry(pattern[attr.name])}"
-						ng-disabled="$ctrl.isDisabledPatternEntry(pattern[attr.name])"
-						buttons="no"
-						onbeforesave="$ctrl.updatePattern(pattern, patternNum, attr, $data)">
-						{{ pattern[attr.name].value }}
-					</a>
-				</td>
-				<td>
-					<a href ng-click="$ctrl.removePattern(patternNum)">
-						<span class="glyphicon glyphicon-trash"></span>
-					</a>
-				</td>
-			</tr>
-		</tbody>
+		<table id="location-table" class="table table-striped" st-table="coll" st-safe-src="$ctrl.resource.data.locationPatterns">
+			<thead>
+				<tr>
+					<th ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">{{::attr.name}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="pattern in coll track by $index" ng-init="patternNum = $index">
+					<td ng-repeat="attr in $ctrl.resource.data.type.phase.attributes track by $index">
+						<a href
+							editable-select="pattern[attr.name].value"
+							e-ng-options="value for value in pattern[attr.name].allowedValues"
+							ng-class="{disabled: $ctrl.isDisabledPatternEntry(pattern[attr.name])}"
+							ng-disabled="$ctrl.isDisabledPatternEntry(pattern[attr.name])"
+							buttons="no"
+							onbeforesave="$ctrl.updatePattern(pattern, patternNum, attr, $data)">
+							{{ pattern[attr.name].value }}
+						</a>
+					</td>
+					<td>
+						<a href ng-click="$ctrl.removePattern(patternNum)">
+							<span class="glyphicon glyphicon-trash"></span>
+						</a>
+					</td>
+				</tr>
+			</tbody>
 		</table>
-</fieldset>
+	</fieldset>
+</div>
 <div class="text-right">
 	<button class="btn btn-primary"
 		ng-click="$ctrl.sendTask()"

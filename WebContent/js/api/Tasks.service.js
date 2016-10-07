@@ -7,32 +7,27 @@ define([
 ) {
 	'use strict';
 	
-	TasksService.$inject = ['$q', 'PreciseApi', 'Resources'];
+	TasksService.$inject = ['$q', 'PreciseApi', 'Resources', 'Scopes'];
 	
-	function TasksService($q, PreciseApi, Resources) {
+	function TasksService($q, PreciseApi, Resources, Scopes) {
 		
 		var Tasks = this;
 		
-		Tasks.getOrderTypes = getOrderTypes;
 		Tasks.isAssignableTo = isAssignableTo;
 		Tasks.resource = resource;
 		Tasks.newResource = newResource;
 		Tasks.existingResource = existingResource;
 		Tasks.Resource = Tasks;
 		
-		var orderTypes = [
-			{ name: 'NONE'      , requiresOrdered: false },
-			{ name: 'PARALLEL'  , requiresOrdered: false },
-			{ name: 'ASCENDING' , requiresOrdered: true },
-			{ name: 'DESCENDING', requiresOrdered: true }
-		];
-		
+		Tasks.OrderTypes = {
+			NONE      : { name: 'NONE'      , displayName: 'None'            , requiresOrdered: false },
+			PARALLEL  : { name: 'PARALLEL'  , displayName: '|Parallel|'      , requiresOrdered: false },
+			ASCENDING : { name: 'ASCENDING' , displayName: 'Ascending\u2191' , requiresOrdered: true },
+			DESCENDING: { name: 'DESCENDING', displayName: 'Descending\u2193', requiresOrdered: true }
+		};
+
 		var getAttrName = _.property('name'),
 			dontSendDirectly = ['exclusiveness', 'orderSpecifications', 'type', 'model', '_links'];
-		
-		function getOrderTypes() {
-			return orderTypes;
-		}
 		
 		function isAssignableTo(orderType, attribute) {
 			return !orderType.requiresOrdered || attribute.ordered;
@@ -43,17 +38,8 @@ define([
 		}
 		
 		function cloneExistingData(task) {
-			var data = _.cloneDeep(task),
-			attributes = data.type.phase.attributes,
-			excl = data.exclusiveness,
-			exclLen = excl.length,
-			attrLen = attributes.length;
-			for (var exclIdx = 0, attrIdx = 0; exclIdx < exclLen; exclIdx++) {
-				var name = excl[exclIdx].name;
-				while (attrIdx < attrLen && attributes[attrIdx].name !== name)
-					attrIdx++;
-				excl[exclIdx] = attributes[attrIdx];
-			}
+			var data = _.cloneDeep(task);
+			Scopes.rereferenceAttributes(data.exclusiveness, data.type.phase.attributes);
 			return $q.when(data);
 		};
 		
@@ -63,7 +49,7 @@ define([
 				numberOfWorkersNeeded: 0,
 				numberOfUnitsPerDay: 0,
 				globalExclusiveness: false,
-				exclusiveness: [],
+				exclusiveness: { type: 'NONE' },
 				orderSpecifications: [],
 				position: task.position
 			});
@@ -137,16 +123,7 @@ define([
 				return !this.orderParts.length ? null : this.orderParts.join(', ');
 			},
 			
-			updateExlusiveness: function () {
-				if (this.data.globalExclusiveness)
-					util.limitArray(this.data.exclusiveness, 0);
-			},
-			
-			updateGlobalExclusiveness: function () {
-				if (this.data.exclusiveness.length)
-					this.data.globalExclusiveness = false;
-			},
-			
+
 			checkPattern: function (pattern) {
 				return PreciseApi.from(PreciseApi.hrefTo(this.data, 'checkedPattern'))
 					.traverse(function (builder) {
@@ -166,9 +143,7 @@ define([
 			
 			getRequestData: function () {
 				var processed = _.omit(this.data, dontSendDirectly);
-				processed.exclusiveness = this.data.exclusiveness.map(function (attr) {
-					return PreciseApi.hrefTo(attr);
-				});
+				processed.exclusiveness = Scopes.toRequestRepresentation(this.data.exclusiveness);
 				processed.orderSpecifications = this.data.orderSpecifications.map(function (order, i) {
 					return {
 						attribute: PreciseApi.hrefTo(order.attribute),

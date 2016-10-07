@@ -104,7 +104,7 @@ define([
 				position: 0.5,
 				attrs: {
 					text: {
-						text: data.scope && data.scope.map(getScopeLabel).join(', '),
+						text: _.chain(data.scope).get('attributes').map(getScopeLabel).join(', ').value(),
 						transform: 'translate(-10, -10)'
 					}
 				}

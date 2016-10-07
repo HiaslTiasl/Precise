@@ -20,7 +20,7 @@ public interface ExpandedTaskProjection {
 	
 	boolean isGlobalExclusiveness();
 	
-	List<AttributeSummaryProjection> getExclusiveness();
+	ScopeSummaryProjection getExclusiveness();
 
 	List<OrderSpecificationSummaryProjection> getOrderSpecifications();
 

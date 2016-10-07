@@ -16,6 +16,10 @@ public interface DependencySummaryProjection {
 	
 	Long getTargetID();
 	
+	EmptyProjection getSource();
+	
+	EmptyProjection getTarget();
+	
 	Position getSourceVertex();
 
 	Position getTargetVertex();
@@ -26,7 +30,7 @@ public interface DependencySummaryProjection {
 	
 	boolean isGlobalScope();
 	
-	List<AttributeSummaryProjection> getScope();
+	ScopeSummaryProjection getScope();
 	
 	List<Position> getVertices();
 }

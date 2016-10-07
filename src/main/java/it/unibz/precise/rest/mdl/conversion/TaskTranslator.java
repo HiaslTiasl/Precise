@@ -29,7 +29,7 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 		mdlTask.setNumberOfWorkersNeeded(task.getNumberOfWorkersNeeded());
 		mdlTask.setNumberOfUnitsPerDay(task.getNumberOfUnitsPerDay());
 		mdlTask.setGlobalExclusiveness(task.isGlobalExclusiveness());
-		mdlTask.setExclusiveness(Util.mapToList(task.getExclusiveness(), context().attributes()::toMDL));
+		mdlTask.setExclusiveness(context().scopes().toMDL(task.getExclusiveness()));
 		mdlTask.setOrder(Util.mapToMap(task.getOrderSpecifications(),
 			os -> os.getAttribute().getName(),
 			OrderSpecification::getOrderType
@@ -49,7 +49,7 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 		task.setNumberOfWorkersNeeded(mdlTask.getNumberOfWorkersNeeded());
 		task.setNumberOfUnitsPerDay(mdlTask.getNumberOfUnitsPerDay());
 		task.setGlobalExclusiveness(mdlTask.isGlobalExclusiveness());
-		task.setExclusiveness(Util.mapToList(mdlTask.getExclusiveness(), context().attributes()::toEntity));
+		task.setExclusiveness(context().scopes().toEntity(mdlTask.getExclusiveness()));
 		task.setOrderSpecifications(
 				order == null ? null : phase.getAttributeHierarchyLevels().stream()
 				.map(AttributeHierarchyLevel::getAttribute)

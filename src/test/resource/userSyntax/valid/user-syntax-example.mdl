@@ -126,7 +126,7 @@
 			}
 		}
 	],
-	"taskTypes": [
+	"taskDefinitions": [
 		{
 			"name": "Construction Site Preparation",
 			"phase": "Skeleton",
@@ -182,7 +182,10 @@
 			"type": "Construction Site Preparation",
 			"numberOfWorkersNeeded": 4,
 			"numberOfUnitsPerDay": 0.2,
-			"exclusiveness": ["sector"],
+			"exclusiveness": {
+				"type": "ATTRIBUTES",
+				"attributes": ["sector"]
+			},
 			"position": {
 				"x": 20,
 				"y": 20
@@ -196,7 +199,10 @@
 			"type": "Excavation",
 			"numberOfWorkersNeeded": 6,
 			"numberOfUnitsPerDay": 0.1,
-			"exclusiveness": ["sector"],
+			"exclusiveness": {
+				"type": "ATTRIBUTES",
+				"attributes": ["sector"]
+			},
 			"position": {
 				"x": 20,
 				"y": 220
@@ -380,32 +386,46 @@
 			"chain": true,
 			"source": 1,
 			"target": 2,
-			"scope": ["sector"]
+			"scope": {
+				"type": "ATTRIBUTES",
+				"attributes": ["sector"]
+			}
 		},
 		{
 			"source": 2,
-			"target": 3,
-			"scope": []
+			"target": 3
 		},
 		{
 			"source": 3,
 			"target": 4,
-			"scope": ["sector", "level"]
+			"scope": {
+				"type": "ATTRIBUTES",
+				"attributes": ["sector", "level"]
+			}
 		},
 		{
 			"source": 3,
 			"target": 5,
-			"scope": ["sector", "level"]
+			"scope": {
+				"type": "ATTRIBUTES",
+				"attributes": ["sector", "level"]
+			}
 		},
 		{
 			"source": 4,
 			"target": 6,
-			"scope": ["sector", "level"]
+			"scope": {
+				"type": "ATTRIBUTES",
+				"attributes": ["sector", "level"]
+			}
 		},
 		{
 			"source": 5,
 			"target": 6,
-			"scope": ["sector", "level"]
+			"scope": {
+				"type": "ATTRIBUTES",
+				"attributes": ["sector", "level"]
+			}
 		},
 		{
 			"source": 6,
@@ -421,7 +441,10 @@
 			"alternate": true,
 			"source": 7,
 			"target": 3,
-			"scope": ["sector", "level"]
+			"scope": {
+				"type": "ATTRIBUTES",
+				"attributes": ["sector", "level"]
+			}
 		},
 		{
 			"source": 3,

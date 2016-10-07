@@ -5,25 +5,20 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.IntSequenceGenerator;
 
 import it.unibz.precise.model.OrderType;
 import it.unibz.precise.model.Position;
-import it.unibz.precise.model.Task;
 
 @JsonIdentityInfo(generator=IntSequenceGenerator.class, property="id", scope=MDLTaskAST.class)
 @JsonIdentityReference(alwaysAsId=false)
 public class MDLTaskAST {
 	
-	@JsonIgnore
-	private Task task;
-	
 	private MDLTaskTypeAST type;
 	private float numberOfWorkersNeeded;
 	private float numberOfUnitsPerDay;
 	private boolean globalExclusiveness;
-	private List<MDLAttributeAST> exclusiveness;
+	private MDLScopeAST exclusiveness;
 	private Map<String, OrderType> order;
 	private Position position;
 	private List<Map<String, String>> locations;
@@ -60,11 +55,11 @@ public class MDLTaskAST {
 		this.globalExclusiveness = globalExclusiveness;
 	}
 
-	public List<MDLAttributeAST> getExclusiveness() {
+	public MDLScopeAST getExclusiveness() {
 		return exclusiveness;
 	}
 
-	public void setExclusiveness(List<MDLAttributeAST> exclusiveness) {
+	public void setExclusiveness(MDLScopeAST exclusiveness) {
 		this.exclusiveness = exclusiveness;
 	}
 

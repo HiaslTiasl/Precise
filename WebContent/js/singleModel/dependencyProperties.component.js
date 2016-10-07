@@ -7,44 +7,44 @@ define([
 ) {
 	'use strict';
 	
-	DependencyPropertiesController.$inject = [];
+	DependencyPropertiesController.$inject = ['PreciseApi', 'Scopes'];
 	
-	function DependencyPropertiesController() {
+	function DependencyPropertiesController(PreciseApi, Scopes) {
 		var $ctrl = this;
 		
 		$ctrl.cancel = cancel;
 		$ctrl.sendDependency = sendDependency;
-		$ctrl.showScope = showScope;
-		$ctrl.globalScopeChanged = globalScopeChanged;
-		$ctrl.scopeChanged = scopeChanged;
+		$ctrl.updateScopeType = updateScopeType;
+		
+		$ctrl.scopeTypes = [
+			Scopes.Types.GLOBAL,
+			Scopes.Types.ATTRIBUTES
+		];
+		
+		$ctrl.$onChanges = $onChanges;
+		
+		function $onChanges(changes) {
+			if (changes.resource) {
+				$ctrl.scope = Scopes.toLocalRepresentation($ctrl.resource.data.scope);
+			}
+		}
 		
 		var getAttrName = _.property('name'),
 			scopeParts;
 		
-		function showScope() {
-			if (!$ctrl.resource.data)
-				return undefined;
-			if (!scopeParts)
-				scopeParts = [];
-			util.mapInto(scopeParts, $ctrl.resource.data.scope, getAttrName);
-			return scopeParts.length ? scopeParts.join(', ') : '(no attributes)';
-		}
-		
-		function globalScopeChanged() {
-			if ($ctrl.resource.data.globalScope)
-				util.limitArray($ctrl.resource.data.scope, 0);
-		}
-		
-		function scopeChanged() {
-			$ctrl.resource.data.globalScope = $ctrl.resource.data.scope.length > 0;
+		function updateScopeType() {
+			$ctrl.scope.type = _.some($ctrl.scope.attributes)
+				? Scopes.Types.ATTRIBUTES
+				: Scopes.Types.GLOBAL;
 		}
 		
 		function sendDependency() {
+			$ctrl.resource.data.scope = Scopes.fromLocalRepresentation($ctrl.scope, $ctrl.resource.data.attributes);
 			return $ctrl.resource.send('dependencySummary')
 				.then(function (result) {
 					$ctrl.done({ $result: result });
 				}, function (reason) {
-					alert(preciseApi.toErrorMessage(reason));
+					alert(PreciseApi.toErrorMessage(reason));
 				});
 		}
 
@@ -59,7 +59,6 @@ define([
 		controllerAs: '$ctrl',
 		bindings: {
 			model: '<',
-			mode: '<',
 			resource: '<',
 			done: '&',
 			cancelled: '&'

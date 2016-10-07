@@ -133,7 +133,9 @@ define([
 		update: function () {
 			var data = this.get('data'),
 				attributes = data.type.phase.attributes,
-				exclusive = data.globalExclusiveness || data.exclusiveness.length,
+				exclusiveness = data.exclusiveness,
+				exclusive = exclusiveness.type === 'GLOBAL'
+					|| (exclusiveness.type === 'ATTRIBUTES' && _.size(exclusiveness.attributes)),
 				locationPatterns = data.locationPatterns,
 				width = WIDTH,
 				height = LOC_POS_Y + this.locationsHeight;
