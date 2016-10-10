@@ -33,7 +33,7 @@ define([
 	
 	var WILDCARD_VALUE = "*";
 	
-	var textClasses = [
+	var sharedClasses = [
 		'task-id',
 		'task-workers-needed',
 		'task-units-per-day',
@@ -43,7 +43,11 @@ define([
 		'task-exclusiveness'
 	];
 	
-	var rectClasses = ['outline', 'task-locations'].concat(textClasses);
+	var indexClasses = ['task-id-index', 'task-workers-index', 'task-units-index', 'task-craft-index'];
+	
+	var textClasses = sharedClasses.slice()
+	
+	var rectClasses = ['outline', 'task-locations'].concat(sharedClasses);
 	
 	var TaskShape = util.set(joint.shapes, ['precise', 'TaskShape'], joint.shapes.basic.Generic.extend({
 		markup: [
@@ -88,7 +92,7 @@ define([
 					'text-anchor': 'middle',
 					//'y-alignment': 'middle'
 				}
-			}, TemplateUtil.withRefsToSameClass('text', 'rect', textClasses, {
+			}, TemplateUtil.withRefsToSameClass('text', 'rect', sharedClasses, {
 				 'ref-y': .5,
 				 'ref-x': .5,
 				 'text-anchor': 'middle',
@@ -104,11 +108,24 @@ define([
 			
 			this.on('change:data', this.update, this);
 			this.on('change:hideLocations', this.updateHideLocations, this);
-
+			
+//			this.initIndexIndicators();
 			this.update();
 			
 			joint.shapes.basic.Generic.prototype.initialize.apply(this, arguments);
 		},
+		
+//		initIndexIndicators: function () {
+//			var x, y = -HEADER_ROW_HEIGHT;
+//			this.attr(_.transform(indexClasses, function (acc, c, i) {
+//				x = (i + 0.5) * HEADER_COL_WIDTH;
+//				acc['.' + c] = {
+//					text: '(' + (1 + i) + ')',
+//					'text-anchor': 'middle',
+//					transform: 'translate(' + x + ',' + y + ')'
+//				};
+//			}, {}));
+//		},
 		
 		updateHideLocations: function (model, hideLocations) {
 			var nameHeight = hideLocations ? model.locationsHeight + NAME_HEIGHT : NAME_HEIGHT,
@@ -227,7 +244,49 @@ define([
    		
    		truncMarkup: '<text class="trunc">...</text>',
    		
+   		createTools: function () {
+   			var bbox = this.vel.bbox(),
+				tools = joint.V('<g class="task-tools"/>'),
+				x, y = -HEADER_ROW_HEIGHT;
+			TemplateUtil.createElements('text', indexClasses).forEach(function (e, i) {
+				x = (i + 0.5) * HEADER_COL_WIDTH;
+				tools.append(joint.V(e)
+					.text('(' + (1 + i) + ')')
+					.attr({
+						'text-anchor': 'middle',
+						'transform': 'translate(' + x + ',' + y + ')'
+					}));
+   			});
+			return tools;
+   		},
+   		
+   		updateToolsPosition: function (model, value, options) {
+   			this.tools
+   				.attr('transform', '')
+   				.translate(value.x, value.y);
+   		},
+   		
+   		attachTools: function () {
+			var vViewport = joint.V(this.paper.viewport);
+			this.tools = vViewport.findOne('.task-tools');
+			if (!this.tools) {
+				this.tools = this.createTools();
+				vViewport.append(this.tools);
+			}
+			this.model.on('change:position', this.updateToolsPosition);
+			this.updateToolsPosition(this.model, this.model.get('position'));
+			this.tools.attr('display', 'inline');
+		},
+		
+		detachTools: function () {
+			this.model.off('change:position', this.updateToolsPosition);
+			this.tools.attr('display', 'none');
+			this.tools = null;
+		},
+   		
    	    initialize: function() {
+   	    	
+   	    	_.bindAll(this, 'updateToolsPosition');
 
    	        this.positionChangeBatchOptions = { batchName: 'position-change', other: { cell: this.model }};
    	        joint.dia.ElementView.prototype.initialize.apply(this, arguments);
@@ -307,6 +366,7 @@ define([
 		},
 		
 		highlight: function () {
+			this.attachTools();
 			this.model.attr({
 				'rect.outline': {
 					filter: {
@@ -321,36 +381,13 @@ define([
 
 					}
 				}
-//				'rect.outline': {
-//					filter: {
-//						name: 'outline',
-//						args: {
-//							color: 'red',
-//							width: 1,
-//							opacity: 5,
-//							margin: 2 
-//						}
-//	
-//					}
-//				}
-//				'rect.outline': {
-//					filter: {
-//						name: 'highlight',
-//						args: {
-//							color: 'red',
-//							width: 1,
-//							blur: 5,
-//							opacity: 1 
-//						}
-//					
-//					}
-//				}
 			});
 			joint.dia.ElementView.prototype.highlight.apply(this, arguments);
 		},
 		
 		unhighlight: function () {
 			this.model.attr('rect.outline/filter', 'none');
+			this.detachTools();
 			joint.dia.ElementView.prototype.unhighlight.apply(this, arguments);
 		}
 		

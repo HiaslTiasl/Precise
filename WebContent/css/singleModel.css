@@ -58,6 +58,43 @@ precise-diagram-paper {
 	margin-bottom: 10px;
 }
 
+/******************************************
+ * Show correspondence between task shapes
+ * and property fields
+ ******************************************/
+ 
+/* using numbers */
+
+.field-id > label::before,
+.field-workers > label::before,
+.field-units-per-day::before,
+.field-craft > label::before {
+	position: relative;
+	margin-right: -1.2em;
+	left: -1.5em;
+	font-weight: normal;
+}
+
+.field-id > label::before {
+	content: "(1)";
+	color: #4bac00;
+}
+
+.field-workers > label::before {
+	content: "(2)";
+	color: #05417e;
+}
+
+.field-units-per-day::before {
+	content: "(3)";
+	color: #C27400;
+}
+
+.field-craft > label::before {
+	content: "(4)";
+	color: #AF0032;
+}
+
 #location-table {
 	table-layout: fixed;
 }

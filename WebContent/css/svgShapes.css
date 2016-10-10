@@ -22,6 +22,22 @@ text {
 	fill: transparent;
 }
 
+.task-id-index {
+	fill: #4bac00;
+}
+
+.task-workers-index {
+	fill: #05417e;
+}
+
+.task-units-index {
+	fill: #C27400;
+}
+
+.task-craft-index {
+	fill: #AF0032;
+}
+
 /******************************************
  * Override JointJS styles
  ******************************************/
@@ -137,10 +153,3 @@ text {
 .add-precedence .joint-type-precise-taskshape.highlighted {
 	cursor: move; 
 }
-
-.add-precedence .joint-type-precise-taskshape.highlighted .outline {
-	fill: transparent;
-	stroke: black;
-	stroke-dasharray: 10,10;
-}
-
