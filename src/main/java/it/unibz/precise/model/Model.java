@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -19,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(uniqueConstraints=@UniqueConstraint(name="UC_MODEL_NAME", columnNames="name"))
 @JsonIgnoreProperties(value={"state"}, allowGetters=true)
 public class Model extends BaseEntity {
+	
+	public static final int DEFAULT_HOURS_PER_DAY = 8;
 	
 	/**
 	 * The state of the model.
@@ -99,6 +102,9 @@ public class Model extends BaseEntity {
 
 	// Task configuration
 	//---------------------------------------------------
+	
+	private int hoursPerDay = DEFAULT_HOURS_PER_DAY;
+	
 
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<TaskType> taskTypes = new ArrayList<>();
@@ -172,6 +178,16 @@ public class Model extends BaseEntity {
 	
 	public void addPhase(Phase phase) {
 		ModelToMany.PHASES.addOneOfMany(this, phase);
+	}
+
+	@Transient
+	public int getHoursPerDay() {
+		return hoursPerDay;
+	}
+
+	@Transient
+	public void setHoursPerDay(int hoursPerDay) {
+		this.hoursPerDay = hoursPerDay;
 	}
 
 	public List<TaskType> getTaskTypes() {

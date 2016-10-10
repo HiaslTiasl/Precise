@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,6 +14,8 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -29,10 +32,12 @@ public class Phase extends BaseEntity {
 	
 	@Convert(converter=ColorConverter.class)
 	private Color color;
-	
+
 	@OneToMany(mappedBy="phase", cascade=CascadeType.ALL, orphanRemoval=true)
 	@OrderBy("position")
 	private List<AttributeHierarchyLevel> attributeHierarchyLevels = new ArrayList<>();
+	
+	private int units;
 	
 	@ManyToOne
 	private Model model;
@@ -61,6 +66,10 @@ public class Phase extends BaseEntity {
 		this.description = description;
 	}
 
+	public int getUnits() {
+		return units;
+	}
+
 	public List<AttributeHierarchyLevel> getAttributeHierarchyLevels() {
 		return attributeHierarchyLevels;
 	}
@@ -70,16 +79,22 @@ public class Phase extends BaseEntity {
 	}
 	
 	public void addAttribute(Attribute attribute) {
-		addLevel(new AttributeHierarchyLevel(this, attribute));
+		AttributeHierarchyLevel level = new AttributeHierarchyLevel();
+		level.setAttribute(attribute);
+		addLevel(level);
 	}
 
 	public void addLevel(AttributeHierarchyLevel level) {
-		level.setPosition(attributeHierarchyLevels.size() + 1);
 		PhaseToMany.LEVELS.addOneOfMany(this, level);
 	}
 	
 	void internalSetLevels(List<AttributeHierarchyLevel> levels) {
 		attributeHierarchyLevels = levels;
+	}
+	
+	public void updateLevelPositions() {
+		IntStream.range(0, attributeHierarchyLevels.size())
+			.forEach(i -> attributeHierarchyLevels.get(i).setPosition(i + 1));
 	}
 	
 	public Model getModel() {
@@ -94,14 +109,26 @@ public class Phase extends BaseEntity {
 		this.model = model;
 	}
 	
+	public AttributeHierarchyLevel firstLevel() {
+		return nextLevel(null);
+	}
+	
 	public AttributeHierarchyLevel nextLevel(AttributeHierarchyLevel prev) {
 		int nextIndex = prev == null ? 0 : prev.getPosition();		// N.B. position == index + 1
 		return nextIndex < attributeHierarchyLevels.size()
 			? attributeHierarchyLevels.get(nextIndex) : null;
 	}
 	
+	public void countUnits() {
+		AttributeHierarchyLevel firstLevel = firstLevel();
+		units = firstLevel == null ? 0 : firstLevel.getNodes().values().stream()
+			.peek(AttributeHierarchyNode::countUnits)
+			.mapToInt(AttributeHierarchyNode::getUnits)
+			.sum();
+	}
+	
 	public Object buildingTree() {
-		AttributeHierarchyLevel firstLevel = attributeHierarchyLevels.isEmpty() ? null : nextLevel(null);
+		AttributeHierarchyLevel firstLevel = firstLevel();
 		return firstLevel == null ? null : createTree(firstLevel, firstLevel.getNodes());
 	}
 	
@@ -126,6 +153,13 @@ public class Phase extends BaseEntity {
 			}
 		}
 		return hasSubTrees ? tree : tree.keySet();
+	}
+	
+	@PrePersist
+	@PreUpdate
+	public void preSave() {
+		updateLevelPositions();
+		countUnits();
 	}
 	
 }

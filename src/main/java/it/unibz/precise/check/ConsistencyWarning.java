@@ -11,7 +11,7 @@ public class ConsistencyWarning {
 	private String message;
 	
 	private List<? extends BaseEntity> entities;
-
+	
 	public ConsistencyWarning(String type, String message, List<? extends BaseEntity> entities) {
 		this.type = type;
 		this.message = message;

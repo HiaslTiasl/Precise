@@ -11,17 +11,19 @@ class ConfigTranslator extends AbstractMDLTranslator<Model, MDLConfigAST> {
 	}
 
 	@Override
-	public void updateMDL(Model model, MDLConfigAST mdlAttribute) {
-		mdlAttribute.setAttributes(Util.mapToList(model.getAttributes(), context().attributes()::toMDL));
-		mdlAttribute.setPhases(Util.mapToList(model.getPhases(), context().phases()::toMDL));
-		mdlAttribute.setTaskDefinitions(Util.mapToList(model.getTaskTypes(), context().taskTypes()::toMDL));
+	public void updateMDL(Model model, MDLConfigAST mdlConfig) {
+		mdlConfig.setHoursPerDay(model.getHoursPerDay());
+		mdlConfig.setAttributes(Util.mapToList(model.getAttributes(), context().attributes()::toMDL));
+		mdlConfig.setPhases(Util.mapToList(model.getPhases(), context().phases()::toMDL));
+		mdlConfig.setTaskDefinitions(Util.mapToList(model.getTaskTypes(), context().taskTypes()::toMDL));
 	}
 	
 	@Override
-	public void updateEntity(MDLConfigAST mdlAttribute, Model model) {
-		model.setAttributes(Util.mapToList(mdlAttribute.getAttributes(), context().attributes()::toEntity));
-		model.setPhases(Util.mapToList(mdlAttribute.getPhases(), context().phases()::toEntity));
-		model.setTaskTypes(Util.mapToList(mdlAttribute.getTaskDefinitions(), context().taskTypes()::toEntity));
+	public void updateEntity(MDLConfigAST mdlConfig, Model model) {
+		model.setHoursPerDay(mdlConfig.getHoursPerDay());
+		model.setAttributes(Util.mapToList(mdlConfig.getAttributes(), context().attributes()::toEntity));
+		model.setPhases(Util.mapToList(mdlConfig.getPhases(), context().phases()::toEntity));
+		model.setTaskTypes(Util.mapToList(mdlConfig.getTaskDefinitions(), context().taskTypes()::toEntity));
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import javax.persistence.ManyToOne;
 public class Location {
 
 	private int level;
-
+	
 	@ManyToOne
 	private AttributeHierarchyNode node;
 
@@ -18,6 +18,14 @@ public class Location {
 		setNode(node);
 	}
 	
+	public int getLevel() {
+		return level;
+	}
+	
+	public void setLevel(int level) {
+		this.level = level;
+	}
+
 	public AttributeHierarchyNode getNode() {
 		return node;
 	}
@@ -25,14 +33,6 @@ public class Location {
 	public void setNode(AttributeHierarchyNode node) {
 		this.node = node;
 		this.level = node == null ? 0 : node.getLevel().getPosition();
-	}
-	
-	public int getLevel() {
-		return level;
-	}
-	
-	public void setLevel(int level) {
-		this.level = level;
 	}
 	
 }

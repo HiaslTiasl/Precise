@@ -31,14 +31,6 @@ public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
 	@MapKey(name="value")
 	private Map<String, AttributeHierarchyNode> nodes = new HashMap<>();
 	
-	public AttributeHierarchyLevel() {
-	}
-
-	public AttributeHierarchyLevel(Phase phase, Attribute attribute) {
-		this.phase = phase;
-		this.attribute = attribute;
-	}
-
 	public Phase getPhase() {
 		return phase;
 	}
@@ -70,6 +62,14 @@ public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
 
 	public void setPosition(int position) {
 		this.position = position;
+	}
+
+	public boolean isUnit() {
+		return position == phase.getAttributeHierarchyLevels().size();
+	}
+	
+	public boolean hasOnlyUnits() {
+		return position == phase.getAttributeHierarchyLevels().size() - 1;
 	}
 
 	public Map<String, AttributeHierarchyNode> getNodes() {

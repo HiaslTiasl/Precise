@@ -15,8 +15,8 @@ import it.unibz.precise.model.Position;
 public class MDLTaskAST {
 	
 	private MDLTaskTypeAST type;
-	private float numberOfWorkersNeeded;
-	private float numberOfUnitsPerDay;
+	private int numberOfWorkersNeeded;
+	private int durationDays;
 	private boolean globalExclusiveness;
 	private MDLScopeAST exclusiveness;
 	private Map<String, OrderType> order;
@@ -31,20 +31,20 @@ public class MDLTaskAST {
 		this.type = type;
 	}
 
-	public float getNumberOfWorkersNeeded() {
+	public int getNumberOfWorkersNeeded() {
 		return numberOfWorkersNeeded;
 	}
 
-	public void setNumberOfWorkersNeeded(float numberOfWorkersNeeded) {
+	public void setNumberOfWorkersNeeded(int numberOfWorkersNeeded) {
 		this.numberOfWorkersNeeded = numberOfWorkersNeeded;
 	}
 
-	public float getNumberOfUnitsPerDay() {
-		return numberOfUnitsPerDay;
+	public int getDurationDays() {
+		return durationDays;
 	}
 
-	public void setNumberOfUnitsPerDay(float numberOfUnitsPerDay) {
-		this.numberOfUnitsPerDay = numberOfUnitsPerDay;
+	public void setDurationDays(int durationDays) {
+		this.durationDays = durationDays;
 	}
 
 	public boolean isGlobalExclusiveness() {

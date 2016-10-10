@@ -33,9 +33,9 @@ public class WarningsController {
 		Model model = modelRepository.findOne(id);
 		if (model == null || ressourceAssembler == null)
 			return ResponseEntity.notFound().build();
-		Function<BaseEntity, ?> entityMapper = ressourceAssembler::toFullResource;
 		List<ConsistencyWarning> warnings = cycleChecker.check(model);
-		List<?> projected = Util.mapToList(warnings, w -> new WarningResourceContent(w, entityMapper));
+		Function<BaseEntity, ?> entityMapper = ressourceAssembler::toFullResource;
+		List<WarningResourceContent> projected = Util.mapToList(warnings, w -> new WarningResourceContent(w, entityMapper));
 		
 		return ResponseEntity.ok(new Resources<>(projected));
 	}

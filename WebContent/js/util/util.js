@@ -77,12 +77,20 @@ define([
 		return proto.constructor;
 	}
 	
+	// https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger#Polyfill
+	function isInteger(value) {
+		return typeof value === "number"
+			&& isFinite(value) 
+			&& Math.floor(value) === value;
+	}
+	
 	return {
 		limitArray: limitArray,
 		mapInto: mapInto,
 		strInsert: strInsert,
 		strInsertBefore: strInsertBefore,
 		set: set,
-		defineClass: defineClass
+		defineClass: defineClass,
+		isInteger: isInteger
 	};
 });

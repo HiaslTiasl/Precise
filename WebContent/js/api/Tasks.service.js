@@ -47,7 +47,7 @@ define([
 			return $q.when({
 				type: null,
 				numberOfWorkersNeeded: 0,
-				numberOfUnitsPerDay: 0,
+				durationDays: 1,
 				globalExclusiveness: false,
 				exclusiveness: { type: 'NONE' },
 				orderSpecifications: [],

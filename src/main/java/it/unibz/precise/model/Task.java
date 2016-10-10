@@ -12,21 +12,24 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import it.unibz.util.Util;
 
 @Entity
 @JsonPropertyOrder(value={"type"})
+@JsonIgnoreProperties(value={"unitsPerDay", "durationHours"}, allowGetters=true)
 public class Task extends BaseEntity {
 
-	
-	@ManyToOne
 	@NotNull(message="{task.type.required}")
+	@ManyToOne
 	private TaskType type;
 	
 	@Embedded
@@ -44,9 +47,11 @@ public class Task extends BaseEntity {
 	@Embedded
 	private Scope exclusiveness = new Scope();
 	
-	private float numberOfWorkersNeeded;
+	private int numberOfWorkersNeeded;
 	
-	private float numberOfUnitsPerDay;
+	private int durationDays;
+	
+	private int units;
 	
 	private boolean globalExclusiveness;
 	
@@ -64,6 +69,10 @@ public class Task extends BaseEntity {
 	}
 
 	public void setType(TaskType type) {
+		TaskTypeToMany.TASKS.setOne(this, type);
+	}
+	
+	void internalSetType(TaskType type) {
 		this.type = type;
 		updateOrderSpecifications();
 	}
@@ -149,20 +158,32 @@ public class Task extends BaseEntity {
 		orderSpecifications.add(orderSpecification);
 	}
 	
-	public float getNumberOfWorkersNeeded() {
+	public int getNumberOfWorkersNeeded() {
 		return numberOfWorkersNeeded;
 	}
 
-	public void setNumberOfWorkersNeeded(float numberOfWorkersNeeded) {
+	public void setNumberOfWorkersNeeded(int numberOfWorkersNeeded) {
 		this.numberOfWorkersNeeded = numberOfWorkersNeeded;
 	}
 
-	public float getNumberOfUnitsPerDay() {
-		return numberOfUnitsPerDay;
+	public int getDurationDays() {
+		return durationDays;
 	}
 
-	public void setNumberOfUnitsPerDay(float numberOfUnitsPerDay) {
-		this.numberOfUnitsPerDay = numberOfUnitsPerDay;
+	public void setDurationDays(int durationDays) {
+		this.durationDays = durationDays;
+	}
+	
+	public int getDurationHours() {
+		return model.getHoursPerDay() * durationDays; 
+	}
+	
+	public float getUnitsPerDay() {
+		return (float)units / durationDays;
+	}
+
+	public int getUnits() {
+		return units;
 	}
 
 	public Scope getExclusiveness() {
@@ -219,6 +240,15 @@ public class Task extends BaseEntity {
 
 	void internalSetOut(List<Dependency> out) {
 		this.out = out;
+	}
+	
+	@PrePersist
+	@PreUpdate
+	public void countUnits() {
+		units = locations.stream()
+			.map(Location::getNode)
+			.mapToInt(loc -> loc != null ? loc.getUnits() : type.getPhase().getUnits())
+			.sum();
 	}
 
 	@PostLoad

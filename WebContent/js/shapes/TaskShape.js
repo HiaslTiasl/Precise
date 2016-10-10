@@ -159,7 +159,7 @@ define([
 				'rect.task-locations':       { height: this.locationsHeight },
 				'text.task-id':              { text: data.id },
 				'text.task-workers-needed':  { text: data.numberOfWorkersNeeded },
-				'text.task-units-per-day':   { text: data.numberOfUnitsPerDay },
+				'text.task-units-per-day':   { text: util.isInteger(data.unitsPerDay) ? data.unitsPerDay : data.unitsPerDay.toFixed(2) },
 				'text.task-type-craft':      { text: data.type.craftShort }
 			};
 			if (locationPatterns) {

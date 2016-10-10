@@ -34,6 +34,16 @@ public class MDLFileAST {
 		this.config = config;
 	}
 
+	@JsonProperty("hoursPerDay")
+	public int getHoursPerDay() {
+		return config.getHoursPerDay();
+	}
+
+	@JsonProperty("hoursPerDay")
+	public void setHoursPerDay(int hoursPerDay) {
+		config.setHoursPerDay(hoursPerDay);
+	}
+
 	@JsonProperty("attributes")
 	public List<MDLAttributeAST> getAttributes() {
 		return config.getAttributes();

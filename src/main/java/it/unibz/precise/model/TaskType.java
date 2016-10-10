@@ -1,8 +1,13 @@
 package it.unibz.precise.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -18,6 +23,9 @@ public class TaskType extends BaseEntity {
 	private String description;
 	private String craft;
 	private String craftShort;
+	
+	@OneToMany(mappedBy="type", cascade=CascadeType.REMOVE)
+	private List<Task> tasks = new ArrayList<>();
 	
 	@ManyToOne
 	private Phase phase;
@@ -57,6 +65,18 @@ public class TaskType extends BaseEntity {
 		this.craftShort = craftShort;
 	}
 
+	public List<Task> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(List<Task> tasks) {
+		TaskTypeToMany.TASKS.setMany(this, tasks);
+	}
+
+	void internalSetTasks(List<Task> tasks) {
+		this.tasks = tasks;
+	}
+	
 	public Phase getPhase() {
 		return phase;
 	}

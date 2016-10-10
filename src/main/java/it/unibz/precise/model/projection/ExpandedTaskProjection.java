@@ -16,7 +16,13 @@ public interface ExpandedTaskProjection {
 
 	float getNumberOfWorkersNeeded();
 	
-	float getNumberOfUnitsPerDay();
+	int getDurationDays();
+	
+	int getDurationHours();
+	
+	float getUnitsPerDay();
+	
+	int getUnits();
 	
 	boolean isGlobalExclusiveness();
 	

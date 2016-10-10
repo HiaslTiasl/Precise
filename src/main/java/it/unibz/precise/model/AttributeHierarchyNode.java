@@ -15,6 +15,9 @@ import javax.persistence.Transient;
 
 @Entity
 public class AttributeHierarchyNode extends BaseEntity {
+	
+	@Column(nullable=false)
+	private String value;
 
 	@ManyToOne
 	private AttributeHierarchyLevel level;
@@ -26,8 +29,7 @@ public class AttributeHierarchyNode extends BaseEntity {
 	@MapKey(name="value")
 	private Map<String, AttributeHierarchyNode> children = new HashMap<>();
 	
-	@Column(nullable=false)
-	private String value;
+	private int units = 1;
 	
 	/**
 	 * Indicates whether the children values range from 1 to children.size().
@@ -39,6 +41,14 @@ public class AttributeHierarchyNode extends BaseEntity {
 	}
 
 	public AttributeHierarchyNode(String value) {
+		this.value = value;
+	}
+	
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
 		this.value = value;
 	}
 
@@ -86,34 +96,42 @@ public class AttributeHierarchyNode extends BaseEntity {
 	
 	void internalSetChildren(Map<String, AttributeHierarchyNode> children) {
 		this.children = children;
+		units = children.values().stream()
+			.mapToInt(AttributeHierarchyNode::getUnits)
+			.sum();
 	}
 	
 	public void addChild(AttributeHierarchyNode node) {
 		NodeToMany.CHILDREN.addOneOfMany(this, node);
 	}
 	
-	void internalAddChild(AttributeHierarchyNode node) {
-		children.put(node.getValue(), node);
-	}
-	
 	public AttributeHierarchyNode findChildByValue(String value) {
 		return children.get(value);
 	}
 
-	public String getValue() {
-		return value;
+	public int getUnits() {
+		return units;
 	}
 
-	public void setValue(String value) {
-		this.value = value;
+	public void setUnits(int units) {
+		this.units = units;
 	}
-
+	
 	public boolean isValuesMatchPositions() {
 		return valuesMatchPositions;
 	}
 
 	public void setValuesMatchPositions(boolean valuesMatchPositions) {
 		this.valuesMatchPositions = valuesMatchPositions;
+	}
+	
+	public void countUnits() {
+		units = level.isUnit() ? 1
+			: level.hasOnlyUnits() ? children.size()
+			: children.values().stream()
+				.peek(AttributeHierarchyNode::countUnits)
+				.mapToInt(AttributeHierarchyNode::getUnits)
+				.sum();
 	}
 	
 	public Map<String, PatternEntry> getPattern() {
