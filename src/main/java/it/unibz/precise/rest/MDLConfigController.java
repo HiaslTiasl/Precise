@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,9 @@ import it.unibz.precise.rest.mdl.conversion.MDLContext;
 @ExposesResourceFor(MDLConfigAST.class)
 public class MDLConfigController {
 	
-	private static final String BASE_PATH = "/files/{name}.mdl/config";
+	public static final String BASE_PATH = MDLFileController.PATH_TO_FILE + "/config";
+	
+	public static final String FILE_SUFFIX = " (config)";
 	
 	@Autowired
 	private ModelRepository repository;
@@ -49,7 +52,9 @@ public class MDLConfigController {
 	)
 	public ResponseEntity<MDLConfigAST> get(@PathVariable String name) {
 		MDLConfigAST config = configByName(new MDLContext(), name);
-		return new ResponseEntity<>(config, HttpStatus.OK);
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, MDLFileController.getContentDisposition(name + FILE_SUFFIX))
+				.body(config);
 	}
 	
 	@RequestMapping(

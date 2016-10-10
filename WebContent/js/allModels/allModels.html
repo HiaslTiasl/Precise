@@ -33,7 +33,14 @@
 				<td>{{m.description}}</td>
 				<td class="toolbar">
 					<a class="btn btn-default" ui-sref="singleModel.diagram({ name: m.name })">Open</a>
-					<a class="btn btn-default" ng-href="{{$ctrl.getFileURI(m)}}" target="_blank" download="{{$ctrl.getFileName(m)}}">Export</a>
+					<div class="btn-group" uib-dropdown>
+						<button class="btn btn-default" uib-dropdown-toggle>Export</button>
+						<ul class="dropdown-menu" uib-dropdown-menu>
+							<li><a ng-href="{{$ctrl.getMDLFileURI(m)}}">As MDL file (JSON)</a></li>
+							<li><a ng-href="{{$ctrl.getCSVFileURI(m)}}">As CSV file</a></li>
+						</ul>
+					</div>
+					<!-- <a class="btn btn-default" ng-href="{{$ctrl.getFileURI(m)}}" target="_blank" download="{{$ctrl.getFileName(m)}}">Export</a> -->
 					<button class="btn btn-default" ng-click="$ctrl.duplicateModel(m)">Duplicate</button>
 					<button class="btn btn-default" ng-click="$ctrl.deleteModel(m)">Delete</button>
 				<td>

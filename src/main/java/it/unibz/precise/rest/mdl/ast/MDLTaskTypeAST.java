@@ -2,18 +2,12 @@ package it.unibz.precise.rest.mdl.ast;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator;
-
-import it.unibz.precise.model.TaskType;
 
 @JsonIdentityInfo(generator=PropertyGenerator.class, property="name", scope=MDLTaskTypeAST.class)
 @JsonIdentityReference(alwaysAsId=false)
 public class MDLTaskTypeAST {
 	
-	@JsonIgnore
-	private TaskType taskType;
-
 	private String name;
 	private String description;
 	private MDLPhaseAST phase;

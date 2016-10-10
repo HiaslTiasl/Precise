@@ -14,7 +14,7 @@ import it.unibz.precise.model.Position;
 @JsonIdentityReference(alwaysAsId=false)
 public class MDLTaskAST {
 	
-	private MDLTaskTypeAST type;
+	private MDLTaskTypeAST definition;
 	private int numberOfWorkersNeeded;
 	private int durationDays;
 	private boolean globalExclusiveness;
@@ -23,12 +23,12 @@ public class MDLTaskAST {
 	private Position position;
 	private List<Map<String, String>> locations;
 	
-	public MDLTaskTypeAST getType() {
-		return type;
+	public MDLTaskTypeAST getDefinition() {
+		return definition;
 	}
 
-	public void setType(MDLTaskTypeAST type) {
-		this.type = type;
+	public void setDefinition(MDLTaskTypeAST definition) {
+		this.definition = definition;
 	}
 
 	public int getNumberOfWorkersNeeded() {

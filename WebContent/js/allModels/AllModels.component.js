@@ -12,8 +12,8 @@ define([
 		var $ctrl = this;
 		
 		$ctrl.refreshModels = refreshModels;
-		$ctrl.getFileName = MDLFiles.fileNameOf;
-		$ctrl.getFileURI = MDLFiles.urlToModel;
+		$ctrl.getMDLFileURI = MDLFiles.urlToModel;
+		$ctrl.getCSVFileURI = getCSVFileURI;
 		$ctrl.createModel = createModel;
 		$ctrl.importFile = importFile;
 		$ctrl.renameModel = renameModel;
@@ -39,6 +39,10 @@ define([
 			$uibModal.open({
 				component: 'preciseCreateModel'
 			}).result.then(refreshModels);
+		}
+		
+		function getCSVFileURI(model) {
+			return "/files/" + model.name + ".csv";
 		}
 		
 		function importFile(file) {

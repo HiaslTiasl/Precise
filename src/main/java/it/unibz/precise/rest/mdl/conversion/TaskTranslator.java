@@ -25,7 +25,7 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 	@Override
 	public void updateMDL(Task task, MDLTaskAST mdlTask) {
 		TaskType taskType = task.getType();
-		mdlTask.setType(context().taskTypes().toMDL(taskType));
+		mdlTask.setDefinition(context().taskTypes().toMDL(taskType));
 		mdlTask.setNumberOfWorkersNeeded(task.getNumberOfWorkersNeeded());
 		mdlTask.setDurationDays(task.getDurationDays());
 		mdlTask.setGlobalExclusiveness(task.isGlobalExclusiveness());
@@ -41,7 +41,7 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 	@Override
 	public void updateEntity(MDLTaskAST mdlTask, Task task) {
 		
-		TaskType taskType = context().taskTypes().toEntity(mdlTask.getType());
+		TaskType taskType = context().taskTypes().toEntity(mdlTask.getDefinition());
 		Phase phase = taskType.getPhase();
 		Map<String, OrderType> order = mdlTask.getOrder();
 		

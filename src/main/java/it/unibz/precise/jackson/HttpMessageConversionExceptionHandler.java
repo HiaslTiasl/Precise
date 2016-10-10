@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.rest.webmvc.RepositoryRestExceptionHandler;
 import org.springframework.data.rest.webmvc.support.ExceptionMessage;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -18,19 +17,18 @@ import com.fasterxml.jackson.databind.deser.UnresolvedId;
 
 import it.unibz.precise.model.InvalidLocationException;
 import it.unibz.precise.rest.MDLFileController;
-import it.unibz.util.ResponseEntityHelper;
 
 @ControllerAdvice(basePackageClasses = {RepositoryRestExceptionHandler.class, MDLFileController.class})
 public class HttpMessageConversionExceptionHandler {
 
     @ExceptionHandler
     ResponseEntity<ExceptionMessage> handle(HttpMessageConversionException e) {
-    	return ResponseEntityHelper.badRequest(new HttpHeaders(), mapException(e.getMostSpecificCause()));
+    	return ResponseEntity.badRequest().body(new ExceptionMessage(mapException(e.getMostSpecificCause())));
     }
     
     @ExceptionHandler
     ResponseEntity<ExceptionMessage> handle(InvalidLocationException e) {
-    	return ResponseEntityHelper.badRequest(new HttpHeaders(), e);
+    	return ResponseEntity.badRequest().body(new ExceptionMessage(e));
     }
     
     private static Throwable mapException(Throwable e) {

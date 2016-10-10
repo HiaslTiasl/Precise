@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"model", "attributes", "phases", "taskTypes", "tasks", "dependencies"})
+@JsonPropertyOrder({"model", "attributes", "phases", "taskDefinitions", "tasks", "dependencies"})
 @Validated
 public class MDLFileAST {
 	

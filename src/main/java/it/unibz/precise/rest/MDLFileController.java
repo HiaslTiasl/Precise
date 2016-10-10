@@ -23,7 +23,6 @@ import it.unibz.precise.model.Model;
 import it.unibz.precise.rep.ModelRepository;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
 import it.unibz.precise.rest.mdl.conversion.MDLContext;
-import it.unibz.util.ResponseEntityHelper;
 
 @RestController
 @ExposesResourceFor(MDLFileAST.class)
@@ -41,12 +40,17 @@ public class MDLFileController {
 	
 	public static final String RESOURCE_NAME = "/files";
 	
-	public static final String PATH_TO_FILE = "/{name}.mdl";
+	public static final String FILE_EXT = ".mdl";
+	public static final String PATH_TO_FILE = "/{name}" + FILE_EXT;
 	
 
 	@RequestMapping("/**")
 	public ResponseEntity<?> fallback() {
-		return ResponseEntityHelper.notFound(new HttpHeaders());
+		return ResponseEntity.notFound().build();
+	}
+	
+	static String getContentDisposition(String name) {
+		return FileDownload.getContentDisposition(name) + MDLFileController.FILE_EXT;
 	}
 	
 	@RequestMapping(
@@ -57,8 +61,10 @@ public class MDLFileController {
 	public ResponseEntity<?> findOne(@PathVariable("name") String name) {
 		MDLFileAST mdl = new MDLContext().files().toMDL(repository.findByName(name));
 		return mdl == null
-			? ResponseEntityHelper.notFound(new HttpHeaders())
-			: ResponseEntityHelper.response(HttpStatus.OK, new HttpHeaders(), mdl);
+			? ResponseEntity.notFound().build()
+			: ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, getContentDisposition(name))
+				.body(mdl);
 	}
 	
 	@Transactional
@@ -91,7 +97,7 @@ public class MDLFileController {
 			throw new RepositoryConstraintViolationException(errors);
 		else
 			repository.save(newModel);
-		return ResponseEntityHelper.response(HttpStatus.CREATED, new HttpHeaders());
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 	
 }
