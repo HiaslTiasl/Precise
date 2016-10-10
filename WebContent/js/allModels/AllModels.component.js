@@ -42,7 +42,7 @@ define([
 		}
 		
 		function getCSVFileURI(model) {
-			return "/files/" + model.name + ".csv";
+			return "files/" + model.name + ".csv";
 		}
 		
 		function importFile(file) {
