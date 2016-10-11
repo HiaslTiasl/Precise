@@ -22,6 +22,13 @@ text {
 	fill: transparent;
 }
 
+/******************************************
+ * Show correspondence between task shapes
+ * and property fields
+ ******************************************/
+
+/* using numbers */
+
 .task-id-index {
 	fill: #4bac00;
 }
@@ -38,6 +45,24 @@ text {
 	fill: #AF0032;
 }
 
+/* using colors */
+/* 
+.highlighted text.task-id {
+	fill: #4bac00;
+}
+
+.highlighted text.task-workers-needed {
+	fill: #05417e;
+}
+
+.highlighted text.task-units-per-day {
+	fill: #C27400;
+}
+
+.highlighted text.task-type-craft {
+	fill: #AF0032;
+}
+*/
 /******************************************
  * Override JointJS styles
  ******************************************/

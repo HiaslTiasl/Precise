@@ -187,6 +187,10 @@ define([
 			'label-move': 'label-change'
 		},
 		
+		options: _.defaults({
+			sampleInterval: 20	// Fixes issues regarding label positioning for short links
+		}, joint.dia.LinkView.prototype.options),
+		
 		initialize: function () {
 			this.batchOptions = _.transform(this.batchNameByAction, function (res, batchName) {
 				res[batchName] = {

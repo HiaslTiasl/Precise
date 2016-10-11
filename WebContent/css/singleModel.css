@@ -70,7 +70,7 @@ precise-diagram-paper {
 .field-units-per-day::before,
 .field-craft > label::before {
 	position: relative;
-	margin-right: -1.2em;
+	margin-right: -1.3em;
 	left: -1.5em;
 	font-weight: normal;
 }
@@ -94,6 +94,30 @@ precise-diagram-paper {
 	content: "(4)";
 	color: #AF0032;
 }
+
+/* using colors */
+/*
+.field-id {
+	color: #4bac00;
+}
+
+.field-workers,
+.field-workers .form-control{
+	color: #05417e;
+	border-color: #05417e;
+}
+
+.field-units-per-day {
+	color: #C27400;
+}
+
+.field-craft {
+	color: #AF0032;
+}
+*/
+/******************************************
+ * Locations
+ ******************************************/
 
 #location-table {
 	table-layout: fixed;
