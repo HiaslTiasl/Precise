@@ -9,6 +9,7 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -28,6 +29,31 @@ import it.unibz.precise.model.Scope.Type;
 	@UniqueConstraint(columnNames={"source_id", "target_id"})
 })
 public class Dependency extends BaseEntity {
+	
+	@Embeddable
+	public static class LabelPosition {
+		
+		@Column(nullable=true)
+		private Float distance;
+		@Column(nullable=true)
+		private Float offset;
+		
+		public Float getDistance() {
+			return distance;
+		}
+		
+		public void setDistance(Float distance) {
+			this.distance = distance;
+		}
+		
+		public Float getOffset() {
+			return offset;
+		}
+		
+		public void setOffset(Float offset) {
+			this.offset = offset;
+		}
+	}
 	
 	private boolean alternate;
 	private boolean chain;
@@ -51,6 +77,9 @@ public class Dependency extends BaseEntity {
 		@AttributeOverride(name="y", column=@Column(name="target_y"))
 	})
 	private Position targetVertex;
+	
+	@Embedded
+	private LabelPosition labelPosition;
 	
 	@ElementCollection
 	private List<Position> vertices;
@@ -113,6 +142,14 @@ public class Dependency extends BaseEntity {
 		this.chain = chain;
 	}
 	
+	public LabelPosition getLabelPosition() {
+		return labelPosition;
+	}
+
+	public void setLabelPosition(LabelPosition labelPosition) {
+		this.labelPosition = labelPosition;
+	}
+
 	public List<Position> getVertices() {
 		return vertices;
 	}

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.rest.core.config.Projection;
 
 import it.unibz.precise.model.Dependency;
+import it.unibz.precise.model.Dependency.LabelPosition;
 import it.unibz.precise.model.Position;
 
 @Projection(name="dependencySummary", types=Dependency.class)
@@ -33,4 +34,7 @@ public interface DependencySummaryProjection {
 	ScopeSummaryProjection getScope();
 	
 	List<Position> getVertices();
+	
+	LabelPosition getLabelPosition();
+
 }

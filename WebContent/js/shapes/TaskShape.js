@@ -109,23 +109,10 @@ define([
 			this.on('change:data', this.update, this);
 			this.on('change:hideLocations', this.updateHideLocations, this);
 			
-//			this.initIndexIndicators();
 			this.update();
 			
 			joint.shapes.basic.Generic.prototype.initialize.apply(this, arguments);
 		},
-		
-//		initIndexIndicators: function () {
-//			var x, y = -HEADER_ROW_HEIGHT;
-//			this.attr(_.transform(indexClasses, function (acc, c, i) {
-//				x = (i + 0.5) * HEADER_COL_WIDTH;
-//				acc['.' + c] = {
-//					text: '(' + (1 + i) + ')',
-//					'text-anchor': 'middle',
-//					transform: 'translate(' + x + ',' + y + ')'
-//				};
-//			}, {}));
-//		},
 		
 		updateHideLocations: function (model, hideLocations) {
 			var nameHeight = hideLocations ? model.locationsHeight + NAME_HEIGHT : NAME_HEIGHT,

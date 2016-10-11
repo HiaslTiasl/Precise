@@ -89,6 +89,10 @@ define([
 					changedData = this.changedEndData(options, cell, data);
 					changedNS = NS_DEPENDENCY;
 					break;
+				case 'label-change': 
+					changedData = this.changedLabel(options, cell, data);
+					changedNS = NS_DEPENDENCY;
+					break;
 				case 'position-change':
 					changedData = this.changedPositionData(options, cell, data);
 					changedNS = NS_TASK;
@@ -133,6 +137,11 @@ define([
 				changedData[endInfo.vertex] = endVal
 			}
 			return changedData;
+		},
+		
+		changedLabel: function (options, cell, data) {
+			var labelPosition = cell.label(0).position;
+			return labelPosition === data.labelPosition ? null : { labelPosition: labelPosition };
 		},
 		
 		changedPositionData: function (options, cell, data) {

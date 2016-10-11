@@ -101,11 +101,13 @@ define([
 				vertices: data.vertices
 			});
 			this.label(0, {
-				position: 0.5,
+				position: _.assign({
+					distance: 0.5,
+					offset: -20
+				}, data.labelPosition),
 				attrs: {
 					text: {
 						text: _.chain(data.scope).get('attributes').map(getScopeLabel).join(', ').value(),
-						transform: 'translate(-10, -10)'
 					}
 				}
 			});
@@ -181,7 +183,8 @@ define([
 		
 		batchNameByAction: {
 			'vertex-move': 'vertices-change',
-			'arrowhead-move': 'end-change'
+			'arrowhead-move': 'end-change',
+			'label-move': 'label-change'
 		},
 		
 		initialize: function () {
@@ -208,13 +211,17 @@ define([
         	this.model.trigger('batch:stop', opt);
 		},
 		
+		addOtherBatchOptionsTo: function (opt) {			
+			if (opt.batchName === 'end-change')
+				opt.other.end = this._arrowhead;
+		},
+		
 		pointerdown: function () {
 			joint.dia.LinkView.prototype.pointerdown.apply(this, arguments);
 			var batchName = this.batchNameByAction[this._action];
 			if (!this.ongoingBatch && batchName) {
 				var opt = this.batchOptions[batchName];
-				if (batchName === 'end-change')
-					opt.other.end = this._arrowhead;
+				this.addOtherBatchOptionsTo(opt);
 				this.ongoingBatch = opt;
 				this.model.trigger('batch:start', opt);
 			}

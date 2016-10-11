@@ -47,7 +47,16 @@ text {
 }
 
 .label rect {
-	display: none;
+	fill: white;
+	opacity: 0.4;
+}
+
+/*
+ * Make sure pointers only hit the <rect> element,
+ * so JointJS recognizes the target as label
+ */
+.label text {
+	pointer-events: none;	
 }
 
 .highlighted {

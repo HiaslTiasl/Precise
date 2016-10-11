@@ -18,6 +18,7 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 		mdlDependency.setSourceVertex(dependency.getSourceVertex());
 		mdlDependency.setTargetVertex(dependency.getTargetVertex());
 		mdlDependency.setVertices(dependency.getVertices());
+		mdlDependency.setLabelPosition(dependency.getLabelPosition());
 		mdlDependency.setGlobalScope(dependency.isGlobalScope());
 		mdlDependency.setScope(context().scopes().toMDL(dependency.getScope()));
 	}
@@ -31,6 +32,7 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 		dependency.setSourceVertex(mdlDependency.getSourceVertex());
 		dependency.setTargetVertex(mdlDependency.getTargetVertex());
 		dependency.setVertices(mdlDependency.getVertices());
+		dependency.setLabelPosition(mdlDependency.getLabelPosition());
 		dependency.setGlobalScope(mdlDependency.isGlobalScope());
 		dependency.setScope(context().scopes().toEntity(mdlDependency.getScope()));
 	}

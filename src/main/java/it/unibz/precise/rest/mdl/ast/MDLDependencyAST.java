@@ -2,6 +2,7 @@ package it.unibz.precise.rest.mdl.ast;
 
 import java.util.List;
 
+import it.unibz.precise.model.Dependency.LabelPosition;
 import it.unibz.precise.model.Position;
 
 public class MDLDependencyAST {
@@ -15,6 +16,7 @@ public class MDLDependencyAST {
 	private boolean globalScope;
 	private MDLScopeAST scope;
 	private List<Position> vertices;
+	private LabelPosition labelPosition;
 
 	public boolean isAlternate() {
 		return alternate;
@@ -86,6 +88,14 @@ public class MDLDependencyAST {
 
 	public void setScope(MDLScopeAST scope) {
 		this.scope = scope;
+	}
+
+	public LabelPosition getLabelPosition() {
+		return labelPosition;
+	}
+
+	public void setLabelPosition(LabelPosition labelPosition) {
+		this.labelPosition = labelPosition;
 	}
 	
 }
