@@ -13,6 +13,8 @@ public interface ModelSummaryProjection {
 	String getName();
 	
 	String getDescription();
+	
+	int getHoursPerDay();
 
 	Model.State getState();
 	

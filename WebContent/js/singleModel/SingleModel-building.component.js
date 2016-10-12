@@ -13,6 +13,7 @@ define([
 		
 		var $ctrl = this;
 		
+		$ctrl.hoursPerDayChanged = hoursPerDayChanged;
 		$ctrl.phaseChanged = phaseChanged;
 		$ctrl.sendPhase = sendPhase;
 		
@@ -42,6 +43,10 @@ define([
 		function phasesChanged() {
 			if ($ctrl.phases && !$ctrl.phase)
 				$ctrl.phase = $ctrl.phases[0];
+		}
+		
+		function hoursPerDayChanged() {
+			$ctrl.model.send().then($ctrl.reload);
 		}
 		
 		function phaseChanged() {
