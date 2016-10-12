@@ -7,6 +7,7 @@ import org.springframework.data.rest.core.RepositoryConstraintViolationException
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
@@ -26,9 +27,15 @@ import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
 @RestController
 @ExposesResourceFor(MDLConfigAST.class)
+@RequestMapping(
+	path=MDLConfigController.RESOURCE_NAME,
+	produces={MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE}
+)
 public class MDLConfigController {
 	
-	public static final String BASE_PATH = MDLFileController.PATH_TO_FILE + "/config";
+	public static final String RESOURCE_NAME = "/files";
+	
+	public static final String PATH_TO_FILE = MDLFileController.PATH_TO_FILE + "/config";
 	
 	public static final String FILE_SUFFIX = " (config)";
 	
@@ -47,7 +54,7 @@ public class MDLConfigController {
 	}
 	
 	@RequestMapping(
-		path=BASE_PATH,
+		path=PATH_TO_FILE,
 		method=RequestMethod.GET
 	)
 	public ResponseEntity<MDLConfigAST> get(@PathVariable String name) {
@@ -58,7 +65,7 @@ public class MDLConfigController {
 	}
 	
 	@RequestMapping(
-		path=BASE_PATH,
+		path=PATH_TO_FILE,
 		method=RequestMethod.PUT
 	)
 	@Transactional
@@ -94,7 +101,7 @@ public class MDLConfigController {
 	}
 	
 	@RequestMapping(
-		path=BASE_PATH,
+		path=PATH_TO_FILE,
 		method=RequestMethod.DELETE
 	)
 	@Transactional

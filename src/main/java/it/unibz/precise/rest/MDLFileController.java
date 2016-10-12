@@ -50,7 +50,7 @@ public class MDLFileController {
 	}
 	
 	static String getContentDisposition(String name) {
-		return FileDownload.getContentDisposition(name) + MDLFileController.FILE_EXT;
+		return FileDownload.getContentDisposition(name + MDLFileController.FILE_EXT);
 	}
 	
 	@RequestMapping(
