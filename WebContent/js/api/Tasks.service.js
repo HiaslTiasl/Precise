@@ -7,31 +7,19 @@ define([
 ) {
 	'use strict';
 	
-	TasksService.$inject = ['$q', 'PreciseApi', 'Resources', 'Scopes'];
+	TasksService.$inject = ['$q', 'PreciseApi', 'Resources', 'Scopes', 'OrderSpecifications'];
 	
-	function TasksService($q, PreciseApi, Resources, Scopes) {
+	function TasksService($q, PreciseApi, Resources, Scopes, OrderSpecifications) {
 		
 		var Tasks = this;
 		
-		Tasks.isAssignableTo = isAssignableTo;
 		Tasks.resource = resource;
 		Tasks.newResource = newResource;
 		Tasks.existingResource = existingResource;
 		Tasks.Resource = Tasks;
-		
-		Tasks.OrderTypes = {
-			NONE      : { name: 'NONE'      , displayName: 'None'            , requiresOrdered: false },
-			PARALLEL  : { name: 'PARALLEL'  , displayName: '|Parallel|'      , requiresOrdered: false },
-			ASCENDING : { name: 'ASCENDING' , displayName: 'Ascending\u2191' , requiresOrdered: true },
-			DESCENDING: { name: 'DESCENDING', displayName: 'Descending\u2193', requiresOrdered: true }
-		};
 
 		var getAttrName = _.property('name'),
 			dontSendDirectly = ['exclusiveness', 'orderSpecifications', 'type', 'model', '_links'];
-		
-		function isAssignableTo(orderType, attribute) {
-			return !orderType.requiresOrdered || attribute.ordered;
-		}
 		
 		function getData(task, exists) {
 			return exists ? cloneExistingData(task) : initializeData(task);
@@ -144,12 +132,7 @@ define([
 			getRequestData: function () {
 				var processed = _.omit(this.data, dontSendDirectly);
 				processed.exclusiveness = Scopes.toRequestRepresentation(this.data.exclusiveness);
-				processed.orderSpecifications = this.data.orderSpecifications.map(function (order, i) {
-					return {
-						attribute: PreciseApi.hrefTo(order.attribute),
-						orderType: order.orderType
-					};
-				});
+				processed.orderSpecifications = OrderSpecifications.toRequestRepresentation(this.data.orderSpecifications);
 				if (!this.exists) {
 					processed.type = PreciseApi.hrefTo(this.data.type);
 					processed.model = PreciseApi.hrefTo(this.model.data);

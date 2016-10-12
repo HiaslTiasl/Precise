@@ -4,6 +4,7 @@ define([
 	'./Files.service',
 	'./MDLFiles.service',
 	'./Scopes.service',
+	'./OrderSpecifications.service',
 	'./Pages.service',
 	'./Resources.service',
 	'./Models.service',
@@ -20,6 +21,7 @@ define([
 	FilesService,
 	MDLFilesService,
 	ScopesService,
+	OrderSpecificationsService,
 	PagesService,
 	ResourcesService,
 	ModelsService,
@@ -37,6 +39,7 @@ define([
 		.service('Files', FilesService)
 		.service('MDLFiles', MDLFilesService)
 		.service('Scopes', ScopesService)
+		.service('OrderSpecifications', OrderSpecificationsService)
 		.service('Pages', PagesService)
 		.service('Resources', ResourcesService)
 		.service('Models', ModelsService)

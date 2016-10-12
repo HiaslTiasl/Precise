@@ -3,7 +3,6 @@ package it.unibz.precise.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.ElementCollection;
@@ -74,7 +73,6 @@ public class Task extends BaseEntity {
 	
 	void internalSetType(TaskType type) {
 		this.type = type;
-		updateOrderSpecifications();
 	}
 	
 	@Transient
@@ -127,22 +125,6 @@ public class Task extends BaseEntity {
 					.collect(Collectors.toList());
 			// Only add pattern if it is a valid location
 			this.locationPatterns = patterns;
-		}
-	}
-	
-	public void updateOrderSpecifications() {
-		if (type == null)
-			orderSpecifications = new ArrayList<>();
-		else {
-			List<AttributeHierarchyLevel> levels = type.getPhase().getAttributeHierarchyLevels();
-			Map<Attribute, OrderSpecification> orderSpecMap = Util.mapToMap(orderSpecifications,
-				OrderSpecification::getAttribute,
-				Function.identity()
-			);
-			orderSpecifications = levels.stream()
-				.map(AttributeHierarchyLevel::getAttribute)
-				.map(a -> orderSpecMap.computeIfAbsent(a, OrderSpecification::new))
-				.collect(Collectors.toList());
 		}
 	}
 	
@@ -254,7 +236,6 @@ public class Task extends BaseEntity {
 	@PostLoad
 	public void updateDependentFields() {
 		updateLocationPatterns();
-		updateOrderSpecifications();
 		updateExclusiveness();
 	}
 	

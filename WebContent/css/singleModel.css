@@ -126,9 +126,13 @@ precise-diagram-paper {
 #location-table th,
 #location-table td {
 	text-align: center;
+}
+
+#location-table th {
 	text-overflow: ellipsis;
 	overflow: hidden;
 }
+
 
 #warnings {
 	position: fixed;

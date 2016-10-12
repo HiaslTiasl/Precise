@@ -62,7 +62,11 @@
 			<div id="exclusiveness-type" class="col-sm-8">
 				<div class="radio" ng-repeat="st in $ctrl.scopeTypes">
 					<label>
-						<input type="radio" ng-model="$ctrl.exclusiveness.type" ng-value="st"/>
+						<input
+							type="radio"
+							ng-model="$ctrl.exclusiveness.type"
+							ng-value="st"
+							ng-change="$ctrl.updateExclusivenessAttributes()"/>
 						{{st.displayName}}
 					</label>
 				</div>
@@ -86,38 +90,72 @@
 	</fieldset>
 	<fieldset>
 		<legend>Order</legend>
-		<div class="form-group">
-			<label for="order" class="col-sm-4 control-label">Order</label>
-			<div class="col-sm-8">
-				<p id="order" class="form-control-static">
-					<a href ng-click="$ctrl.showOrderForm = !$ctrl.showOrderForm">
-						{{ $ctrl.resource.showOrder() || '(no order)' }}
-					</a>
-				</p>
-			</div>
+		<div class="toolbar">
+			<button
+				class="btn btn-primary btn-xs"
+				ng-click="$ctrl.addOrderSpec()"
+				ng-disabled="!$ctrl.canAddOrderSpec()">
+				<span class="glyphicon glyphicon-plus"></span>
+			</button>
 		</div>
-		<div class="form-group form-group-sm" ng-repeat="order in $ctrl.resource.data.orderSpecifications" ng-show="$ctrl.showOrderForm">
-			<label for="attr-{{::order.attribute.name}}" class="col-sm-4 control-label">
-				{{::order.attribute.name}}
-			</label>
-			<div class="col-sm-8">
-				<select id="attr-{{::order.attribute.name}}"
-					class="form-control"
-					ng-model="order.orderType"
-					ng-options="t.name as t.displayName disable when $ctrl.isDisabledOrderType(t, order.attribute) for t in $ctrl.orderTypes">
-				</select>
-			</div>
-		</div>
+		<table id="location-table" class="table table-striped" st-table="orderSpecs" st-safe-src="$ctrl.order.specs">
+			<thead>
+				<tr>
+					<th>Attribute</th>
+					<th>Order Type</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="o in orderSpecs track by $index">
+					<td>
+						<a href
+							editable-select="o.attribute"
+							buttons="no"
+							e-ng-options="a as a.name for a in $ctrl.resource.data.type.phase.attributes | filter:$ctrl.attrFilterForOrderSpec(o):true track by a.name"
+							onbeforesave="$ctrl.selectedOrderSpecAttribute($data, o.attribute)">
+							{{ o.attribute.name || '----'}}
+						</a>
+					</td>
+					<td>
+						<a href
+							editable-select="o.orderType"
+							buttons="no"
+							e-ng-options="t as t.displayName disable when $ctrl.isDisabledOrderType(t, o.attribute) for t in $ctrl.orderTypes">
+							{{ o.orderType.displayName }}
+						</select>
+					</td>
+					<td>
+						<button
+							class="btn btn-default btn-xs"
+							ng-click="$ctrl.moveUpOrderSpec($index)"
+							ng-disabled="!$ctrl.canMoveUpOrderSpec($index)">
+							<span class="glyphicon glyphicon-chevron-up"></span>
+						</button>
+						<button
+							class="btn btn-default btn-xs"
+							ng-click="$ctrl.moveDownOrderSpec($index)"
+							ng-disabled="!$ctrl.canMoveDownOrderSpec($index)">
+							<span class="glyphicon glyphicon-chevron-down"></span>
+						</button>
+						<button
+							class="btn btn-danger btn-xs"
+							ng-click="$ctrl.removeOrderSpec($index)">
+							<span class="glyphicon glyphicon-trash"></span>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 	</fieldset>
 	<fieldset>
 		<legend>Locations</legend>
-		<!-- <label for="location-table" class="control-label">Locations</label> -->
 		<div class="toolbar">
 			<a href ng-click="$ctrl.addPattern()">
 				<span class="glyphicon glyphicon-plus"></span>
 			</a>
 		</div>
-		<table id="location-table" class="table table-striped" st-table="coll" st-safe-src="$ctrl.resource.data.locationPatterns">
+		<table id="location-table" class="table table-striped" st-table="locs" st-safe-src="$ctrl.resource.data.locationPatterns">
 			<thead>
 				<tr>
 					<th ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">{{::attr.name}}</th>
@@ -125,7 +163,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr ng-repeat="pattern in coll track by $index" ng-init="patternNum = $index">
+				<tr ng-repeat="pattern in locs track by $index" ng-init="patternNum = $index">
 					<td ng-repeat="attr in $ctrl.resource.data.type.phase.attributes track by $index">
 						<a href
 							editable-select="pattern[attr.name].value"

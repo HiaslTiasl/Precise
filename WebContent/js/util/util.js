@@ -84,6 +84,12 @@ define([
 			&& Math.floor(value) === value;
 	}
 	
+	function swap(obj, key1, key2) {
+		var temp = obj[key1];
+		obj[key1] = obj[key2];
+		obj[key2] = temp;
+	}
+	
 	return {
 		limitArray: limitArray,
 		mapInto: mapInto,
@@ -91,6 +97,7 @@ define([
 		strInsertBefore: strInsertBefore,
 		set: set,
 		defineClass: defineClass,
-		isInteger: isInteger
+		isInteger: isInteger,
+		swap: swap
 	};
 });
