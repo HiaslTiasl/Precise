@@ -27,42 +27,32 @@ text {
  * and property fields
  ******************************************/
 
-/* using numbers */
-
-.task-id-index {
-	fill: #4bac00;
+text.task-id {
+	fill: white;
 }
 
-.task-workers-index {
-	fill: #05417e;
+rect.task-id {
+	fill: black;
 }
 
-.task-units-index {
-	fill: #C27400;
+rect.task-workers-needed {
+	fill: #F6BEC8;
+	fill: #D4C8E1;
+	fill: #E6F4FF;
 }
 
-.task-craft-index {
-	fill: #AF0032;
+rect.task-units-per-day {
+	fill: #FFE9C4;
+	fill: #F8D9E0;
+	fill: #FFFBE5;
 }
 
-/* using colors */
-/* 
-.highlighted text.task-id {
-	fill: #4bac00;
+rect.task-type-craft {
+	fill: #FFFCC4;
+	fill: #FFE8C4;
+	fill: #FFE5E6;
 }
 
-.highlighted text.task-workers-needed {
-	fill: #05417e;
-}
-
-.highlighted text.task-units-per-day {
-	fill: #C27400;
-}
-
-.highlighted text.task-type-craft {
-	fill: #AF0032;
-}
-*/
 /******************************************
  * Override JointJS styles
  ******************************************/

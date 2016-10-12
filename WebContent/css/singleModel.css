@@ -62,59 +62,37 @@ precise-diagram-paper {
  * Show correspondence between task shapes
  * and property fields
  ******************************************/
- 
-/* using numbers */
 
-.field-id > label::before,
-.field-workers > label::before,
-.field-units-per-day::before,
-.field-craft > label::before {
-	position: relative;
-	margin-right: -1.3em;
-	left: -1.5em;
-	font-weight: normal;
+#id,
+#units-per-day,
+#craft {
+	border: none;
+	box-shadow: none;
 }
 
-.field-id > label::before {
-	content: "(1)";
-	color: #4bac00;
+#id {
+	background-color: black;
+	color: white;
 }
 
-.field-workers > label::before {
-	content: "(2)";
-	color: #05417e;
+#workers {
+	background-color: #F6BEC8;
+	background-color: #D4C8E1;
+	background-color: #E6F4FF;
 }
 
-.field-units-per-day::before {
-	content: "(3)";
-	color: #C27400;
+#units-per-day {
+	background-color: #FFE9C4;
+	background-color: #F8D9E0;
+	background-color: #FFFBE5;
 }
 
-.field-craft > label::before {
-	content: "(4)";
-	color: #AF0032;
+#craft {
+	background-color: #FFFCC4;
+	background-color: #FFE8C4;
+	background-color: #FFE5E6;
 }
 
-/* using colors */
-/*
-.field-id {
-	color: #4bac00;
-}
-
-.field-workers,
-.field-workers .form-control{
-	color: #05417e;
-	border-color: #05417e;
-}
-
-.field-units-per-day {
-	color: #C27400;
-}
-
-.field-craft {
-	color: #AF0032;
-}
-*/
 /******************************************
  * Locations
  ******************************************/

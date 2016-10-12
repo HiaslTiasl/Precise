@@ -142,7 +142,10 @@ define([
 					|| (exclusiveness.type === 'ATTRIBUTES' && _.size(exclusiveness.attributes)),
 				locationPatterns = data.locationPatterns,
 				width = WIDTH,
-				height = LOC_POS_Y + this.locationsHeight;
+				height = LOC_POS_Y + this.locationsHeight,
+				unitsPerDay = util.isInteger(data.unitsPerDay) 
+					? data.unitsPerDay.toString()
+					: data.unitsPerDay.toFixed(1);
 
 			if (exclusive) {
 				width += 10;
@@ -161,9 +164,16 @@ define([
 				},
 				'rect.task-type-name':       { fill: colors.toCSS(data.type.phase.color) },
 				'rect.task-locations':       { height: this.locationsHeight },
-				'text.task-id':              { text: data.id },
-				'text.task-workers-needed':  { text: data.numberOfWorkersNeeded },
-				'text.task-units-per-day':   { text: util.isInteger(data.unitsPerDay) ? data.unitsPerDay : data.unitsPerDay.toFixed(2) },
+				'text.task-id':              { text: '#' + data.id },
+				'text.task-workers-needed':  { text: data.numberOfWorkersNeeded + 'w' },
+				'text.task-units-per-day':   {
+					text: unitsPerDay + 'u\u2044d',
+					annotations: [ {
+						start: unitsPerDay.length,
+						end: unitsPerDay.length + 3,
+						attrs: { 'font-size': '0.8em', 'dy': '-0.35em 0.35em 0.35em' }
+					} ]
+				},
 				'text.task-type-craft':      { text: data.type.craftShort }
 			};
 			if (locationPatterns) {
@@ -353,7 +363,7 @@ define([
 		},
 		
 		highlight: function () {
-			this.attachTools();
+			//this.attachTools();
 			this.model.attr({
 				'rect.outline': {
 					filter: {
@@ -374,7 +384,7 @@ define([
 		
 		unhighlight: function () {
 			this.model.attr('rect.outline/filter', 'none');
-			this.detachTools();
+			//this.detachTools();
 			joint.dia.ElementView.prototype.unhighlight.apply(this, arguments);
 		}
 		
