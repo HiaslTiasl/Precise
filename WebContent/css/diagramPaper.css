@@ -11,6 +11,18 @@ precise-diagram-paper .toolbar {
 	width: 100%;
 }
 
+precise-diagram-paper .toolset-chooser [uib-dropdown-toggle] {
+	background-color: #f8f8f8;
+	border: 1px solid #e7e7e7;
+	border-radius: none;
+	margin-top: -24px;
+	padding-top: 30px;
+}
+
+precise-diagram-paper .toolset {
+	display: inline-block;
+}
+
 precise-diagram-paper .other-tools {
 	float: right;
 }

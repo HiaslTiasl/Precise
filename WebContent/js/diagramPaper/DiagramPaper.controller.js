@@ -21,6 +21,8 @@ define([
 		
 		$ctrl.$onChanges = $onChanges;
 		
+		$ctrl.toolbar = 'Edit';
+		
 		$ctrl.showLocations = true;
 		$ctrl.showLabels = true;
 		

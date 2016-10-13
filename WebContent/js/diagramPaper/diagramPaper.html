@@ -1,27 +1,48 @@
 <div class="panels">
-	<div class="toolbar">
-		<!--
-			Using a wrapper element since repeating on buttons directly
-			would eliminate whitespaces between them in the resulting markup
-			and therefore also in the view.
-		-->
-		<span ng-repeat="t in $ctrl.diagramToolset">
-			<button
-				class="btn btn-default"
-				ng-class="{'active': $ctrl.diaPaper.editMode === t.editMode}"
-				ng-click="$ctrl.diaPaper.invokeTool(t)"
-				ng-disabled="$ctrl.diaPaper.editMode !== t.editMode && !$ctrl.diaPaper.canInvokeTool(t)">
-				{{::t.title}}
+	<div class="toolbar" ng-switch on="$ctrl.toolbar">
+		<div class="btn-group toolset-chooser" uib-dropdown>
+			<button class="btn btn-default" uib-dropdown-toggle>
+				<span class="glyphicon glyphicon-menu-hamburger"></span> {{$ctrl.toolbar}}
 			</button>
-		</span>
-		<label class="checkbox-inline">
-			<input type="checkbox" ng-model="$ctrl.showLocations" ng-change="$ctrl.hideLocationsChanged()">
-			Locations
-		</label>
-		<label class="checkbox-inline">
-			<input type="checkbox" ng-model="$ctrl.showLabels" ng-change="$ctrl.hideLabelsChanged()">
-			Dependency Scopes
-		</label>
+			<ul class="dropdown-menu" uib-dropdown-menu>
+				<li ng-class="{active: $ctrl.toolbar === 'Edit'}">
+					<a href ng-click="$ctrl.toolbar = 'Edit'">
+						Edit
+					</a>
+				</li>
+				<li ng-class="{active: $ctrl.toolbar === 'View'}">
+					<a href ng-click="$ctrl.toolbar = 'View'">
+						View
+					</a>
+				</li>
+			</ul>
+		</div>
+		<div class="toolset" ng-switch-when="Edit">
+			<!--
+				Using a wrapper element since repeating on buttons directly
+				would eliminate whitespaces between them in the resulting markup
+				and therefore also in the view.
+			-->
+			<span ng-repeat="t in $ctrl.diagramToolset">
+				<button
+					class="btn btn-default"
+					ng-class="{'active': $ctrl.diaPaper.editMode === t.editMode}"
+					ng-click="$ctrl.diaPaper.invokeTool(t)"
+					ng-disabled="$ctrl.diaPaper.editMode !== t.editMode && !$ctrl.diaPaper.canInvokeTool(t)">
+					{{::t.title}}
+				</button>
+			</span>
+		</div>
+		<div class="toolset" ng-switch-when="View">
+			<label class="checkbox-inline">
+				<input type="checkbox" ng-model="$ctrl.showLocations" ng-change="$ctrl.hideLocationsChanged()">
+				Locations
+			</label>
+			<label class="checkbox-inline">
+				<input type="checkbox" ng-model="$ctrl.showLabels" ng-change="$ctrl.hideLabelsChanged()">
+				Dependency Scopes
+			</label>
+		</div>
 		<div class="other-tools">
 			<span>{{100 * $ctrl.zoomScale | number:0}}%</span>
 			<a href ng-click="$ctrl.fitAndCenter()"><span class="glyphicon glyphicon-fullscreen"></span></a>
