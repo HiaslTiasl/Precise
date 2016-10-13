@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator;
 
+import it.unibz.precise.model.ShortNameProvider;
+
 @JsonIdentityInfo(generator=PropertyGenerator.class, property="name", scope=MDLAttributeAST.class)
 @JsonIdentityReference(alwaysAsId=false)
-public class MDLAttributeAST {
+public class MDLAttributeAST implements ShortNameProvider {
 
 	private String name;
 	private String shortName;

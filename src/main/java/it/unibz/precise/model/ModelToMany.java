@@ -11,13 +11,12 @@ import it.unibz.util.CollectionBidirection;
 
 class ModelToMany {
 	
-	
-	static final CollectionBidirection<Model, Phase, List<Phase>> PHASES =
+	static final CollectionBidirection<Model, Craft, List<Craft>> CRAFTS =
 		new CollectionBidirection<>(
-			Model::getPhases,
-			Model::internalSetPhases,
-			Phase::getModel,
-			Phase::internalSetModel
+			Model::getCrafts,
+			Model::internalSetCrafts,
+			Craft::getModel,
+			Craft::internalSetModel
 		);
 
 	static final CollectionBidirection<Model, Attribute, List<Attribute>> ATTRIBUTES =
@@ -28,6 +27,14 @@ class ModelToMany {
 			Attribute::internalSetModel
 		);
 	
+	static final CollectionBidirection<Model, Phase, List<Phase>> PHASES =
+		new CollectionBidirection<>(
+			Model::getPhases,
+			Model::internalSetPhases,
+			Phase::getModel,
+			Phase::internalSetModel
+		);
+
 	static final CollectionBidirection<Model, TaskType, List<TaskType>> TYPES =
 		new CollectionBidirection<>(
 			Model::getTaskTypes,

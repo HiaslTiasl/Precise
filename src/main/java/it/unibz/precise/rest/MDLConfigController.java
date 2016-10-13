@@ -64,7 +64,7 @@ public class MDLConfigController {
 			return ResponseEntity.notFound().build();
 		
 		MDLFileAST mdlFile = new MDLFileAST();
-		mdlFile.setConfig(config);
+		mdlFile.setConfiguration(config);
 		
 		return ResponseEntity.ok()
 			.header(HttpHeaders.CONTENT_DISPOSITION, MDLFileController.getContentDisposition(name + FILE_SUFFIX))
@@ -91,7 +91,7 @@ public class MDLConfigController {
 		context.configs().updateEntity(MDLConfigAST.EMPTY_CONFIG, model);
 		repository.flush();
 		
-		MDLConfigAST config = mdlFile.getConfig();
+		MDLConfigAST config = mdlFile == null ? null : mdlFile.getConfiguration();
 		if (config == null && srcName != null)
 			config = configByName(context, srcName);
 		

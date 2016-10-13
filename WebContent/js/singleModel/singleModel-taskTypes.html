@@ -16,7 +16,7 @@
 		<tr ng-repeat="tt in $ctrl.coll">
 			<td>{{tt.name}}</td>
 			<td>{{tt.description}}</td>
-			<td>{{tt | withShortName:'craft':'craftShort'}}</td>
+			<td>{{tt.craft | withShortName}}</td>
 			<td>{{tt.phase.name}}</td>
 			<td>
 				<button

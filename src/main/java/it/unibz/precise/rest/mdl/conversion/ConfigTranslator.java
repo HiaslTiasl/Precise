@@ -15,6 +15,7 @@ class ConfigTranslator extends AbstractMDLTranslator<Model, MDLConfigAST> {
 		mdlConfig.setHoursPerDay(model.getHoursPerDay());
 		mdlConfig.setAttributes(Util.mapToList(model.getAttributes(), context().attributes()::toMDL));
 		mdlConfig.setPhases(Util.mapToList(model.getPhases(), context().phases()::toMDL));
+		mdlConfig.setCrafts(Util.mapToList(model.getCrafts(), context().crafts()::toMDL));
 		mdlConfig.setTaskDefinitions(Util.mapToList(model.getTaskTypes(), context().taskTypes()::toMDL));
 	}
 	
@@ -23,6 +24,7 @@ class ConfigTranslator extends AbstractMDLTranslator<Model, MDLConfigAST> {
 		model.setHoursPerDay(mdlConfig.getHoursPerDay());
 		model.setAttributes(Util.mapToList(mdlConfig.getAttributes(), context().attributes()::toEntity));
 		model.setPhases(Util.mapToList(mdlConfig.getPhases(), context().phases()::toEntity));
+		model.setCrafts(Util.mapToList(mdlConfig.getCrafts(), context().crafts()::toEntity));
 		model.setTaskTypes(Util.mapToList(mdlConfig.getTaskDefinitions(), context().taskTypes()::toEntity));
 	}
 

@@ -14,8 +14,7 @@ class TaskTypeTranslator extends AbstractMDLTranslator<TaskType, MDLTaskTypeAST>
 		mdlTaskType.setName(taskType.getName());
 		mdlTaskType.setDescription(taskType.getDescription());
 		mdlTaskType.setPhase(context().phases().toMDL(taskType.getPhase()));
-		mdlTaskType.setCraft(taskType.getCraft());
-		mdlTaskType.setCraftShort(taskType.getCraftShort());
+		mdlTaskType.setCraft(context().crafts().toMDL(taskType.getCraft()));
 	}
 	
 	@Override
@@ -23,8 +22,7 @@ class TaskTypeTranslator extends AbstractMDLTranslator<TaskType, MDLTaskTypeAST>
 		taskType.setName(mdlTaskType.getName());
 		taskType.setDescription(mdlTaskType.getDescription());
 		taskType.setPhase(context().phases().toEntity(mdlTaskType.getPhase()));
-		taskType.setCraft(mdlTaskType.getCraft());
-		taskType.setCraftShort(mdlTaskType.getCraftShort());
+		taskType.setCraft(context().crafts().toEntity(mdlTaskType.getCraft()));
 	}
 
 	@Override

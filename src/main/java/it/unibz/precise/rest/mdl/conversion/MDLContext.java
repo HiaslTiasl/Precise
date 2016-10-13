@@ -1,6 +1,7 @@
 package it.unibz.precise.rest.mdl.conversion;
 
 import it.unibz.precise.model.Attribute;
+import it.unibz.precise.model.Craft;
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.Phase;
@@ -9,6 +10,7 @@ import it.unibz.precise.model.Task;
 import it.unibz.precise.model.TaskType;
 import it.unibz.precise.rest.mdl.ast.MDLAttributeAST;
 import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
+import it.unibz.precise.rest.mdl.ast.MDLCraftAST;
 import it.unibz.precise.rest.mdl.ast.MDLDependencyAST;
 import it.unibz.precise.rest.mdl.ast.MDLDiagramAST;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
@@ -24,6 +26,7 @@ public class MDLContext {
 	private final MDLTranslator<Model, MDLModelAST> modelTranslator;
 	private final MDLTranslator<Model, MDLConfigAST> configTranslator;
 	private final MDLTranslator<Model, MDLDiagramAST> diagramTranslator;
+	private final MDLTranslator<Craft, MDLCraftAST> craftTranslator;
 	private final MDLTranslator<Attribute, MDLAttributeAST> attributeTranslator;
 	private final MDLTranslator<Phase, MDLPhaseAST> phaseTranslator;
 	private final MDLTranslator<TaskType, MDLTaskTypeAST> taskTypeTranslator;
@@ -36,6 +39,7 @@ public class MDLContext {
 		modelTranslator      = cache(new ModelTranslator(this));
 		configTranslator     = cache(new ConfigTranslator(this));
 		diagramTranslator    = cache(new DiagramTranslator(this));
+		craftTranslator      = cache(new CraftTranslator(this));
 		attributeTranslator  = cache(new AttributeTranslator(this));
 		phaseTranslator      = cache(new PhaseTranslator(this));
 		taskTypeTranslator   = cache(new TaskTypeTranslator(this));
@@ -64,6 +68,10 @@ public class MDLContext {
 		return diagramTranslator;
 	}
 	
+	public MDLTranslator<Craft, MDLCraftAST> crafts() {
+		return craftTranslator;
+	}
+
 	public MDLTranslator<Attribute, MDLAttributeAST> attributes() {
 		return attributeTranslator;
 	}

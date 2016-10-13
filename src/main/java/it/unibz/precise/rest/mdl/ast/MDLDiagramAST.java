@@ -2,9 +2,6 @@ package it.unibz.precise.rest.mdl.ast;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-@JsonPropertyOrder({"tasks", "dependencies"})
 public class MDLDiagramAST {
 	
 	private List<MDLTaskAST> tasks;

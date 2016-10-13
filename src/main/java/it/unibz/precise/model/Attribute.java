@@ -14,7 +14,7 @@ import javax.persistence.UniqueConstraint;
 @Table(uniqueConstraints={
 	@UniqueConstraint(columnNames={"model_id", "name"})
 })
-public class Attribute extends BaseEntity {
+public class Attribute extends BaseEntity implements ShortNameProvider {
 
 	@Column(nullable=false)
 	private String name;

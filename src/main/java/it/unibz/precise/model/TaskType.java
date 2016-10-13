@@ -21,8 +21,9 @@ public class TaskType extends BaseEntity {
 	@Column(nullable=false)
 	private String name;
 	private String description;
-	private String craft;
-	private String craftShort;
+	
+	@ManyToOne
+	private Craft craft;
 	
 	@OneToMany(mappedBy="type", cascade=CascadeType.REMOVE)
 	private List<Task> tasks = new ArrayList<>();
@@ -49,20 +50,12 @@ public class TaskType extends BaseEntity {
 		this.description = description;
 	}
 
-	public String getCraft() {
+	public Craft getCraft() {
 		return craft;
 	}
 
-	public void setCraft(String craft) {
+	public void setCraft(Craft craft) {
 		this.craft = craft;
-	}
-
-	public String getCraftShort() {
-		return craftShort != null ? craftShort : craft;
-	}
-
-	public void setCraftShort(String craftShort) {
-		this.craftShort = craftShort;
 	}
 
 	public List<Task> getTasks() {

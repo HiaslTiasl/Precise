@@ -174,7 +174,7 @@ define([
 						attrs: { 'font-size': '0.8em', 'dy': '-0.35em 0.35em 0.35em' }
 					} ]
 				},
-				'text.task-type-craft':      { text: data.type.craftShort }
+				'text.task-type-craft':      { text: data.type.craft.shortName }
 			};
 			if (locationPatterns) {
 				attrs['text.trunc'] = {

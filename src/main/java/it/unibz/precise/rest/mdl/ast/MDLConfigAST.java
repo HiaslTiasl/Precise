@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import it.unibz.precise.model.Model;
 
-@JsonPropertyOrder({"hoursPerDay", "attributes", "phases", "taskDefinitions"})
+@JsonPropertyOrder({"hoursPerDay", "attributes", "phases", "crafts", "taskDefinitions"})
 public class MDLConfigAST {
 	
 	public static final MDLConfigAST EMPTY_CONFIG = new MDLConfigAST();
@@ -14,6 +14,7 @@ public class MDLConfigAST {
 	private int hoursPerDay = Model.DEFAULT_HOURS_PER_DAY;
 	private List<MDLAttributeAST> attributes;
 	private List<MDLPhaseAST> phases;
+	private List<MDLCraftAST> crafts;
 	private List<MDLTaskTypeAST> taskDefinitions;
 	
 	public int getHoursPerDay() {
@@ -22,6 +23,14 @@ public class MDLConfigAST {
 
 	public void setHoursPerDay(int hoursPerDay) {
 		this.hoursPerDay = hoursPerDay;
+	}
+
+	public List<MDLCraftAST> getCrafts() {
+		return crafts;
+	}
+
+	public void setCrafts(List<MDLCraftAST> crafts) {
+		this.crafts = crafts;
 	}
 
 	public List<MDLAttributeAST> getAttributes() {

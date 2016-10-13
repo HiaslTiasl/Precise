@@ -10,7 +10,7 @@ public class MDLFileAST {
 	
 	private MDLModelAST model;
 	
-	private MDLConfigAST config;
+	private MDLConfigAST configuration;
 	private MDLDiagramAST diagram;
 	
 	public MDLModelAST getModel() {
@@ -21,12 +21,12 @@ public class MDLFileAST {
 		this.model = model;
 	}
 	
-	public MDLConfigAST getConfig() {
-		return config;
+	public MDLConfigAST getConfiguration() {
+		return configuration;
 	}
 
-	public void setConfig(MDLConfigAST config) {
-		this.config = config;
+	public void setConfiguration(MDLConfigAST configuration) {
+		this.configuration = configuration;
 	}
 
 	public MDLDiagramAST getDiagram() {

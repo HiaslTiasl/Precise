@@ -11,8 +11,7 @@ public class MDLTaskTypeAST {
 	private String name;
 	private String description;
 	private MDLPhaseAST phase;
-	private String craft;
-	private String craftShort;
+	private MDLCraftAST craft;
 	
 	public String getName() {
 		return name;
@@ -38,20 +37,12 @@ public class MDLTaskTypeAST {
 		this.phase = phase;
 	}
 
-	public String getCraft() {
+	public MDLCraftAST getCraft() {
 		return craft;
 	}
 
-	public void setCraft(String craft) {
+	public void setCraft(MDLCraftAST craft) {
 		this.craft = craft;
 	}
 
-	public String getCraftShort() {
-		return craftShort;
-	}
-
-	public void setCraftShort(String craftShort) {
-		this.craftShort = craftShort;
-	}
-	
 }

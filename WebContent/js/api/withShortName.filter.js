@@ -8,8 +8,8 @@ define([
 	function withShortNameFilterFactory() {
 		
 		function withShortName(object, nameKey, shortNameKey) {
-			var name = _.get(object, nameKey),
-				shortName = _.get(object, shortNameKey);
+			var name = _.get(object, nameKey || 'name'),
+				shortName = _.get(object, shortNameKey || 'shortName');
 			return shortName && shortName !== name
 				? name + ' (' + shortName + ')'
 				: name;

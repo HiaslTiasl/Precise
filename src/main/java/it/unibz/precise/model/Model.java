@@ -91,20 +91,19 @@ public class Model extends BaseEntity {
 	
 	private String description;
 	
-	// Building configuration
+	// Configuration
 	//---------------------------------------------------
 	
+	private int hoursPerDay = DEFAULT_HOURS_PER_DAY;
+
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<Attribute> attributes = new ArrayList<>();
 	
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<Phase> phases = new ArrayList<>();
-
-	// Task configuration
-	//---------------------------------------------------
 	
-	private int hoursPerDay = DEFAULT_HOURS_PER_DAY;
-	
+	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
+	private List<Craft> crafts = new ArrayList<>();
 
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
 	private List<TaskType> taskTypes = new ArrayList<>();
@@ -147,6 +146,16 @@ public class Model extends BaseEntity {
 			: isDiagramEmpty() ? State.CONFIGURING
 			: State.MODELLING;
 	}
+	
+	@Transient
+	public int getHoursPerDay() {
+		return hoursPerDay;
+	}
+
+	@Transient
+	public void setHoursPerDay(int hoursPerDay) {
+		this.hoursPerDay = hoursPerDay;
+	}
 
 	public List<Attribute> getAttributes() {
 		return attributes;
@@ -179,15 +188,17 @@ public class Model extends BaseEntity {
 	public void addPhase(Phase phase) {
 		ModelToMany.PHASES.addOneOfMany(this, phase);
 	}
-
-	@Transient
-	public int getHoursPerDay() {
-		return hoursPerDay;
+	
+	public List<Craft> getCrafts() {
+		return crafts;
+	}
+	
+	public void setCrafts(List<Craft> crafts) {
+		ModelToMany.CRAFTS.setMany(this, crafts);
 	}
 
-	@Transient
-	public void setHoursPerDay(int hoursPerDay) {
-		this.hoursPerDay = hoursPerDay;
+	void internalSetCrafts(List<Craft> crafts) {
+		this.crafts = crafts;
 	}
 
 	public List<TaskType> getTaskTypes() {
