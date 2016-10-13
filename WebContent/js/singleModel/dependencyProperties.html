@@ -1,19 +1,19 @@
 <div class="form-horizontal">
 	<div class="form-group">
-		<label for="phase" class="col-sm-4 control-label">Source</label>
+		<label for="source" class="col-sm-4 control-label">Source</label>
 		<div class="col-sm-8">
-			<p id="phase" class="form-control-static">{{$ctrl.resource.data.sourceID}}</p>
+			<p id="source" class="form-control-static">{{$ctrl.resource.data.sourceID}}</p>
 		</div>
 	</div>
 	<div class="form-group">
-		<label for="craft" class="col-sm-4 control-label">Target</label>
+		<label for="target" class="col-sm-4 control-label">Target</label>
 		<div class="col-sm-8">
-			<p id="craft" class="form-control-static">{{$ctrl.resource.data.targetID}}</p>
+			<p id="target" class="form-control-static">{{$ctrl.resource.data.targetID}}</p>
 		</div>
 	</div>
 	<div class="form-group">
-		<label for="type" class="col-sm-4 control-label">Kind</label>
-		<div class="col-sm-8">
+		<label for="kind" class="col-sm-4 control-label">Kind</label>
+		<div id="kind" class="col-sm-8">
 			<div class="checkbox">
 				<label>
 					<input type="checkbox" ng-model="$ctrl.resource.data.alternate"> Alternate
@@ -42,15 +42,13 @@
 		<div class="form-group">
 			<label for="exclusiveness-attributes" class="col-sm-4 control-label">Attributes</label>
 			<div class="col-sm-8">
-				<div class="row">
-					<div class="checkbox col-sm-6" ng-repeat="attr in $ctrl.resource.data.attributes">
-						<label>
-							<input type="checkbox"
-								ng-model="$ctrl.scope.attributes[attr.name]"
-								ng-change="$ctrl.updateScopeType()">
-								{{attr.name}}
-						</label>
-					</div>
+				<div class="checkbox" ng-repeat="attr in $ctrl.resource.data.attributes">
+					<label>
+						<input type="checkbox"
+							ng-model="$ctrl.scope.attributes[attr.name]"
+							ng-change="$ctrl.updateScopeType()">
+							{{attr | withShortName}}
+					</label>
 				</div>
 			</div>
 		</div>

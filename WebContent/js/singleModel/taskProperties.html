@@ -89,15 +89,13 @@
 		<div class="form-group">
 			<label for="exclusiveness-attributes" class="col-sm-4 control-label">Attributes</label>
 			<div class="col-sm-8">
-				<div class="row">
-					<div class="checkbox col-sm-6" ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">
-						<label>
-							<input type="checkbox"
-								ng-model="$ctrl.exclusiveness.attributes[attr.name]"
-								ng-change="$ctrl.updateExlusivenessType()">
-								{{attr.name}}
-						</label>
-					</div>
+				<div class="checkbox" ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">
+					<label>
+						<input type="checkbox"
+							ng-model="$ctrl.exclusiveness.attributes[attr.name]"
+							ng-change="$ctrl.updateExlusivenessType()">
+							{{ attr | withShortName }}
+					</label>
 				</div>
 			</div>
 		</div>
@@ -126,9 +124,9 @@
 						<a href
 							editable-select="o.attribute"
 							buttons="no"
-							e-ng-options="a as a.name for a in $ctrl.resource.data.type.phase.attributes | filter:$ctrl.attrFilterForOrderSpec(o):true track by a.name"
+							e-ng-options="a as (a | withShortName) for a in $ctrl.resource.data.type.phase.attributes | filter:$ctrl.attrFilterForOrderSpec(o):true track by a.name"
 							onbeforesave="$ctrl.selectedOrderSpecAttribute($data, o.attribute)">
-							{{ o.attribute.name || '----'}}
+							{{ (o.attribute | withShortName) || '----'}}
 						</a>
 					</td>
 					<td>
@@ -172,7 +170,7 @@
 		<table id="location-table" class="table table-striped" st-table="locs" st-safe-src="$ctrl.resource.data.locationPatterns">
 			<thead>
 				<tr>
-					<th ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">{{::attr.name}}</th>
+					<th ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">{{::(attr | withShortName)}}</th>
 					<th></th>
 				</tr>
 			</thead>
