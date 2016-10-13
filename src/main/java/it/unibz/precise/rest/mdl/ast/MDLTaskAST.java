@@ -17,7 +17,6 @@ public class MDLTaskAST {
 	private MDLTaskTypeAST definition;
 	private int numberOfWorkersNeeded;
 	private int durationDays;
-	private boolean globalExclusiveness;
 	private MDLScopeAST exclusiveness;
 	private Map<String, OrderType> order;
 	private Position position;
@@ -45,14 +44,6 @@ public class MDLTaskAST {
 
 	public void setDurationDays(int durationDays) {
 		this.durationDays = durationDays;
-	}
-
-	public boolean isGlobalExclusiveness() {
-		return globalExclusiveness;
-	}
-
-	public void setGlobalExclusiveness(boolean globalExclusiveness) {
-		this.globalExclusiveness = globalExclusiveness;
 	}
 
 	public MDLScopeAST getExclusiveness() {

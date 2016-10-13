@@ -13,7 +13,6 @@ public class MDLDependencyAST {
 	private MDLTaskAST target;
 	private Position sourceVertex;
 	private Position targetVertex;
-	private boolean globalScope;
 	private MDLScopeAST scope;
 	private List<Position> vertices;
 	private LabelPosition labelPosition;
@@ -74,14 +73,6 @@ public class MDLDependencyAST {
 		this.vertices = vertices;
 	}
 	
-	public boolean isGlobalScope() {
-		return globalScope;
-	}
-
-	public void setGlobalScope(boolean globalScope) {
-		this.globalScope = globalScope;
-	}
-
 	public MDLScopeAST getScope() {
 		return scope;
 	}
