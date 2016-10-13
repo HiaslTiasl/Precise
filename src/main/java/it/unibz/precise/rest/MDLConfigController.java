@@ -23,6 +23,7 @@ import it.unibz.precise.model.Model;
 import it.unibz.precise.rep.ModelRepository;
 import it.unibz.precise.rep.PhaseRepository;
 import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
+import it.unibz.precise.rest.mdl.ast.MDLFileAST;
 import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
 @RestController
@@ -57,11 +58,17 @@ public class MDLConfigController {
 		path=PATH_TO_FILE,
 		method=RequestMethod.GET
 	)
-	public ResponseEntity<MDLConfigAST> get(@PathVariable String name) {
+	public ResponseEntity<?> get(@PathVariable String name) {
 		MDLConfigAST config = configByName(new MDLContext(), name);
+		if (config == null)
+			return ResponseEntity.notFound().build();
+		
+		MDLFileAST mdlFile = new MDLFileAST();
+		mdlFile.setConfig(config);
+		
 		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, MDLFileController.getContentDisposition(name + FILE_SUFFIX))
-				.body(config);
+			.header(HttpHeaders.CONTENT_DISPOSITION, MDLFileController.getContentDisposition(name + FILE_SUFFIX))
+			.body(mdlFile);
 	}
 	
 	@RequestMapping(
@@ -71,7 +78,7 @@ public class MDLConfigController {
 	@Transactional
 	public void set(
 		@PathVariable String name,
-		@Valid @RequestBody(required=false) MDLConfigAST config,
+		@Valid @RequestBody(required=false) MDLFileAST mdlFile,
 		Errors errors,
 		@RequestParam(name="use", required=false) String srcName
 	) {
@@ -84,6 +91,7 @@ public class MDLConfigController {
 		context.configs().updateEntity(MDLConfigAST.EMPTY_CONFIG, model);
 		repository.flush();
 		
+		MDLConfigAST config = mdlFile.getConfig();
 		if (config == null && srcName != null)
 			config = configByName(context, srcName);
 		
