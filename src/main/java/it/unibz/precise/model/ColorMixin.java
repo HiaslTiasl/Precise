@@ -15,8 +15,13 @@ public abstract class ColorMixin extends Color {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public ColorMixin(@JsonProperty("r") int red, @JsonProperty("g") int green, @JsonProperty("b") int blue) {
-		super(red, green, blue);
+	public ColorMixin(
+		@JsonProperty("r") int red,
+		@JsonProperty("g") int green,
+		@JsonProperty("b") int blue,
+		@JsonProperty(value="a", required=false) int alpha)
+	{
+		super(red, green, blue, alpha);
 	}
 	
 	@Override @JsonProperty("r") public abstract int getRed();
