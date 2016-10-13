@@ -193,8 +193,12 @@ public class Dependency extends BaseEntity {
 	}
 	
 	public void updateScope() {
-		scope.updateType();
-		scope.onEmptyAttributes(Scope.Type.GLOBAL);
+		if (scope == null)
+			scope = new Scope(Scope.Type.GLOBAL);
+		else {
+			scope.updateType();
+			scope.onEmptyAttributes(Scope.Type.GLOBAL);
+		}
 	}
 
 	public boolean isGlobalScope() {
@@ -245,7 +249,7 @@ public class Dependency extends BaseEntity {
 	public void updateDependentFields() {
 		updateSourceVertex();
 		updateTargetVertex();
-		scope.updateType();
+		updateScope();
 	}
 	
 }

@@ -44,7 +44,7 @@ public class Task extends BaseEntity {
 	private List<OrderSpecification> orderSpecifications = new ArrayList<>();
 	
 	@Embedded
-	private Scope exclusiveness = new Scope();
+	private Scope exclusiveness = new Scope(Scope.Type.NONE);
 	
 	private int numberOfWorkersNeeded;
 	
@@ -173,7 +173,10 @@ public class Task extends BaseEntity {
 	}
 	
 	public void updateExclusiveness() {
-		exclusiveness.updateType();
+		if (exclusiveness == null)
+			exclusiveness = new Scope(Scope.Type.NONE);
+		else
+			exclusiveness.updateType();
 	}
 
 	public void setExclusiveness(Scope exclusiveness) {
@@ -224,13 +227,18 @@ public class Task extends BaseEntity {
 		this.out = out;
 	}
 	
-	@PrePersist
-	@PreUpdate
 	public void countUnits() {
 		units = locations.stream()
 			.map(Location::getNode)
 			.mapToInt(loc -> loc != null ? loc.getUnits() : type.getPhase().getUnits())
 			.sum();
+	}
+	
+	@PrePersist
+	@PreUpdate
+	public void initDependentFields() {
+		countUnits();
+		updateDependentFields();
 	}
 
 	@PostLoad
