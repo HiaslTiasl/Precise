@@ -4,7 +4,7 @@ import org.springframework.validation.annotation.Validated;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"model", "config", "diagram"})
+@JsonPropertyOrder({"model", "configuration", "diagram"})
 @Validated
 public class MDLFileAST {
 	
