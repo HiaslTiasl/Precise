@@ -1,78 +1,17 @@
 package it.unibz.precise.rest.mdl.ast;
 
-import java.util.List;
-
 import org.springframework.validation.annotation.Validated;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"model", "hoursPerDay", "attributes", "phases", "taskDefinitions", "tasks", "dependencies"})
+@JsonPropertyOrder({"model", "config", "diagram"})
 @Validated
 public class MDLFileAST {
 	
 	private MDLModelAST model;
 	
-	@JsonIgnore
 	private MDLConfigAST config;
-	
-	private List<MDLTaskAST> tasks;
-	private List<MDLDependencyAST> dependencies;
-	
-	public MDLFileAST() {
-		config = new MDLConfigAST();
-	}
-	
-	@JsonIgnore
-	public MDLConfigAST getConfig() {
-		return config;
-	}
-
-	@JsonIgnore
-	public void setConfig(MDLConfigAST config) {
-		this.config = config;
-	}
-
-	@JsonProperty("hoursPerDay")
-	public int getHoursPerDay() {
-		return config.getHoursPerDay();
-	}
-
-	@JsonProperty("hoursPerDay")
-	public void setHoursPerDay(int hoursPerDay) {
-		config.setHoursPerDay(hoursPerDay);
-	}
-
-	@JsonProperty("attributes")
-	public List<MDLAttributeAST> getAttributes() {
-		return config.getAttributes();
-	}
-	
-	@JsonProperty("attributes")
-	public void setAttributes(List<MDLAttributeAST> attributes) {
-		this.config.setAttributes(attributes);
-	}
-	
-	@JsonProperty("phases")
-	public List<MDLPhaseAST> getPhases() {
-		return config.getPhases();
-	}
-	
-	@JsonProperty("phases")
-	public void setPhases(List<MDLPhaseAST> phases) {
-		this.config.setPhases(phases);
-	}
-	
-	@JsonProperty("taskDefinitions")
-	public List<MDLTaskTypeAST> getTaskDefinitions() {
-		return config.getTaskDefinitions();
-	}
-	
-	@JsonProperty("taskDefinitions")
-	public void setTaskDefinitions(List<MDLTaskTypeAST> taskDefinitions) {
-		config.setTaskDefinitions(taskDefinitions);
-	}
+	private MDLDiagramAST diagram;
 	
 	public MDLModelAST getModel() {
 		return model;
@@ -82,20 +21,20 @@ public class MDLFileAST {
 		this.model = model;
 	}
 	
-	public List<MDLTaskAST> getTasks() {
-		return tasks;
+	public MDLConfigAST getConfig() {
+		return config;
+	}
+
+	public void setConfig(MDLConfigAST config) {
+		this.config = config;
+	}
+
+	public MDLDiagramAST getDiagram() {
+		return diagram;
 	}
 	
-	public void setTasks(List<MDLTaskAST> tasks) {
-		this.tasks = tasks;
-	}
-	
-	public List<MDLDependencyAST> getDependencies() {
-		return dependencies;
-	}
-	
-	public void setDependencies(List<MDLDependencyAST> dependencies) {
-		this.dependencies = dependencies;
+	public void setDiagram(MDLDiagramAST diagram) {
+		this.diagram = diagram;
 	}
 	
 }

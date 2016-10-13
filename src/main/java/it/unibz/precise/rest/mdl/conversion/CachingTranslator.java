@@ -1,7 +1,7 @@
 package it.unibz.precise.rest.mdl.conversion;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CachingTranslator<E, MDL> extends AbstractMDLTranslator<E, MDL> {
 	
@@ -13,18 +13,18 @@ public class CachingTranslator<E, MDL> extends AbstractMDLTranslator<E, MDL> {
 	public CachingTranslator(MDLTranslator<E, MDL> delegate) {
 		super(delegate.context());
 		this.delegate = delegate;
-		entitiesToMDL = new HashMap<>();
-		mdlToEntities = new HashMap<>();
+		entitiesToMDL = new ConcurrentHashMap<>();
+		mdlToEntities = new ConcurrentHashMap<>();
 	}
-
+	
 	@Override
 	public MDL toMDL(E entity) {
-		return entitiesToMDL.computeIfAbsent(entity, e -> delegate.toMDL(e));
+		return entity == null ? null : entitiesToMDL.computeIfAbsent(entity, e -> delegate.toMDL(e));
 	}
 
 	@Override
 	public E toEntity(MDL mdl) {
-		return mdlToEntities.computeIfAbsent(mdl, m -> delegate.toEntity(m));
+		return mdl == null ? null : mdlToEntities.computeIfAbsent(mdl, m -> delegate.toEntity(m));
 	}
 	
 	public void clearCache() {
@@ -34,12 +34,12 @@ public class CachingTranslator<E, MDL> extends AbstractMDLTranslator<E, MDL> {
 
 	@Override
 	public E createEntity(MDL mdl) {
-		return delegate.createEntity(null);
+		return delegate.createEntity(mdl);
 	}
 
 	@Override
 	public MDL createMDL(E entity) {
-		return delegate.createMDL(null);
+		return delegate.createMDL(entity);
 	}
 
 	@Override
