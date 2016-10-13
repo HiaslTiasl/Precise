@@ -7,10 +7,7 @@ import java.util.stream.Collectors;
 
 import it.unibz.precise.model.Attribute;
 import it.unibz.precise.model.AttributeHierarchyLevel;
-import it.unibz.precise.model.OrderSpecification;
-import it.unibz.precise.model.OrderType;
 import it.unibz.precise.model.PatternEntry;
-import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Task;
 import it.unibz.precise.model.TaskType;
 import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
@@ -29,34 +26,22 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 		mdlTask.setNumberOfWorkersNeeded(task.getNumberOfWorkersNeeded());
 		mdlTask.setDurationDays(task.getDurationDays());
 		mdlTask.setExclusiveness(context().scopes().toMDL(task.getExclusiveness()));
-		mdlTask.setOrder(Util.mapToMap(task.getOrderSpecifications(),
-			os -> os.getAttribute().getName(),
-			OrderSpecification::getOrderType
-		));
+		mdlTask.setOrder(Util.mapToList(task.getOrderSpecifications(),context().orderSpecs()::toMDL));
 		mdlTask.setPosition(task.getPosition());
 		mdlTask.setLocations(Util.mapToList(task.getLocationPatterns(), this::toSimplePattern));
 	}
 	
 	@Override
 	public void updateEntity(MDLTaskAST mdlTask, Task task) {
-		
 		TaskType taskType = context().taskTypes().toEntity(mdlTask.getDefinition());
-		Phase phase = taskType.getPhase();
-		Map<String, OrderType> order = mdlTask.getOrder();
 		
 		task.setType(taskType);
 		task.setNumberOfWorkersNeeded(mdlTask.getNumberOfWorkersNeeded());
 		task.setDurationDays(mdlTask.getDurationDays());
 		task.setExclusiveness(context().scopes().toEntity(mdlTask.getExclusiveness()));
-		task.setOrderSpecifications(
-				order == null ? null : phase.getAttributeHierarchyLevels().stream()
-				.map(AttributeHierarchyLevel::getAttribute)
-				.filter(a -> order.containsKey(a.getName()))
-				.map(a -> new OrderSpecification(a, order.get(a.getName())))
-				.collect(Collectors.toList())
-		);
+		task.setOrderSpecifications(Util.mapToList(mdlTask.getOrder(),context().orderSpecs()::toEntity));
 		task.setPosition(mdlTask.getPosition());
-		task.setLocationPatterns(Util.mapToList(mdlTask.getLocations(), p -> toPattern(p, phase.getAttributeHierarchyLevels())));
+		task.setLocationPatterns(Util.mapToList(mdlTask.getLocations(), p -> toPattern(p, taskType.getPhase().getAttributeHierarchyLevels())));
 	}
 	
 	@Override

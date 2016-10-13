@@ -4,6 +4,7 @@ import it.unibz.precise.model.Attribute;
 import it.unibz.precise.model.Craft;
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Model;
+import it.unibz.precise.model.OrderSpecification;
 import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Scope;
 import it.unibz.precise.model.Task;
@@ -15,6 +16,7 @@ import it.unibz.precise.rest.mdl.ast.MDLDependencyAST;
 import it.unibz.precise.rest.mdl.ast.MDLDiagramAST;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
 import it.unibz.precise.rest.mdl.ast.MDLModelAST;
+import it.unibz.precise.rest.mdl.ast.MDLOrderSpecificationAST;
 import it.unibz.precise.rest.mdl.ast.MDLPhaseAST;
 import it.unibz.precise.rest.mdl.ast.MDLScopeAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
@@ -33,6 +35,7 @@ public class MDLContext {
 	private final MDLTranslator<Task, MDLTaskAST> taskTranslator;
 	private final MDLTranslator<Dependency, MDLDependencyAST> dependencyTranslator;
 	private final MDLTranslator<Scope, MDLScopeAST> scopeTranslator;
+	private final MDLTranslator<OrderSpecification, MDLOrderSpecificationAST> orderSpecTranslator;
 	
 	public MDLContext() {
 		fileTranslator       = cache(new FileTranslator(this));
@@ -46,6 +49,7 @@ public class MDLContext {
 		taskTranslator       = cache(new TaskTranslator(this));
 		dependencyTranslator = cache(new DependencyTranslator(this));
 		scopeTranslator      = cache(new ScopeTranslator(this));
+		orderSpecTranslator  = cache(new OrderSpecificationTranslator(this));
 	}
 	
 	private <E, MDL> MDLTranslator<E, MDL> cache(MDLTranslator<E, MDL> translator) {
@@ -94,6 +98,10 @@ public class MDLContext {
 	
 	public MDLTranslator<Scope, MDLScopeAST> scopes() {
 		return scopeTranslator;
+	}
+	
+	public MDLTranslator<OrderSpecification, MDLOrderSpecificationAST> orderSpecs() {
+		return orderSpecTranslator;
 	}
 	
 }
