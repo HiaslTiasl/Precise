@@ -55,7 +55,7 @@ public class CSVFileController {
 			.collect(Collectors.joining(nl));
 		
 		return ResponseEntity.ok()
-			.header(HttpHeaders.CONTENT_DISPOSITION, FileDownload.getContentDisposition(name) + FILE_EXT)
+			.header(HttpHeaders.CONTENT_DISPOSITION, FileDownload.getContentDisposition(name + FILE_EXT))
 			.body(String.join(nl, headerRow, dataRows));
 	}
 	
