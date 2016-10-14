@@ -175,8 +175,12 @@ public class Task extends BaseEntity {
 	public void updateExclusiveness() {
 		if (exclusiveness == null)
 			exclusiveness = new Scope(Scope.Type.UNIT);
-		else
-			exclusiveness.updateType(type.getPhase().getAttributeHierarchyLevels().size(), true);
+		else {
+			exclusiveness.update(Util.mapToList(
+				type.getPhase().getAttributeHierarchyLevels(),
+				AttributeHierarchyLevel::getAttribute
+			));
+		}
 	}
 
 	public void setExclusiveness(Scope exclusiveness) {

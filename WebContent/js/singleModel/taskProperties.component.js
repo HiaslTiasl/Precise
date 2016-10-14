@@ -54,11 +54,11 @@ define([
 		}
 		
 		function updateExlusivenessType() {
-			Scopes.updateType($ctrl.exclusiveness, $ctrl.resource.data.type.phase.attributes.length);
+			Scopes.updateType($ctrl.exclusiveness, $ctrl.resource.data.type.phase.attributes);
 		}
 		
 		function updateExclusivenessAttributes() {
-			Scopes.updateAttributes($ctrl.exclusiveness);
+			Scopes.updateAttributes($ctrl.exclusiveness, $ctrl.resource.data.type.phase.attributes);
 		}
 		
 		function attrFilterForOrderSpec(os) {

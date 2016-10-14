@@ -198,8 +198,11 @@ public class Dependency extends BaseEntity {
 	public void updateScope() {
 		if (scope == null)
 			scope = new Scope(Scope.Type.GLOBAL);
-		else
-			scope.updateType(getAttributes().size(), canHaveUnitScope());
+		else {
+			scope.update(getAttributes());
+			if (scope.getType() == Type.UNIT && !canHaveUnitScope())
+				scope.setType(Type.ATTRIBUTES);
+		}
 	}
 
 	public Model getModel() {

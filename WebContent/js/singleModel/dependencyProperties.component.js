@@ -47,11 +47,13 @@ define([
 		}
 		
 		function updateScopeType() {
-			Scopes.updateType($ctrl.scope, $ctrl.resource.data.attributes.length, canHaveUnitScope());
+			Scopes.updateType($ctrl.scope, $ctrl.resource.data.attributes);
+			if ($ctrl.scope.type === Scopes.Types.UNIT && !canHaveUnitScope())
+				$ctrl.scope.type = Scopes.Types.ATTRIBUTES;
 		}
 
 		function updateScopeAttributes() {
-			Scopes.updateAttributes($ctrl.scope);
+			Scopes.updateAttributes($ctrl.scope, $ctrl.resource.data.attributes);
 		}
 		
 		function sendDependency() {

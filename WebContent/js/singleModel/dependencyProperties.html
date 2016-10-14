@@ -33,7 +33,12 @@
 			<div id="scope-type" class="col-sm-8">
 				<div class="radio" ng-repeat="st in $ctrl.scopeTypes">
 					<label>
-						<input type="radio" ng-model="$ctrl.scope.type" ng-value="st"/>
+						<input
+						type="radio"
+						ng-model="$ctrl.scope.type"
+						ng-value="st"
+						ng-change="$ctrl.updateScopeAttributes()"
+						ng-disabled="$ctrl.isDisabledScopeType(st)"/>
 						{{st.displayName}}
 					</label>
 				</div>

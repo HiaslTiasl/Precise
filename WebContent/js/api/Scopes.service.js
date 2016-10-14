@@ -62,23 +62,22 @@ define([
 			};
 		}
 		
-		function updateType(localScope, totalAttrCount, unitAllowed) {
-			var attrCount = _.chain(localScope.attributes).filter().size().value();
+		function updateType(localScope, allAttrs) {
+			var attrCount = _.chain(localScope.attributes).filter().size().value(),
+				totalAttrCount = allAttrs.length;
 			if (attrCount === totalAttrCount)
 				localScope.type = Types.UNIT;
 			else if (attrCount > 0 && attrCount < totalAttrCount)
 				localScope.type = Types.ATTRIBUTES;
 			else if (attrCount == 0 && localScope.type === Types.ATTRIBUTES)
 				localScope.type = Types.GLOBAL;
-			if (!unitAllowed && localScope.type === Types.UNIT)
-				localScope.type = Types.ATTRIBUTES;
 		}
 		
-		function updateAttributes(localScope) {
+		function updateAttributes(localScope, allAttrs) {
 			if (localScope.type !== Types.ATTRIBUTES) {
-				var allAttrs = localScope.type === Types.UNIT;
-				_.forEach(localScope.attributes, function (value, name, attrs) {
-					attrs[name] = allAttrs;
+				var value = localScope.type === Types.UNIT;
+				_.forEach(allAttrs, function (attr) {
+					localScope.attributes[attr.name] = value;
 				});			
 			}
 		}
