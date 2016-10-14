@@ -11,6 +11,7 @@ html {
 .navbar-fixed-top {
 	height: 50px;
 	margin-bottom: 0;
+	z-index: 100;
 }
 
 .navbar-fixed-top + .content {
