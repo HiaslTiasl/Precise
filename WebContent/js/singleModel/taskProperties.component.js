@@ -32,7 +32,7 @@ define([
 		$ctrl.isDisabledOrderType = isDisabledOrderType;
 		
 		$ctrl.scopeTypes = [
-			Scopes.Types.NONE,
+			Scopes.Types.UNIT,
 			Scopes.Types.GLOBAL,
 			Scopes.Types.ATTRIBUTES
 		];
@@ -54,17 +54,11 @@ define([
 		}
 		
 		function updateExlusivenessType() {
-			$ctrl.exclusiveness.type = _.some($ctrl.exclusiveness.attributes)
-				? Scopes.Types.ATTRIBUTES
-				: Scopes.Types.GLOBAL;
+			Scopes.updateType($ctrl.exclusiveness, $ctrl.resource.data.type.phase.attributes.length);
 		}
 		
 		function updateExclusivenessAttributes() {
-			if ($ctrl.exclusiveness.type === Scopes.Types.GLOBAL) {
-				_.forEach($ctrl.exclusiveness.attributes, function (a, name, attrs) {
-					attrs[name] = false;
-				});			
-			}
+			Scopes.updateAttributes($ctrl.exclusiveness);
 		}
 		
 		function attrFilterForOrderSpec(os) {

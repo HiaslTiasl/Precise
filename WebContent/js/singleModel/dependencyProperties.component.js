@@ -7,16 +7,19 @@ define([
 ) {
 	'use strict';
 	
-	DependencyPropertiesController.$inject = ['PreciseApi', 'Scopes'];
+	DependencyPropertiesController.$inject = ['$q', 'PreciseApi', 'Scopes', 'Tasks'];
 	
-	function DependencyPropertiesController(PreciseApi, Scopes) {
+	function DependencyPropertiesController($q, PreciseApi, Scopes, Tasks) {
 		var $ctrl = this;
 		
 		$ctrl.cancel = cancel;
 		$ctrl.sendDependency = sendDependency;
+		$ctrl.isDisabledScopeType = isDisabledScopeType;
 		$ctrl.updateScopeType = updateScopeType;
+		$ctrl.updateScopeAttributes = updateScopeAttributes;
 		
 		$ctrl.scopeTypes = [
+            Scopes.Types.UNIT,
 			Scopes.Types.GLOBAL,
 			Scopes.Types.ATTRIBUTES
 		];
@@ -25,17 +28,30 @@ define([
 		
 		function $onChanges(changes) {
 			if (changes.resource) {
-				$ctrl.scope = Scopes.toLocalRepresentation($ctrl.resource.data.scope);
+				var data = $ctrl.resource.data;
+				$ctrl.scope = Scopes.toLocalRepresentation(data.scope);
 			}
 		}
 		
 		var getAttrName = _.property('name'),
 			scopeParts;
 		
+		function isDisabledScopeType(scopeType) {
+			return scopeType === Scopes.Types.UNIT && !canHaveUnitScope();
+		}
+		
+		function canHaveUnitScope() {
+			var data = $ctrl.resource.data;
+			return !data.source || !data.target
+				|| data.source.type.phase.name === data.target.type.phase.name;
+		}
+		
 		function updateScopeType() {
-			$ctrl.scope.type = _.some($ctrl.scope.attributes)
-				? Scopes.Types.ATTRIBUTES
-				: Scopes.Types.GLOBAL;
+			Scopes.updateType($ctrl.scope, $ctrl.resource.data.attributes.length, canHaveUnitScope());
+		}
+
+		function updateScopeAttributes() {
+			Scopes.updateAttributes($ctrl.scope);
 		}
 		
 		function sendDependency() {

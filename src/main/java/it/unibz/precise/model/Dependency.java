@@ -87,8 +87,6 @@ public class Dependency extends BaseEntity {
 	@Embedded
 	private Scope scope = new Scope(Type.GLOBAL);
 	
-	private boolean globalScope;
-	
 	@ManyToOne
 	private Model model;
 
@@ -192,23 +190,18 @@ public class Dependency extends BaseEntity {
 		this.scope = scope;
 	}
 	
+	public boolean canHaveUnitScope() {
+		return source == null || target == null
+			|| source.getType().getPhase() == target.getType().getPhase();
+	}
+	
 	public void updateScope() {
 		if (scope == null)
 			scope = new Scope(Scope.Type.GLOBAL);
-		else {
-			scope.updateType();
-			scope.onEmptyAttributes(Scope.Type.GLOBAL);
-		}
+		else
+			scope.updateType(getAttributes().size(), canHaveUnitScope());
 	}
 
-	public boolean isGlobalScope() {
-		return globalScope;
-	}
-
-	public void setGlobalScope(boolean globalScope) {
-		this.globalScope = globalScope;
-	}
-	
 	public Model getModel() {
 		return model;
 	}
@@ -239,7 +232,8 @@ public class Dependency extends BaseEntity {
 			: noSourceAttrs ? targetAttrs.collect(Collectors.toList())
 			: noTargetAttrs ? sourceAttrs.collect(Collectors.toList())
 			: sourceAttrs.filter(
-				targetAttrs.collect(Collectors.toSet())::contains)
+				targetAttrs.collect(Collectors.toSet())::contains
+			)
 			.collect(Collectors.toList());
 	}
 	

@@ -40,9 +40,19 @@ define([
 		
 		function cloneExistingData(dependency) {
 			var data = _.cloneDeep(dependency);
-			return allowedAttributes(dependency).then(function (attributes) {
-				data.attributes = attributes;
-				Scopes.rereferenceAttributes(data.scope, attributes);
+			return $q.all([
+				allowedAttributes(dependency).then(function (attributes) {
+					data.attributes = attributes;
+					Scopes.rereferenceAttributes(data.scope, attributes);
+					return data;
+				}),
+				getSource(dependency).then(function (source) {
+					data.source = source;
+				}),
+				getTarget(dependency).then(function (target) {
+					data.target = target;
+				})
+			]).then(function () {
 				return data;
 			});
 		}
@@ -54,6 +64,26 @@ define([
 		function allowedAttributes(dependency) {
 			return PreciseApi.from(PreciseApi.hrefTo(dependency, 'attributes'))
 				.followAndGet('attributes[$all]');
+		}
+		
+		function getTask(data) {
+			return !data ? $q.when(null)
+				: PreciseApi.from(PreciseApi.hrefTo(data))
+					.traverse(function (builder) {
+						return builder
+							.withTemplateParameters({
+								projection: 'expandedTask'
+							})
+							.get();
+					});
+		}
+		
+		function getSource(dependency) {
+			return getTask(dependency.source);
+		}
+		
+		function getTarget(dependency) {
+			return getTask(dependency.target);				
 		}
 		
 		function DependencyResource(model, data, exists) {
@@ -84,7 +114,7 @@ define([
 					processed.target = PreciseApi.hrefTo(this.data.target);
 				return processed;
 			}
-		
+			
 		});
 		
 	}

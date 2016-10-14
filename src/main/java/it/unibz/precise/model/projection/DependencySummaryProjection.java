@@ -29,8 +29,6 @@ public interface DependencySummaryProjection {
 	
 	boolean isChain();
 	
-	boolean isGlobalScope();
-	
 	ScopeSummaryProjection getScope();
 	
 	List<Position> getVertices();

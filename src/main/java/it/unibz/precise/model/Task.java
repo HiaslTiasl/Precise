@@ -44,7 +44,7 @@ public class Task extends BaseEntity {
 	private List<OrderSpecification> orderSpecifications = new ArrayList<>();
 	
 	@Embedded
-	private Scope exclusiveness = new Scope(Scope.Type.NONE);
+	private Scope exclusiveness = new Scope(Scope.Type.UNIT);
 	
 	private int numberOfWorkersNeeded;
 	
@@ -120,9 +120,9 @@ public class Task extends BaseEntity {
 		if (type != null) {
 			List<AttributeHierarchyLevel> levels = type.getPhase().getAttributeHierarchyLevels();
 			this.locations = patterns.stream()
-					.map(p -> LocationPatterns.patternToNode(p, levels))
-					.map(Location::new)
-					.collect(Collectors.toList());
+				.map(p -> LocationPatterns.patternToNode(p, levels))
+				.map(Location::new)
+				.collect(Collectors.toList());
 			// Only add pattern if it is a valid location
 			this.locationPatterns = patterns;
 		}
@@ -174,9 +174,9 @@ public class Task extends BaseEntity {
 	
 	public void updateExclusiveness() {
 		if (exclusiveness == null)
-			exclusiveness = new Scope(Scope.Type.NONE);
+			exclusiveness = new Scope(Scope.Type.UNIT);
 		else
-			exclusiveness.updateType();
+			exclusiveness.updateType(type.getPhase().getAttributeHierarchyLevels().size(), true);
 	}
 
 	public void setExclusiveness(Scope exclusiveness) {

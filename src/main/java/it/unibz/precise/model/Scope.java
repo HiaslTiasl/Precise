@@ -9,7 +9,7 @@ import javax.persistence.ManyToMany;
 public class Scope {
 	
 	public enum Type {
-		NONE, GLOBAL, ATTRIBUTES;
+		UNIT, GLOBAL, ATTRIBUTES;
 	}
 	
 	private Type type;
@@ -18,7 +18,7 @@ public class Scope {
 	private List<Attribute> attributes;
 	
 	public Scope() {
-		this(Type.NONE);
+		this(Type.UNIT);
 	}
 
 	public Scope(Type type) {
@@ -38,14 +38,17 @@ public class Scope {
 		this.type = type;
 	}
 	
-	public void updateType() {
-		if (!isAttributesEmpty() && type != Type.ATTRIBUTES)
+	public void updateType(int totalAttrCount, boolean unitAllowed) {
+		int attrCount = attributes == null ? 0 : attributes.size();
+		if (attrCount == totalAttrCount)
+			type = Type.UNIT;
+		else if (attrCount > 0 && attrCount < totalAttrCount)
 			type = Type.ATTRIBUTES;
-	}
-	
-	public void onEmptyAttributes(Type type) {
-		if (isAttributesEmpty())
-			this.type = type;
+		else if (attrCount == 0 && type == Type.ATTRIBUTES)
+			type = Type.GLOBAL;
+		
+		if (!unitAllowed && type == Type.UNIT)
+			type = Type.ATTRIBUTES;
 	}
 
 	public List<Attribute> getAttributes() {

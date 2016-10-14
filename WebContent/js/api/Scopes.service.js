@@ -10,9 +10,9 @@ define([
 	function ScopesService(PreciseApi) {
 		
 		var Types = {
-			NONE      : { name: 'NONE'      , displayName: 'None'      , canHaveAttrs: false },
-			GLOBAL    : { name: 'GLOBAL'    , displayName: 'Global'    , canHaveAttrs: false },
-			ATTRIBUTES: { name: 'ATTRIBUTES', displayName: 'Attributes', canHaveAttrs: true }
+			UNIT      : { name: 'UNIT'      , displayName: 'Unit' },
+			GLOBAL    : { name: 'GLOBAL'    , displayName: 'Global' },
+			ATTRIBUTES: { name: 'ATTRIBUTES', displayName: 'Attributes' }
 		};
 		
 		this.Types = Types;
@@ -21,6 +21,8 @@ define([
 		this.toLocalRepresentation = toLocalRepresentation;
 		this.fromLocalRepresentation = fromLocalRepresentation;
 		this.toRequestRepresentation = toRequestRepresentation;
+		this.updateType = updateType;
+		this.updateAttributes = updateAttributes;
 		
 		function rereferenceAttributes(scope, attributes) {
 			var scopeLen = _.size(scope.attributes),
@@ -45,11 +47,9 @@ define([
 		function fromLocalRepresentation(scope, attributes) {
 			return {
 				type: scope.type.name,
-				attributes: scope.type.canHaveAttrs
-					? _.filter(attributes, function (a) {
-						return scope.attributes[a.name];
-					})
-					: undefined 
+				attributes: _.filter(attributes, function (a) {
+					return scope.attributes[a.name];
+				}) 
 			};
 		}
 		
@@ -60,6 +60,27 @@ define([
 					return PreciseApi.hrefTo(attr);
 				})
 			};
+		}
+		
+		function updateType(localScope, totalAttrCount, unitAllowed) {
+			var attrCount = _.chain(localScope.attributes).filter().size().value();
+			if (attrCount === totalAttrCount)
+				localScope.type = Types.UNIT;
+			else if (attrCount > 0 && attrCount < totalAttrCount)
+				localScope.type = Types.ATTRIBUTES;
+			else if (attrCount == 0 && localScope.type === Types.ATTRIBUTES)
+				localScope.type = Types.GLOBAL;
+			if (!unitAllowed && localScope.type === Types.UNIT)
+				localScope.type = Types.ATTRIBUTES;
+		}
+		
+		function updateAttributes(localScope) {
+			if (localScope.type !== Types.ATTRIBUTES) {
+				var allAttrs = localScope.type === Types.UNIT;
+				_.forEach(localScope.attributes, function (value, name, attrs) {
+					attrs[name] = allAttrs;
+				});			
+			}
 		}
 		
 	}
