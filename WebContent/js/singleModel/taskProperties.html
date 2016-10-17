@@ -162,6 +162,14 @@
 	</fieldset>
 	<fieldset>
 		<legend>Locations</legend>
+		<div class="form-group">
+			<label for="total-units" class="col-sm-8 control-label">Total number of units</label>
+			<div class="col-sm-4">
+				<p id="total-units" class="form-control-static">
+					{{$ctrl.resource.data.units}}
+				</p>
+			</div>
+		</div>
 		<div class="toolbar">
 			<a href ng-click="$ctrl.addPattern()">
 				<span class="glyphicon glyphicon-plus"></span>
