@@ -21,6 +21,10 @@ define([
 		NS_TASK = 'task',
 		NS_DEPENDENCY = 'dependency';
 	
+	var CLASS_WARNING = 'warning',
+		CLASS_SEARCH_RESULTS = 'search-results',
+		CLASS_SEARCH_RESULT = 'search-result';
+	
 	var nsToType = {},
 		typeToNs;
 	
@@ -229,46 +233,53 @@ define([
 			});
 		},
 		
+		toggleClass: function (cellIDs, clazz, toggle) {
+			var paper = this.paper;
+			cellIDs.forEach(function (id) {
+				paper.findViewByModel(id).vel.toggleClass(clazz, toggle);
+			});
+		},
+		
+		resetClasses: function () {
+			this.resetWarnings();
+			this.resetSearchResults();
+		},
+		
 		resetWarnings: function () {
 			var paper = this.paper;
 			if (this.warningTasks) {
-				this.warningTasks.forEach(function (t) {
-					paper.findViewByModel(TaskShape.toTaskID(t.id)).vel.toggleClass('warning', false);
-				});
+				this.toggleClass(this.warningTasks, CLASS_WARNING, false);
 				this.warningTasks = null;
 			}
 			if (this.warningDependencies) {
-				this.warningDependencies.forEach(function (d) {
-					paper.findViewByModel(DependencyShape.toDependencyID(d.id)).vel.toggleClass('warning', false);
-				});
+				this.toggleClass(this.warningDependencies, CLASS_WARNING, false);
 				this.warningDependencies = null;
 			}
 		},
 		
 		showWarningForTasks: function (tasks, withDependencies) {
-			this.resetWarnings();
+			this.resetClasses();
 			var paper = this.paper,
 				graph = paper.model;
-			tasks.forEach(function (t) {
+			this.warningTasks = tasks.map(function (t) {
 				var id = TaskShape.toTaskID(t.id),
-					cell = graph.getCell(id),
 					cellView = paper.findViewByModel(id);
-				cellView.vel.toggleClass('warning', true)
+				cellView.vel.toggleClass(CLASS_WARNING, true);
+				return id;
 			});
-			this.warningTasks = tasks;
 			if (withDependencies) {
 				var dependencies = [];
-				tasks.forEach(function (t) {
-					graph.getConnectedLinks(graph.getCell(TaskShape.toTaskID(t.id)), {
+				this.warningTasks.forEach(function (id) {
+					graph.getConnectedLinks(graph.getCell(id), {
 						outbound: true,
 						inbound: false
 					}).forEach(function (d) {
 						var target = d.get('target');
 						if (target.id) {
 							var targetView = paper.findViewByModel(target.id);
-							if (targetView.vel.hasClass('warning')) {
-								paper.findViewByModel(d).vel.toggleClass('warning', true);
-								dependencies.push(d.get('data'));
+							if (targetView.vel.hasClass(CLASS_WARNING)) {
+								paper.findViewByModel(d).vel.toggleClass(CLASS_WARNING, true);
+								dependencies.push(target.id);
 							}
 						}
 					});
@@ -277,8 +288,23 @@ define([
 			}
 		},
 		
-		toggleWarningClass: function (cellView, warning) {
-			cellView.vel.toggleClass('warning', warning);
+		resetSearchResults: function () {
+			this.paper.$el.toggleClass(CLASS_SEARCH_RESULTS, false);
+			if (this.searchResults) {
+				this.toggleClass(this.searchResults, CLASS_SEARCH_RESULT, false);
+				this.searchResults = null;
+			}
+		},
+		
+		showSearchResults: function (tasks) {
+			this.resetClasses();
+			this.paper.$el.toggleClass(CLASS_SEARCH_RESULTS, true);
+			this.warningTasks = tasks.map(function (t) {
+				var id = TaskShape.toTaskID(t.id),
+					cellView = paper.findViewByModel(id);
+				cellView.vel.toggleClass(CLASS_SEARCH_RESULT, true);
+				return id;
+			});
 		},
 		
 		setEditMode: function (editMode) {

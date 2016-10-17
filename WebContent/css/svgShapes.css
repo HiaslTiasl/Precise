@@ -125,6 +125,27 @@ rect.task-type-craft {
 }
 
 /******************************************
+ * Search results
+ ******************************************/
+
+.search-results .joint-type-precise-taskshape:not(.search-result) rect,
+.search-results .joint-type-precise-dependencyshape .connection,
+.search-results .joint-type-precise-dependencyshape .marker-target,
+.search-results .joint-type-precise-dependencyshape .alt-cross {
+	stroke: #aaa;
+}
+
+.search-results .joint-type-precise-taskshape:not(.search-result) text,
+.search-results .joint-type-precise-dependencyshape text,
+.search-results .joint-type-precise-dependencyshape .marker-target {
+	fill: #aaa;
+}
+
+.search-results .joint-type-precise-taskshape:not(.search-result) rect {
+	fill: #eee;
+}
+
+/******************************************
  * Warnings
  ******************************************/
  
