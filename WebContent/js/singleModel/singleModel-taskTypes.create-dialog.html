@@ -19,12 +19,13 @@
 			</select>
 		</div>
 		<div class="form-group">
-			<label for="taskType-craft">Craft Name</label>
-			<input id="taskType-craft" type="text" class="form-control" ng-model="$ctrl.taskType.craft"/>
-		</div>
-		<div class="form-group">
-			<label for="taskType-craft-short">Short Craft Name</label>
-			<input id="taskType-craft-short" type="text" class="form-control" ng-model="$ctrl.taskType.craftShort"/>
+			<label for="taskType-craft">Craft</label>
+			<select id="taskType-craft"
+				class="form-control"
+				ng-model="$ctrl.taskType.craft"
+				ng-options="c as (c | withShortName) for c in $ctrl.crafts">
+				<option value="">-- Select a craft --</option>
+			</select>
 		</div>
 	</form>
 </div>

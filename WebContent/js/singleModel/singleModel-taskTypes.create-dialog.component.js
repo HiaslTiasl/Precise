@@ -16,6 +16,7 @@ define([], function () {
 		
 		function $onInit() {
 			$ctrl.phases = $ctrl.resolve.phases;
+			$ctrl.crafts = $ctrl.resolve.crafts;
 		}
 		
 		function createTaskType() {

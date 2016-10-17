@@ -38,7 +38,10 @@ define([
 				component: 'preciseCreateTaskType',
 				resolve: {
 					model: _.constant($ctrl.model),
-					phases: _.constant($ctrl.phases)
+					phases: _.constant($ctrl.phases),
+					crafts: function () {
+						return $ctrl.model.getCrafts();
+					}
 				}
 			}).result.then(loadTaskTypes);
 		}

@@ -52,6 +52,7 @@ define([
 				var processed = _.omit(this.data, dontSendDirectly);
 				if (!this.exists) {
 					processed.phase = PreciseApi.hrefTo(this.data.phase);
+					processed.craft = PreciseApi.hrefTo(this.data.craft);
 					processed.model = PreciseApi.hrefTo(this.model.data);
 				}
 				return processed;

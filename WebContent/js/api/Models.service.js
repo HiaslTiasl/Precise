@@ -128,6 +128,10 @@ define([
 				return this.getList('phases', params);
 			},
 			
+			getCrafts: function (params) {
+				return this.getList('crafts', params);
+			},
+			
 			getTaskTypes: function (params) {
 				return this.getList('taskTypes', params);
 			},
