@@ -31,36 +31,11 @@ define([
 					task.position = randomPosition(randomBBox);
 				return task;
 			}
-			
-//			var baseResource = PreciseApi.fromBase(),
-//				modelHref = PreciseApi.linkTo(modelResource).href;
 		
-			// Use 'search' method since projections are not exposed in associations
 			return $q.all({
-//				tasks: baseResource
-//					.traverse(function (builder) {
-//						return builder.follow('tasks', 'search', 'findByModel', 'tasks[$all]')
-//							.withTemplateParameters({
-//								model: modelHref,
-//								projection: 'expandedTask'
-//							})
-//							.get();
-//					})
 				tasks: modelResource.getTasks({ projection: 'expandedTask' })
-					.then(Pages.collectRemaining)
 					.then(mapArrUsing(_.flow(taskToCell, checkPosition))),
-//				dependencies: baseResource
-//					.traverse(function (builder) {
-//						return builder
-//							.follow('dependencies', 'search', 'findByModel', 'dependencies[$all]')
-//							.withTemplateParameters({
-//								model: modelHref,
-//								projection: 'dependencySummary'
-//							})
-//							.get()
-//					})
 				dependencies: modelResource.getDependencies({ projection: 'dependencySummary' })
-					.then(Pages.collectRemaining)
 					.then(mapArrUsing(dependencyToCell))
 			}).then(function (cells) {
 				return {

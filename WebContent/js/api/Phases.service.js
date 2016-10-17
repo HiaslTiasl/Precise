@@ -46,15 +46,15 @@ define([
 			
 			defaultProjection: 'phaseSummary',
 		
-			getTaskTypes: function () {
+			getTaskTypes: function (params) {
 				var self = this;
 				return PreciseApi.fromBase()
 					.traverse(function (builder) {
 						return builder
 							.follow('taskTypes', 'search', 'findByPhase')
-							.withTemplateParameters({
-								phase: PreciseApi.hrefTo(self.data)
-							})
+							.withTemplateParameters(_.assign({
+								phase: PreciseApi.hrefTo(self.data),
+							}, params))
 							.get();
 					}).then(Pages.wrapper('taskTypes'));
 			}

@@ -85,6 +85,34 @@ define([
 					.traverse(function (builder) {
 						return builder.del();
 					});
+			},
+			
+			get: function (rel, params) {
+				var res = PreciseApi.from(PreciseApi.hrefTo(this.data, rel));
+				
+				return !params ? res.followAndGet()
+					: res.traverse(function (builder) {
+						return builder
+							.withTemplateParameters(params)
+							.getUrl();				
+					}).then(function (url) {
+						var query = 'projection=' + params.projection;
+						if (!_.includes(url, '?'))
+							url = url + '?' + query;
+						else if (!_.includes(url, query))
+							url = url + '&' + query;
+						return PreciseApi.from(url).followAndGet();
+					}, alert);
+			},
+			
+			getPage: function (rel, params) {
+				return this.get(rel, params).then(Pages.wrapper(rel));
+			},
+			
+			getList: function (rel, params) {
+				return this.get(rel, params).then(function (res) {
+					return PreciseApi.embeddedArray(res, rel);
+				});
 			}
 			
 		});

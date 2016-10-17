@@ -37,7 +37,7 @@ define([
 				numberOfWorkersNeeded: 0,
 				durationDays: 1,
 				globalExclusiveness: false,
-				exclusiveness: { type: 'NONE' },
+				exclusiveness: null,
 				orderSpecifications: [],
 				position: task.position
 			});

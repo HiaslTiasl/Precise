@@ -23,7 +23,6 @@ define([
 		
 		function loadTaskTypes() {
 			$ctrl.model.getTaskTypes({ projection: 'expandedTaskType' })
-				.then(Pages.collectRemaining)
 				.then(setTaskTypes, function (err) {
 					console.log(err);
 				});

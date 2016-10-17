@@ -33,7 +33,6 @@ define([
 		
 		function loadPhases() {
 			$ctrl.model.getPhases({ projection: 'expandedPhase' })
-				.then(Pages.collectRemaining)
 				.then(setPhases);
 		}
 		

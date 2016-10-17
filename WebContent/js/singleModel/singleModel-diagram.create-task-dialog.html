@@ -25,14 +25,14 @@
 					ng-model="$ctrl.resource.data.type"
 					ng-options="type as type.name for type in $ctrl.taskTypes"
 					ng-disabled="!$ctrl.taskTypes">
-					<option value="">-- Select a Task --</option>
+					<option value="">-- Select a Definition --</option>
 				</select>
 			</div>
 		</div>
 		<div class="form-group">
 			<label for="craft" class="col-sm-4 control-label">Craft</label>
 			<div class="col-sm-8">
-				<p id="craft" class="form-control-static">{{$ctrl.resource.data.type | withShortName:'craft':'craftShort'}}</p>
+				<p id="craft" class="form-control-static">{{$ctrl.resource.data.type.craft | withShortName }}</p>
 			</div>
 		</div>
 		<div class="form-group">
@@ -54,26 +54,6 @@
 					ng-model="$ctrl.resource.data.numberOfUnitsPerDay"/>
 			</div>
 		</div>
-		<fieldset ng-disabled="!$ctrl.phase">
-			<div class="form-group">
-				<label for="workers" class="col-sm-4 control-label">Exclusiveness</label>
-				<div class="col-sm-8">
-					<div class="checkbox">
-						<label>
-							<input type="checkbox" ng-model="$ctrl.resource.data.globalExclusiveness" ng-change="$ctrl.resource.updateExlusiveness()"> Global
-						</label>
-					</div>
-					<a href
-						editable-select="$ctrl.resource.data.exclusiveness"
-						e-multiple
-						e-ng-options="attr as attr.name for attr in $ctrl.phase.attributes"
-						onaftersave="$ctrl.resource.updateGlobalExclusiveness()"
-						ng-disabled="$ctrl.resource.data.globalExclusiveness">
-						{{ $ctrl.resource.showExclusiveness() || '(no attributes)' }}
-					</a>
-				</div>
-			</div>
-		</fieldset>
 	</div>
 </div>
 <div class="modal-footer">

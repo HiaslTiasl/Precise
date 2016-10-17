@@ -86,36 +86,6 @@ define([
 			
 			defaultProjection: null,
 		
-			searchByModel: function (rel, params) {
-				var templateParams = _.assign({
-					model: PreciseApi.hrefTo(this.data),
-				}, params);
-				return PreciseApi.fromBase()
-					.traverse(function (builder) {
-						return builder
-							.follow(rel, 'search', 'findByModel')
-							.withTemplateParameters(templateParams)
-							.get();
-					}).then(Pages.wrapper(rel));
-			},
-			
-			followToList: function (rel, params) {
-				return PreciseApi.from(PreciseApi.hrefTo(this.data, rel))
-					.traverse(function (builder) {
-						return builder
-							.withTemplateParameters(params)
-							.get();				
-					}).then(function (res) {
-						return PreciseApi.embeddedArray(res, rel);
-					});
-			},
-			
-			getList: function (rel, params) {
-				return params && params.projection
-					? this.searchByModel(rel, params)
-					: this.followToList(rel, params);
-			},
-			
 			getTasks: function (params) {
 				return this.getList('tasks', params);
 			},
@@ -137,7 +107,7 @@ define([
 			},
 			
 			getWarnings: function () {
-				return this.followToList('warnings');
+				return this.getList('warnings');
 			}
 		
 		});

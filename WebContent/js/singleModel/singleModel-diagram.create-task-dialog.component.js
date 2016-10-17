@@ -1,9 +1,9 @@
 define([], function () {
 	'use strict';
 	
-	SingleModelDiagramCreateTaskDialogController.$inject = ['Pages', 'Tasks', 'Phases'];
+	SingleModelDiagramCreateTaskDialogController.$inject = ['Pages', 'Tasks', 'TaskTypes', 'Phases'];
 	
-	function SingleModelDiagramCreateTaskDialogController(Pages, Tasks, Phases) {
+	function SingleModelDiagramCreateTaskDialogController(Pages, Tasks, TaskTypes, Phases) {
 		
 		var $ctrl = this;
 		
@@ -15,17 +15,7 @@ define([], function () {
 		
 		function $onInit() {
 			$ctrl.resource = $ctrl.resolve.resource;
-			loadPhases();
-		}
-		
-		function loadPhases() {
-			$ctrl.resource.model.getPhases({
-				projection: Phases.Resource.prototype.defaultProjection
-			})
-			.then(Pages.collectRemaining)
-			.then(function (phases) {
-				$ctrl.phases = phases;
-			});
+			$ctrl.phases = $ctrl.resolve.phases;
 		}
 		
 		function phaseChanged() {
@@ -33,7 +23,9 @@ define([], function () {
 			$ctrl.taskTypes = null;
 			Phases.existingResource($ctrl.model, $ctrl.phase)
 				.then(function (resource) {
-					return resource.getTaskTypes();
+					return resource.getTaskTypes({
+						projection: TaskTypes.Resource.prototype.defaultProjection
+					});
 				})
 				.then(Pages.collectRemaining)
 				.then(function (taskTypes) {

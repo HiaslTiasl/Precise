@@ -36,7 +36,7 @@ define([
 		};
 		
 		function toLocalRepresentation(scope) {
-			return  {
+			return scope && {
 				type: Types[scope.type],
 				attributes: _.transform(scope.attributes, function (res, attr) {
 					res[attr.name] = true;
@@ -45,7 +45,7 @@ define([
 		}
 		
 		function fromLocalRepresentation(scope, attributes) {
-			return {
+			return scope && {
 				type: scope.type.name,
 				attributes: _.filter(attributes, function (a) {
 					return scope.attributes[a.name];
@@ -54,7 +54,7 @@ define([
 		}
 		
 		function toRequestRepresentation(scope) {
-			return {
+			return scope && {
 				type: scope.type,
 				attributes: _.map(scope.attributes, function (attr) {
 					return PreciseApi.hrefTo(attr);

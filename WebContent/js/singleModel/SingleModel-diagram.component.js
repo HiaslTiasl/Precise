@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelDiagramController.$inject = ['$scope', '$uibModal', 'PreciseApi', 'Tasks', 'Dependencies'];
+	SingleModelDiagramController.$inject = ['$scope', '$uibModal', 'PreciseApi', 'Tasks', 'Dependencies', 'Phases'];
 	
-	function SingleModelDiagramController($scope, $uibModal, PreciseApi, Tasks, Dependencies) {
+	function SingleModelDiagramController($scope, $uibModal, PreciseApi, Tasks, Dependencies, Phases) {
 		
 		var $ctrl = this;
 		
@@ -71,7 +71,10 @@ define([
 			$uibModal.open({
 				component: 'preciseCreateTask',
 				resolve: {
-					resource: _.constant(Tasks.newResource($ctrl.model, data))
+					resource: _.constant(Tasks.newResource($ctrl.model, data)),
+					phases: function () {
+						return $ctrl.model.getPhases(Phases.Resource.prototype.defaultProjection)
+					}
 				}
 			}).result.then(function (result) {
 				$scope.$broadcast('properties:created', 'task', result);

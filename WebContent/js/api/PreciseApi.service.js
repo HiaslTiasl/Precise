@@ -109,6 +109,8 @@ define([
 		}
 		
 		function resolveSuccess(response) {
+			if (typeof response === 'string')	// getUrl was called -> just forward the resulting URL
+				return response;
 			var data = response.body;
 			if (data && typeof data === 'string')
 				data = response.body = response.data = JSON.parse(data);
