@@ -297,9 +297,10 @@ define([
 		},
 		
 		showSearchResults: function (tasks) {
+			var paper = this.paper;
 			this.resetClasses();
-			this.paper.$el.toggleClass(CLASS_SEARCH_RESULTS, true);
-			this.warningTasks = tasks.map(function (t) {
+			paper.$el.toggleClass(CLASS_SEARCH_RESULTS, true);
+			this.searchResults = tasks.map(function (t) {
 				var id = TaskShape.toTaskID(t.id),
 					cellView = paper.findViewByModel(id);
 				cellView.vel.toggleClass(CLASS_SEARCH_RESULT, true);

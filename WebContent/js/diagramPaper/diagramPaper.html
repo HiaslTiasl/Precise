@@ -1,18 +1,13 @@
 <div class="panels">
-	<div class="toolbar" ng-switch on="$ctrl.toolbar">
+	<div class="toolbar" ng-switch on="$ctrl.toolset">
 		<div class="btn-group toolset-chooser" uib-dropdown>
 			<button class="btn btn-default" uib-dropdown-toggle>
-				<span class="glyphicon glyphicon-menu-hamburger"></span> {{$ctrl.toolbar}}
+				<span class="glyphicon glyphicon-menu-hamburger"></span> {{$ctrl.toolset}}
 			</button>
 			<ul class="dropdown-menu" uib-dropdown-menu>
-				<li ng-class="{active: $ctrl.toolbar === 'Edit'}">
-					<a href ng-click="$ctrl.toolbar = 'Edit'">
-						Edit
-					</a>
-				</li>
-				<li ng-class="{active: $ctrl.toolbar === 'View'}">
-					<a href ng-click="$ctrl.toolbar = 'View'">
-						View
+				<li ng-repeat="ts in $ctrl.toolsets" ng-class="{active: $ctrl.toolset === ts}">
+					<a href ng-click="$ctrl.toolset = ts">
+						{{::ts}}
 					</a>
 				</li>
 			</ul>
@@ -42,6 +37,60 @@
 				<input type="checkbox" ng-model="$ctrl.showLabels" ng-change="$ctrl.hideLabelsChanged()">
 				Dependency Scopes
 			</label>
+		</div>
+		<div class="toolset" ng-switch-when="Search">
+			<div class="form-inline">
+				<input
+					type="text"
+					class="form-control"
+					placeholder="search task"
+					ng-model="$ctrl.searchText"/>
+				<button class="btn btn-primary" ng-click="$ctrl.search()">Search</button>
+				<button class="btn btn-default" ng-click="$ctrl.cancelSearch()">Cancel</button>
+				<a
+					href
+					ng-click="$ctrl.advancedSearchMode = !$ctrl.advancedSearchMode">
+					Advanced <span class="caret"></span>
+				</a>
+			</div>
+			<div class="advanced-search" uib-collapse="!$ctrl.advancedSearchMode">
+				<div class="form">
+					<div class="form-group">		
+						<label for="search-id" class="control-label">ID</label>
+						<input id="search-id" type="text" class="form-control" ng-model="$ctrl.searchParams.id"/>
+					</div>
+					<div class="form-group">		
+						<label for="search-phase" class="control-label">Phase</label>
+						<select
+							id="search-phase"
+							class="form-control"
+							ng-model="$ctrl.searchParams.phase"
+							ng-options="p as p.name for p in $ctrl.phases">
+							<option value="">-- Select a phase --</option>
+						</select>
+					</div>
+					<div class="form-group">		
+						<label for="search-def" class="control-label">Definition</label>
+						<select
+							id="search-def"
+							class="form-control"
+							ng-model="$ctrl.searchParams.type"
+							ng-options="t as t.name for t in $ctrl.taskTypes">
+							<option value="">-- Select a definition --</option>
+						</select>
+					</div>
+					<div class="form-group">		
+						<label for="search-craft" class="control-label">Craft</label>
+						<select
+							id="search-craft"
+							class="form-control"
+							ng-model="$ctrl.searchParams.craft"
+							ng-options="c as (c | withShortName) for c in $ctrl.crafts">
+							<option value="">-- Select a definition --</option>
+						</select>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="other-tools">
 			<span>{{100 * $ctrl.zoomScale | number:0}}%</span>

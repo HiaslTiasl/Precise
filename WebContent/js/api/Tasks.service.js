@@ -7,19 +7,50 @@ define([
 ) {
 	'use strict';
 	
-	TasksService.$inject = ['$q', 'PreciseApi', 'Resources', 'Scopes', 'OrderSpecifications'];
+	TasksService.$inject = ['$q', 'PreciseApi', 'Pages', 'Resources', 'Scopes', 'OrderSpecifications'];
 	
-	function TasksService($q, PreciseApi, Resources, Scopes, OrderSpecifications) {
+	function TasksService($q, PreciseApi, Pages, Resources, Scopes, OrderSpecifications) {
 		
 		var Tasks = this;
 		
+		Tasks.searchSimple = searchSimple;
+		Tasks.searchAdvanced = searchAdvanced;
 		Tasks.resource = resource;
 		Tasks.newResource = newResource;
 		Tasks.existingResource = existingResource;
 		Tasks.Resource = Tasks;
+		
 
 		var getAttrName = _.property('name'),
 			dontSendDirectly = ['exclusiveness', 'orderSpecifications', 'type', 'model', '_links'];
+		
+		function searchSimple(model, text) {
+			return PreciseApi.fromBase()
+			.traverse(function (builder) {
+				return builder
+					.follow('tasks', 'search', 'simple')
+					.withTemplateParameters({
+						model: PreciseApi.hrefTo(model),
+						q: text
+					})
+					.get();
+			}).then(Pages.wrapper('tasks'));
+		}
+
+		function searchAdvanced(model, params) {
+			return PreciseApi.fromBase()
+				.traverse(function (builder) {
+					return builder
+						.follow('tasks', 'search', 'advanced')
+						.withTemplateParameters(_.defaults({
+							model: PreciseApi.hrefTo(model),
+							phase: PreciseApi.hrefTo(params.phase),
+							type: PreciseApi.hrefTo(params.type),
+							craft: PreciseApi.hrefTo(params.craft)
+						}, params))
+						.get();
+				}).then(Pages.wrapper('tasks'));
+		}
 		
 		function getData(task, exists) {
 			return exists ? cloneExistingData(task) : initializeData(task);

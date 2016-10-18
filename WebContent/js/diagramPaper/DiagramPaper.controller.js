@@ -7,9 +7,9 @@ define([
 ) {
 	'use strict';
 	
-	DiagramController.$inject = ['$scope', '$rootScope', '$timeout', '$uibModal', 'PreciseApi', 'PreciseDiagramPaper', 'DiagramPaperToolset'];
+	DiagramController.$inject = ['$scope', '$rootScope', '$timeout', '$uibModal', 'PreciseApi', 'PreciseDiagramPaper', 'DiagramPaperToolset', 'Pages', 'Tasks'];
 	
-	function DiagramController($scope, $rootScope, $timeout, $uibModal, PreciseApi, PreciseDiagraPaper, DiagramPaperToolset) {
+	function DiagramController($scope, $rootScope, $timeout, $uibModal, PreciseApi, PreciseDiagraPaper, DiagramPaperToolset, Pages, Tasks) {
 		var $ctrl = this;
 		
 		$ctrl.diagramToolset = DiagramPaperToolset;
@@ -18,21 +18,51 @@ define([
 		$ctrl.hideLocationsChanged = hideLocationsChanged;
 		$ctrl.hideLabelsChanged = hideLabelsChanged;
 		$ctrl.openLegend = openLegend;
+		$ctrl.search = search;
+		$ctrl.cancelSearch = cancelSearch;
 		
 		$ctrl.$onChanges = $onChanges;
 		
-		$ctrl.toolbar = 'Edit';
+		$ctrl.toolsets = ['Edit', 'View', 'Search'];
+		$ctrl.toolset = 'Edit';
 		
 		$ctrl.showLocations = true;
 		$ctrl.showLabels = true;
 		
+		$ctrl.advancedSearchMode = false;
+		
 		function $onChanges(changes) {
-			if ($ctrl.diaPaper) {
-				if (changes.currentWarning)
-					warningsChanged();
-				if (changes.hideLocations)
-					hideLocationsChanged();
+			if (changes.model) {
+				initSearch();
 			}
+		}
+		
+		function initSearch() {
+			$ctrl.searchParams = {};
+			$ctrl.model.getPhases().then(function (phases) {
+				$ctrl.phases = phases;
+			});
+			$ctrl.model.getTaskTypes().then(function (taskTypes) {
+				$ctrl.taskTypes = taskTypes;
+			});
+			$ctrl.model.getCrafts().then(function (crafts) {
+				$ctrl.crafts = crafts;
+			});
+		}
+		
+		function search() {
+			var req = $ctrl.advancedSearchMode
+				? Tasks.searchAdvanced($ctrl.model.data, $ctrl.searchParams)
+				: Tasks.searchSimple($ctrl.model.data, $ctrl.searchText);
+				
+			req.then(Pages.collectRemaining).then(function (tasks) {
+				$ctrl.diaPaper.showSearchResults(tasks)
+			});
+		}
+		
+		function cancelSearch() {
+			$ctrl.searchParams = {};
+			$ctrl.diaPaper.resetSearchResults();
 		}
 		
 		function broadcast() {
