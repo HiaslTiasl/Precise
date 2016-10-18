@@ -21,7 +21,7 @@ public interface TaskRepository extends PagingAndSortingRepository<Task, Long> {
 	@Query("SELECT t FROM Task t"
 			+ " where t.model = :model"
 			+ " AND ("
-				+ " t.id = :q"											// In case of ID, only show exact matches
+				+ " CAST(t.id as string) = :q"							// In case of ID, only show exact matches
 				+ " OR t.type.phase.name LIKE CONCAT('%', :q, '%')"
 				+ " OR t.type.name LIKE CONCAT('%', :q, '%')"
 				+ " OR t.type.craft.name LIKE CONCAT('%', :q, '%')"
