@@ -3,6 +3,8 @@ package it.unibz.precise;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.projection.ProjectionFactory;
+import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.event.ValidatingRepositoryEventListener;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
@@ -18,6 +20,11 @@ public class RepositoryConfiguration extends RepositoryRestConfigurerAdapter {
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
     	// The task ID must be shown in the diagram
         config.exposeIdsFor(Task.class);
+    }
+    
+    @Bean
+    public ProjectionFactory projectionFactory() {
+    	return new SpelAwareProxyProjectionFactory();
     }
     
     /**

@@ -248,12 +248,12 @@ define([
 			}
 		},
 		
-		showWarningForTasks: function (entities) {
+		showWarning: function (warning) {
 			this.resetClasses();
 			var paper = this.paper,
 				graph = paper.model;
-			this.warningEntities = entities.map(function (t) {
-				var id = HAL.hrefTo(t),
+			this.warningEntities = warning.entities.map(function (t) {
+				var id = HAL.resolve(HAL.hrefTo(t)),
 					cellView = paper.findViewByModel(id);
 				cellView.vel.toggleClass(CLASS_WARNING, true);
 				return id;

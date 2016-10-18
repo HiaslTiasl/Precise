@@ -19,7 +19,7 @@ public class ModelLinks {
 		long id = getID.apply(resource);
 		resource.add(
 			service.underBasePath(
-				linkTo(methodOn(WarningsController.class).getWarnings(id, null))
+				linkTo(methodOn(WarningsController.class).getWarnings(id))
 			)
 			.withRel("warnings")
 		);

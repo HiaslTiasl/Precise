@@ -132,7 +132,7 @@ define([
 		
 		function warningsChanged() {
 			if ($ctrl.currentWarning)
-				$ctrl.diaPaper.showWarningForTasks($ctrl.currentWarning.entities, true);
+				$ctrl.diaPaper.showWarning($ctrl.currentWarning);
 			else
 				$ctrl.diaPaper.resetWarnings();
 		}
