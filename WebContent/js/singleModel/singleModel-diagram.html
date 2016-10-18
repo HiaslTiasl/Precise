@@ -5,23 +5,23 @@
 		current-warning="$ctrl.currentWarning"
 		on-structure-changed="$ctrl.reload()">
 	</precise-diagram-paper>
-	<div id="properties-wrapper">
+	<div id="properties-wrapper" ng-switch on="$ctrl.resourceType">
 		<h3>Properties</h3>
 		<task-properties
 			class="properties"
-			ng-if="$ctrl.taskResource"
-			resource="$ctrl.taskResource"
+			ng-switch-when="task"
+			resource="$ctrl.resource"
 			done="$ctrl.done($result)"
 			cancelled="$ctrl.cancelled()">
 		</task-properties>
 		<dependency-properties
 			class="properties"
-			ng-if="$ctrl.dependencyResource"
-			resource="$ctrl.dependencyResource"
+			ng-switch-when="dependency"
+			resource="$ctrl.resource"
 			done="$ctrl.done($result)"
 			cancelled="$ctrl.cancelled()">
 		</dependency-properties>
-		<div ng-if="!$ctrl.activeResource">
+		<div ng-switch-default>
 			Nothing selected.
 		</div>
 	</div>

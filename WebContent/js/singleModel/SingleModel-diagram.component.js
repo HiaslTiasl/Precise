@@ -28,14 +28,14 @@ define([
 		
 		function $onChanges(changes) {
 			if (changes.model) {
-				resetResources();
+				resetResource();
 				loadWarnings();
 			}
 		}
 		
-		function resetResources() {
+		function resetResource() {
 			$ctrl.resourceType = null;
-			$ctrl.activeResource = $ctrl.dependencyResource = $ctrl.taskResource = null;
+			$ctrl.resource = null;
 		}
 		
 		function diagramTaskChangeHandler(event, data) {
@@ -94,29 +94,31 @@ define([
 		
 		function selectTaskHandler(event, selectedView) {
 			var data = selectedView && selectedView.model.get('data');
-			$ctrl.dependencyResource = null;
-			if (!data)
-				resetResources();
-			else {
-				Tasks.existingResource($ctrl.model, data).then(function (res) {
-					$ctrl.resourceType = 'task';
-					$ctrl.activeResource = $ctrl.taskResource = res;
-					$ctrl.dependencyResource = null;
-				});
-			}
+			showTask(data);
 		}
 		
 		function selectDependencyHandler(event, selectedView) {
 			var data = selectedView && selectedView.model.get('data');
+			showDependency(data);
+		}
+		
+		function showProperties(resourceWrapper, resourceType, data) {
 			if (!data)
-				resetResources();
+				resetResource();
 			else {
-				Dependencies.existingResource($ctrl.model, data).then(function (res) {
-					$ctrl.resourceType = 'dependency';
-					$ctrl.activeResource = $ctrl.dependencyResource = res;
-					$ctrl.taskResource = null;
+				resourceWrapper($ctrl.model, data).then(function (res) {
+					$ctrl.resourceType = resourceType;
+					$ctrl.resource = res;
 				});
 			}
+		}
+		
+		function showTask(data) {
+			showProperties(Tasks.existingResource, 'task', data);
+		}
+		
+		function showDependency(data) {
+			showProperties(Dependencies.existingResource, 'dependency', data);			
 		}
 		
 		function loadWarnings() {
@@ -131,6 +133,7 @@ define([
 		
 		function done(result) {
 			$scope.$broadcast('properties:change', $ctrl.resourceType, result);
+			showTask(result);
 		}
 		
 		function cancelled() {
