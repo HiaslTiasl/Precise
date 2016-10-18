@@ -45,6 +45,11 @@ precise-diagram-paper .other-tools .divider::after {
 	content: "|";
 }
 
+#simple-search,
+#advanced-search {
+	width: 20em;
+}
+
 precise-diagram-paper .joint-paper {
 	position: absolute;
 	top: 3em;

@@ -273,7 +273,7 @@ define([
 			this.resetClasses();
 			paper.$el.toggleClass(CLASS_SEARCH_RESULTS, true);
 			this.searchResults = tasks.map(function (t) {
-				var id = HAL.hrefTo(t),
+				var id = HAL.resolve(HAL.hrefTo(t)),
 					cellView = paper.findViewByModel(id);
 				cellView.vel.toggleClass(CLASS_SEARCH_RESULT, true);
 				return id;

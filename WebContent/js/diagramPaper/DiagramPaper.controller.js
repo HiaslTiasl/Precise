@@ -15,6 +15,7 @@ define([
 		$ctrl.diagramToolset = DiagramPaperToolset;
 		$ctrl.onPaperInit = onPaperInit;
 
+		$ctrl.searchQueryChanged = searchQueryChanged;
 		$ctrl.hideLocationsChanged = hideLocationsChanged;
 		$ctrl.hideLabelsChanged = hideLabelsChanged;
 		$ctrl.openLegend = openLegend;
@@ -29,7 +30,9 @@ define([
 		$ctrl.showLocations = true;
 		$ctrl.showLabels = true;
 		
-		$ctrl.advancedSearchMode = false;
+		var searchParamKeyMappings = {
+			type: 'def'
+		};
 		
 		function $onChanges(changes) {
 			if (changes.model) {
@@ -53,18 +56,36 @@ define([
 			});
 		}
 		
+		function searchQueryChanged() {
+			return $ctrl.searchQuery = _.chain($ctrl.searchParams)
+				.keys()
+				.filter(function (k) {
+					return $ctrl.searchParams[k];
+				})
+				.map(function (k) {
+					var val = $ctrl.searchParams[k];
+					return (searchParamKeyMappings[k] || k)
+						+ ':'
+						+ (val.name || val)
+				})
+				.join(', ')
+				.value();
+		}
+		
 		function search() {
-			var req = $ctrl.advancedSearchMode
+			var req = $ctrl.advancedSearch
 				? Tasks.searchAdvanced($ctrl.model.data, $ctrl.searchParams)
 				: Tasks.searchSimple($ctrl.model.data, $ctrl.searchText);
 				
 			req.then(Pages.collectRemaining).then(function (tasks) {
 				$ctrl.diaPaper.showSearchResults(tasks)
 			});
+				
 		}
 		
 		function cancelSearch() {
 			$ctrl.searchParams = {};
+			$ctrl.searchQuery = null;
 			$ctrl.searchText = null;
 			$ctrl.diaPaper.resetSearchResults();
 		}

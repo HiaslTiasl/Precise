@@ -42,64 +42,87 @@
 			<form class="form-inline">
 				<div class="form-group">
 					<input
+						id="simple-search"
 						type="text"
 						class="form-control"
 						placeholder="search task"
-						ng-model="$ctrl.searchText"/>
+						ng-model="$ctrl.searchText"
+						ng-if="!$ctrl.advancedSearch"/>
+					<div
+						id="advanced-search"
+						class="input-group"
+						ng-if="$ctrl.advancedSearch"
+						uib-dropdown
+						dropdown-append-to-body
+						auto-close="outsideClick">
+						<input
+							type="text"
+							class="form-control"
+							ng-model="$ctrl.searchQuery"
+							readonly/>
+						<div class="input-group-btn">
+							<button class="btn btn-default" uib-dropdown-toggle>
+								<span class="glyphicon glyphicon-edit"></span>
+							</button>
+							<ul class="dropdown-menu" uib-dropdown-menu>
+								<li>
+									<div class="container-fluid">
+										<div class="form">
+											<div class="form-group">		
+												<label for="search-id" class="control-label">ID</label>
+												<input
+												id="search-id"
+												type="text"
+												class="form-control"
+												ng-model="$ctrl.searchParams.id"
+												ng-change="$ctrl.searchQueryChanged()"/>
+											</div>
+											<div class="form-group">		
+												<label for="search-phase" class="control-label">Phase</label>
+												<select
+													id="search-phase"
+													class="form-control"
+													ng-model="$ctrl.searchParams.phase"
+													ng-change="$ctrl.searchQueryChanged()"
+													ng-options="p as p.name for p in $ctrl.phases">
+													<option value="">-- Select a phase --</option>
+												</select>
+											</div>
+											<div class="form-group">		
+												<label for="search-def" class="control-label">Definition</label>
+												<select
+													id="search-def"
+													class="form-control"
+													ng-model="$ctrl.searchParams.type"
+													ng-change="$ctrl.searchQueryChanged()"
+													ng-options="t as t.name for t in $ctrl.taskTypes">
+													<option value="">-- Select a definition --</option>
+												</select>
+											</div>
+											<div class="form-group">		
+												<label for="search-craft" class="control-label">Craft</label>
+												<select
+													id="search-craft"
+													class="form-control"
+													ng-model="$ctrl.searchParams.craft"
+													ng-change="$ctrl.searchQueryChanged()"
+													ng-options="c as (c | withShortName) for c in $ctrl.crafts">
+													<option value="">-- Select a definition --</option>
+												</select>
+											</div>
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
 				</div>
 				<div class="form-group">
 					<button type="submit" class="btn btn-primary" ng-click="$ctrl.search()">Search</button>
 					<button class="btn btn-default" ng-click="$ctrl.cancelSearch()">Cancel</button>
-					<span uib-dropdown dropdown-append-to-body auto-close="outsideClick">
-						<a
-							href
-							ng-click="$ctrl.advancedSearchMode = !$ctrl.advancedSearchMode"
-							uib-dropdown-toggle>
-							Advanced <span class="caret"></span>
-						</a>
-						<ul class="dropdown-menu" uib-dropdown-menu>
-							<li>
-								<div class="container-fluid">
-									<form class="form">
-										<div class="form-group">		
-											<label for="search-id" class="control-label">ID</label>
-											<input id="search-id" type="text" class="form-control" ng-model="$ctrl.searchParams.id"/>
-										</div>
-										<div class="form-group">		
-											<label for="search-phase" class="control-label">Phase</label>
-											<select
-												id="search-phase"
-												class="form-control"
-												ng-model="$ctrl.searchParams.phase"
-												ng-options="p as p.name for p in $ctrl.phases">
-												<option value="">-- Select a phase --</option>
-											</select>
-										</div>
-										<div class="form-group">		
-											<label for="search-def" class="control-label">Definition</label>
-											<select
-												id="search-def"
-												class="form-control"
-												ng-model="$ctrl.searchParams.type"
-												ng-options="t as t.name for t in $ctrl.taskTypes">
-												<option value="">-- Select a definition --</option>
-											</select>
-										</div>
-										<div class="form-group">		
-											<label for="search-craft" class="control-label">Craft</label>
-											<select
-												id="search-craft"
-												class="form-control"
-												ng-model="$ctrl.searchParams.craft"
-												ng-options="c as (c | withShortName) for c in $ctrl.crafts">
-												<option value="">-- Select a definition --</option>
-											</select>
-										</div>
-									</form>
-								</div>
-							</li>
-						</ul>
-					</span>
+					<a href ng-click="$ctrl.advancedSearch = !$ctrl.advancedSearch">
+						{{$ctrl.advancedSearch ? 'Simple' : 'Advanced'}}
+					</a>
 				</div>
 			</form>
 		</div>
