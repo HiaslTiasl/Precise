@@ -8,9 +8,10 @@ define([
 	'./Pages.service',
 	'./Resources.service',
 	'./Models.service',
-	'./Tasks.service',
-	'./TaskTypes.service',
 	'./Phases.service',
+	'./Crafts.service',
+	'./TaskTypes.service',
+	'./Tasks.service',
 	'./Dependencies.service',
 	'./withShortName.filter',
 	'./join.filter',
@@ -25,9 +26,10 @@ define([
 	PagesService,
 	ResourcesService,
 	ModelsService,
-	TasksService,
-	TaskTypesService,
 	PhasesService,
+	CraftsService,
+	TaskTypesService,
+	TasksService,
 	DependenciesService,
 	withShortNameFilterFactory,
 	joinFilterFactory
@@ -43,9 +45,10 @@ define([
 		.service('Pages', PagesService)
 		.service('Resources', ResourcesService)
 		.service('Models', ModelsService)
-		.service('Tasks', TasksService)
-		.service('TaskTypes', TaskTypesService)
 		.service('Phases', PhasesService)
+		.service('Crafts', CraftsService)
+		.service('TaskTypes', TaskTypesService)
+		.service('Tasks', TasksService)
 		.service('Dependencies', DependenciesService)
 		.filter('withShortName', withShortNameFilterFactory)
 		.filter('join', joinFilterFactory);

@@ -9,6 +9,8 @@ define([
 	'./SingleModel-config.component',
 	'./singleModel-config.import-dialog.component',
 	'./SingleModel-building.component',
+	'./SingleModel-crafts.component',
+	'./singleModel-crafts.create-dialog.component',
 	'./SingleModel-taskTypes.component',
 	'./singleModel-taskTypes.create-dialog.component',
 	'./taskProperties.component',
@@ -27,6 +29,8 @@ define([
 	singleModelConfigComponent,
 	singleModelConfigImportDialogComponent,
 	singleModelBuildingComponent,
+	singleModelCraftsComponent,
+	singleModelCraftsCreateDialogComponent,
 	singleModelTaskTypesComponent,
 	singleModelTaskTypesCreateDialogComponent,
 	taskPropertiesComponent,
@@ -42,6 +46,8 @@ define([
 		.component('preciseConfig', singleModelConfigComponent)
 		.component('preciseImportConfig', singleModelConfigImportDialogComponent)
 		.component('preciseBuilding', singleModelBuildingComponent)
+		.component('preciseCrafts', singleModelCraftsComponent)
+		.component('preciseCreateCraft', singleModelCraftsCreateDialogComponent)
 		.component('preciseTaskTypes', singleModelTaskTypesComponent)
 		.component('preciseCreateTaskType', singleModelTaskTypesCreateDialogComponent)
 		.component('taskProperties', taskPropertiesComponent)

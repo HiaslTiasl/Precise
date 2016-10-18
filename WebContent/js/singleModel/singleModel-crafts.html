@@ -1,0 +1,28 @@
+<div class="toolbar">
+	<button class="btn btn-default" ng-click="$ctrl.createCraft()" ng-disabled="!$ctrl.phases">Create</button>
+</div>
+<table id="phase-table" class="table table-striped" st-table="$ctrl.coll" st-safe-src="$ctrl.crafts">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Short name</th>
+			<th>Description</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="c in $ctrl.coll">
+			<td>{{c.name}}</td>
+			<td>{{c.shortName}}</td>
+			<td>{{c.description}}</td>
+			<td>
+				<button
+					class="btn btn-default"
+					ng-click="$ctrl.deleteCraft(c)"
+					ng-disabled="!$ctrl.model.data.configInfo.editable">
+					Delete
+				</button>
+			</td>
+		</tr>
+	</tbody>
+</table>
