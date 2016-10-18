@@ -46,7 +46,7 @@ define([
 		
 		function taskToCell(task) {
 			return {
-				id: TaskShape.toTaskID(task.id),
+				id: PreciseApi.hrefTo(task),
 				type: 'precise.TaskShape',
 				data: task
 			};
@@ -54,7 +54,7 @@ define([
 		
 		function dependencyToCell(dependency) {
 			return {
-				id: DependencyShape.toDependencyID(dependency.id),
+				id: PreciseApi.hrefTo(dependency),
 				type: 'precise.DependencyShape',
 				data: dependency
 			};

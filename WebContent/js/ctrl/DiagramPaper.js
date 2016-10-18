@@ -4,6 +4,7 @@ define([
 	'lib/joint',
 	'shapes/TaskShape',
 	'shapes/DependencyShape',
+	'api/hal',
 	'util/util'
 ], function (
 	$,
@@ -11,6 +12,7 @@ define([
 	joint,
 	TaskShape,
 	DependencyShape,
+	HAL,
 	util
 ) {
 	'use strict';
@@ -124,11 +126,10 @@ define([
 				endInfo = DependencyShape.endInfo[end],
 				endVal = cell.get(end);
 			if (endVal.id) {
-				var endCell = this.paper.model.getCell(endVal.id),
-					endData = endCell.get('data');
-				if (endData.id !== data[endInfo.id]) {
+				var endCell = this.paper.model.getCell(endVal.id);
+				if (endVal.id !== HAL.resolve(HAL.hrefTo(data[end]))) {
 					changedData = {};
-					changedData[end] = endData
+					changedData[end] = endCell.get('data')
 					if (endVal.id === cell.get(endInfo.opposite).id && !data.vertices) {
 						var taskView = this.paper.findViewByModel(endCell);
 						changedData[vertices] = DependencyShapeView.computeLoopVertices(taskView);
@@ -138,7 +139,7 @@ define([
 			else if (endVal !== data[endInfo.vertex]) {
 				changedData = {};
 				changedData[end] = null;
-				changedData[endInfo.vertex] = endVal
+				changedData[endInfo.vertex] = endVal;
 			}
 			return changedData;
 		},
@@ -190,15 +191,9 @@ define([
 			this.selectedView.model.set('data', data);
 		},
 		
-		getModelID: function (ns, data) {
-			return ns === NS_TASK
-				? TaskShape.toTaskID(data.id)
-				: DependencyShape.toDependencyID(data.id);
-		},
-		
 		addCell: function (ns, data) {
 			var args = {
-					id: this.getModelID(ns, data), 
+					id: HAL.hrefTo(data), 
 					data: data
 				},
 				cell = ns === NS_TASK ? new TaskShape(args) : new DependencyShape(args);
@@ -208,7 +203,7 @@ define([
 		
 		removeCell: function (ns, data) {
 			this.resetEditMode();
-			var model = this.paper.model.getCell(this.getModelID(ns, data));
+			var model = this.paper.model.getCell(HAL.hrefTo(data));
 			if (model) {
 				model.removedRemotely = true;
 				model.remove();
@@ -247,45 +242,22 @@ define([
 		
 		resetWarnings: function () {
 			var paper = this.paper;
-			if (this.warningTasks) {
-				this.toggleClass(this.warningTasks, CLASS_WARNING, false);
-				this.warningTasks = null;
-			}
-			if (this.warningDependencies) {
-				this.toggleClass(this.warningDependencies, CLASS_WARNING, false);
-				this.warningDependencies = null;
+			if (this.warningEntities) {
+				this.toggleClass(this.warningEntities, CLASS_WARNING, false);
+				this.warningEntities = null;
 			}
 		},
 		
-		showWarningForTasks: function (tasks, withDependencies) {
+		showWarningForTasks: function (entities) {
 			this.resetClasses();
 			var paper = this.paper,
 				graph = paper.model;
-			this.warningTasks = tasks.map(function (t) {
-				var id = TaskShape.toTaskID(t.id),
+			this.warningEntities = entities.map(function (t) {
+				var id = HAL.hrefTo(t),
 					cellView = paper.findViewByModel(id);
 				cellView.vel.toggleClass(CLASS_WARNING, true);
 				return id;
 			});
-			if (withDependencies) {
-				var dependencies = [];
-				this.warningTasks.forEach(function (id) {
-					graph.getConnectedLinks(graph.getCell(id), {
-						outbound: true,
-						inbound: false
-					}).forEach(function (d) {
-						var target = d.get('target');
-						if (target.id) {
-							var targetView = paper.findViewByModel(target.id);
-							if (targetView.vel.hasClass(CLASS_WARNING)) {
-								paper.findViewByModel(d).vel.toggleClass(CLASS_WARNING, true);
-								dependencies.push(target.id);
-							}
-						}
-					});
-				})
-				this.warningDependencies = dependencies;
-			}
 		},
 		
 		resetSearchResults: function () {
@@ -301,7 +273,7 @@ define([
 			this.resetClasses();
 			paper.$el.toggleClass(CLASS_SEARCH_RESULTS, true);
 			this.searchResults = tasks.map(function (t) {
-				var id = TaskShape.toTaskID(t.id),
+				var id = HAL.hrefTo(t),
 					cellView = paper.findViewByModel(id);
 				cellView.vel.toggleClass(CLASS_SEARCH_RESULT, true);
 				return id;

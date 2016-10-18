@@ -101,11 +101,6 @@ public class Dependency extends BaseEntity {
 	public void internalSetSource(Task source) {
 		this.source = source;
 	}
-	
-	@Transient
-	public Long getSourceID() {
-		return source == null ? null : source.getId();
-	}
 
 	public Task getTarget() {
 		return target;
@@ -117,11 +112,6 @@ public class Dependency extends BaseEntity {
 	
 	void internalSetTarget(Task target) {
 		this.target = target;
-	}
-	
-	@Transient
-	public Long getTargetID() {
-		return target == null ? null : target.getId();
 	}
 
 	public boolean isAlternate() {

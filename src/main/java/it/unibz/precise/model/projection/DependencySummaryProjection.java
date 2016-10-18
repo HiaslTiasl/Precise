@@ -13,10 +13,6 @@ public interface DependencySummaryProjection {
 	
 	long getId();
 	
-	Long getSourceID();
-	
-	Long getTargetID();
-	
 	EmptyProjection getSource();
 	
 	EmptyProjection getTarget();

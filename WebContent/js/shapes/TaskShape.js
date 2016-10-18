@@ -3,12 +3,14 @@ define([
 	'lib/joint',
 	'shapes/TemplateUtil',
 	'api/colors',
+	'api/hal',
 	'util/util'
 ], function (
 	_,
 	joint,
 	TemplateUtil,
 	colors,
+	HAL,
 	util
 ) {
 	
@@ -104,7 +106,7 @@ define([
 			this.attrCount = options.data.type.phase.attributes.length;
 			this.locationsHeight = this.attrCount * LOC_ROW_HEIGHT;
 
-			this.set('id', TaskShape.toTaskID(options.data.id));
+			this.set('id', HAL.hrefTo(options.data));
 			
 			this.on('change:data', this.update, this);
 			this.on('change:hideLocations', this.updateHideLocations, this);
@@ -215,11 +217,7 @@ define([
 		NAME_POS_Y: HEADER_ROW_HEIGHT,
 		NAME_HEIGHT: NAME_HEIGHT,
 		LOC_POS_Y: LOC_POS_Y,
-		DEFAULT_HEIGHT: DEFAULT_HEIGHT,
-		
-		toTaskID: function (id) {
-			return 'task-' + id;
-		}
+		DEFAULT_HEIGHT: DEFAULT_HEIGHT		
 	}));
 	
 	// http://stackoverflow.com/a/30275325

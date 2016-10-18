@@ -9,26 +9,15 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapt
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import it.unibz.precise.model.Attribute;
-import it.unibz.precise.model.Dependency;
-import it.unibz.precise.model.Location;
-import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
 
 @Configuration
 public class RepositoryConfiguration extends RepositoryRestConfigurerAdapter {
 
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
-        config.exposeIdsFor(
-        	Attribute.class,
-        	Phase.class,
-        	TaskType.class,
-        	Task.class,
-        	Location.class,
-        	Dependency.class
-        );
+    	// The task ID must be shown in the diagram
+        config.exposeIdsFor(Task.class);
     }
     
     /**

@@ -1,12 +1,12 @@
 define([
 	'lib/lodash',
 	'lib/joint',
-	'shapes/TaskShape',
+	'api/hal',
 	'util/util'
 ], function (
 	_,
 	joint,
-	TaskShape,
+	HAL,
 	util
 ) {
 	'use strict';
@@ -78,7 +78,7 @@ define([
 		}, joint.dia.Link.prototype.defaults),
 		
 		initialize: function (options) {
-			this.set('id', DependencyShape.toDependencyID(options.data.id));
+			this.set('id', HAL.hrefTo(options.data));
 			
 			this.on('change:data', this.update, this);
 			this.on('change:hideLabels', this.updateHideLabels, this);
@@ -96,8 +96,8 @@ define([
 			var data = this.get('data') || {};
 			
 			this.set({
-				source: data.sourceID ? DependencyShape.idToEndpoint(data.sourceID) : data.sourceVertex,
-				target: data.targetID ? DependencyShape.idToEndpoint(data.targetID) : data.targetVertex,
+				source: data.source ? { id: HAL.resolve(HAL.hrefTo(data.source)) } : data.sourceVertex,
+				target: data.target ? { id: HAL.resolve(HAL.hrefTo(data.target)) } : data.targetVertex,
 				vertices: data.vertices
 			});
 			this.label(0, {
@@ -129,24 +129,12 @@ define([
 		
 	}, {
 		// Static properties
-		toDependencyID: function (id) {
-			return 'dependency-' + id;
-		},
-		
-		idToEndpoint: function (id) {
-			return {
-				id: TaskShape.toTaskID(id)
-			};
-		},
-		
 		endInfo: {
 			source: {
-				id: 'sourceID',
 				vertex: 'sourceVertex',
 				opposite: 'target'
 			},
 			target: {
-				id: 'targetID',
 				vertex: 'targetVertex',
 				opposite: 'source'
 			}

@@ -75,11 +75,6 @@ public class Task extends BaseEntity {
 		this.type = type;
 	}
 	
-	@Transient
-	public Long getTypeID() {
-		return type == null ? null : type.getId();
-	}
-	
 	public Position getPosition() {
 		return position;
 	}

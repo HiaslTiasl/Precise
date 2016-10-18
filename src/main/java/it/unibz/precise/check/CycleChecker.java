@@ -2,13 +2,17 @@ package it.unibz.precise.check;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.unibz.precise.model.BaseEntity;
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.Task;
@@ -38,12 +42,18 @@ public class CycleChecker implements ConsistencyChecker {
 	
 	private ConsistencyWarning warning(List<Task> tasks) {
 		Collections.reverse(tasks);
+		Set<Task> taskSet = new HashSet<>(tasks);
+		Stream<Dependency> dependencies = tasks.stream()
+			.map(Task::getOut)
+			.flatMap(List::stream)
+			.filter(d -> taskSet.contains(d.getTarget()));
+		List<BaseEntity> entities = Stream.concat(tasks.stream(), dependencies).collect(Collectors.toList());
 		String msg = WARNING_MESSAGE
 			+ tasks.stream()
 				.map(Task::getId)
 				.map(String::valueOf)
 				.collect(Collectors.joining(", "));
-		return new ConsistencyWarning(WARNING_TYPE, msg, tasks);
+		return new ConsistencyWarning(WARNING_TYPE, msg, entities);
 	}
 	
 	// Usage example
