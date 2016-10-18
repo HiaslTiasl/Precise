@@ -24,13 +24,13 @@ define([
 	var WIDTH = MAX_LOC_COL_COUNT * LOC_COL_WIDTH,
 		HEADER_ROW_HEIGHT = LOC_ROW_HEIGHT,
 		HEADER_COL_WIDTH = WIDTH / 4,
-		NAME_HEIGHT = 2 * HEADER_ROW_HEIGHT,
+		NAME_HEIGHT = 2.5 * HEADER_ROW_HEIGHT,
 		LOC_POS_Y = HEADER_ROW_HEIGHT + NAME_HEIGHT,
 		DEFAULT_HEIGHT = LOC_POS_Y + DEFAULT_LOC_HEIGHT;
 	
 	var NAME_PADDING = {
-		x: 10,
-		y: 2
+		x: 5,
+		y: 1
 	};
 	
 	var WILDCARD_VALUE = "*";
@@ -169,12 +169,12 @@ define([
 				'text.task-id':              { text: '#' + data.id },
 				'text.task-workers-needed':  { text: data.numberOfWorkersNeeded + 'w' },
 				'text.task-units-per-day':   {
-					text: unitsPerDay + 'u\u2044d',
-					annotations: [ {
-						start: unitsPerDay.length,
-						end: unitsPerDay.length + 3,
-						attrs: { 'font-size': '0.8em', 'dy': '-0.35em 0.35em 0.35em' }
-					} ]
+					text: unitsPerDay,// + 'u\u2044d',
+					//annotations: [ {
+					//	start: unitsPerDay.length,
+					//	end: unitsPerDay.length + 3,
+					//	attrs: { 'font-size': '0.8em', 'dy': '-0.35em 0.35em 0.35em' }
+					//} ]
 				},
 				'text.task-type-craft':      { text: data.type.craft.shortName }
 			};
