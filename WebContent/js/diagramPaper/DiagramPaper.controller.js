@@ -35,6 +35,9 @@ define([
 			if (changes.model) {
 				initSearch();
 			}
+			if (changes.currentWarning && $ctrl.diaPaper) {
+				warningsChanged();
+			}
 		}
 		
 		function initSearch() {
@@ -62,6 +65,7 @@ define([
 		
 		function cancelSearch() {
 			$ctrl.searchParams = {};
+			$ctrl.searchText = null;
 			$ctrl.diaPaper.resetSearchResults();
 		}
 		
