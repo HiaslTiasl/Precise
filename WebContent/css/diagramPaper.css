@@ -31,15 +31,6 @@ precise-diagram-paper .toolset {
 	display: inline-block;
 }
 
-precise-diagram-paper .toolset .advanced-search {
-	position: absolute;
-	top: 3em;
-	z-index: 400;
-	background: white;
-	border: 1px solid #888;
-	box-shadow: 1px 1px 4px 1px #888;
-	padding: 0.2em;
-}
 
 precise-diagram-paper .other-tools {
 	float: right;

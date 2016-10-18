@@ -39,58 +39,69 @@
 			</label>
 		</div>
 		<div class="toolset" ng-switch-when="Search">
-			<div class="form-inline">
-				<input
-					type="text"
-					class="form-control"
-					placeholder="search task"
-					ng-model="$ctrl.searchText"/>
-				<button class="btn btn-primary" ng-click="$ctrl.search()">Search</button>
-				<button class="btn btn-default" ng-click="$ctrl.cancelSearch()">Cancel</button>
-				<a
-					href
-					ng-click="$ctrl.advancedSearchMode = !$ctrl.advancedSearchMode">
-					Advanced <span class="caret"></span>
-				</a>
-			</div>
-			<div class="advanced-search" uib-collapse="!$ctrl.advancedSearchMode">
-				<div class="form">
-					<div class="form-group">		
-						<label for="search-id" class="control-label">ID</label>
-						<input id="search-id" type="text" class="form-control" ng-model="$ctrl.searchParams.id"/>
-					</div>
-					<div class="form-group">		
-						<label for="search-phase" class="control-label">Phase</label>
-						<select
-							id="search-phase"
-							class="form-control"
-							ng-model="$ctrl.searchParams.phase"
-							ng-options="p as p.name for p in $ctrl.phases">
-							<option value="">-- Select a phase --</option>
-						</select>
-					</div>
-					<div class="form-group">		
-						<label for="search-def" class="control-label">Definition</label>
-						<select
-							id="search-def"
-							class="form-control"
-							ng-model="$ctrl.searchParams.type"
-							ng-options="t as t.name for t in $ctrl.taskTypes">
-							<option value="">-- Select a definition --</option>
-						</select>
-					</div>
-					<div class="form-group">		
-						<label for="search-craft" class="control-label">Craft</label>
-						<select
-							id="search-craft"
-							class="form-control"
-							ng-model="$ctrl.searchParams.craft"
-							ng-options="c as (c | withShortName) for c in $ctrl.crafts">
-							<option value="">-- Select a definition --</option>
-						</select>
-					</div>
+			<form class="form-inline">
+				<div class="form-group">
+					<input
+						type="text"
+						class="form-control"
+						placeholder="search task"
+						ng-model="$ctrl.searchText"/>
 				</div>
-			</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary" ng-click="$ctrl.search()">Search</button>
+					<button class="btn btn-default" ng-click="$ctrl.cancelSearch()">Cancel</button>
+					<span uib-dropdown dropdown-append-to-body auto-close="outsideClick">
+						<a
+							href
+							ng-click="$ctrl.advancedSearchMode = !$ctrl.advancedSearchMode"
+							uib-dropdown-toggle>
+							Advanced <span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu" uib-dropdown-menu>
+							<li>
+								<div class="container-fluid">
+									<form class="form">
+										<div class="form-group">		
+											<label for="search-id" class="control-label">ID</label>
+											<input id="search-id" type="text" class="form-control" ng-model="$ctrl.searchParams.id"/>
+										</div>
+										<div class="form-group">		
+											<label for="search-phase" class="control-label">Phase</label>
+											<select
+												id="search-phase"
+												class="form-control"
+												ng-model="$ctrl.searchParams.phase"
+												ng-options="p as p.name for p in $ctrl.phases">
+												<option value="">-- Select a phase --</option>
+											</select>
+										</div>
+										<div class="form-group">		
+											<label for="search-def" class="control-label">Definition</label>
+											<select
+												id="search-def"
+												class="form-control"
+												ng-model="$ctrl.searchParams.type"
+												ng-options="t as t.name for t in $ctrl.taskTypes">
+												<option value="">-- Select a definition --</option>
+											</select>
+										</div>
+										<div class="form-group">		
+											<label for="search-craft" class="control-label">Craft</label>
+											<select
+												id="search-craft"
+												class="form-control"
+												ng-model="$ctrl.searchParams.craft"
+												ng-options="c as (c | withShortName) for c in $ctrl.crafts">
+												<option value="">-- Select a definition --</option>
+											</select>
+										</div>
+									</form>
+								</div>
+							</li>
+						</ul>
+					</span>
+				</div>
+			</form>
 		</div>
 		<div class="other-tools">
 			<span>{{100 * $ctrl.zoomScale | number:0}}%</span>
