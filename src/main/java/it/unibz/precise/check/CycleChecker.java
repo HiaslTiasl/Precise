@@ -29,15 +29,14 @@ public class CycleChecker implements ConsistencyChecker {
 	private SCCFinder sccFinder;
 	
 	@Override
-	public List<ConsistencyWarning> check(Model model) {
+	public Stream<ConsistencyWarning> check(Model model) {
 		List<Task> tasks = model.getTasks();
 		List<List<Integer>> adj = AdjacencyLists.from(tasks);
 		List<List<Integer>> sccs = sccFinder.findSCCs(adj);
 		return sccs.stream()
 			.filter(c -> c.size() > 1)
 			.map(c -> Util.mapToList(c, tasks::get))
-			.map(this::warning)
-			.collect(Collectors.toList());
+			.map(this::warning);
 	}
 	
 	private ConsistencyWarning warning(List<Task> tasks) {
@@ -53,7 +52,7 @@ public class CycleChecker implements ConsistencyChecker {
 				.map(Task::getId)
 				.map(String::valueOf)
 				.collect(Collectors.joining(", "));
-		return new ConsistencyWarning(WARNING_TYPE, msg, entities);
+		return new ConsistencyWarning(WARNING_TYPE, msg, entities, null);
 	}
 	
 	// Usage example
@@ -88,7 +87,7 @@ public class CycleChecker implements ConsistencyChecker {
 		Model model = new Model();
 		model.setTasks(tasks);
 
-		new CycleChecker().check(model).stream().map(ConsistencyWarning::getMessage).forEach(System.out::println);
+		new CycleChecker().check(model).map(ConsistencyWarning::getMessage).forEach(System.out::println);
 	}
 	
 }

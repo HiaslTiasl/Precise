@@ -1,11 +1,11 @@
 package it.unibz.precise.check;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 import it.unibz.precise.model.Model;
 
 public interface ConsistencyChecker {
 	
-	List<ConsistencyWarning> check(Model model);
+	Stream<ConsistencyWarning> check(Model model);
 
 }

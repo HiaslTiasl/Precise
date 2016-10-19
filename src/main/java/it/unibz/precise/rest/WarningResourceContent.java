@@ -39,5 +39,31 @@ public class WarningResourceContent {
 	public List<?> getEntities() {
 		return Util.mapToList(warning.getEntities(), entityMapper::apply);
 	}
+	
+	@JsonProperty("locations")
+	public List<?> getLocations() {
+		return Util.mapToList(
+			warning.getLocations(),
+			l -> new LocationContent(entityMapper.apply(l.getTask()), l.getIndex())
+		);
+	}
+	
+	public static class LocationContent {
+		private Object task;
+		private int index;
+		
+		public LocationContent(Object task, int index) {
+			this.task = task;
+			this.index = index;
+		}
+
+		public Object getTask() {
+			return task;
+		}
+		
+		public int getIndex() {
+			return index;
+		}
+	}
 
 }

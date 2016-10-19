@@ -100,12 +100,10 @@ public class CycleCheckerTest {
 		
 		Set<Set<Task>> expectedTaskSets = toExpectedTaskSets(tasks, expectedSCCs);
 
-		List<ConsistencyWarning> warnings = cycleChecker.check(model);
-		
-		Set<? extends Set<? extends BaseEntity>> foundSCCs = warnings.stream()
-				.map(ConsistencyWarning::getEntities)
-				.map(es -> new HashSet<>(es))
-				.collect(Collectors.toSet());
+		Set<? extends Set<? extends BaseEntity>> foundSCCs = cycleChecker.check(model)
+			.map(ConsistencyWarning::getEntities)
+			.map(es -> new HashSet<>(es))
+			.collect(Collectors.toSet());
 		
 		Assert.assertEquals(expectedTaskSets, foundSCCs);
 	}

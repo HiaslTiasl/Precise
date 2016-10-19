@@ -149,6 +149,7 @@ rect.task-type-craft {
  ******************************************/
  
 .joint-type-precise-taskshape.warning rect,
+.joint-type-precise-taskshape rect.warning,
 .joint-type-precise-dependencyshape.warning .connection,
 .joint-type-precise-dependencyshape.warning .marker-target,
 .joint-type-precise-dependencyshape.warning .alt-cross {

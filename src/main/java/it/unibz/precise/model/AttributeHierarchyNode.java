@@ -1,9 +1,14 @@
 package it.unibz.precise.model;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -80,10 +85,16 @@ public class AttributeHierarchyNode extends BaseEntity {
 	void internalSetParent(AttributeHierarchyNode parent) {
 		this.parent = parent;
 	}
-
-	@Transient
-	public Long getParentID() {
-		return parent == null ? null : parent.getId();
+	
+	public Iterator<AttributeHierarchyNode> ancestors() {
+		return new AncestorIterator(this);
+	}
+	
+	public Stream<AttributeHierarchyNode> ancestorStream() {
+		return StreamSupport.stream(
+			Spliterators.spliteratorUnknownSize(ancestors(), Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL),
+			false
+		);
 	}
 	
 	public Map<String, AttributeHierarchyNode> getChildren() {
@@ -168,6 +179,28 @@ public class AttributeHierarchyNode extends BaseEntity {
 		for (int i = pattern.size(); i < len; i++)
 			addToPattern(pattern, levels.get(i).getAttribute(), PatternEntry.WILDCARD_VALUE);
 		return pattern;
+	}
+	
+	private static class AncestorIterator implements Iterator<AttributeHierarchyNode> {
+			
+		private AttributeHierarchyNode next;
+		
+		private AncestorIterator(AttributeHierarchyNode start) {
+			next = start;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return next != null;
+		}
+
+		@Override
+		public AttributeHierarchyNode next() {
+			AttributeHierarchyNode cur = next;
+			next = next.getParent();
+			return cur;
+		}
+			
 	}
 	
 }

@@ -44,6 +44,10 @@ define([
 		}
 	};
 	
+	function idOfEntity(e) {
+		return HAL.resolve(HAL.hrefTo(e));
+	}
+	
 	var DiagramPaper = util.defineClass(Backbone.Events, {
 		
 		constructor: function DiagramPaper(paper) {
@@ -228,10 +232,20 @@ define([
 			});
 		},
 		
-		toggleClass: function (cellIDs, clazz, toggle) {
+		toggleEntityClass: function (cellIDs, clazz, toggle) {
 			var paper = this.paper;
-			cellIDs.forEach(function (id) {
+			_.forEach(cellIDs, function (id) {
 				paper.findViewByModel(id).vel.toggleClass(clazz, toggle);
+			});
+		},
+		
+		toggleLocationClass: function (locs, clazz, toggle) {
+			var paper = this.paper;
+			_.forEach(locs, function (l) {
+				paper.findViewByModel(idOfEntity(l.task))
+					.vel.find('.loc-num-' + l.index).forEach(function (v) {
+						v.toggleClass(clazz, toggle);
+					});
 			});
 		},
 		
@@ -243,7 +257,11 @@ define([
 		resetWarnings: function () {
 			var paper = this.paper;
 			if (this.warningEntities) {
-				this.toggleClass(this.warningEntities, CLASS_WARNING, false);
+				this.toggleEntityClass(this.warningEntities, CLASS_WARNING, false);
+				this.warningEntities = null;
+			}
+			if (this.warningLocations) {
+				this.toggleLocationClass(this.warningLocations, CLASS_WARNING, false);
 				this.warningEntities = null;
 			}
 		},
@@ -252,18 +270,18 @@ define([
 			this.resetClasses();
 			var paper = this.paper,
 				graph = paper.model;
-			this.warningEntities = warning.entities.map(function (t) {
-				var id = HAL.resolve(HAL.hrefTo(t)),
-					cellView = paper.findViewByModel(id);
-				cellView.vel.toggleClass(CLASS_WARNING, true);
-				return id;
-			});
+			
+			this.warningEntities = _.map(warning.entities, idOfEntity);
+			this.toggleEntityClass(this.warningEntities, CLASS_WARNING, true);
+			
+			this.warningLocations = warning.locations;
+			this.toggleLocationClass(this.warningLocations, CLASS_WARNING, true);
 		},
 		
 		resetSearchResults: function () {
 			this.paper.$el.toggleClass(CLASS_SEARCH_RESULTS, false);
 			if (this.searchResults) {
-				this.toggleClass(this.searchResults, CLASS_SEARCH_RESULT, false);
+				this.toggleEntityClass(this.searchResults, CLASS_SEARCH_RESULT, false);
 				this.searchResults = null;
 			}
 		},
@@ -272,12 +290,10 @@ define([
 			var paper = this.paper;
 			this.resetClasses();
 			paper.$el.toggleClass(CLASS_SEARCH_RESULTS, true);
-			this.searchResults = tasks.map(function (t) {
-				var id = HAL.resolve(HAL.hrefTo(t)),
-					cellView = paper.findViewByModel(id);
-				cellView.vel.toggleClass(CLASS_SEARCH_RESULT, true);
-				return id;
+			this.searchResults = _.map(tasks, function (t) {
+				return HAL.resolve(HAL.hrefTo(t));
 			});
+			this.toggleEntityClass(this.searchResults, CLASS_SEARCH_RESULT, true);
 		},
 		
 		setEditMode: function (editMode) {

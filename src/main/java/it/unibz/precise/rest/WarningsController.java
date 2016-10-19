@@ -1,6 +1,7 @@
 package it.unibz.precise.rest;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.projection.ProjectionFactory;
@@ -11,8 +12,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import it.unibz.precise.check.ConsistencyChecker;
 import it.unibz.precise.check.ConsistencyWarning;
-import it.unibz.precise.check.CycleChecker;
 import it.unibz.precise.model.BaseEntity;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.projection.EmptyProjection;
@@ -23,7 +24,7 @@ import it.unibz.util.Util;
 public class WarningsController {
 	
 	@Autowired
-	private CycleChecker cycleChecker;
+	private ConsistencyChecker checker;
 	
 	@Autowired
 	private ModelRepository modelRepository;
@@ -36,7 +37,7 @@ public class WarningsController {
 		Model model = modelRepository.findOne(id);
 		if (model == null)
 			return ResponseEntity.notFound().build();
-		List<ConsistencyWarning> warnings = cycleChecker.check(model);
+		List<ConsistencyWarning> warnings = checker.check(model).collect(Collectors.toList());
 		List<WarningResourceContent> projected = Util.mapToList(warnings, w -> new WarningResourceContent(w, this::mapEntity));
 		
 		return ResponseEntity.ok(new Resources<>(projected));

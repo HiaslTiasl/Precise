@@ -95,6 +95,4 @@ public class TaskType extends BaseEntity {
 		this.model = model;
 	}
 
-	public void checkOverlappingLocations() {}
-
 }
