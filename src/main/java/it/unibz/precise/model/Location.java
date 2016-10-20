@@ -32,7 +32,10 @@ public class Location {
 	
 	public void setNode(AttributeHierarchyNode node) {
 		this.node = node;
-		this.level = node == null ? 0 : node.getLevel().getPosition();
+	}
+	
+	public void update() {
+		level = node == null ? 0 : node.getLevel().getPosition();		
 	}
 	
 }

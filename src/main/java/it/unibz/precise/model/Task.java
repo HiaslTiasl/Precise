@@ -1,9 +1,12 @@
 package it.unibz.precise.model;
 
+import it.unibz.util.Util;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
@@ -19,8 +22,6 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import it.unibz.util.Util;
 
 @Entity
 @JsonPropertyOrder(value={"type"})
@@ -97,6 +98,10 @@ public class Task extends BaseEntity {
 	public void addLocation(Location location) {
 		locations.add(location);
 		locationPatterns.add(locationToPattern(location));
+	}
+	
+	public void updateLocations() {
+		locations.forEach(Location::update);
 	}
 	
 	public void updateLocationPatterns() {
@@ -242,6 +247,7 @@ public class Task extends BaseEntity {
 
 	@PostLoad
 	public void updateDependentFields() {
+		updateLocations();
 		updateLocationPatterns();
 		updateExclusiveness();
 	}
