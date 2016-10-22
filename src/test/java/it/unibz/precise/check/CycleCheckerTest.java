@@ -101,7 +101,11 @@ public class CycleCheckerTest {
 		Set<Set<Task>> expectedTaskSets = toExpectedTaskSets(tasks, expectedSCCs);
 
 		Set<? extends Set<? extends BaseEntity>> foundSCCs = cycleChecker.check(model)
-			.map(ConsistencyWarning::getEntities)
+			.map(w -> w.getEntities()
+				.stream()
+				.filter(Task.class::isInstance)
+				.collect(Collectors.toList())
+			)
 			.map(es -> new HashSet<>(es))
 			.collect(Collectors.toSet());
 		

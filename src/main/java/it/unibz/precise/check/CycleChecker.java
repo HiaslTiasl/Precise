@@ -31,11 +31,9 @@ public class CycleChecker implements ConsistencyChecker {
 	@Override
 	public Stream<ConsistencyWarning> check(Model model) {
 		List<Task> tasks = model.getTasks();
-		List<List<Integer>> adj = AdjacencyLists.from(tasks);
-		List<List<Integer>> sccs = sccFinder.findSCCs(adj);
+		List<List<Task>> sccs = sccFinder.findSCCs(tasks, t -> t.getOut().stream().map(Dependency::getTarget));
 		return sccs.stream()
 			.filter(c -> c.size() > 1)
-			.map(c -> Util.mapToList(c, tasks::get))
 			.map(this::warning);
 	}
 	
