@@ -24,7 +24,7 @@ import it.unibz.util.Util;
 public class WarningsController {
 	
 	@Autowired
-	private ConsistencyChecker checker;
+	private List<ConsistencyChecker> consistencyCheckers;
 	
 	@Autowired
 	private ModelRepository modelRepository;
@@ -37,7 +37,9 @@ public class WarningsController {
 		Model model = modelRepository.findOne(id);
 		if (model == null)
 			return ResponseEntity.notFound().build();
-		List<ConsistencyWarning> warnings = checker.check(model).collect(Collectors.toList());
+		List<ConsistencyWarning> warnings = consistencyCheckers.stream()
+			.flatMap(c -> c.check(model))
+			.collect(Collectors.toList());
 		List<WarningResourceContent> projected = Util.mapToList(warnings, w -> new WarningResourceContent(w, this::mapEntity));
 		
 		return ResponseEntity.ok(new Resources<>(projected));
