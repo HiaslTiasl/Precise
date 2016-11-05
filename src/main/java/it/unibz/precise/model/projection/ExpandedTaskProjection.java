@@ -8,23 +8,28 @@ import org.springframework.data.rest.core.config.Projection;
 import it.unibz.precise.model.PatternEntry;
 import it.unibz.precise.model.Position;
 import it.unibz.precise.model.Task;
+import it.unibz.precise.model.Task.DurationType;
 
 @Projection(name="expandedTask", types=Task.class)
 public interface ExpandedTaskProjection {
 	
 	long getId();
+	
+	DurationType getDurationType();
+	
+	Integer getTotalQuantity();
 
-	float getNumberOfWorkersNeeded();
+	Integer getCrewSize();
 	
-	int getDurationDays();
+	Integer getCrewCount();
 	
-	int getDurationHours();
+	Integer getDurationDays();
 	
-	float getUnitsPerDay();
+	Integer getDurationHours();
+	
+	Float getQuantityPerDay();
 	
 	int getUnits();
-	
-	boolean isGlobalExclusiveness();
 	
 	ScopeSummaryProjection getExclusiveness();
 

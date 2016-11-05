@@ -64,7 +64,7 @@ precise-diagram-paper {
  ******************************************/
 
 #id,
-#units-per-day,
+#quantity-per-day,
 #craft {
 	border: none;
 	box-shadow: none;
@@ -75,13 +75,13 @@ precise-diagram-paper {
 	color: white;
 }
 
-#workers {
+#crew-size {
 	background-color: #F6BEC8;
 	background-color: #D4C8E1;
 	background-color: #E6F4FF;
 }
 
-#units-per-day {
+#quantity-per-day {
 	background-color: #FFE9C4;
 	background-color: #F8D9E0;
 	background-color: #FFFBE5;
@@ -143,7 +143,7 @@ precise-diagram-paper {
 #warnings article {
 	height: 100px;
 	min-width: 400px;
-	overflow-y: scroll;
+	overflow: scroll;
 }
 
 #warnings.panel,

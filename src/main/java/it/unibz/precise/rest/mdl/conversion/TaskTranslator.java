@@ -21,9 +21,12 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 
 	@Override
 	public void updateMDL(Task task, MDLTaskAST mdlTask) {
-		TaskType taskType = task.getType();
-		mdlTask.setDefinition(context().taskTypes().toMDL(taskType));
-		mdlTask.setNumberOfWorkersNeeded(task.getNumberOfWorkersNeeded());
+		mdlTask.setDefinition(context().taskTypes().toMDL(task.getType()));
+		mdlTask.setDurationType(task.getDurationType());
+		mdlTask.setTotalQuantity(task.getTotalQuantity());
+		mdlTask.setQuantityPerDay(task.getQuantityPerDay());
+		mdlTask.setCrewSize(task.getCrewSize());
+		mdlTask.setCrewCount(task.getCrewCount());
 		mdlTask.setDurationDays(task.getDurationDays());
 		mdlTask.setExclusiveness(context().scopes().toMDL(task.getExclusiveness()));
 		mdlTask.setOrder(Util.mapToList(task.getOrderSpecifications(),context().orderSpecs()::toMDL));
@@ -34,9 +37,12 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 	@Override
 	public void updateEntity(MDLTaskAST mdlTask, Task task) {
 		TaskType taskType = context().taskTypes().toEntity(mdlTask.getDefinition());
-		
 		task.setType(taskType);
-		task.setNumberOfWorkersNeeded(mdlTask.getNumberOfWorkersNeeded());
+		task.setDurationType(mdlTask.getDurationType());
+		task.setTotalQuantity(mdlTask.getTotalQuantity());
+		task.setQuantityPerDay(mdlTask.getQuantityPerDay());
+		task.setCrewSize(mdlTask.getCrewSize());
+		task.setCrewCount(mdlTask.getCrewCount());
 		task.setDurationDays(mdlTask.getDurationDays());
 		task.setExclusiveness(context().scopes().toEntity(mdlTask.getExclusiveness()));
 		task.setOrderSpecifications(Util.mapToList(mdlTask.getOrder(),context().orderSpecs()::toEntity));

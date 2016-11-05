@@ -9,7 +9,9 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator;
 public class MDLTaskTypeAST {
 	
 	private String name;
+	private String shortName;
 	private String description;
+	private String unitOfMeasure;
 	private MDLPhaseAST phase;
 	private MDLCraftAST craft;
 	
@@ -21,6 +23,14 @@ public class MDLTaskTypeAST {
 		this.name = name;
 	}
 
+	public String getShortName() {
+		return shortName;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
+	}
+
 	public String getDescription() {
 		return description;
 	}
@@ -29,6 +39,14 @@ public class MDLTaskTypeAST {
 		this.description = description;
 	}
 	
+	public String getUnitOfMeasure() {
+		return unitOfMeasure;
+	}
+
+	public void setUnitOfMeasure(String unitOfMeasure) {
+		this.unitOfMeasure = unitOfMeasure;
+	}
+
 	public MDLPhaseAST getPhase() {
 		return phase;
 	}

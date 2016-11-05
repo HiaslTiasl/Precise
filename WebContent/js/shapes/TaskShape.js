@@ -37,8 +37,8 @@ define([
 	
 	var sharedClasses = [
 		'task-id',
-		'task-workers-needed',
-		'task-units-per-day',
+		'task-crew-size',
+		'task-quantity-per-day',
 		'task-type-craft',
 		'task-type-name',
 		'task-order',
@@ -74,13 +74,13 @@ define([
 					width: WIDTH,
 					'follow-scale': true
 				},
-				'rect.task-id, rect.task-workers-needed, rect.task-units-per-day, rect.task-type-craft': {
+				'rect.task-id, rect.task-crew-size, rect.task-quantity-per-day, rect.task-type-craft': {
 					width: HEADER_COL_WIDTH,
 					height: HEADER_ROW_HEIGHT
 				},
 				'rect.task-id':             { x: 0 * HEADER_COL_WIDTH },
-				'rect.task-workers-needed': { x: 1 * HEADER_COL_WIDTH },
-				'rect.task-units-per-day':  { x: 2 * HEADER_COL_WIDTH },
+				'rect.task-crew-size': { x: 1 * HEADER_COL_WIDTH },
+				'rect.task-quantity-per-day':  { x: 2 * HEADER_COL_WIDTH },
 				'rect.task-type-craft':     { x: 3 * HEADER_COL_WIDTH },
 				
 				'rect.task-type-name': { y: HEADER_ROW_HEIGHT, height: NAME_HEIGHT },
@@ -117,23 +117,29 @@ define([
 		},
 		
 		updateHideLocations: function (model, hideLocations) {
-			var nameHeight = hideLocations ? model.locationsHeight + NAME_HEIGHT : NAME_HEIGHT,
+			model.attr('.loc-entry, .trunc', { display: hideLocations ? 'none' : 'inline' });
+			model.updateName();
+		},
+		
+		updateName: function () {
+			var hideLocations = this.get('hideLocations'),
+				nameHeight = hideLocations ? this.locationsHeight + NAME_HEIGHT : NAME_HEIGHT,
 				fontSize = hideLocations ? '150%' : '100%',
-				nameStyle = { 'font-size': fontSize };
+				nameStyle = { 'font-size': fontSize },
+				type = this.get('data').type,
+				nameText = type.shortName + ' - ' + type.name;
 			this.attr({
 				'rect.task-type-name': { height: nameHeight },
 				'text.task-type-name':       {
 					style: nameStyle,
-					text: joint.util.breakText(model.get('data').type.name, {
+					text: joint.util.breakText(nameText, {
 						width: WIDTH - 2 * NAME_PADDING.x,
 						height: nameHeight - 2 * NAME_PADDING.y
 					}, {
 						'style': 'font-size:' + fontSize
 					})
-				},
-				'.loc-entry, .trunc': { display: hideLocations ? 'none' : 'inline' }
+				}
 			});
-			
 		},
 		
 		update: function () {
@@ -145,9 +151,11 @@ define([
 				locationPatterns = data.locationPatterns,
 				width = WIDTH,
 				height = LOC_POS_Y + this.locationsHeight,
-				unitsPerDay = util.isInteger(data.unitsPerDay) 
-					? data.unitsPerDay.toString()
-					: data.unitsPerDay.toFixed(1);
+				crewSize = isNaN(data.crewSize) ? '' : data.crewSize,
+				quantityPerDay = isNaN(data.quantityPerDay) ? ''
+					: util.isInteger(data.quantityPerDay) 
+						? data.quantityPerDay.toString()
+						: data.quantityPerDay.toFixed(1);
 
 			if (exclusive) {
 				width += 10;
@@ -164,19 +172,12 @@ define([
 					height: height,
 					transform: exclusive ? 'translate(-5,-5)' : ''
 				},
-				'rect.task-type-name':       { fill: colors.toCSS(data.type.phase.color) },
-				'rect.task-locations':       { height: this.locationsHeight },
-				'text.task-id':              { text: '#' + data.id },
-				'text.task-workers-needed':  { text: data.numberOfWorkersNeeded + 'w' },
-				'text.task-units-per-day':   {
-					text: unitsPerDay,// + 'u\u2044d',
-					//annotations: [ {
-					//	start: unitsPerDay.length,
-					//	end: unitsPerDay.length + 3,
-					//	attrs: { 'font-size': '0.8em', 'dy': '-0.35em 0.35em 0.35em' }
-					//} ]
-				},
-				'text.task-type-craft':      { text: data.type.craft.shortName }
+				'rect.task-type-name':        { fill: colors.toCSS(data.type.phase.color) },
+				'rect.task-locations':        { height: this.locationsHeight },
+				'text.task-id':               { text: '#' + data.id },
+				'text.task-crew-size':        { text: crewSize },
+				'text.task-quantity-per-day': { text: quantityPerDay },
+				'text.task-type-craft':       { text: data.type.craft.shortName }
 			};
 			if (locationPatterns) {
 				attrs['text.trunc'] = {
@@ -208,7 +209,7 @@ define([
 				}
 				this.attr(attrs);
 			}
-			this.updateHideLocations(this, this.get('hideLocations'));
+			this.updateName();
 		}
 		
 	}, {

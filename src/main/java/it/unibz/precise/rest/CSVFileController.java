@@ -1,5 +1,6 @@
 package it.unibz.precise.rest;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Model;
+import it.unibz.precise.model.PatternEntry;
 import it.unibz.precise.model.Task;
+import it.unibz.precise.model.TaskType;
 import it.unibz.precise.rep.ModelRepository;
 
 @RestController
@@ -23,6 +26,8 @@ import it.unibz.precise.rep.ModelRepository;
 	produces="text/csv"
 )
 public class CSVFileController {
+	
+	private static final String ESCAPE = "\"";
 	
 	@Autowired
 	private ModelRepository repository;
@@ -41,8 +46,9 @@ public class CSVFileController {
 	public ResponseEntity<?> findOne(
 		@PathVariable("name") String name,
 		@RequestParam(name="separator", defaultValue=",") String sep,
-		@RequestParam(name="listSeparator", defaultValue=", ") String listSep,
-		@RequestParam(name="newline", defaultValue="\n") String nl
+		@RequestParam(name="locSeparator", defaultValue=", ") String locSep,
+		@RequestParam(name="taskSeparator", defaultValue=", ") String taskSep,
+		@RequestParam(name="newline", defaultValue="\r\n") String nl
 	) {
 		Model model = repository.findByName(name);
 		if (model == null)
@@ -51,7 +57,7 @@ public class CSVFileController {
 		String headerRow = headerRow(sep);
 		
 		String dataRows = model.getTasks().stream()
-			.map(t -> dataRow(t, sep, listSep))
+			.map(t -> dataRow(t, sep, locSep, taskSep))
 			.collect(Collectors.joining(nl));
 		
 		return ResponseEntity.ok()
@@ -60,20 +66,46 @@ public class CSVFileController {
 	}
 	
 	private static String headerRow(String sep) {
-		return String.join(sep, "Task", "Workers", "Duration", "Predecessors");
+		return String.join(sep,
+			"Name",
+			"Acronym",
+			"ID",
+			"Crew Size",
+			"Crew Count",
+			"Duration",
+			"Unit of Measure",
+			"Total Quantity",
+			"Quantity Per Day",
+			"Man-hours",
+			"Locations",
+			"Predecessors"
+		);
 	}
 	
-	private static String dataRow(Task task, String sep, String listSep) {
+	private static String dataRow(Task task, String sep, String locSep, String taskSep) {
+		TaskType type = task.getType();
 		return Stream.of(
+			type.getName(),
+			type.getShortName(),
 			task.getId(),
-			task.getNumberOfWorkersNeeded(),
+			task.getCrewSize(),
+			task.getCrewCount(),
 			task.getDurationDays(),
+			type.getUnitOfMeasure(),
+			task.getTotalQuantity(),
+			task.getQuantityPerDay(),
+			task.getManHours(),
+			task.getLocationPatterns().stream()
+				.map(PatternEntry::toValueString)
+				.collect(Collectors.joining(locSep)),
 			task.getIn().stream()
 				.map(Dependency::getSource)
-				.map(Task::getId)
+				.map(t -> task.getType().getShortName() + '(' + t.getId() + ')')
 				.map(String::valueOf)
-				.collect(Collectors.joining(listSep, "\"", "\""))
-		).map(String::valueOf).collect(Collectors.joining(sep));
+				.collect(Collectors.joining(taskSep))
+		)
+		.map(cell -> ESCAPE + Objects.toString(cell, "") + ESCAPE)
+		.collect(Collectors.joining(sep));
 	}
 	
 }

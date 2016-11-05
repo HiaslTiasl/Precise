@@ -1,12 +1,9 @@
 package it.unibz.precise.model;
 
-import it.unibz.util.Util;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
@@ -17,16 +14,23 @@ import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import it.unibz.util.Util;
+
 @Entity
 @JsonPropertyOrder(value={"type"})
 @JsonIgnoreProperties(value={"unitsPerDay", "durationHours"}, allowGetters=true)
 public class Task extends BaseEntity {
+
+	public static final int DEFAULT_CREW_COUNT = 1;
+	
+	public enum DurationType { MANUAL, AUTO }
 
 	@NotNull(message="{task.type.required}")
 	@ManyToOne
@@ -47,13 +51,22 @@ public class Task extends BaseEntity {
 	@Embedded
 	private Scope exclusiveness = new Scope(Scope.Type.UNIT);
 	
-	private int numberOfWorkersNeeded;
+	private Integer totalQuantity;
 	
-	private int durationDays;
+	@Min(0)
+	private Integer crewSize;
 	
+	@Min(0)
+	private Integer crewCount;
+	
+	private DurationType durationType = DurationType.AUTO;
+	
+	@Min(0)
+	private Integer durationDays;
+	
+	private Float quantityPerDay;
+
 	private int units;
-	
-	private boolean globalExclusiveness;
 	
 	@OneToMany(mappedBy="target")
 	private List<Dependency> in = new ArrayList<>();
@@ -140,30 +153,81 @@ public class Task extends BaseEntity {
 		orderSpecifications.add(orderSpecification);
 	}
 	
-	public int getNumberOfWorkersNeeded() {
-		return numberOfWorkersNeeded;
+	public Integer getTotalQuantity() {
+		return totalQuantity;
 	}
 
-	public void setNumberOfWorkersNeeded(int numberOfWorkersNeeded) {
-		this.numberOfWorkersNeeded = numberOfWorkersNeeded;
+	public void setTotalQuantity(Integer totalQuantity) {
+		this.totalQuantity = totalQuantity;
 	}
 
-	public int getDurationDays() {
+	public Integer getCrewSize() {
+		return crewSize;
+	}
+
+	public void setCrewSize(Integer crewSize) {
+		this.crewSize = crewSize;
+	}
+
+	public Integer getCrewCount() {
+		return crewCount;
+	}
+
+	public void setCrewCount(Integer crewCount) {
+		this.crewCount = crewCount;
+	}
+
+	public DurationType getDurationType() {
+		return durationType;
+	}
+
+	public void setDurationType(DurationType durationType) {
+		this.durationType = durationType;
+	}
+	
+	public void updateDuration() {
+		switch (durationType) {
+		case AUTO:
+			durationDays = (int)Math.ceil(totalQuantity / quantityPerDay);
+			if (crewCount == null)
+				crewCount = 1;
+			break;
+		case MANUAL:
+			totalQuantity = crewSize = crewCount = null;
+			quantityPerDay = null;
+			break;
+		}
+	}
+
+	public Integer getDurationDays() {
 		return durationDays;
 	}
 
-	public void setDurationDays(int durationDays) {
+	public void setDurationDays(Integer durationDays) {
 		this.durationDays = durationDays;
 	}
 	
 	public int getDurationHours() {
-		return model.getHoursPerDay() * durationDays; 
+		return (int)(model.getHoursPerDay() * (
+			durationType == DurationType.MANUAL
+				? durationDays
+				: totalQuantity / quantityPerDay
+		));
 	}
 	
-	public float getUnitsPerDay() {
-		return (float)units / durationDays;
+	public Float getQuantityPerDay() {
+		return quantityPerDay;
 	}
 
+	public void setQuantityPerDay(Float quantityPerDay) {
+		this.quantityPerDay = quantityPerDay;
+	}
+
+	public Integer getManHours() {
+		return crewSize == null || crewCount == null ? null
+			: crewSize * crewCount * getDurationHours();
+	}
+	
 	public int getUnits() {
 		return units;
 	}
@@ -185,14 +249,6 @@ public class Task extends BaseEntity {
 
 	public void setExclusiveness(Scope exclusiveness) {
 		this.exclusiveness = exclusiveness;
-	}
-
-	public boolean isGlobalExclusiveness() {
-		return globalExclusiveness;
-	}
-
-	public void setGlobalExclusiveness(boolean globalExclusiveness) {
-		this.globalExclusiveness = globalExclusiveness;
 	}
 
 	public Model getModel() {
@@ -250,6 +306,7 @@ public class Task extends BaseEntity {
 		updateLocations();
 		updateLocationPatterns();
 		updateExclusiveness();
+		updateDuration();
 	}
 	
 }

@@ -15,7 +15,7 @@ public class NonExistingLocationException extends InvalidLocationException {
 	public NonExistingLocationException(Map<String, PatternEntry> pattern,
 		Map<String, PatternEntry> parentPattern, String attrName, String value)
 	{
-		super(pattern, "There is no " + attrName + "=" + value + " in location " + PatternEntry.toString(parentPattern));
+		super(pattern, "There is no " + attrName + "=" + value + " in location " + PatternEntry.toKeyValueString(parentPattern));
 	}
 
 }

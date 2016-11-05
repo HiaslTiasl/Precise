@@ -62,10 +62,17 @@ public class PatternEntry {
 		return value != null && !PatternEntry.WILDCARD_VALUE.equals(value);
 	}
 	
-	public static String toString(Map<String, PatternEntry> pattern) {
+	public static String toKeyValueString(Map<String, PatternEntry> pattern) {
 		return pattern == null ? "[]" : pattern.values().stream()
 			.map(e -> e.getAttributeName() + "=" + e.getValue())
 			.collect(Collectors.joining(", ", "[", "]"));
+	}
+	
+	public static String toValueString(Map<String, PatternEntry> pattern) {
+		return pattern == null ? WILDCARD_VALUE
+			: pattern.values().stream()
+				.map(PatternEntry::getValue)
+				.collect(Collectors.joining("-"));
 	}
 	
 }

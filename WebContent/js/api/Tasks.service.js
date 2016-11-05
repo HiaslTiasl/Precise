@@ -65,9 +65,11 @@ define([
 		function initializeData(task) {
 			return $q.when({
 				type: null,
-				numberOfWorkersNeeded: 0,
-				durationDays: 1,
-				globalExclusiveness: false,
+				durationType: 'AUTO',
+				totalQuantity: 0,
+				quantityPerDay: 0,
+				crewSize: 1,
+				crewCount: 1,
 				exclusiveness: null,
 				orderSpecifications: [],
 				position: task.position

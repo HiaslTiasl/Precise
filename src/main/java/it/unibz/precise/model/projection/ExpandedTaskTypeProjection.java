@@ -10,7 +10,11 @@ public interface ExpandedTaskTypeProjection {
 
 	String getName();
 	
+	String getShortName();
+	
 	String getDescription();
+	
+	String getUnitOfMeasure();
 	
 	Craft getCraft();
 	

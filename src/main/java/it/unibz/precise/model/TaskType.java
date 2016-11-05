@@ -14,13 +14,17 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(uniqueConstraints={
-	@UniqueConstraint(columnNames={"model_id", "name"})
+	@UniqueConstraint(columnNames={"model_id", "name"}),
+	@UniqueConstraint(columnNames={"model_id", "shortName"})
 })
 public class TaskType extends BaseEntity {
 	
 	@Column(nullable=false)
 	private String name;
+	@Column(nullable=false)
+	private String shortName;
 	private String description;
+	private String unitOfMeasure;
 	
 	@ManyToOne
 	private Craft craft;
@@ -42,12 +46,28 @@ public class TaskType extends BaseEntity {
 		this.name = name;
 	}
 
+	public String getShortName() {
+		return shortName;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
+	}
+
 	public String getDescription() {
 		return description;
 	}
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getUnitOfMeasure() {
+		return unitOfMeasure;
+	}
+
+	public void setUnitOfMeasure(String unitOfMeasure) {
+		this.unitOfMeasure = unitOfMeasure;
 	}
 
 	public Craft getCraft() {
