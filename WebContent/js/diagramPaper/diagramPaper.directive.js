@@ -35,7 +35,8 @@ function (
 	            tools: '<',
 	            hideLocations: '<',
 	            currentWarning: '<',
-				onStructureChanged: '&'
+				onStructureChanged: '&',
+				onZoom: '&'
 	        },
 	        controller: 'DiagramPaperController',
 	        controllerAs: '$ctrl',
@@ -87,7 +88,6 @@ function (
 					panEnabled: false,
 					beforePan: beforePan,
 					minZoom: 0.1,
-					onZoom: wrapInTimeout(onZoom),
 					// http://ariutta.github.io/svg-pan-zoom/demo/mobile.html
 					customEventsHandler: {
 						haltEventListeners: [/*'touchstart', 'touchend',*/ 'touchmove'/*, 'touchleave', 'touchcancel'*/],
@@ -135,9 +135,9 @@ function (
 			        			paper.mousedblclick($.Event(ev.srcEvent));
 			        		});
 			        		// Prevent moving the page on some devices when panning over SVG
-//			        		options.svgElement.addEventListener('touchmove', function (e) {
-//			        			e.preventDefault();
-//			        		});
+			        		options.svgElement.addEventListener('touchmove', function (e) {
+			        			e.preventDefault();
+			        		});
 			        	},
 			        	destroy: function() {
 			        		this.hammer.destroy();
@@ -152,11 +152,7 @@ function (
 				
 				scope.$on('render:done', initialPanAndZoom);
 				scope.$on('diagram:change', updateBBox);
-				model.on('add remove', wrapInTimeout(updateBBox));
-				
-				function wrapInTimeout(fn) {
-					return _.partial($timeout, fn, 0, true);
-				}
+				model.on('add remove', $ctrl.wrapInTimeout(updateBBox));
 				
 				// http://ariutta.github.io/svg-pan-zoom/demo/limit-pan.html
 				function beforePan(oldPan, newPan) {
@@ -195,32 +191,8 @@ function (
 					paperPanZoom.center();
 				}
 				
-				function onZoom(scale) {
-					$ctrl.zoomScale = scale;
-				}
-				
+				$ctrl.paperPanZoom = paperPanZoom;				
 				$ctrl.onPaperInit(paper);
-	        	
-	        	// TODO: Either find a better way or don't support key shortcuts.
-	        	// the following effectively captures events, but in too many cases.
-	        	// For example, when the user presses `Del` while editing a task property,
-	        	// the `keyup` event is captured and the task is deleted.
-	        	
-	        	// One options: 
-	        	
-//	        	angular.element($window).on('keyup', function (event) {
-//	        		scope.$on('keyup', function (event) {
-//		        		switch (event.keyCode) {
-//		    			case 46:	// Del
-//		    				var view = $ctrl.diaPaper.selectedView;
-//		    				if (view)
-//		    					scope.$emit('cell:delete', $ctrl.diaPaper.selectedNS, view.model.get('data'))
-//		    				break;
-//		    			case 26:	// Esc
-//		    				$ctrl.diaPaper.resetEditMode();
-//		    				break;
-//		    			}
-//		        	});
 	        } 
 	    };
 	}

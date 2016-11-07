@@ -21,6 +21,9 @@ define([
 		$ctrl.openLegend = openLegend;
 		$ctrl.search = search;
 		$ctrl.cancelSearch = cancelSearch;
+		$ctrl.zoomChanged = zoomChanged;
+		
+		$ctrl.wrapInTimeout = wrapInTimeout;
 		
 		$ctrl.$onChanges = $onChanges;
 		
@@ -119,6 +122,12 @@ define([
 			
 			// diagram -> remote
 			$scope.$on('diagram:remove', onDiagramRemove);
+			
+			$ctrl.paperPanZoom.setOnZoom(wrapInTimeout(onZoom));
+		}
+		
+		function wrapInTimeout(fn) {
+			return _.partial($timeout, fn, 0, true);
 		}
 		
 		function onRenderDone(event) {
@@ -164,6 +173,14 @@ define([
 		
 		function hideLabelsChanged() {
 			$ctrl.diaPaper.toggleHideLabels(!$ctrl.showLabels);
+		}
+		
+		function onZoom(scale) {
+			$ctrl.zoomScale = Math.round(scale * 100);
+		}
+		
+		function zoomChanged() {
+			$ctrl.paperPanZoom.zoom($ctrl.zoomScale / 100);
 		}
 		
 		function openLegend() {

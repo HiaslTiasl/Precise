@@ -23,7 +23,7 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 		mdlDependency.setLabelPosition(dependency.getLabelPosition());
 		mdlDependency.setScope(context().scopes().toMDL(dependency.getScope()));
 	}
-	
+
 	@Override
 	public void updateEntity(MDLDependencyAST mdlDependency, Dependency dependency) {
 		dependency.setAlternate(mdlDependency.isAlternate());
@@ -32,8 +32,8 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 		dependency.setTarget(context().tasks().toEntity(mdlDependency.getTarget()));
 		dependency.setSourceVertex(mdlDependency.getSourceVertex());
 		dependency.setTargetVertex(mdlDependency.getTargetVertex());
-		// N.B. we use a new collection to prevent errors when converting forth and back,
-		// since embedded collections cannot be shared
+		// N.B. we defensively use a new collection to prevent errors when converting forth and back,
+		// since embedded collections cannot be shared.
 		dependency.setVertices(new ArrayList<>(mdlDependency.getVertices()));
 		dependency.setLabelPosition(mdlDependency.getLabelPosition());
 		dependency.setScope(context().scopes().toEntity(mdlDependency.getScope()));

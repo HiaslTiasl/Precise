@@ -126,11 +126,29 @@
 				</div>
 			</form>
 		</div>
-		<div class="other-tools">
-			<span>{{100 * $ctrl.zoomScale | number:0}}%</span>
-			<a href ng-click="$ctrl.fitAndCenter()"><span class="glyphicon glyphicon-fullscreen"></span></a>
+		<div class="other-tools form-inline">
+			Zoom:
+			<span class="input-group">
+				<input
+					type="number"
+					class="form-control"
+					ng-model="$ctrl.zoomScale"
+					ng-change="$ctrl.zoomChanged()"/>
+				<span class="input-group-addon">%</span>
+			</span>
+			<button class="btn btn-default btn-sm" ng-click="$ctrl.paperPanZoom.zoomIn()">
+				<span class="glyphicon glyphicon-plus"></span>
+			</button>
+			<button class="btn btn-default btn-sm" ng-click="$ctrl.paperPanZoom.zoomOut()">
+				<span class="glyphicon glyphicon-minus"></span>
+			</button>
+			<button class="btn btn-default btn-sm" ng-click="$ctrl.fitAndCenter()">
+				<span class="glyphicon glyphicon-fullscreen"></span>
+			</button>
 			<span class="divider"></span>
-			<a href ng-click="$ctrl.openLegend()"><span class="glyphicon glyphicon-info-sign"></span></a>
+			<a href ng-click="$ctrl.openLegend()">
+				<span class="glyphicon glyphicon-info-sign">
+			</span></a>
 		</div>
 	</div>
 	<div class="joint-paper"></div>
