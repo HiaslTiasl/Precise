@@ -59,7 +59,8 @@ define([
 		}
 		
 		function duplicateModel(model) {
-			
+			return AllModels.duplicateModel(model)
+				.then(refreshModels);
 		}
 		
 		function deleteModel(model) {

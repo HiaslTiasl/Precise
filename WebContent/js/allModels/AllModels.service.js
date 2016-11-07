@@ -15,6 +15,7 @@ define([
 		svc.importFile = importFile;
 		svc.renameModel = renameModel;
 		svc.deleteModel = deleteModel;
+		svc.duplicateModel = duplicateModel;
 		svc.cachedModels = null;
 		svc.clearCache = clearCache;
 		
@@ -61,6 +62,10 @@ define([
 				.existingResource(model)
 				.delete()
 				.then(clearCache);
+		}
+		
+		function duplicateModel(model) {
+			return MDLFiles.duplicate(MDLFiles.urlToModel(model.name + ' - copy'), model.name)
 		}
 	}
 	

@@ -1,5 +1,6 @@
 package it.unibz.precise.rest.mdl.conversion;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,8 +54,8 @@ public class PhaseTranslator extends AbstractMDLTranslator<Phase, MDLPhaseAST> {
 	private void walkTree(List<AttributeHierarchyLevel> levels, int levelIndex, Object tree, AttributeHierarchyNode parent) {
 		if (tree instanceof Integer)
 			walkTreeLevel(levels, levelIndex, (int)tree, parent);
-		else if (tree instanceof List)
-			walkTreeLevel(levels, levelIndex, (List<?>)tree, parent);
+		else if (tree instanceof Collection)
+			walkTreeLevel(levels, levelIndex, (Collection<?>)tree, parent);
 		else if (tree instanceof Map)
 			walkTreeLevel(levels, levelIndex, (Map<?,?>)tree, parent);
 	}
@@ -67,7 +68,7 @@ public class PhaseTranslator extends AbstractMDLTranslator<Phase, MDLPhaseAST> {
 			createNode(level, parent, attr.checkValue(value));
 	}
 	
-	private void walkTreeLevel(List<AttributeHierarchyLevel> levels, int levelIndex, List<?> leafs, AttributeHierarchyNode parent) {
+	private void walkTreeLevel(List<AttributeHierarchyLevel> levels, int levelIndex, Collection<?> leafs, AttributeHierarchyNode parent) {
 		AttributeHierarchyLevel level = levels.get(levelIndex);
 		Attribute attr = level.getAttribute();
 		for (Object value : leafs)

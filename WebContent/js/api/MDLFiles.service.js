@@ -11,10 +11,16 @@ define([], function () {
 		svc.urlToModel = urlToModel;
 		svc.urlToFile = urlToFile;
 		svc.importJSON = importJSON;
+		svc.duplicate = duplicate;
 		svc.clearConfig = clearConfig;
 		
 		var basePath = 'files/',
 			configPath = '/config';
+		
+		var headers = {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json'
+		};
 		
 		function fileNameOf(model) {
 			var name = typeof model === 'object' ? model.name : model;
@@ -46,11 +52,17 @@ define([], function () {
 				url: uri,
 				method: 'PUT',
 				data: json,
-				headers: {
-					'Content-Type': 'application/json',
-					'Accept': 'application/json'
-				}
+				headers: headers,
 			}).then(PreciseApi.getResponseData);
+		}
+		
+		function duplicate(uri, srcName) {
+			return $http({
+				url: uri,
+				method: 'PUT',
+				headers: headers,
+				params: { use: srcName }
+			})
 		}
 		
 	}

@@ -74,11 +74,17 @@ public class MDLFileController {
 	)
 	public ResponseEntity<?> save(
 		@PathVariable("name") String name,
-		@Valid @RequestBody MDLFileAST modelDTO,
+		@Valid @RequestBody(required=false) MDLFileAST modelDTO,
 		Errors errors,
-		@RequestParam(defaultValue="false") boolean update)
+		@RequestParam(defaultValue="false") boolean update,
+		@RequestParam(name="use", required=false) String srcName)
 	{
-		if (update) {
+		if (modelDTO == null && srcName != null) {
+			modelDTO = new MDLContext().files().toMDL(repository.findByName(srcName));
+			if (modelDTO == null)
+				return ResponseEntity.notFound().build();
+		}
+		else if (update) {
 			// If explicitly requested, allow to overwrite a model with the given name
 			Model oldModel = repository.findByName(name);
 			if (oldModel != null) {
