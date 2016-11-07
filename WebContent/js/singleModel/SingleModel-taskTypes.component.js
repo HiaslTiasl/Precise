@@ -36,7 +36,9 @@ define([
 			var modalInstance = $uibModal.open({
 				component: 'preciseCreateTaskType',
 				resolve: {
-					model: _.constant($ctrl.model),
+					model: function () {
+						return TaskTypes.newResource($ctrl.model)
+					},
 					phases: _.constant($ctrl.phases),
 					crafts: function () {
 						return $ctrl.model.getCrafts();

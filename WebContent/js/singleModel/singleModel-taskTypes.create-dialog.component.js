@@ -7,24 +7,19 @@ define([], function () {
 		
 		var $ctrl = this;
 		
-		$ctrl.taskType = {};
-		
 		$ctrl.createTaskType = createTaskType;
 		$ctrl.cancel = cancel;
 		
 		$ctrl.$onInit = $onInit;
 		
 		function $onInit() {
+			$ctrl.resource = $ctrl.resolve.resource;
 			$ctrl.phases = $ctrl.resolve.phases;
 			$ctrl.crafts = $ctrl.resolve.crafts;
 		}
 		
 		function createTaskType() {
-			TaskTypes
-				.newResource($ctrl.resolve.model, $ctrl.taskType)
-				.then(function (resource) {
-					return resource.create();
-				})
+			$ctrl.resource.create()
 				.then($ctrl.modalInstance.close);
 		}
 		

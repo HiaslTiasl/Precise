@@ -5,12 +5,12 @@
 	<div class="form-horizontal">
 		<div class="form-group">
 			<label for="phase" class="col-sm-4 control-label">Phase</label>
-			<div class="col-sm-8">
+			<div class="col-sm-6">
 				<select
 					id="phase"
 					class="form-control"
 					ng-model="$ctrl.phase"
-					ng-options="phase as phase.name for phase in $ctrl.phases"
+					ng-options="phase as phase.name for phase in $ctrl.phases track by phase.name"
 					ng-change="$ctrl.phaseChanged()">
 					<option value="">-- Select a Phase --</option>
 				</select>
@@ -18,15 +18,21 @@
 		</div>
 		<div class="form-group">
 			<label for="type" class="col-sm-4 control-label">Definition</label>
-			<div class="col-sm-8">
+			<div class="col-sm-6">
 				<select
 					id="type"
 					class="form-control"
 					ng-model="$ctrl.resource.data.type"
-					ng-options="type as (type.shortName + ' - ' + type.name) for type in $ctrl.taskTypes"
+					ng-options="type as (type.shortName + ' - ' + type.name) for type in $ctrl.taskTypes track by type.name"
+					ng-change="$ctrl.taskDefinitionChanged()"
 					ng-disabled="!$ctrl.taskTypes">
 					<option value="">-- Select a Definition --</option>
 				</select>
+			</div>
+			<div class="col-sm-2 text-right">
+				<button class="btn btn-default" ng-click="$ctrl.createTaskDefinition()">
+					<span class="glyphicon glyphicon-plus"></span> New
+				</button>
 			</div>
 		</div>
 		<div class="form-group">

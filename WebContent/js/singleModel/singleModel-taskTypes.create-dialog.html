@@ -5,32 +5,32 @@
 	<form class="form">
 		<div class="form-group">
 			<label for="taskType-name">Name</label>
-			<input id="model-name" type="text" class="form-control" ng-model="$ctrl.taskType.name"/>
+			<input id="model-name" type="text" class="form-control" ng-model="$ctrl.resource.data.name"/>
 		</div>
 		<div class="form-group">
 			<label for="taskType-short-name">Short Name</label>
-			<input id="model-short-name" type="text" class="form-control" ng-model="$ctrl.taskType.shortName"/>
+			<input id="model-short-name" type="text" class="form-control" ng-model="$ctrl.resource.data.shortName"/>
 		</div>
 		<div class="form-group">
 			<label for="taskType-descr">Description</label>
-			<textarea id="taskType-descr" class="form-control" ng-model="$ctrl.taskType.description" rows="10">
+			<textarea id="taskType-descr" class="form-control" ng-model="$ctrl.resource.data.description" rows="10">
 			</textarea>
 		</div>
 		<div class="form-group">
 			<label for="taskType-phase">Phase</label>
-			<select id="taskType-phase" class="form-control" ng-model="$ctrl.taskType.phase" ng-options="p as p.name for p in $ctrl.phases">
+			<select id="taskType-phase" class="form-control" ng-model="$ctrl.resource.data.phase" ng-options="p as p.name for p in $ctrl.phases">
 				<option value="">-- Select a phase --</option>
 			</select>
 		</div>
 		<div class="form-group">
 			<label for="unit-of-measure">Unit of Measure</label>
-			<input id="unit-of-measure" type="text" class="form-control" ng-model="$ctrl.taskType.unitOfMeasure"/>
+			<input id="unit-of-measure" type="text" class="form-control" ng-model="$ctrl.resource.data.unitOfMeasure"/>
 		</div>
 		<div class="form-group">
 			<label for="taskType-craft">Craft</label>
 			<select id="taskType-craft"
 				class="form-control"
-				ng-model="$ctrl.taskType.craft"
+				ng-model="$ctrl.resource.data.craft"
 				ng-options="c as (c | withShortName) for c in $ctrl.crafts">
 				<option value="">-- Select a craft --</option>
 			</select>
