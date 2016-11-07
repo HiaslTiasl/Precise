@@ -36,8 +36,8 @@ precise-diagram-paper .other-tools {
 	float: right;
 }
 
-precise-diagram-paper .other-tools .input-group {
-	width: 8em;
+precise-diagram-paper .other-tools .input-group > input.zoom-scale {
+	width: 6em;
 }
 
 precise-diagram-paper .other-tools .divider {
