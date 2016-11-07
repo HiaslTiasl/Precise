@@ -87,7 +87,7 @@ function (
 					dblClickZoomEnabled: false,
 					panEnabled: false,
 					beforePan: beforePan,
-					minZoom: 0.1,
+					minZoom: 0.01,
 					// http://ariutta.github.io/svg-pan-zoom/demo/mobile.html
 					customEventsHandler: {
 						haltEventListeners: [/*'touchstart', 'touchend',*/ 'touchmove'/*, 'touchleave', 'touchcancel'*/],
@@ -144,7 +144,8 @@ function (
 			        	}
 					}
 				});
-				
+				// Update paper dimensions on resize
+	        	$window.addEventListener('resize', onResize);
 				//Enable pan when a blank area is click (held) on
 				paper.on('blank:pointerdown', enablePan);
 				//Disable pan when the mouse button is released
@@ -153,6 +154,12 @@ function (
 				scope.$on('render:done', initialPanAndZoom);
 				scope.$on('diagram:change', updateBBox);
 				model.on('add remove', $ctrl.wrapInTimeout(updateBBox));
+				
+				
+				function onResize() {
+					paper.setDimensions($paperEl.width(), $paperEl.height());
+					paperPanZoom.resize();
+				}
 				
 				// http://ariutta.github.io/svg-pan-zoom/demo/limit-pan.html
 				function beforePan(oldPan, newPan) {
