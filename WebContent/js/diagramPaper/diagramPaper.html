@@ -40,26 +40,33 @@
 		</div>
 		<div class="toolset" ng-switch-when="Search">
 			<form class="form-inline">
-				<div class="form-group">
-					<input
-						id="simple-search"
-						type="text"
-						class="form-control"
-						placeholder="search task"
-						ng-model="$ctrl.searchText"
-						ng-if="!$ctrl.advancedSearch"/>
+				<div class="form-group has-feedback">
+					<div class="input-group" ng-if="!$ctrl.advancedSearch">
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="submit" ng-submit="$ctrl.search()">
+								<span class="glyphicon glyphicon-search"></span>
+							</button>
+						</span>
+						<input
+							id="simple-search" 
+							type="search"
+							class="form-control"
+							placeholder="search task"
+							ng-model="$ctrl.searchText"
+							ng-change="$ctrl.searchTextChanged()"
+							ng-model-options="{ updateOn: 'default blur submit', debounce: { default: 200, blur: 0, submit: 0 } }"/>
+					</div>
+					<span
+						class="form-control-feedback glyphicon glyphicon-remove"
+						ng-click="$ctrl.cancelSearch()"
+						ng-if="$ctrl.searchText">
+					</span>
 					<div
-						id="advanced-search"
 						class="input-group"
 						ng-if="$ctrl.advancedSearch"
 						uib-dropdown
 						dropdown-append-to-body
 						auto-close="outsideClick">
-						<input
-							type="text"
-							class="form-control"
-							ng-model="$ctrl.searchQuery"
-							readonly/>
 						<div class="input-group-btn">
 							<button class="btn btn-default" uib-dropdown-toggle>
 								<span class="glyphicon glyphicon-edit"></span>
@@ -115,11 +122,22 @@
 								</li>
 							</ul>
 						</div>
+						<input
+							id="advanced-search"
+							type="search"
+							class="form-control"
+							ng-model="$ctrl.searchQuery"
+							readonly/>
 					</div>
+					<span
+						class="glyphicon glyphicon-remove form-control-feedback"
+						ng-click="$ctrl.cancelSearch()"
+						ng-if="$ctrl.searchQuery">
+					</span>
 				</div>
 				<div class="form-group">
-					<button type="submit" class="btn btn-primary" ng-click="$ctrl.search()">Search</button>
-					<button class="btn btn-default" ng-click="$ctrl.cancelSearch()">Cancel</button>
+					<!-- <button type="submit" class="btn btn-primary" ng-click="$ctrl.search()">Search</button> -->
+					<!-- <button class="btn btn-default" ng-click="$ctrl.cancelSearch()">Cancel</button> -->
 					<a href ng-click="$ctrl.advancedSearch = !$ctrl.advancedSearch">
 						{{$ctrl.advancedSearch ? 'Simple' : 'Advanced'}}
 					</a>
@@ -133,15 +151,16 @@
 					type="number"
 					class="form-control zoom-scale"
 					ng-model="$ctrl.zoomScale"
-					ng-change="$ctrl.zoomChanged()"/>
+					ng-change="$ctrl.zoomChanged()"
+					ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }"/>
 				<span class="input-group-addon">%</span>
 			</span>
 			<span class="btn-group btn-group-sm">
 				<button class="btn btn-default" ng-click="$ctrl.paperPanZoom.zoomIn()">
-					<span class="glyphicon glyphicon-plus"></span>
+					<span class="glyphicon glyphicon-zoom-in"></span>
 				</button>
 				<button class="btn btn-default" ng-click="$ctrl.paperPanZoom.zoomOut()">
-					<span class="glyphicon glyphicon-minus"></span>
+					<span class="glyphicon glyphicon-zoom-out"></span>
 				</button>
 				<button class="btn btn-default" ng-click="$ctrl.fitAndCenter()">
 					<span class="glyphicon glyphicon-fullscreen"></span>

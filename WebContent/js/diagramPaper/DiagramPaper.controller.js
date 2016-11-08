@@ -15,6 +15,7 @@ define([
 		$ctrl.diagramToolset = DiagramPaperToolset;
 		$ctrl.onPaperInit = onPaperInit;
 
+		$ctrl.searchTextChanged = searchTextChanged;
 		$ctrl.searchQueryChanged = searchQueryChanged;
 		$ctrl.hideLocationsChanged = hideLocationsChanged;
 		$ctrl.hideLabelsChanged = hideLabelsChanged;
@@ -59,8 +60,12 @@ define([
 			});
 		}
 		
+		function searchTextChanged() {
+			search();
+		}
+		
 		function searchQueryChanged() {
-			return $ctrl.searchQuery = _.chain($ctrl.searchParams)
+			$ctrl.searchQuery = _.chain($ctrl.searchParams)
 				.keys()
 				.filter(function (k) {
 					return $ctrl.searchParams[k];
@@ -73,17 +78,22 @@ define([
 				})
 				.join(', ')
 				.value();
+			
+			search();
 		}
 		
 		function search() {
-			var req = $ctrl.advancedSearch
+			if (!$ctrl.searchText && !$ctrl.searchQuery)
+				cancelSearch();
+			else {
+				var req = $ctrl.advancedSearch
 				? Tasks.searchAdvanced($ctrl.model.data, $ctrl.searchParams)
-				: Tasks.searchSimple($ctrl.model.data, $ctrl.searchText);
+					: Tasks.searchSimple($ctrl.model.data, $ctrl.searchText);
 				
-			req.then(Pages.collectRemaining).then(function (tasks) {
-				$ctrl.diaPaper.showSearchResults(tasks)
-			});
-				
+				req.then(Pages.collectRemaining).then(function (tasks) {
+					$ctrl.diaPaper.showSearchResults(tasks)
+				});
+			}
 		}
 		
 		function cancelSearch() {

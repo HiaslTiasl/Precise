@@ -40,6 +40,12 @@ precise-diagram-paper .other-tools .input-group > input.zoom-scale {
 	width: 6em;
 }
 
+precise-diagram-paper .has-feedback .form-control-feedback {
+	z-index: 10;
+	cursor: pointer;
+	pointer-events: all;
+}
+
 precise-diagram-paper .other-tools .divider {
 	margin-left: 0.5em;
 	margin-right: 0.5em;
@@ -51,7 +57,7 @@ precise-diagram-paper .other-tools .divider::after {
 
 #simple-search,
 #advanced-search {
-	width: 20em;
+	width: 18em;
 }
 
 precise-diagram-paper .joint-paper {
