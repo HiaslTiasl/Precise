@@ -35,77 +35,85 @@
 				</button>
 			</div>
 		</div>
-		<div class="form-group">
-			<label for="craft" class="col-sm-4 control-label">Craft</label>
-			<div class="col-sm-8">
-				<p id="craft" class="form-control-static">{{$ctrl.resource.data.type.craft | withShortName }}</p>
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="duration" class="col-sm-4 control-label">Expected duration</label>
-			<div class="col-sm-8">
-				<div class="radio">
-					<label>
-						<input type="radio" ng-model="$ctrl.resource.data.durationType" value="MANUAL">
-						Insert manually
-					</label>
-				</div>
-				<div class="radio">
-					<label>
-						<input type="radio" ng-model="$ctrl.resource.data.durationType" value="AUTO">
-						Computed
-					</label>
-				</div>
-				<div class="input-group">
-					<input id="duration"
-						type="number"
-						class="form-control"
-						ng-model="$ctrl.resource.data.durationDays"
-						ng-readonly="$ctrl.resource.data.durationType === 'AUTO'"/>
-					<span class="input-group-addon">days</span>
-				</div>
-			</div>
-		</div>
-		<div ng-show="$ctrl.resource.data.durationType === 'AUTO'">
+		<div ng-show="$ctrl.resource.data.type">
 			<div class="form-group">
-				<label for="crew-size" class="col-sm-4 control-label">Crew size</label>
+				<label for="craft" class="col-sm-4 control-label">Craft</label>
 				<div class="col-sm-8">
-					<input id="crew-size"
-						type="number"
-						class="form-control field-crew-size"
-						ng-model="$ctrl.resource.data.crewSize"/>
+					<p id="craft" class="form-control-static">{{$ctrl.resource.data.type.craft | withShortName }}</p>
 				</div>
 			</div>
 			<div class="form-group">
-				<label for="crew-count" class="col-sm-4 control-label">Crew count</label>
+				<label for="duration" class="col-sm-4 control-label">Expected duration</label>
 				<div class="col-sm-8">
-					<input id="crew-count"
-						type="number"
-						class="form-control field-crewCount"
-						ng-model="$ctrl.resource.data.crewCount"/>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="total-quantity" class="col-sm-4 control-label">Total Quantity</label>
-				<div class="col-sm-8">
+					<div class="radio">
+						<label>
+							<input
+								type="radio"
+								ng-model="$ctrl.resource.data.durationType"
+								value="MANUAL">
+							Insert manually
+						</label>
+					</div>
+					<div class="radio">
+						<label>
+							<input
+								type="radio"
+								ng-model="$ctrl.resource.data.durationType" value="AUTO"
+								ng-disabled="!$ctrl.resource.data.type.unitOfMeasure">
+							Computed
+						</label>
+					</div>
 					<div class="input-group">
-						<input id="total-quantity"
+						<input id="duration"
 							type="number"
-							class="form-control field-total-quantity"
-							ng-model="$ctrl.resource.data.totalQuantity"/>
-						<span class="input-group-addon">{{$ctrl.resource.data.type.unitOfMeasure}}</span>
+							class="form-control"
+							ng-model="$ctrl.resource.data.durationDays"
+							ng-readonly="$ctrl.resource.data.durationType === 'AUTO'"/>
+						<span class="input-group-addon">days</span>
 					</div>
 				</div>
 			</div>
-			<div class="form-group">
-				<label for="quantity-per-day" class="col-sm-4 control-label">Quantity/day</label>
-				<div class="col-sm-8">
-					<div class="input-group">
-						<input id="quantity-per-day"
+			<div ng-show="$ctrl.resource.data.durationType === 'AUTO'">
+				<div class="form-group">
+					<label for="crew-size" class="col-sm-4 control-label">Crew size</label>
+					<div class="col-sm-8">
+						<input id="crew-size"
 							type="number"
-							class="form-control field-quantity-per-day"
-							ng-model="$ctrl.resource.data.quantityPerDay"/>
-						<span class="input-group-addon">{{$ctrl.resource.data.type.unitOfMeasure}}</span>
+							class="form-control field-crew-size"
+							ng-model="$ctrl.resource.data.crewSize"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="crew-count" class="col-sm-4 control-label">Crew count</label>
+					<div class="col-sm-8">
+						<input id="crew-count"
+							type="number"
+							class="form-control field-crewCount"
+							ng-model="$ctrl.resource.data.crewCount"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="total-quantity" class="col-sm-4 control-label">Total Quantity</label>
+					<div class="col-sm-8">
+						<div class="input-group">
+							<input id="total-quantity"
+								type="number"
+								class="form-control field-total-quantity"
+								ng-model="$ctrl.resource.data.totalQuantity"/>
+							<span class="input-group-addon">{{$ctrl.resource.data.type.unitOfMeasure}}</span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="quantity-per-day" class="col-sm-4 control-label">Quantity/day</label>
+					<div class="col-sm-8">
+						<div class="input-group">
+							<input id="quantity-per-day"
+								type="number"
+								class="form-control field-quantity-per-day"
+								ng-model="$ctrl.resource.data.quantityPerDay"/>
+							<span class="input-group-addon">{{$ctrl.resource.data.type.unitOfMeasure}}</span>
+						</div>
 					</div>
 				</div>
 			</div>

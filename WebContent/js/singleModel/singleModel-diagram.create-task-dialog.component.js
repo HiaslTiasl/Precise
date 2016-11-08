@@ -8,6 +8,7 @@ define([], function () {
 		var $ctrl = this;
 		
 		$ctrl.phaseChanged = phaseChanged;
+		$ctrl.taskDefinitionChanged = taskDefinitionChanged;
 		$ctrl.createTaskDefinition = createTaskDefinition;
 		$ctrl.createTask = createTask;
 		$ctrl.cancel = cancel;
@@ -54,6 +55,8 @@ define([], function () {
 		function taskDefinitionChanged() {
 			if ($ctrl.phase != $ctrl.resource.data.type.phase) 
 				$ctrl.phase = $ctrl.resource.data.type.phase;
+			if (!$ctrl.resource.data.type.unitOfMeasure)
+				$ctrl.resource.data.durationType = 'MANUAL';
 		}
 		
 		function createTaskDefinition() {

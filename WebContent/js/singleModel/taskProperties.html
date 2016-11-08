@@ -28,13 +28,20 @@
 		<div class="col-sm-8">
 			<div class="radio">
 				<label>
-					<input type="radio" ng-model="$ctrl.resource.data.durationType" value="MANUAL">
+					<input
+						type="radio"
+						ng-model="$ctrl.resource.data.durationType"
+						value="MANUAL">
 					Insert manually
 				</label>
 			</div>
 			<div class="radio">
 				<label>
-					<input type="radio" ng-model="$ctrl.resource.data.durationType" value="AUTO">
+					<input
+						type="radio"
+						ng-model="$ctrl.resource.data.durationType"
+						value="AUTO"
+						ng-disabled="!$ctrl.resource.data.type.unitOfMeasure">
 					Computed
 				</label>
 			</div>
