@@ -25,7 +25,7 @@ import it.unibz.util.Util;
 
 @Entity
 @JsonPropertyOrder(value={"type"})
-@JsonIgnoreProperties(value={"unitsPerDay", "durationHours"}, allowGetters=true)
+@JsonIgnoreProperties(value={"manHours", "durationHours"}, allowGetters=true)
 public class Task extends BaseEntity {
 
 	public static final int DEFAULT_CREW_COUNT = 1;

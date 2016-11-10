@@ -28,7 +28,6 @@ define([
 		
 		function $onChanges(changes) {
 			if (changes.model) {
-				resetResource();
 				loadWarnings();
 			}
 		}
