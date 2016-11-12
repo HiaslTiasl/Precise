@@ -134,6 +134,9 @@ define([
 			$scope.$on('diagram:remove', onDiagramRemove);
 			
 			$ctrl.paperPanZoom.setOnZoom(wrapInTimeout(onZoom));
+			
+			// init zoom
+			onZoom($ctrl.paperPanZoom.getZoom());
 		}
 		
 		function wrapInTimeout(fn) {

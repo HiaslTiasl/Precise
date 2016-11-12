@@ -76,6 +76,10 @@ function (
 	                }
 	            });
 	        	
+	        	// MIN_ZOOM should not be changed to a greater value to ensure all integer percentages from 1 to 100 are valid
+	        	var MIN_ZOOM = 0.01,		
+	        		MAX_ZOOM = 500;
+	        	
 	        	// Setup pan and zoom functionality
 	        	// See http://plnkr.co/edit/djYRygTGnQOvaBICk1dE?p=preview
 	        	var paperPanZoom = svgPanZoom(paper.svg, {
@@ -87,7 +91,8 @@ function (
 					dblClickZoomEnabled: false,
 					panEnabled: false,
 					beforePan: beforePan,
-					minZoom: 0.01,
+					minZoom: MIN_ZOOM,
+					maxZoom: MAX_ZOOM,
 					// http://ariutta.github.io/svg-pan-zoom/demo/mobile.html
 					customEventsHandler: {
 						haltEventListeners: [/*'touchstart', 'touchend',*/ 'touchmove'/*, 'touchleave', 'touchcancel'*/],
@@ -178,7 +183,10 @@ function (
 				
 				function initialPanAndZoom() {
 					updateBBox();
-					fitAndCenter()
+					// Temporarily limit zoom to 100% to prevent extreme values in case the diagram is (almost) empty.
+					paperPanZoom.setMaxZoom(1);
+					fitAndCenter();
+					paperPanZoom.setMaxZoom(MAX_ZOOM);
 				}
 				
 				function enablePan() {
