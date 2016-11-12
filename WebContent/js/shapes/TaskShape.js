@@ -130,7 +130,7 @@ define([
 				nameText = type.shortName + ' - ' + type.name;
 			this.attr({
 				'rect.task-type-name': { height: nameHeight },
-				'text.task-type-name':       {
+				'text.task-type-name': {
 					style: nameStyle,
 					text: joint.util.breakText(nameText, {
 						width: WIDTH - 2 * NAME_PADDING.x,
@@ -152,7 +152,8 @@ define([
 				width = WIDTH,
 				height = LOC_POS_Y + this.locationsHeight,
 				crew = isNaN(data.crewSize) || isNaN(data.crewCount) ? '' : data.crewCount + '\u00d7' + data.crewSize,
-				duration = isNaN(data.durationDays) ? '' : data.durationDays + 'd';
+				duration = isNaN(data.durationDays) ? '' : data.durationDays + 'd',
+				craft = _.get(data, ['type', 'craft', 'shortName'], '');
 
 			if (exclusive) {
 				width += 10;
@@ -174,7 +175,7 @@ define([
 				'text.task-id':         { text: '#' + data.id },
 				'text.task-crew':       { text: crew },
 				'text.task-duration':   { text: duration },
-				'text.task-type-craft': { text: data.type.craft.shortName }
+				'text.task-type-craft': { text: craft }
 			};
 			if (locationPatterns) {
 				attrs['text.trunc'] = {

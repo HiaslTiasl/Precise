@@ -27,12 +27,11 @@
 		</thead>
 		<tbody>
 			<tr ng-repeat="m in $ctrl.coll">
-				<td>
-					<a href editable-text="m.name" onbeforesave="$ctrl.renameModel(m, $data)">{{m.name}}</a>
-				</td>
+				<td>{{m.name}}</td>
 				<td>{{m.description}}</td>
 				<td class="toolbar">
 					<a class="btn btn-default" ui-sref="singleModel.diagram({ name: m.name })">Open</a>
+					<button class="btn btn-default" ng-click="$ctrl.editModel(m)">Edit</button>
 					<div class="btn-group" uib-dropdown>
 						<button class="btn btn-default" uib-dropdown-toggle>Export</button>
 						<ul class="dropdown-menu" uib-dropdown-menu>

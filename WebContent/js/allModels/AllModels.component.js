@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	AllModelsController.$inject = ['$scope', '$q', '$uibModal', 'PreciseApi', 'AllModels', 'MDLFiles'];
+	AllModelsController.$inject = ['$scope', '$q', '$uibModal', 'PreciseApi', 'AllModels', 'Models', 'MDLFiles'];
 	
-	function AllModelsController($scope, $q, $uibModal, PreciseApi, AllModels, MDLFiles) {
+	function AllModelsController($scope, $q, $uibModal, PreciseApi, AllModels, Models, MDLFiles) {
 		
 		var $ctrl = this;
 		
@@ -15,8 +15,8 @@ define([
 		$ctrl.getMDLFileURI = MDLFiles.urlToModel;
 		$ctrl.getCSVFileURI = getCSVFileURI;
 		$ctrl.createModel = createModel;
+		$ctrl.editModel = editModel;
 		$ctrl.importFile = importFile;
-		$ctrl.renameModel = renameModel;
 		$ctrl.duplicateModel = duplicateModel;
 		$ctrl.deleteModel = deleteModel;
 		
@@ -35,10 +35,21 @@ define([
 			return AllModels.getModels().then(setModels);
 		}
 		
-		function createModel(model) {
+		function openModal(resource) {
 			$uibModal.open({
-				component: 'preciseCreateModel'
+				component: 'preciseCreateModel',
+				resolve: { resource: resource }
 			}).result.then(refreshModels);
+		}
+		
+		function createModel() {
+			openModal(Models.newResource);
+		}
+		
+		function editModel(model) {
+			openModal(function () {
+				return Models.existingResource(model);
+			});
 		}
 		
 		function getCSVFileURI(model) {
@@ -51,11 +62,6 @@ define([
 				.then(refreshModels, function (errReason) {
 					$ctrl.fileErrorMsg = errReason;
 				});
-		}
-		
-		function renameModel(model, newName) {
-			return AllModels.renameModel(model, newName)
-				['catch'](PreciseApi.mapReason(PreciseApi.toErrorMessage));
 		}
 		
 		function duplicateModel(model) {

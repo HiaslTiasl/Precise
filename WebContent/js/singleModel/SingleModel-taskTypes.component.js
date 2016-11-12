@@ -11,6 +11,7 @@ define([
 		var $ctrl = this;
 		
 		$ctrl.createTaskType = createTaskType;
+		$ctrl.editTaskType = editTaskType;
 		$ctrl.deleteTaskType = deleteTaskType;
 		
 		$ctrl.$onChanges = $onChanges;
@@ -32,26 +33,38 @@ define([
 			$ctrl.taskTypes = taskTypes;
 		}
 		
-		function createTaskType() {
-			var modalInstance = $uibModal.open({
+		var getCrafts = _.once(function () {
+			return $ctrl.model.getCrafts();
+		});
+		
+		function openModal(resource) {
+			$uibModal.open({
 				component: 'preciseCreateTaskType',
 				resolve: {
-					model: function () {
-						return TaskTypes.newResource($ctrl.model)
-					},
+					resource: resource,
 					phases: _.constant($ctrl.phases),
-					crafts: function () {
-						return $ctrl.model.getCrafts();
-					}
+					crafts: getCrafts
 				}
 			}).result.then(loadTaskTypes);
+		}
+		
+		function editTaskType(taskType) {
+			openModal(function () {
+				return TaskTypes.existingResource($ctrl.model, taskType);
+			});
+		}
+		
+		function createTaskType() {
+			openModal(function () {
+				return TaskTypes.newResource($ctrl.model);
+			});
 		}
 		
 		function deleteTaskType(taskType) {
 			TaskTypes
 				.existingResource($ctrl.model, taskType)
 				.then(function (resource) {
-					resource.delete();
+					return resource.delete();
 				})
 				.then(loadTaskTypes);
 		}

@@ -1,8 +1,10 @@
 <div class="modal-header">
-	<h3 class="modal-title">New Task Definition</h3>
+	<h3 class="modal-title">
+		{{$ctrl.resource.exists ? 'Edit Task Definition ' + $ctrl.resource.data.name : 'New Task Definition'}}
+	</h3>
 </div>
 <div class="modal-body">
-	<form class="form">
+	<form id="task-type-form" class="form">
 		<div class="form-group">
 			<label for="taskType-name">Name</label>
 			<input id="model-name" type="text" class="form-control" ng-model="$ctrl.resource.data.name"/>
@@ -18,9 +20,17 @@
 		</div>
 		<div class="form-group">
 			<label for="taskType-phase">Phase</label>
-			<select id="taskType-phase" class="form-control" ng-model="$ctrl.resource.data.phase" ng-options="p as p.name for p in $ctrl.phases">
+			<select
+				id="taskType-phase"
+				class="form-control"
+				ng-model="$ctrl.resource.data.phase"
+				ng-options="p as p.name for p in $ctrl.phases track by p.name"
+				ng-if="::!$ctrl.phaseFixed">
 				<option value="">-- Select a phase --</option>
 			</select>
+			<p class="form-control-static" ng-if="::$ctrl.phaseFixed">
+				{{$ctrl.resource.data.phase.name}}
+			</p>
 		</div>
 		<div class="form-group">
 			<label for="unit-of-measure">Unit of Measure</label>
@@ -31,13 +41,13 @@
 			<select id="taskType-craft"
 				class="form-control"
 				ng-model="$ctrl.resource.data.craft"
-				ng-options="c as (c | withShortName) for c in $ctrl.crafts">
+				ng-options="c as (c | withShortName) for c in $ctrl.crafts track by c.name">
 				<option value="">-- Select a craft --</option>
 			</select>
 		</div>
 	</form>
 </div>
 <div class="modal-footer">
-	<button class="btn btn-primary" type="button" ng-click="$ctrl.createTaskType()">Create</button>
-	<button class="btn btn-cancel" type="button" ng-click="$ctrl.cancel()">Cancel</button>
+	<button class="btn btn-primary" type="submit" form="task-type-form" ng-click="$ctrl.sendTaskType()">OK</button>
+	<button class="btn btn-cancel" type="button" form="task-type-form" ng-click="$ctrl.cancel()">Cancel</button>
 </div>

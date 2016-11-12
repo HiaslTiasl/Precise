@@ -1,24 +1,24 @@
 <div class="modal-header">
-	<h3 class="modal-title">New Craft</h3>
+	<h3 class="modal-title">{{$ctrl.resource.exists ? 'Edit Craft ' + $ctrl.resource.data.name : 'New Craft'}}</h3>
 </div>
 <div class="modal-body">
-	<form class="form">
+	<form id="craft-form" class="form">
 		<div class="form-group">
-			<label for="taskType-name">Name</label>
-			<input id="model-name" type="text" class="form-control" ng-model="$ctrl.craft.name"/>
+			<label for="craft-name">Name</label>
+			<input id="craft-name" type="text" class="form-control" ng-model="$ctrl.resource.data.name"/>
 		</div>
 		<div class="form-group">
-			<label for="craft-name">Short Name</label>
-			<input id="craft-name" type="text" class="form-control" ng-model="$ctrl.craft.shortName"/>
+			<label for="craft-short-name">Short Name</label>
+			<input id="craft-short-name" type="text" class="form-control" ng-model="$ctrl.resource.data.shortName"/>
 		</div>
 		<div class="form-group">
 			<label for="craft-descr">Description</label>
-			<textarea id="craft-descr" class="form-control" ng-model="$ctrl.taskType.description" rows="10">
+			<textarea id="craft-descr" class="form-control" ng-model="$ctrl.resource.data.description" rows="10">
 			</textarea>
 		</div>
 	</form>
 </div>
 <div class="modal-footer">
-	<button class="btn btn-primary" type="button" ng-click="$ctrl.createCraft()">Create</button>
-	<button class="btn btn-cancel" type="button" ng-click="$ctrl.cancel()">Cancel</button>
+	<button class="btn btn-primary" type="submit" form="craft-form" ng-click="$ctrl.sendCraft()">OK</button>
+	<button class="btn btn-cancel" type="button" form="craft-form" ng-click="$ctrl.cancel()">Cancel</button>
 </div>

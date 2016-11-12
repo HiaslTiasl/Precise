@@ -18,8 +18,12 @@
 			<td>
 				<button
 					class="btn btn-default"
-					ng-click="$ctrl.deleteCraft(c)"
-					ng-disabled="!$ctrl.model.data.configInfo.editable">
+					ng-click="$ctrl.editCraft(c)">
+					Edit
+				</button>
+				<button
+					class="btn btn-default"
+					ng-click="$ctrl.deleteCraft(c)">
 					Delete
 				</button>
 			</td>

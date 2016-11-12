@@ -21,7 +21,7 @@ define([
 		}
 		
 		function BaseResource(data, exists) {
-			this.data = data;
+			this.data = data || {};
 			this.exists = exists !== undefined ? exists : guessExisting(data);
 		}
 		

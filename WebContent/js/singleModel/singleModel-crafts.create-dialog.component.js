@@ -7,17 +7,17 @@ define([], function () {
 		
 		var $ctrl = this;
 		
-		$ctrl.craft = {};
-		
-		$ctrl.createCraft = createCraft;
+		$ctrl.sendCraft = sendCraft;
 		$ctrl.cancel = cancel;
 		
-		function createCraft() {
-			Crafts
-				.newResource($ctrl.resolve.model, $ctrl.craft)
-				.then(function (resource) {
-					return resource.create();
-				})
+		$ctrl.$onInit = $onInit;
+		
+		function $onInit() {
+			$ctrl.resource = $ctrl.resolve.resource
+		}
+		
+		function sendCraft() {
+			$ctrl.resource.send()
 				.then($ctrl.modalInstance.close);
 		}
 		

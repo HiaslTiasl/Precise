@@ -1,4 +1,8 @@
-define([], function () {
+define([
+	'lib/lodash'
+], function (
+	_
+) {
 	'use strict';
 	
 	SingleModelTaskTypeCreateDialogController.$inject = ['TaskTypes'];
@@ -7,7 +11,7 @@ define([], function () {
 		
 		var $ctrl = this;
 		
-		$ctrl.createTaskType = createTaskType;
+		$ctrl.sendTaskType = sendTaskType;
 		$ctrl.cancel = cancel;
 		
 		$ctrl.$onInit = $onInit;
@@ -16,10 +20,11 @@ define([], function () {
 			$ctrl.resource = $ctrl.resolve.resource;
 			$ctrl.phases = $ctrl.resolve.phases;
 			$ctrl.crafts = $ctrl.resolve.crafts;
+			$ctrl.phaseFixed = !!_.get($ctrl.resource.data, 'phase');
 		}
 		
-		function createTaskType() {
-			$ctrl.resource.create()
+		function sendTaskType() {
+			$ctrl.resource.send()
 				.then($ctrl.modalInstance.close);
 		}
 		

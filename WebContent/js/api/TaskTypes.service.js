@@ -18,7 +18,7 @@ define([
 		TaskTypes.resource = resource;
 		TaskTypes.Resource = TaskTypeResource;
 		
-		var dontSendDirectly = ['phase', 'model', '_links'];
+		var dontSendDirectly = ['craft', 'phase', 'model', '_links'];
 		
 		function newResource(model, taskType) {
 			return resource(model, taskType, false);
@@ -50,9 +50,10 @@ define([
 			
 			getRequestData: function () {
 				var processed = _.omit(this.data, dontSendDirectly);
+				if (this.data.craft)
+					processed.craft = PreciseApi.hrefTo(this.data.craft);
 				if (!this.exists) {
 					processed.phase = PreciseApi.hrefTo(this.data.phase);
-					processed.craft = PreciseApi.hrefTo(this.data.craft);
 					processed.model = PreciseApi.hrefTo(this.model.data);
 				}
 				return processed;

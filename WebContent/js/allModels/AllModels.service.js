@@ -13,7 +13,6 @@ define([
 		
 		svc.getModels = getModels;
 		svc.importFile = importFile;
-		svc.renameModel = renameModel;
 		svc.deleteModel = deleteModel;
 		svc.duplicateModel = duplicateModel;
 		svc.cachedModels = null;
@@ -38,15 +37,6 @@ define([
 					return MDLFiles.importJSON(MDLFiles.urlToFile(file.name), json)
 				})
 				.then(clearCache, PreciseApi.mapReason(PreciseApi.toErrorMessage));
-		}
-		
-		function renameModel(model, newName) {
-			return PreciseApi.continueFrom(model)
-				.traverse(function (builder) {
-					return builder.patch({ name: newName });
-				}).then(function () {
-					model.name = newName;
-				}).then(clearCache);
 		}
 		
 		function deleteModel(model) {

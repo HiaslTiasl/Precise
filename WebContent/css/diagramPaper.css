@@ -31,6 +31,18 @@ precise-diagram-paper .toolset {
 	display: inline-block;
 }
 
+precise-diagram-paper .toolset .btn.btn-default:focus {
+	color: #333;
+	background-color: #fff;
+	border-color: #ccc;
+}
+
+precise-diagram-paper .toolset .btn.btn-default:active,
+precise-diagram-paper .toolset .btn.btn-default.active {
+	color: #333;
+	background-color: #e6e6e6;
+	border-color: #adadad;
+}
 
 precise-diagram-paper .other-tools {
 	float: right;

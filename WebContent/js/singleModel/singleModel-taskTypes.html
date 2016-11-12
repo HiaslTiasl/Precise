@@ -23,8 +23,12 @@
 			<td>
 				<button
 					class="btn btn-default"
-					ng-click="$ctrl.deleteTaskType(tt)"
-					ng-disabled="!$ctrl.model.data.configInfo.editable">
+					ng-click="$ctrl.editTaskType(tt)">
+					Edit
+				</button>
+				<button
+					class="btn btn-default"
+					ng-click="$ctrl.deleteTaskType(tt)">
 					Delete
 				</button>
 			</td>

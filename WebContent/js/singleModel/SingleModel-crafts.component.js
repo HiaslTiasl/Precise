@@ -11,6 +11,7 @@ define([
 		var $ctrl = this;
 		
 		$ctrl.createCraft = createCraft;
+		$ctrl.editCraft = editCraft;
 		$ctrl.deleteCraft = deleteCraft;
 		
 		$ctrl.$onChanges = $onChanges;
@@ -32,20 +33,32 @@ define([
 			$ctrl.crafts = crafts;
 		}
 		
-		function createCraft() {
-			var modalInstance = $uibModal.open({
+		function openModal(resource) {
+			$uibModal.open({
 				component: 'preciseCreateCraft',
-				resolve: {
-					model: _.constant($ctrl.model)
-				}
+				resolve: { resource: resource }
 			}).result.then(loadCrafts);
+		}
+		
+		function editCraft(craft) {
+			openModal(function () {
+				return Crafts.existingResource($ctrl.model, craft);
+			});
+		}
+		
+		function createCraft() {
+			openModal({
+				resource: function () {
+					return Crafts.newResource($ctrl.model);
+				}
+			});
 		}
 		
 		function deleteCraft(craft) {
 			Crafts
 				.existingResource($ctrl.model, craft)
 				.then(function (resource) {
-					resource.delete();
+					return resource.delete();
 				})
 				.then(loadCrafts);
 		}

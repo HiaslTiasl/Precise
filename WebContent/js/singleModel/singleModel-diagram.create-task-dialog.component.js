@@ -1,4 +1,8 @@
-define([], function () {
+define([
+	'lib/lodash'
+], function (
+	_
+) {
 	'use strict';
 	
 	SingleModelDiagramCreateTaskDialogController.$inject = ['$uibModal', 'Pages', 'Tasks', 'TaskTypes', 'Phases'];
@@ -59,6 +63,10 @@ define([], function () {
 				$ctrl.resource.data.durationType = 'MANUAL';
 		}
 		
+		var getCrafts = _.once(function () {
+			return $ctrl.resource.model.getCrafts();
+		});
+		
 		function createTaskDefinition() {
 			$uibModal.open({
 				component: 'preciseCreateTaskType',
@@ -68,10 +76,7 @@ define([], function () {
 							phase: $ctrl.phase
 						});
 					},
-					phases: _.constant($ctrl.phase ? [$ctrl.phase] : $ctrl.phases),
-					crafts: function () {
-						return $ctrl.resource.model.getCrafts();
-					}
+					crafts: getCrafts
 				}
 			}).result.then(function (result) {
 				$ctrl.taskTypes.push(result);

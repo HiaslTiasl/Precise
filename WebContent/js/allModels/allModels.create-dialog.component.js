@@ -7,15 +7,17 @@ define([], function () {
 		
 		var $ctrl = this;
 		
-		$ctrl.model = {};
-		
-		$ctrl.createModel = createModel;
+		$ctrl.sendModel = sendModel;
 		$ctrl.cancel = cancel;
 		
-		function createModel() {
-			Models
-				.newResource($ctrl.model)
-				.create()
+		$ctrl.$onInit = $onInit;
+		
+		function $onInit() {
+			$ctrl.resource = $ctrl.resolve.resource
+		}
+		
+		function sendModel() {
+			$ctrl.resource.send()
 				.then($ctrl.modalInstance.close);
 		}
 		
@@ -30,6 +32,7 @@ define([], function () {
 		controller: AllModelsCreateDialogController,
 		controllerAs: '$ctrl',
 		bindings: {
+			resolve: '<',
 			modalInstance: '<'
 		}
 	}
