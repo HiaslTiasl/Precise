@@ -14,7 +14,7 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 	}
 
 	@Override
-	public void updateMDL(Dependency dependency, MDLDependencyAST mdlDependency) {
+	protected void updateMDLImpl(Dependency dependency, MDLDependencyAST mdlDependency) {
 		mdlDependency.setAlternate(dependency.isAlternate());
 		mdlDependency.setChain(dependency.isChain());
 		mdlDependency.setSource(context().tasks().toMDL(dependency.getSource()));
@@ -27,7 +27,7 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 	}
 
 	@Override
-	public void updateEntity(MDLDependencyAST mdlDependency, Dependency dependency) {
+	protected void updateEntityImpl(MDLDependencyAST mdlDependency, Dependency dependency) {
 		dependency.setAlternate(mdlDependency.isAlternate());
 		dependency.setChain(mdlDependency.isChain());
 		dependency.setSource(context().tasks().toEntity(mdlDependency.getSource()));

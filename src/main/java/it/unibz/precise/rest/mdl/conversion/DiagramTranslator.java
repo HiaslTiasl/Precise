@@ -11,19 +11,15 @@ class DiagramTranslator extends AbstractMDLTranslator<Model, MDLDiagramAST> {
 	}
 
 	@Override
-	public void updateMDL(Model model, MDLDiagramAST mdlDiagram) {
+	protected void updateMDLImpl(Model model, MDLDiagramAST mdlDiagram) {
 		mdlDiagram.setTasks(Util.mapToList(model.getTasks(), context().tasks()::toMDL));
 		mdlDiagram.setDependencies(Util.mapToList(model.getDependencies(), context().dependencies()::toMDL));
 	}
 	
 	@Override
-	public void updateEntity(MDLDiagramAST mdlDiagram, Model model) {
-		mdlDiagram.getTasks().stream()
-			.map(context().tasks()::toEntity)
-			.forEach(model::addTask);
-		mdlDiagram.getDependencies().stream()
-			.map(context().dependencies()::toEntity)
-			.forEach(model::addDependency);
+	protected void updateEntityImpl(MDLDiagramAST mdlDiagram, Model model) {
+		model.setTasks(Util.mapToList(mdlDiagram.getTasks(), context().tasks()::toEntity));
+		model.setDependencies(Util.mapToList(mdlDiagram.getDependencies(), context().dependencies()::toEntity));
 	}
 
 	@Override

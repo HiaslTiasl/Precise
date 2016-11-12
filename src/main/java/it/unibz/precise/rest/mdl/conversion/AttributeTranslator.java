@@ -15,7 +15,7 @@ class AttributeTranslator extends AbstractMDLTranslator<Attribute, MDLAttributeA
 	}
 
 	@Override
-	public void updateMDL(Attribute attribute, MDLAttributeAST mdlAttribute) {
+	protected void updateMDLImpl(Attribute attribute, MDLAttributeAST mdlAttribute) {
 		List<String> range = attribute.getRange();
 		mdlAttribute.setName(attribute.getName());
 		mdlAttribute.setShortName(attribute.getShortName());
@@ -25,7 +25,7 @@ class AttributeTranslator extends AbstractMDLTranslator<Attribute, MDLAttributeA
 	}
 	
 	@Override
-	public void updateEntity(MDLAttributeAST mdlAttribute, Attribute attribute) {
+	protected void updateEntityImpl(MDLAttributeAST mdlAttribute, Attribute attribute) {
 		attribute.setName(mdlAttribute.getName());
 		attribute.setShortName(mdlAttribute.getShortName());
 		attribute.setDescription(mdlAttribute.getDescription());

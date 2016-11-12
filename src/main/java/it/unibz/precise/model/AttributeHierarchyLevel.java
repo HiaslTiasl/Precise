@@ -31,6 +31,13 @@ public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
 	@MapKey(name="value")
 	private Map<String, AttributeHierarchyNode> nodes = new HashMap<>();
 	
+	public AttributeHierarchyLevel() {
+	}
+	
+	public AttributeHierarchyLevel(Attribute attribute) {
+		this.attribute = attribute;
+	}
+	
 	public Phase getPhase() {
 		return phase;
 	}

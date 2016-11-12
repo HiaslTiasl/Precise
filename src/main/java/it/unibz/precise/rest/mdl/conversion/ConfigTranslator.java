@@ -11,7 +11,7 @@ class ConfigTranslator extends AbstractMDLTranslator<Model, MDLConfigAST> {
 	}
 
 	@Override
-	public void updateMDL(Model model, MDLConfigAST mdlConfig) {
+	protected void updateMDLImpl(Model model, MDLConfigAST mdlConfig) {
 		mdlConfig.setHoursPerDay(model.getHoursPerDay());
 		mdlConfig.setAttributes(Util.mapToList(model.getAttributes(), context().attributes()::toMDL));
 		mdlConfig.setPhases(Util.mapToList(model.getPhases(), context().phases()::toMDL));
@@ -20,7 +20,7 @@ class ConfigTranslator extends AbstractMDLTranslator<Model, MDLConfigAST> {
 	}
 	
 	@Override
-	public void updateEntity(MDLConfigAST mdlConfig, Model model) {
+	protected void updateEntityImpl(MDLConfigAST mdlConfig, Model model) {
 		model.setHoursPerDay(mdlConfig.getHoursPerDay());
 		model.setAttributes(Util.mapToList(mdlConfig.getAttributes(), context().attributes()::toEntity));
 		model.setPhases(Util.mapToList(mdlConfig.getPhases(), context().phases()::toEntity));

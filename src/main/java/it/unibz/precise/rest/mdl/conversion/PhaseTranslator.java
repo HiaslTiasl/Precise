@@ -1,16 +1,17 @@
 package it.unibz.precise.rest.mdl.conversion;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 import it.unibz.precise.model.Attribute;
 import it.unibz.precise.model.AttributeHierarchyLevel;
 import it.unibz.precise.model.AttributeHierarchyNode;
 import it.unibz.precise.model.Phase;
 import it.unibz.precise.rest.mdl.ast.MDLPhaseAST;
+import it.unibz.util.Util;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class PhaseTranslator extends AbstractMDLTranslator<Phase, MDLPhaseAST> {
 	
@@ -19,7 +20,7 @@ public class PhaseTranslator extends AbstractMDLTranslator<Phase, MDLPhaseAST> {
 	}
 
 	@Override
-	public void updateMDL(Phase phase, MDLPhaseAST mdlPhase) {
+	protected void updateMDLImpl(Phase phase, MDLPhaseAST mdlPhase) {
 		mdlPhase.setName(phase.getName());
 		mdlPhase.setDescription(phase.getDescription());
 		mdlPhase.setColor(phase.getColor());
@@ -31,13 +32,14 @@ public class PhaseTranslator extends AbstractMDLTranslator<Phase, MDLPhaseAST> {
 	}
 	
 	@Override
-	public void updateEntity(MDLPhaseAST mdlPhase, Phase phase) {
+	protected void updateEntityImpl(MDLPhaseAST mdlPhase, Phase phase) {
 		phase.setName(mdlPhase.getName());
 		phase.setDescription(mdlPhase.getDescription());
 		phase.setColor(mdlPhase.getColor());
-		mdlPhase.getAttributes().stream()
-			.map(context().attributes()::toEntity)
-			.forEach(phase::addAttribute);
+		phase.setAttributeHierarchyLevels(Util.mapToList(
+			mdlPhase.getAttributes(),
+			a -> new AttributeHierarchyLevel(context().attributes().toEntity(a))
+		));
 		walkTree(phase.getAttributeHierarchyLevels(), 0, mdlPhase.getValueTree(), null);
 	}
 	

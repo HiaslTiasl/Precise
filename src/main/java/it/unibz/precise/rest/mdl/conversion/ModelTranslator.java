@@ -20,12 +20,12 @@ class ModelTranslator extends AbstractMDLTranslator<Model, MDLModelAST> {
 	}
 
 	@Override
-	public void updateEntity(MDLModelAST mdlModel, Model model) {
+	protected void updateEntityImpl(MDLModelAST mdlModel, Model model) {
 		model.setDescription(mdlModel.getDescription());
 	}
 
 	@Override
-	public void updateMDL(Model model, MDLModelAST mdlModel) {
+	protected void updateMDLImpl(Model model, MDLModelAST mdlModel) {
 		mdlModel.setDescription(model.getDescription());
 	}
 

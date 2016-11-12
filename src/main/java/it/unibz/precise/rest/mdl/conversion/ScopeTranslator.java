@@ -21,7 +21,7 @@ public class ScopeTranslator extends AbstractMDLTranslator<Scope, MDLScopeAST> {
 	}
 
 	@Override
-	public void updateEntity(MDLScopeAST mdlScope, Scope scope) {
+	protected void updateEntityImpl(MDLScopeAST mdlScope, Scope scope) {
 		if (mdlScope != null) {
 			scope.setType(mdlScope.getType());
 			scope.setAttributes(Util.mapToList(mdlScope.getAttributes(), context().attributes()::toEntity));
@@ -29,7 +29,7 @@ public class ScopeTranslator extends AbstractMDLTranslator<Scope, MDLScopeAST> {
 	}
 
 	@Override
-	public void updateMDL(Scope scope, MDLScopeAST mdlScope) {
+	protected void updateMDLImpl(Scope scope, MDLScopeAST mdlScope) {
 		if (scope != null) {
 			mdlScope.setType(scope.getType());
 			mdlScope.setAttributes(Util.mapToList(scope.getAttributes(), context().attributes()::toMDL));		

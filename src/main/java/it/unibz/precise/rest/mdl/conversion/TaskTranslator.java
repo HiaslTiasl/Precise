@@ -21,7 +21,7 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 	}
 
 	@Override
-	public void updateMDL(Task task, MDLTaskAST mdlTask) {
+	protected void updateMDLImpl(Task task, MDLTaskAST mdlTask) {
 		DurationType durationType = task.getDurationType();
 		mdlTask.setDefinition(context().taskTypes().toMDL(task.getType()));
 		mdlTask.setDurationType(durationType);
@@ -37,7 +37,7 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 	}
 	
 	@Override
-	public void updateEntity(MDLTaskAST mdlTask, Task task) {
+	protected void updateEntityImpl(MDLTaskAST mdlTask, Task task) {
 		TaskType taskType = context().taskTypes().toEntity(mdlTask.getDefinition());
 		task.setType(taskType);
 		task.setDurationType(mdlTask.getDurationType());

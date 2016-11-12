@@ -43,12 +43,12 @@ public class CachingTranslator<E, MDL> extends AbstractMDLTranslator<E, MDL> {
 	}
 
 	@Override
-	public void updateEntity(MDL mdl, E entity) {
+	protected void updateEntityImpl(MDL mdl, E entity) {
 		delegate.updateEntity(mdl, entity);
 	}
 
 	@Override
-	public void updateMDL(E entity, MDL mdl) {
+	protected void updateMDLImpl(E entity, MDL mdl) {
 		delegate.updateMDL(entity, mdl);
 	}
 

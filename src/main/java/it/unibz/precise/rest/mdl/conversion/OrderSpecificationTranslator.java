@@ -20,7 +20,7 @@ public class OrderSpecificationTranslator extends AbstractMDLTranslator<OrderSpe
 	}
 
 	@Override
-	public void updateEntity(MDLOrderSpecificationAST mdlOrderSpec, OrderSpecification orderSpec) {
+	protected void updateEntityImpl(MDLOrderSpecificationAST mdlOrderSpec, OrderSpecification orderSpec) {
 		if (mdlOrderSpec != null) {
 			orderSpec.setOrderType(mdlOrderSpec.getOrderType());
 			orderSpec.setAttribute(context().attributes().toEntity(mdlOrderSpec.getAttribute()));
@@ -28,7 +28,7 @@ public class OrderSpecificationTranslator extends AbstractMDLTranslator<OrderSpe
 	}
 
 	@Override
-	public void updateMDL(OrderSpecification orderSpec, MDLOrderSpecificationAST mdlOrderSpec) {
+	protected void updateMDLImpl(OrderSpecification orderSpec, MDLOrderSpecificationAST mdlOrderSpec) {
 		if (orderSpec != null) {
 			mdlOrderSpec.setOrderType(orderSpec.getOrderType());
 			mdlOrderSpec.setAttribute(context().attributes().toMDL(orderSpec.getAttribute()));		

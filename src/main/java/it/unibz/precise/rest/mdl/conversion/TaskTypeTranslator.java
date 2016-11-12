@@ -10,7 +10,7 @@ class TaskTypeTranslator extends AbstractMDLTranslator<TaskType, MDLTaskTypeAST>
 	}
 
 	@Override
-	public void updateMDL(TaskType taskType, MDLTaskTypeAST mdlTaskType) {
+	protected void updateMDLImpl(TaskType taskType, MDLTaskTypeAST mdlTaskType) {
 		mdlTaskType.setName(taskType.getName());
 		mdlTaskType.setShortName(taskType.getShortName());
 		mdlTaskType.setDescription(taskType.getDescription());
@@ -20,7 +20,7 @@ class TaskTypeTranslator extends AbstractMDLTranslator<TaskType, MDLTaskTypeAST>
 	}
 	
 	@Override
-	public void updateEntity(MDLTaskTypeAST mdlTaskType, TaskType taskType) {
+	protected void updateEntityImpl(MDLTaskTypeAST mdlTaskType, TaskType taskType) {
 		taskType.setName(mdlTaskType.getName());
 		taskType.setShortName(mdlTaskType.getShortName());
 		taskType.setDescription(mdlTaskType.getDescription());

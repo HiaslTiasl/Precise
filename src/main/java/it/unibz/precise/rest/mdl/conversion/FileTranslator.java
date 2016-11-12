@@ -10,14 +10,14 @@ class FileTranslator extends AbstractMDLTranslator<Model, MDLFileAST> {
 	}
 
 	@Override
-	public void updateMDL(Model model, MDLFileAST mdlFile) {
+	protected void updateMDLImpl(Model model, MDLFileAST mdlFile) {
 		mdlFile.setModel(context().models().toMDL(model));
 		mdlFile.setConfiguration(context().configs().toMDL(model));
 		mdlFile.setDiagram(context().diagrams().toMDL(model));
 	}
 	
 	@Override
-	public void updateEntity(MDLFileAST mdlFile, Model model) {
+	protected void updateEntityImpl(MDLFileAST mdlFile, Model model) {
 		context().models().updateEntity(mdlFile.getModel(), model);
 		context().configs().updateEntity(mdlFile.getConfiguration(), model);
 		context().diagrams().updateEntity(mdlFile.getDiagram(), model);
