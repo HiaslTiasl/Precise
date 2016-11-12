@@ -50,7 +50,7 @@ define([
 		
 		function editTaskType(taskType) {
 			openModal(function () {
-				return TaskTypes.existingResource($ctrl.model, taskType);
+				return TaskTypes.existingResource($ctrl.model, _.clone(taskType));
 			});
 		}
 		

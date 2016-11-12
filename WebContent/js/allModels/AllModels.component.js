@@ -48,7 +48,7 @@ define([
 		
 		function editModel(model) {
 			openModal(function () {
-				return Models.existingResource(model);
+				return Models.existingResource(_.clone(model));
 			});
 		}
 		

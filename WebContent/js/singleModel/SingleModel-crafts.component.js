@@ -42,7 +42,7 @@ define([
 		
 		function editCraft(craft) {
 			openModal(function () {
-				return Crafts.existingResource($ctrl.model, craft);
+				return Crafts.existingResource($ctrl.model, _.clone(craft));
 			});
 		}
 		
