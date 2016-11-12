@@ -1,5 +1,13 @@
 package it.unibz.precise.rest;
 
+import it.unibz.precise.model.Dependency;
+import it.unibz.precise.model.Model;
+import it.unibz.precise.model.PatternEntry;
+import it.unibz.precise.model.Task;
+import it.unibz.precise.model.TaskType;
+import it.unibz.precise.rep.ModelRepository;
+
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,13 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import it.unibz.precise.model.Dependency;
-import it.unibz.precise.model.Model;
-import it.unibz.precise.model.PatternEntry;
-import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
-import it.unibz.precise.rep.ModelRepository;
 
 @RestController
 @RequestMapping(
@@ -100,7 +101,8 @@ public class CSVFileController {
 				.collect(Collectors.joining(locSep)),
 			task.getIn().stream()
 				.map(Dependency::getSource)
-				.map(t -> task.getType().getShortName() + '(' + t.getId() + ')')
+				.sorted(Comparator.comparing((Task t) -> t.getType().getShortName()).thenComparing(Task::getId))
+				.map(t -> t.getType().getShortName() + '(' + t.getId() + ')')
 				.map(String::valueOf)
 				.collect(Collectors.joining(taskSep))
 		)

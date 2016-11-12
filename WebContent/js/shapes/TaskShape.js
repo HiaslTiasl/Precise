@@ -37,8 +37,8 @@ define([
 	
 	var sharedClasses = [
 		'task-id',
-		'task-crew-size',
-		'task-quantity-per-day',
+		'task-crew',
+		'task-duration',
 		'task-type-craft',
 		'task-type-name',
 		'task-order',
@@ -74,14 +74,14 @@ define([
 					width: WIDTH,
 					'follow-scale': true
 				},
-				'rect.task-id, rect.task-crew-size, rect.task-quantity-per-day, rect.task-type-craft': {
+				'rect.task-id, rect.task-crew, rect.task-duration, rect.task-type-craft': {
 					width: HEADER_COL_WIDTH,
 					height: HEADER_ROW_HEIGHT
 				},
-				'rect.task-id':             { x: 0 * HEADER_COL_WIDTH },
-				'rect.task-crew-size': { x: 1 * HEADER_COL_WIDTH },
-				'rect.task-quantity-per-day':  { x: 2 * HEADER_COL_WIDTH },
-				'rect.task-type-craft':     { x: 3 * HEADER_COL_WIDTH },
+				'rect.task-id':         { x: 0 * HEADER_COL_WIDTH },
+				'rect.task-crew':       { x: 1 * HEADER_COL_WIDTH },
+				'rect.task-duration':   { x: 2 * HEADER_COL_WIDTH },
+				'rect.task-type-craft': { x: 3 * HEADER_COL_WIDTH },
 				
 				'rect.task-type-name': { y: HEADER_ROW_HEIGHT, height: NAME_HEIGHT },
 				'rect.task-locations': { y: LOC_POS_Y,  height: DEFAULT_LOC_HEIGHT },
@@ -151,11 +151,8 @@ define([
 				locationPatterns = data.locationPatterns,
 				width = WIDTH,
 				height = LOC_POS_Y + this.locationsHeight,
-				crewSize = isNaN(data.crewSize) ? '' : data.crewSize,
-				quantityPerDay = isNaN(data.quantityPerDay) ? ''
-					: util.isInteger(data.quantityPerDay) 
-						? data.quantityPerDay.toString()
-						: data.quantityPerDay.toFixed(1);
+				crew = isNaN(data.crewSize) || isNaN(data.crewCount) ? '' : data.crewCount + '\u00d7' + data.crewSize,
+				duration = isNaN(data.durationDays) ? '' : data.durationDays + 'd';
 
 			if (exclusive) {
 				width += 10;
@@ -172,12 +169,12 @@ define([
 					height: height,
 					transform: exclusive ? 'translate(-5,-5)' : ''
 				},
-				'rect.task-type-name':        { fill: colors.toCSS(data.type.phase.color) },
-				'rect.task-locations':        { height: this.locationsHeight },
-				'text.task-id':               { text: '#' + data.id },
-				'text.task-crew-size':        { text: crewSize },
-				'text.task-quantity-per-day': { text: quantityPerDay },
-				'text.task-type-craft':       { text: data.type.craft.shortName }
+				'rect.task-type-name':  { fill: colors.toCSS(data.type.phase.color) },
+				'rect.task-locations':  { height: this.locationsHeight },
+				'text.task-id':         { text: '#' + data.id },
+				'text.task-crew':       { text: crew },
+				'text.task-duration':   { text: duration },
+				'text.task-type-craft': { text: data.type.craft.shortName }
 			};
 			if (locationPatterns) {
 				attrs['text.trunc'] = {

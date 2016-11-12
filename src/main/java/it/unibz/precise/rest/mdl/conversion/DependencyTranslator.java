@@ -1,9 +1,11 @@
 package it.unibz.precise.rest.mdl.conversion;
 
-import java.util.ArrayList;
-
 import it.unibz.precise.model.Dependency;
+import it.unibz.precise.model.Position;
 import it.unibz.precise.rest.mdl.ast.MDLDependencyAST;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependencyAST> {
 	
@@ -34,7 +36,8 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 		dependency.setTargetVertex(mdlDependency.getTargetVertex());
 		// N.B. we defensively use a new collection to prevent errors when converting forth and back,
 		// since embedded collections cannot be shared.
-		dependency.setVertices(new ArrayList<>(mdlDependency.getVertices()));
+		List<Position> vertices = mdlDependency.getVertices();
+		dependency.setVertices(vertices == null ? null : new ArrayList<>(vertices));
 		dependency.setLabelPosition(mdlDependency.getLabelPosition());
 		dependency.setScope(context().scopes().toEntity(mdlDependency.getScope()));
 	}

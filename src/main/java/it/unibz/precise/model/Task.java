@@ -188,7 +188,7 @@ public class Task extends BaseEntity {
 	public void updateDuration() {
 		switch (durationType) {
 		case AUTO:
-			durationDays = (int)Math.ceil(totalQuantity / quantityPerDay);
+			durationDays = (int)Math.ceil(exactDurationDays());
 			if (crewCount == null)
 				crewCount = 1;
 			break;
@@ -197,6 +197,12 @@ public class Task extends BaseEntity {
 			quantityPerDay = null;
 			break;
 		}
+	}
+	
+	private double exactDurationDays() {
+		return durationType == DurationType.MANUAL
+			? durationDays
+			: totalQuantity / (crewCount * quantityPerDay);
 	}
 
 	public Integer getDurationDays() {
@@ -207,12 +213,9 @@ public class Task extends BaseEntity {
 		this.durationDays = durationDays;
 	}
 	
-	public int getDurationHours() {
-		return (int)(model.getHoursPerDay() * (
-			durationType == DurationType.MANUAL
-				? durationDays
-				: totalQuantity / quantityPerDay
-		));
+	public Integer getManHours() {
+		return crewCount == null || crewSize == null ? null
+			: (int)(crewCount * crewSize * model.getHoursPerDay() * exactDurationDays());
 	}
 	
 	public Float getQuantityPerDay() {
@@ -221,11 +224,6 @@ public class Task extends BaseEntity {
 
 	public void setQuantityPerDay(Float quantityPerDay) {
 		this.quantityPerDay = quantityPerDay;
-	}
-
-	public Integer getManHours() {
-		return crewSize == null || crewCount == null ? null
-			: crewSize * crewCount * getDurationHours();
 	}
 	
 	public int getUnits() {

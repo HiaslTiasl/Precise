@@ -64,7 +64,6 @@ precise-diagram-paper {
  ******************************************/
 
 #id,
-#quantity-per-day,
 #craft {
 	border: none;
 	box-shadow: none;
@@ -75,13 +74,14 @@ precise-diagram-paper {
 	color: white;
 }
 
-#crew-size {
+#crew-size,
+#crew-count {
 	background-color: #F6BEC8;
 	background-color: #D4C8E1;
 	background-color: #E6F4FF;
 }
 
-#quantity-per-day {
+#duration {
 	background-color: #FFE9C4;
 	background-color: #F8D9E0;
 	background-color: #FFFBE5;

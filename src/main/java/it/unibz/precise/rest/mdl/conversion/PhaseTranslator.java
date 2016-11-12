@@ -63,7 +63,8 @@ public class PhaseTranslator extends AbstractMDLTranslator<Phase, MDLPhaseAST> {
 	private void walkTreeLevel(List<AttributeHierarchyLevel> levels, int levelIndex, int totalNum, AttributeHierarchyNode parent) {
 		AttributeHierarchyLevel level = levels.get(levelIndex);
 		Attribute attr = level.getAttribute();
-		parent.setValuesMatchPositions(true);
+		if (parent != null)
+			parent.setValuesMatchPositions(true);
 		for (int value = 1; value <= totalNum; value++)
 			createNode(level, parent, attr.checkValue(value));
 	}

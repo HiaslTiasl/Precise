@@ -34,13 +34,13 @@ rect.task-id {
 	fill: black;
 }
 
-rect.task-crew-size {
+rect.task-crew {
 	fill: #F6BEC8;
 	fill: #D4C8E1;
 	fill: #E6F4FF;
 }
 
-rect.task-quantity-per-day {
+rect.task-duration {
 	fill: #FFE9C4;
 	fill: #F8D9E0;
 	fill: #FFFBE5;

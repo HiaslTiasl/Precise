@@ -25,7 +25,7 @@ public interface ExpandedTaskProjection {
 	
 	Integer getDurationDays();
 	
-	Integer getDurationHours();
+	Integer getManHours();
 	
 	Float getQuantityPerDay();
 	
