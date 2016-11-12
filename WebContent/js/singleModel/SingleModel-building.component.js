@@ -41,8 +41,9 @@ define([
 		}
 		
 		function phasesChanged() {
-			if ($ctrl.phases && !$ctrl.phase)
-				$ctrl.phase = $ctrl.phases[0];
+			$ctrl.phase = !_.size($ctrl.phases) ? null
+				: !$ctrl.phase ? $ctrl.phases[0]
+				: _.find($ctrl.phases, { name: $ctrl.phase.name });
 		}
 		
 		function hoursPerDayChanged() {

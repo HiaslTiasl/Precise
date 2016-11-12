@@ -15,7 +15,7 @@
 			  </label>
 			</div>
 		</div>
-		<div class="form-group" ng-switch on="$ctrl.from">
+		<div class="form-group" ng-class="{'has-error': $ctrl.fileError}" ng-switch on="$ctrl.from">
 			<div id="file-config" class="input-group" ng-switch-when="file">
 				<span class="input-group-btn">			
 					<button class="btn btn-default" ng-model="$ctrl.file" ngf-select="$ctrl.selectFile($ctrl.file)">Browse</button>
@@ -36,6 +36,7 @@
 						: '-- Select a model --'
 				}}</option>
 			</select>
+			<p class="help-block">{{$ctrl.fileError}}</p>
 		</div>
 	</form>
 </div>

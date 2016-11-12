@@ -1,9 +1,9 @@
 define([], function () {
 	'use strict';
 	
-	SingleModelConfigImportDialogController.$inject = ['$http', 'Files', 'MDLFiles', 'AllModels']
+	SingleModelConfigImportDialogController.$inject = ['$http', 'PreciseApi', 'Files', 'MDLFiles', 'AllModels']
 	
-	function SingleModelConfigImportDialogController($http, Files, MDLFiles, AllModels) {
+	function SingleModelConfigImportDialogController($http, PreciseApi, Files, MDLFiles, AllModels) {
 		
 		var $ctrl = this;
 		
@@ -61,7 +61,10 @@ define([], function () {
 				.readAsText(file)
 				.then(function (text) {
 					return MDLFiles.importJSON(MDLFiles.urlToModel($ctrl.resolve.model.data, true), text);
-				});
+				})
+				['catch'](PreciseApi.mapReason(function (reason) {
+					return $ctrl.fileError = PreciseApi.toErrorMessage(reason);
+				}));
 		}
 		
 		function chooseModel(data) {
