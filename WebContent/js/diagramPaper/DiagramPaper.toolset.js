@@ -65,10 +65,10 @@ define([
 				}
 			}
 		}
-	}, {
-		title: 'Duplicate selected task',
-		requiresSelected: 'task(TODO)',
-		action: null	// TODO
+//	}, {
+//		title: 'Duplicate selected task',
+//		requiresSelected: 'task(TODO)',
+//		action: null	// TODO
 	} ];
 
 });

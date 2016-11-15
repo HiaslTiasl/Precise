@@ -30,10 +30,9 @@ public class CycleChecker implements ConsistencyChecker {
 	
 	@Override
 	public Stream<ConsistencyWarning> check(Model model) {
-		List<Task> tasks = model.getTasks();
-		List<List<Task>> sccs = sccFinder.findSCCs(tasks, t -> t.getOut().stream().map(Dependency::getTarget));
+		List<List<Task>> sccs = sccFinder.findSCCs(new DiagramGraph(model));
 		return sccs.stream()
-			.filter(c -> c.size() > 1)
+			.filter(SCCFinder::isNonTrivialComponent)
 			.map(this::warning);
 	}
 	
@@ -47,7 +46,8 @@ public class CycleChecker implements ConsistencyChecker {
 		List<BaseEntity> entities = Stream.concat(tasks.stream(), dependencies).collect(Collectors.toList());
 		String msg = WARNING_MESSAGE
 			+ tasks.stream()
-				.map(Task::getId)
+				.sorted(Task.shortIdentificationComparator())
+				.map(Task::getShortIdentification)
 				.map(String::valueOf)
 				.collect(Collectors.joining(", "));
 		return new ConsistencyWarning(WARNING_TYPE, msg, entities, null);

@@ -1,13 +1,12 @@
-package it.unibz.precise.check;
+package it.unibz.precise.graph;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Stream;
+
+import it.unibz.precise.check.SCCFinder;
 
 /**
  * https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java
@@ -16,22 +15,20 @@ import java.util.stream.Stream;
 public class SCCTarjan implements SCCFinder {
 
 
-	public <T> List<List<T>> findSCCs(Collection<T> nodes, Function<T, Stream<T>> adj) {
-		return new Run<T>(nodes, adj).dfs();
+	public <T> List<List<T>> findSCCs(Graph<T> graph) {
+		return new Run<T>(graph).dfs();
 	}
 	
 	private static class Run<T> {
-		private Collection<T> nodes;
-		private Function<T, Stream<T>> adj;
+		private Graph<T> graph;
 		private ArrayList<T> stack;
 		private Map<T, Integer> lowlinks;
 		private List<List<T>> components;
 		private int time;
 		
-		private Run(Collection<T> nodes, Function<T, Stream<T>> adj) {
-			int n = nodes.size();
-			this.nodes = nodes;
-			this.adj = adj;
+		private Run(Graph<T> graph) {
+			this.graph = graph;
+			int n = graph.nodes().size();
 			stack = new ArrayList<>(n);
 			lowlinks = new HashMap<>(n);
 			components = new ArrayList<>(n);
@@ -51,10 +48,11 @@ public class SCCTarjan implements SCCFinder {
 		}
 		
 		private List<List<T>> dfs() {
-			for (T node : nodes) {
+			for (T node : graph.nodes()) {
 				if (!visited(node))
 					dfs(node);
 			}
+			Collections.reverse(components);
 			return components;
 		}
 		
@@ -64,7 +62,7 @@ public class SCCTarjan implements SCCFinder {
 			
 			// Using an Iterator instead of a Stream, because nodes are visited recursively.
 			// In particular, each iteration depends on state modifications from earlier iterations.
-			Iterable<T> successors = adj.apply(node)::iterator;
+			Iterable<T> successors = graph.successors(node)::iterator;
 			for (T suc : successors) {
 				if (!visited(suc))
 					dfs(suc);
@@ -83,10 +81,7 @@ public class SCCTarjan implements SCCFinder {
 					component.add(n);
 					lowlinks.put(n, Integer.MAX_VALUE);
 				} while (!n.equals(node));
-				// We put nodes on the stack as we traverse the graph,
-				// and add them to the component as we pop them from the stack.
-				// By reversing the component afterwards, we get elements in topological order.
-				Collections.reverse(component);
+				// Collections.reverse(component);
 				components.add(component);
 			}
 		}

@@ -1,12 +1,14 @@
 package it.unibz.precise.check;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Stream;
+
+import it.unibz.precise.graph.Graph;
 
 public interface SCCFinder {
 	
-	<T> List<List<T>> findSCCs(Collection<T> nodes, Function<T, Stream<T>> adj);
+	<T> List<List<T>> findSCCs(Graph<T> graph);
 
+	static <T> boolean isNonTrivialComponent(List<T> component) {
+		return component.size() > 1;
+	}
 }

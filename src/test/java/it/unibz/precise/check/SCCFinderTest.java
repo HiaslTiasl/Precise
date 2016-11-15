@@ -23,6 +23,7 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import it.unibz.precise.Application;
+import it.unibz.precise.graph.Graph;
 
 @RunWith(Parameterized.class)
 @SpringBootTest(classes=Application.class, webEnvironment=WebEnvironment.RANDOM_PORT)
@@ -59,10 +60,11 @@ public class SCCFinderTest {
 	
 	@Test
 	public void testFindSCCs() {
-		List<List<Integer>> foundSCCs = sccFinder.findSCCs(
+		Graph<Integer> graph = new Graph<>(
 			IntStream.range(0, adj.size()).boxed().collect(Collectors.toList()),
 			i -> adj.get(i).stream()
 		);
+		List<List<Integer>> foundSCCs = sccFinder.findSCCs(graph);
 		
 		Set<Set<Integer>> sccSets = foundSCCs.stream()
 			.map(HashSet<Integer>::new)

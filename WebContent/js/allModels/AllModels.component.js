@@ -43,7 +43,9 @@ define([
 		}
 		
 		function createModel() {
-			openModal(Models.newResource);
+			openModal(function () {
+				return Models.newResource();
+			});
 		}
 		
 		function editModel(model) {

@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import it.unibz.precise.check.SCCFinder;
-import it.unibz.precise.check.SCCTarjan;
+import it.unibz.precise.graph.SCCTarjan;
 
 @Configuration
 public class ConsistencyConfig {

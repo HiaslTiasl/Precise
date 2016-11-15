@@ -1,13 +1,6 @@
 package it.unibz.precise.rest;
 
-import it.unibz.precise.model.Dependency;
-import it.unibz.precise.model.Model;
-import it.unibz.precise.model.PatternEntry;
-import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
-import it.unibz.precise.rep.ModelRepository;
-
-import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,6 +14,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.unibz.precise.check.DiagramGraph;
+import it.unibz.precise.graph.SCCTarjan;
+import it.unibz.precise.model.Dependency;
+import it.unibz.precise.model.Model;
+import it.unibz.precise.model.PatternEntry;
+import it.unibz.precise.model.Task;
+import it.unibz.precise.model.TaskType;
+import it.unibz.precise.rep.ModelRepository;
+
 @RestController
 @RequestMapping(
 	path=CSVFileController.RESOURCE_NAME,
@@ -32,7 +34,10 @@ public class CSVFileController {
 	
 	@Autowired
 	private ModelRepository repository;
-
+	
+	@Autowired
+	private SCCTarjan sccTarjan;
+	
 	public static final String RESOURCE_NAME = "/files";
 	
 	public static final String FILE_EXT = ".csv";
@@ -57,7 +62,12 @@ public class CSVFileController {
 		
 		String headerRow = headerRow(sep);
 		
-		String dataRows = model.getTasks().stream()
+		DiagramGraph graph = new DiagramGraph(model);
+		List<Task> orderedTasks = sccTarjan.findSCCs(graph).stream()
+			.flatMap(l -> l.stream().sorted(Task.shortIdentificationComparator()))
+			.collect(Collectors.toList());
+		
+		String dataRows = orderedTasks.stream()
 			.map(t -> dataRow(t, sep, locSep, taskSep))
 			.collect(Collectors.joining(nl));
 		
@@ -83,7 +93,7 @@ public class CSVFileController {
 		);
 	}
 	
-	private static String dataRow(Task task, String sep, String locSep, String taskSep) {
+	private String dataRow(Task task, String sep, String locSep, String taskSep) {
 		TaskType type = task.getType();
 		return Stream.of(
 			type.getName(),
@@ -101,8 +111,8 @@ public class CSVFileController {
 				.collect(Collectors.joining(locSep)),
 			task.getIn().stream()
 				.map(Dependency::getSource)
-				.sorted(Comparator.comparing((Task t) -> t.getType().getShortName()).thenComparing(Task::getId))
-				.map(t -> t.getType().getShortName() + '(' + t.getId() + ')')
+				.sorted(Task.shortIdentificationComparator())
+				.map(Task::getShortIdentification)
 				.map(String::valueOf)
 				.collect(Collectors.joining(taskSep))
 		)

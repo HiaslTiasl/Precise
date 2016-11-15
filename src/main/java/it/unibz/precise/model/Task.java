@@ -1,6 +1,7 @@
 package it.unibz.precise.model;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,6 +30,10 @@ import it.unibz.util.Util;
 public class Task extends BaseEntity {
 
 	public static final int DEFAULT_CREW_COUNT = 1;
+	
+	private static Comparator<Task> shortNameAndIDComparator = Comparator.comparing(
+		(Task t) -> t.getType().getShortName()
+	).thenComparing(Task::getId);
 	
 	public enum DurationType { MANUAL, AUTO }
 
@@ -188,9 +193,9 @@ public class Task extends BaseEntity {
 	public void updateDuration() {
 		switch (durationType) {
 		case AUTO:
-			durationDays = (int)Math.ceil(exactDurationDays());
 			if (crewCount == null)
 				crewCount = 1;
+			durationDays = (int)Math.ceil(exactDurationDays());
 			break;
 		case MANUAL:
 			totalQuantity = crewSize = crewCount = null;
@@ -283,6 +288,14 @@ public class Task extends BaseEntity {
 
 	void internalSetOut(List<Dependency> out) {
 		this.out = out;
+	}
+	
+	public String getShortIdentification() {
+		return type.getShortName() + '(' + getId() + ')';
+	}
+	
+	public static Comparator<Task> shortIdentificationComparator() {
+		return shortNameAndIDComparator;
 	}
 	
 	public void countUnits() {

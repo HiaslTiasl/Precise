@@ -69,7 +69,6 @@ public class OverlappingLocationsChecker implements ConsistencyChecker {
 		return overlappings.values().stream()
 			.filter(l -> l.size() > 1)
 			.map(this::warnOverlappingLocations);
-		
 	}
 	
 	private Stream<TaskLocation> taskLocations(Task task) {
@@ -106,7 +105,7 @@ public class OverlappingLocationsChecker implements ConsistencyChecker {
 					.map(TaskLocation::getIndex)
 					.map(String::valueOf)
 					.collect(Collectors.joining(", "))
-				+ " in task " + e.getKey().getId()
+				+ " in task " + e.getKey().getShortIdentification()
 			)
 			.collect(Collectors.joining(", "));
 	}
