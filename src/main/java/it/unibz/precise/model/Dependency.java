@@ -240,8 +240,8 @@ public class Dependency extends BaseEntity {
 	}
 	
 	public boolean removeNotAllowedScopeAttributes() {
-		return scope.getAttributes()
-			.removeAll(getNotAllowedScopeAttributes().collect(Collectors.toSet()));
+		return scope != null && scope.getAttributes() != null
+			&& scope.getAttributes().removeAll(getNotAllowedScopeAttributes().collect(Collectors.toSet()));
 	}
 	
 	@PostLoad

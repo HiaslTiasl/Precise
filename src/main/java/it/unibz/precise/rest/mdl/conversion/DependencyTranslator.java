@@ -40,6 +40,8 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 		dependency.setVertices(vertices == null ? null : new ArrayList<>(vertices));
 		dependency.setLabelPosition(mdlDependency.getLabelPosition());
 		dependency.setScope(context().scopes().toEntity(mdlDependency.getScope()));
+		if (!context().isStrictMode())
+			dependency.removeNotAllowedScopeAttributes();
 	}
 
 	@Override

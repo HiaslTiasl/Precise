@@ -1,5 +1,7 @@
 package it.unibz.precise.rest.mdl.conversion;
 
+import java.util.stream.Collectors;
+
 import it.unibz.precise.model.Scope;
 import it.unibz.precise.rest.mdl.ast.MDLScopeAST;
 import it.unibz.util.Util;
@@ -24,7 +26,13 @@ public class ScopeTranslator extends AbstractMDLTranslator<Scope, MDLScopeAST> {
 	protected void updateEntityImpl(MDLScopeAST mdlScope, Scope scope) {
 		if (mdlScope != null) {
 			scope.setType(mdlScope.getType());
-			scope.setAttributes(Util.mapToList(mdlScope.getAttributes(), context().attributes()::toEntity));
+			scope.setAttributes(
+				mdlScope.getAttributes() == null ? null
+				: mdlScope.getAttributes().stream()
+					.map(context().attributes()::toEntity)
+					.filter(a -> a != null)
+					.collect(Collectors.toList())
+			);
 		}
 	}
 
