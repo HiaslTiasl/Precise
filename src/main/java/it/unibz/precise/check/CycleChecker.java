@@ -30,7 +30,7 @@ public class CycleChecker implements ConsistencyChecker {
 	
 	@Override
 	public Stream<ConsistencyWarning> check(Model model) {
-		List<List<Task>> sccs = sccFinder.findSCCs(new DiagramGraph(model));
+		List<List<Task>> sccs = sccFinder.findSCCs(DiagramGraph.of(model));
 		return sccs.stream()
 			.filter(SCCFinder::isNonTrivialComponent)
 			.map(this::warning);

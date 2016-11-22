@@ -36,7 +36,7 @@ define([
 				.then(function (json) {
 					return MDLFiles.importJSON(MDLFiles.urlToFile(file.name), json)
 				})
-				.then(clearCache, PreciseApi.mapReason(PreciseApi.toErrorMessage));
+				.then(clearCache, PreciseApi.mapReason(PreciseApi.getError));
 		}
 		
 		function deleteModel(model) {

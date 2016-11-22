@@ -43,7 +43,7 @@ define([
 		function canHaveUnitScope() {
 			var data = $ctrl.resource.data;
 			return !data.source || !data.target
-				|| data.source.type.phase.name === data.target.type.phase.name;
+				|| _.get(data.source, ['type', 'phase', 'name']) === _.get(data.target, ['type', 'phase', 'name']);
 		}
 		
 		function updateScopeType() {

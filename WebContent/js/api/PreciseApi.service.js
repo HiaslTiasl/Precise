@@ -16,8 +16,7 @@ define([
 		// register the traverson-hal plug-in for media type 'application/hal+json'
 		traverson.registerMediaType(JsonHalAdapter.mediaType, JsonHalAdapter);
 		
-		var getErrorMessage = _.property('message'),
-			getResponseData = _.property('data');
+		var getResponseData = _.property('data');
 		
 		this.basePath = basePath;
 		this.linkTo = HAL.linkTo;
@@ -29,14 +28,19 @@ define([
 		this.resultOf = resultOf;
 		this.mapReason = mapReason;
 		this.getResponseData = getResponseData;
-		this.responseErrorMessage = responseErrorMessage;
-		this.toErrorMessage = toErrorMessage;
+		this.responseError = responseError;
+		this.getError = getError;
 		this.deleteResource = deleteResource;
 		
 		this.asyncAlert = wrapAsync($window.alert, $window);
 		this.asyncConfirm = wrapAsync($window.confirm, $window, _.identity);
 		
 		var basePath = 'api';
+		
+		function getErrorMessage(error) {
+			return error
+				&& (error.property + '=' + error.invalidValue + ': ' + error.message); 
+		}
 		
 		function from(url) {
 			return new Request(url);
@@ -51,7 +55,7 @@ define([
 		}
 		
 		function resultOf(request) {
-			return request.result.then(resolveSuccess);
+			return request.result.then(resolveSuccess, getError);
 		}
 		
 		function mapReason(mapper) {
@@ -70,29 +74,27 @@ define([
 		}
 		
 		// TODO: improve
-		function responseErrorMessage(response) {
+		function responseError(response) {
 			var data = response.data;
 			return !data
-				? httpErrorMessage(response)									// No error message -> report HTTP failure
-				: data.errors && data.errors.map(getErrorMessage).join('. ')	// Multiple Validation errors
-					|| getErrorMessage(data)									// Exception message
-					|| data;													// Something else
+				? { message: httpErrorMessage(response) }									// No error message -> report HTTP failure
+				: data.errors || data;													// Something else
 		}
 		
-		function toErrorMessage(reason) {
-			var msg;
+		function getError(reason) {
+			var error;
 			switch (typeof reason) {
 			case 'string':
-				msg = reason;
+				error = { message: reason };
 				break;
 			case 'object':
 				if (reason instanceof Error)
-					msg = reason.message;
+					error = reason;
 				else if ('status' in reason && 'statusText' in reason)
-					msg = responseErrorMessage(reason);
+					error = responseError(reason);
 				break;
 			}
-			return msg || 'Error';
+			return error || 'Error';
 		}
 		
 		function resolveSuccess(response) {
@@ -101,7 +103,7 @@ define([
 			var data = response.body;
 			if (data && typeof data === 'string')
 				data = response.body = response.data = JSON.parse(data);
-			return isSuccess(response) ? data : $q.reject(response);
+			return isSuccess(response) ? data : $q.reject(getError(response));
 		}
 		
 		function isSuccess(response) {

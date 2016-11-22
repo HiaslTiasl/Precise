@@ -1,5 +1,7 @@
 package it.unibz.precise.rest.mdl.conversion;
 
+import static it.unibz.precise.rest.mdl.conversion.CachingTranslator.cache;
+
 import it.unibz.precise.model.Attribute;
 import it.unibz.precise.model.Craft;
 import it.unibz.precise.model.Dependency;
@@ -24,20 +26,22 @@ import it.unibz.precise.rest.mdl.ast.MDLTaskTypeAST;
 
 public class MDLContext {
 	
-	private final MDLTranslator<Model, MDLFileAST> fileTranslator;
-	private final MDLTranslator<Model, MDLModelAST> modelTranslator;
-	private final MDLTranslator<Model, MDLConfigAST> configTranslator;
-	private final MDLTranslator<Model, MDLDiagramAST> diagramTranslator;
-	private final MDLTranslator<Craft, MDLCraftAST> craftTranslator;
-	private final MDLTranslator<Attribute, MDLAttributeAST> attributeTranslator;
-	private final MDLTranslator<Phase, MDLPhaseAST> phaseTranslator;
-	private final MDLTranslator<TaskType, MDLTaskTypeAST> taskTypeTranslator;
-	private final MDLTranslator<Task, MDLTaskAST> taskTranslator;
-	private final MDLTranslator<Dependency, MDLDependencyAST> dependencyTranslator;
-	private final MDLTranslator<Scope, MDLScopeAST> scopeTranslator;
-	private final MDLTranslator<OrderSpecification, MDLOrderSpecificationAST> orderSpecTranslator;
+	private final CachingTranslator<Model, MDLFileAST> fileTranslator;
+	private final CachingTranslator<Model, MDLModelAST> modelTranslator;
+	private final CachingTranslator<Model, MDLConfigAST> configTranslator;
+	private final CachingTranslator<Model, MDLDiagramAST> diagramTranslator;
+	private final CachingTranslator<Craft, MDLCraftAST> craftTranslator;
+	private final CachingTranslator<Attribute, MDLAttributeAST> attributeTranslator;
+	private final CachingTranslator<Phase, MDLPhaseAST> phaseTranslator;
+	private final CachingTranslator<TaskType, MDLTaskTypeAST> taskTypeTranslator;
+	private final CachingTranslator<Task, MDLTaskAST> taskTranslator;
+	private final CachingTranslator<Dependency, MDLDependencyAST> dependencyTranslator;
+	private final CachingTranslator<Scope, MDLScopeAST> scopeTranslator;
+	private final CachingTranslator<OrderSpecification, MDLOrderSpecificationAST> orderSpecTranslator;
 	
-	public MDLContext() {
+	private boolean strictMode = true;
+	
+	private MDLContext() {
 		fileTranslator       = cache(new FileTranslator(this));
 		modelTranslator      = cache(new ModelTranslator(this));
 		configTranslator     = cache(new ConfigTranslator(this));
@@ -52,55 +56,64 @@ public class MDLContext {
 		orderSpecTranslator  = cache(new OrderSpecificationTranslator(this));
 	}
 	
-	private <E, MDL> MDLTranslator<E, MDL> cache(MDLTranslator<E, MDL> translator) {
-		return new CachingTranslator<>(translator);
+	public static MDLContext create() {
+		return new MDLContext();
+	}
+	
+	public boolean isStrictMode() {
+		return strictMode;
+	}
+	
+	public MDLContext switchStrictMode(boolean strictMode) {
+		this.strictMode = strictMode;
+		return this;
 	}
 		
-	public MDLTranslator<Model, MDLFileAST> files() {
+	public CachingTranslator<Model, MDLFileAST> files() {
 		return fileTranslator;
 	}
 	
-	public MDLTranslator<Model, MDLModelAST> models() {
+	public CachingTranslator<Model, MDLModelAST> models() {
 		return modelTranslator;
 	}
 
-	public MDLTranslator<Model, MDLConfigAST> configs() {
+	public CachingTranslator<Model, MDLConfigAST> configs() {
 		return configTranslator;
 	}
 	
-	public MDLTranslator<Model, MDLDiagramAST> diagrams() {
+	public CachingTranslator<Model, MDLDiagramAST> diagrams() {
 		return diagramTranslator;
 	}
 	
-	public MDLTranslator<Craft, MDLCraftAST> crafts() {
+	public CachingTranslator<Craft, MDLCraftAST> crafts() {
 		return craftTranslator;
 	}
 
-	public MDLTranslator<Attribute, MDLAttributeAST> attributes() {
+	public CachingTranslator<Attribute, MDLAttributeAST> attributes() {
 		return attributeTranslator;
 	}
 	
-	public MDLTranslator<Phase, MDLPhaseAST> phases() {
+	public CachingTranslator<Phase, MDLPhaseAST> phases() {
 		return phaseTranslator;
 	}
 	
-	public MDLTranslator<TaskType, MDLTaskTypeAST> taskTypes() {
+	public CachingTranslator<TaskType, MDLTaskTypeAST> taskTypes() {
 		return taskTypeTranslator;
 	}
 	
-	public MDLTranslator<Task, MDLTaskAST> tasks() {
+	public CachingTranslator<Task, MDLTaskAST> tasks() {
 		return taskTranslator;
 	}
 	
-	public MDLTranslator<Dependency, MDLDependencyAST> dependencies() {
+	public CachingTranslator<Dependency, MDLDependencyAST> dependencies() {
 		return dependencyTranslator;
 	}
 	
-	public MDLTranslator<Scope, MDLScopeAST> scopes() {
+	public CachingTranslator<Scope, MDLScopeAST> scopes() {
 		return scopeTranslator;
 	}
 	
-	public MDLTranslator<OrderSpecification, MDLOrderSpecificationAST> orderSpecs() {
+	public CachingTranslator<OrderSpecification, MDLOrderSpecificationAST> orderSpecs() {
 		return orderSpecTranslator;
 	}
 	

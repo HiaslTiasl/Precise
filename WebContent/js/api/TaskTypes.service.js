@@ -52,10 +52,10 @@ define([
 				var processed = _.omit(this.data, dontSendDirectly);
 				if (this.data.craft)
 					processed.craft = PreciseApi.hrefTo(this.data.craft);
-				if (!this.exists) {
+				if (this.data.phase)
 					processed.phase = PreciseApi.hrefTo(this.data.phase);
+				if (!this.exists)
 					processed.model = PreciseApi.hrefTo(this.model.data);
-				}
 				return processed;
 			}
 		

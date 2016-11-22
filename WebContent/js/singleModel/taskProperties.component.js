@@ -7,9 +7,9 @@ define([
 ) {
 	'use strict';
 	
-	TaskPropertiesController.$inject = ['PreciseApi', 'Tasks', 'Scopes', 'OrderSpecifications', 'Phases', 'Pages'];
+	TaskPropertiesController.$inject = ['$q', '$anchorScroll', '$timeout', 'PreciseApi', 'Tasks', 'TaskTypes', 'Scopes', 'OrderSpecifications', 'Phases', 'Pages'];
 	
-	function TaskPropertiesController(PreciseApi, Tasks, Scopes, OrderSpecifications, Phases, Pages) {
+	function TaskPropertiesController($q, $anchorScroll, $timeout, PreciseApi, Tasks, TaskTypes, Scopes, OrderSpecifications, Phases, Pages) {
 		var $ctrl = this;
 		
 		$ctrl.cancel = cancel;
@@ -30,6 +30,7 @@ define([
 		$ctrl.sendTask = sendTask;
 		$ctrl.isDisabledPatternEntry = isDisabledPatternEntry;
 		$ctrl.isDisabledOrderType = isDisabledOrderType;
+		$ctrl.toggleCollapsed = toggleCollapsed;
 		
 		$ctrl.scopeTypes = [
 			Scopes.Types.UNIT,
@@ -43,6 +44,13 @@ define([
 			OrderSpecifications.Types.ASCENDING,
 			OrderSpecifications.Types.DESCENDING
 		];
+		
+		$ctrl.collapsed = {
+			pitches: true,
+			exclusiveness: true,
+			order: true,
+			locations: true
+		};
 
 		$ctrl.$onChanges = $onChanges;
 		
@@ -50,15 +58,34 @@ define([
 			if ($ctrl.resource) {
 				$ctrl.exclusiveness = Scopes.toLocalRepresentation($ctrl.resource.data.exclusiveness);
 				$ctrl.order = OrderSpecifications.toLocalRepresentation($ctrl.resource.data.orderSpecifications);
+				var resourcePromise = $ctrl.resource.data.type.phase
+					? Phases.existingResource($ctrl.resource.model, $ctrl.resource.data.type.phase)
+					: $q.when($ctrl.resource.model)
+				resourcePromise.then(loadTaskTypesFrom);
 			}
 		}
 		
+		function loadTaskTypesFrom(resource) {
+			// Reset old list of task types first so they cannot be selected.
+			resource.getTaskTypes({
+				projection: TaskTypes.Resource.prototype.defaultProjection
+			})
+			.then(Pages.collectRemaining)
+			.then(function (taskTypes) {
+				$ctrl.taskTypes = taskTypes;
+			});			
+		}
+		
+		function toggleCollapsed(fieldset) {
+			$ctrl.collapsed[fieldset] = !$ctrl.collapsed[fieldset];
+		}
+		
 		function updateExlusivenessType() {
-			Scopes.updateType($ctrl.exclusiveness, $ctrl.resource.data.type.phase.attributes);
+			Scopes.updateType($ctrl.exclusiveness, _.get($ctrl.resource.data, ['type', 'phase', 'attributes']));
 		}
 		
 		function updateExclusivenessAttributes() {
-			Scopes.updateAttributes($ctrl.exclusiveness, $ctrl.resource.data.type.phase.attributes);
+			Scopes.updateAttributes($ctrl.exclusiveness, _.get($ctrl.resource.data, ['type', 'phase', 'attributes']));
 		}
 		
 		function attrFilterForOrderSpec(os) {
@@ -78,7 +105,7 @@ define([
 		}
 		
 		function addOrderSpec() {
-			var attr = _.find($ctrl.resource.data.type.phase.attributes, canSelectForOrderSpec);
+			var attr = _.find(_.get($ctrl.resource.data, ['type', 'phase', 'attributes']), canSelectForOrderSpec);
 			if (attr)
 				selectedOrderSpecAttribute(attr);
 			$ctrl.order.specs.push({
@@ -101,7 +128,7 @@ define([
 		}
 		
 		function canAddOrderSpec() {
-			return _.size($ctrl.order.specs) < _.size($ctrl.resource.data.type.phase.attributes);
+			return _.size($ctrl.order.specs) < _.size(_.get($ctrl.resource.data, ['type', 'phase', 'attributes']));
 		}
 		
 		function canMoveUpOrderSpec(index) {
@@ -124,7 +151,11 @@ define([
 		
 		function addPattern() {
 			return $ctrl.resource.globalPattern().then(function (checkedPattern) {
+				var num = $ctrl.resource.data.locationPatterns.length;
 				$ctrl.resource.data.locationPatterns.push(checkedPattern);
+				$timeout(function () {
+					$anchorScroll('location-' + num);
+				});
 			});
 		}
 		
@@ -133,9 +164,9 @@ define([
 		}
 		
 		function sendTask() {
-			var attributes = $ctrl.resource.data.type.phase.attributes,
-				exclusiveness = Scopes.fromLocalRepresentation($ctrl.exclusiveness, attributes),
-				orderSpecifications = OrderSpecifications.fromLocalRepresentation($ctrl.order, attributes);
+			var attributes = _.get($ctrl.resource.data, ['type', 'phase', 'attributes']),
+				exclusiveness = attributes && Scopes.fromLocalRepresentation($ctrl.exclusiveness, attributes),
+				orderSpecifications = attributes && OrderSpecifications.fromLocalRepresentation($ctrl.order, attributes);
 			$ctrl.resource.data.exclusiveness = exclusiveness;
 			$ctrl.resource.data.orderSpecifications = orderSpecifications;
 			return $ctrl.resource.send('expandedTask')

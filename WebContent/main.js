@@ -4,7 +4,8 @@ require.config({
 	paths: {	
 		'jquery': './lib/jquery',
 		'svg-pan-zoom': './lib/svg-pan-zoom',
-		'angular-ui-router': './lib/angular-ui-router'
+		'angular-ui-router': './lib/angular-ui-router',
+		'lib/angular-toastr': './lib/angular-toastr.tpls'
 		//'lib/lodash': './lib/lodash.min'	// ... for production use
     },
     map: {
@@ -34,6 +35,7 @@ require.config({
     	},
     	'lib/xeditable': ['lib/angular'],
     	'lib/json-formatter': ['lib/angular'],
+    	'lib/angular-toastr': ['lib/angular'],
     	'lib/angularjs-color-picker': ['lib/tinycolor', 'lib/angular']
     }
 });

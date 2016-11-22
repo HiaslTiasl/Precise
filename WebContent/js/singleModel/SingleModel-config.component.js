@@ -24,7 +24,7 @@ define([
 		}
 		
 		function getFileURL(model) {
-			return MDLFiles.urlToModel(model, true);
+			return MDLFiles.urlToModel(model, MDLFiles.CONFIG_PATH);
 		}
 		
 		function getFileName(model) {
@@ -42,11 +42,11 @@ define([
 		
 		function importConfig() {
 			$uibModal.open({
-				component: 'preciseImportConfig',
+				component: 'preciseImportModel',
 				resolve: {
-					model: function () {
-						return $ctrl.model;
-					}
+					model: _.constant($ctrl.model),
+					title: _.constant('Configuration'),
+					subPath: _.constant(MDLFiles.CONFIG_PATH)
 				}
 			}).result.then($ctrl.reload);
 		}

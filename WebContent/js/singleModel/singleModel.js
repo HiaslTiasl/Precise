@@ -7,7 +7,6 @@ define([
 	'./SingleModel-diagram.component',
 	'./singleModel-diagram.create-task-dialog.component',
 	'./SingleModel-config.component',
-	'./singleModel-config.import-dialog.component',
 	'./SingleModel-building.component',
 	'./SingleModel-crafts.component',
 	'./singleModel-crafts.create-dialog.component',
@@ -15,6 +14,7 @@ define([
 	'./singleModel-taskTypes.create-dialog.component',
 	'./taskProperties.component',
 	'./dependencyProperties.component',
+	'./import-model-dialog.component',
 	'lib/ui-bootstrap',
 	'lib/json-formatter',
 	'lib/angularjs-color-picker'
@@ -27,14 +27,14 @@ define([
 	singleModelDiagramComponent,
 	singleModelDiagramCreateTaskDialogComponent,
 	singleModelConfigComponent,
-	singleModelConfigImportDialogComponent,
 	singleModelBuildingComponent,
 	singleModelCraftsComponent,
 	singleModelCraftsCreateDialogComponent,
 	singleModelTaskTypesComponent,
 	singleModelTaskTypesCreateDialogComponent,
 	taskPropertiesComponent,
-	dependencyPropertiesComponent
+	dependencyPropertiesComponent,
+	importModelDialogComponent
 ) {
 	'use strict';
 	
@@ -44,13 +44,13 @@ define([
 		.component('preciseDiagram', singleModelDiagramComponent)
 		.component('preciseCreateTask', singleModelDiagramCreateTaskDialogComponent)
 		.component('preciseConfig', singleModelConfigComponent)
-		.component('preciseImportConfig', singleModelConfigImportDialogComponent)
 		.component('preciseBuilding', singleModelBuildingComponent)
 		.component('preciseCrafts', singleModelCraftsComponent)
 		.component('preciseCreateCraft', singleModelCraftsCreateDialogComponent)
 		.component('preciseTaskTypes', singleModelTaskTypesComponent)
 		.component('preciseCreateTaskType', singleModelTaskTypesCreateDialogComponent)
 		.component('taskProperties', taskPropertiesComponent)
-		.component('dependencyProperties', dependencyPropertiesComponent);
+		.component('dependencyProperties', dependencyPropertiesComponent)
+		.component('preciseImportModel', importModelDialogComponent);
 	
 });

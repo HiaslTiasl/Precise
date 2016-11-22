@@ -74,5 +74,10 @@ public class PatternEntry {
 				.map(PatternEntry::getValue)
 				.collect(Collectors.joining("-"));
 	}
+
+	@Override
+	public String toString() {
+		return "PatternEntry [attributeName=" + attributeName + ", value=" + value + "]";
+	}
 	
 }

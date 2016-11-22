@@ -14,8 +14,10 @@ define([], function () {
 		svc.duplicate = duplicate;
 		svc.clearConfig = clearConfig;
 		
-		var basePath = 'files/',
-			configPath = '/config';
+		svc.CONFIG_PATH = '/config';
+		svc.DIAGRAM_PATH = '/diagram';
+		
+		var basePath = 'files/';
 		
 		var headers = {
 			'Content-Type': 'application/json',
@@ -27,17 +29,17 @@ define([], function () {
 			return name + '.mdl';
 		}
 		
-		function appendConfigPath(fileURL) {
-			return fileURL + configPath;
+		function appendSubPath(fileURL, subPath) {
+			return fileURL + subPath;
 		}
 		
-		function urlToFile(fileName, config) {
+		function urlToFile(fileName, subPath) {
 			var url = basePath + fileName;
-			return config ? appendConfigPath(url) : url;
+			return subPath ? appendSubPath(url, subPath) : url;
 		}
 		
-		function urlToModel(model, config) {
-			return urlToFile(fileNameOf(model), config);
+		function urlToModel(model, subPath) {
+			return urlToFile(fileNameOf(model), subPath);
 		}
 		
 		function clearConfig(model) {

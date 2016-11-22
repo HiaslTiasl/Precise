@@ -4,17 +4,21 @@ define([
 	'allModels/allModels',
 	'singleModel/singleModel',
 	'configStates',
+	'configToastr',
 	'angular-ui-router',
+	'lib/angular-toastr'
 ], function (
 	angular,
 	api,
 	allModels,
 	singleModel,
-	configStates
+	configStates,
+	configToastr
 ) {
 	'use strict';
 	
-	return angular.module('precise', ['ui.router', api.name, allModels.name, singleModel.name])
-		.config(configStates);
+	return angular.module('precise', ['ui.router', 'toastr', api.name, allModels.name, singleModel.name])
+		.config(configStates)
+		.config(configToastr);
 	
 });

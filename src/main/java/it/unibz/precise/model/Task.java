@@ -127,7 +127,7 @@ public class Task extends BaseEntity {
 	}
 	
 	private Map<String, PatternEntry> locationToPattern(Location location) {
-		return LocationPatterns.locationToPattern(location, type.getPhase().getAttributeHierarchyLevels());
+		return LocationPatterns.locationToPattern(location, type.getPhase());
 	}
 	
 	public List<Map<String, PatternEntry>> getLocationPatterns() {
@@ -135,13 +135,17 @@ public class Task extends BaseEntity {
 	}
 	
 	public void setLocationPatterns(List<Map<String, PatternEntry>> patterns) {
-		if (type != null) {
+		setLocationPatterns(patterns, true);
+	}
+
+	public void setLocationPatterns(List<Map<String, PatternEntry>> patterns, boolean strict) {
+		if (type != null && type.getPhase() != null) {
 			List<AttributeHierarchyLevel> levels = type.getPhase().getAttributeHierarchyLevels();
 			this.locations = patterns.stream()
-				.map(p -> LocationPatterns.patternToNode(p, levels))
+				.map(p -> LocationPatterns.patternToNode(this, p, levels, strict))
 				.map(Location::new)
 				.collect(Collectors.toList());
-			// Only add pattern if it is a valid location
+			// Only replace patterns if they are valid locations
 			this.locationPatterns = patterns;
 		}
 	}
@@ -194,11 +198,11 @@ public class Task extends BaseEntity {
 		switch (durationType) {
 		case AUTO:
 			if (crewCount == null)
-				crewCount = 1;
+				crewCount = DEFAULT_CREW_COUNT;
 			durationDays = (int)Math.ceil(exactDurationDays());
 			break;
 		case MANUAL:
-			totalQuantity = crewSize = crewCount = null;
+			totalQuantity = null;
 			quantityPerDay = null;
 			break;
 		}
@@ -240,13 +244,13 @@ public class Task extends BaseEntity {
 	}
 	
 	public void updateExclusiveness() {
-		if (exclusiveness == null)
+		if (exclusiveness == null || type.getPhase() == null)
 			exclusiveness = new Scope(Scope.Type.UNIT);
 		else {
 			exclusiveness.update(Util.mapToList(
 				type.getPhase().getAttributeHierarchyLevels(),
 				AttributeHierarchyLevel::getAttribute
-			));
+			), true);
 		}
 	}
 
@@ -291,7 +295,7 @@ public class Task extends BaseEntity {
 	}
 	
 	public String getShortIdentification() {
-		return type.getShortName() + '(' + getId() + ')';
+		return type.getShortName() + '#' + getId();
 	}
 	
 	public static Comparator<Task> shortIdentificationComparator() {
@@ -299,10 +303,12 @@ public class Task extends BaseEntity {
 	}
 	
 	public void countUnits() {
-		units = locations.stream()
-			.map(Location::getNode)
-			.mapToInt(loc -> loc != null ? loc.getUnits() : type.getPhase().getUnits())
-			.sum();
+		Phase phase = type.getPhase();
+		units = phase == null ? 0
+			: locations.stream()
+				.map(Location::getNode)
+				.mapToInt(loc -> loc != null ? loc.getUnits() : phase.getUnits())
+				.sum();
 	}
 	
 	@PrePersist
@@ -318,6 +324,11 @@ public class Task extends BaseEntity {
 		updateLocationPatterns();
 		updateExclusiveness();
 		updateDuration();
+	}
+
+	@Override
+	public String toString() {
+		return "Task [id=" + getId() + ", type=" + type + "]";
 	}
 	
 }

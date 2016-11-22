@@ -26,7 +26,9 @@ define([
 			PREV = 'prev';
 		
 		function collectRemaining(page, templateParams) {
-			return page.collectRemaining(templateParams);
+			return page instanceof PageWrapper
+				? page.collectRemaining(templateParams)
+				: page;
 		}
 		
 		function collectRemainingImpl(page, templateParams, result) {

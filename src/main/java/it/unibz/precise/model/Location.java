@@ -37,5 +37,10 @@ public class Location {
 	public void update() {
 		level = node == null ? 0 : node.getLevel().getPosition();		
 	}
+
+	@Override
+	public String toString() {
+		return "Location [level=" + level + ", node=" + node + "]";
+	}
 	
 }

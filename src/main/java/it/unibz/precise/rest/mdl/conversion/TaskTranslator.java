@@ -1,5 +1,6 @@
 package it.unibz.precise.rest.mdl.conversion;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -7,10 +8,12 @@ import java.util.stream.Collectors;
 
 import it.unibz.precise.model.Attribute;
 import it.unibz.precise.model.AttributeHierarchyLevel;
+import it.unibz.precise.model.InvalidLocationsException;
 import it.unibz.precise.model.PatternEntry;
+import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
 import it.unibz.precise.model.Task.DurationType;
+import it.unibz.precise.model.TaskType;
 import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
 import it.unibz.util.Util;
 
@@ -49,7 +52,19 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 		task.setExclusiveness(context().scopes().toEntity(mdlTask.getExclusiveness()));
 		task.setOrderSpecifications(Util.mapToList(mdlTask.getOrder(),context().orderSpecs()::toEntity));
 		task.setPosition(mdlTask.getPosition());
-		task.setLocationPatterns(Util.mapToList(mdlTask.getLocations(), p -> toPattern(p, taskType.getPhase().getAttributeHierarchyLevels())));
+		
+		Phase phase = taskType.getPhase();
+		boolean strict = context().isStrictMode();
+		if (phase != null) {
+			task.setLocationPatterns(
+				Util.mapToList(mdlTask.getLocations(), p -> toPattern(p, taskType.getPhase().getAttributeHierarchyLevels())),
+				strict
+			);
+		}
+		else if (strict)
+			throw new InvalidLocationsException(task, "Cannot specify locations without referring to a phase");
+		else
+			task.setLocationPatterns(new ArrayList<>());
 	}
 	
 	@Override

@@ -37,23 +37,22 @@ define([
 		}
 		
 		function resetPhase() {
-			$ctrl.taskTypes = null;
-			$ctrl.resource.model.getTaskTypes({
-				projection: TaskTypes.Resource.prototype.defaultProjection
-			}).then(setTaskDefinitions);
+			loadTaskTypesFrom($ctrl.resource.model);
 		}
 		
 		function setPhase() {
-			// Reset old list of task types first so they cannot be selected.
-			$ctrl.taskTypes = null;
 			Phases.existingResource($ctrl.resource.model, $ctrl.phase)
-				.then(function (resource) {
-					return resource.getTaskTypes({
-						projection: TaskTypes.Resource.prototype.defaultProjection
-					});
-				})
-				.then(Pages.collectRemaining)
-				.then(setTaskDefinitions);			
+				.then(loadTaskTypesFrom);			
+		}
+		
+		function loadTaskTypesFrom(resource) {
+			// Reset old list of task types first so they cannot be selected.
+			setTaskDefinitions(null);
+			resource.getTaskTypes({
+				projection: TaskTypes.Resource.prototype.defaultProjection
+			})
+			.then(Pages.collectRemaining)
+			.then(setTaskDefinitions);			
 		}
 		
 		function taskDefinitionChanged() {

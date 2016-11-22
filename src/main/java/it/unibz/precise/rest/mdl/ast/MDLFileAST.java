@@ -8,6 +8,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Validated
 public class MDLFileAST {
 	
+	public static final MDLFileAST EMPTY_FILE;
+	
+	static {
+		EMPTY_FILE = new MDLFileAST();
+		EMPTY_FILE.setConfiguration(MDLConfigAST.EMPTY_CONFIG);
+		EMPTY_FILE.setDiagram(MDLDiagramAST.EMPTY_DIAGRAM);
+	}
+	
 	private MDLModelAST model;
 	
 	private MDLConfigAST configuration;

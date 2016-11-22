@@ -1,8 +1,10 @@
 define([
 	'lib/lodash',
+	'api/hal',
 	'util/util'
 ],function (
 	_,
+	HAL,
 	util
 ) {
 	'use strict';
@@ -58,7 +60,8 @@ define([
 		
 		function cloneExistingData(task) {
 			var data = _.cloneDeep(task);
-			Scopes.rereferenceAttributes(data.exclusiveness, data.type.phase.attributes);
+			if (data.type.phase)
+				Scopes.rereferenceAttributes(data.exclusiveness, data.type.phase.attributes);
 			return $q.when(data);
 		};
 		
@@ -166,10 +169,10 @@ define([
 				var processed = _.omit(this.data, dontSendDirectly);
 				processed.exclusiveness = Scopes.toRequestRepresentation(this.data.exclusiveness);
 				processed.orderSpecifications = OrderSpecifications.toRequestRepresentation(this.data.orderSpecifications);
-				if (!this.exists) {
-					processed.type = PreciseApi.hrefTo(this.data.type);
-					processed.model = PreciseApi.hrefTo(this.model.data);
-				}
+				if (this.data.type)
+					processed.type = HAL.resolve(HAL.hrefTo(this.data.type));
+				if (!this.exists)
+					processed.model = HAL.resolve(HAL.hrefTo(this.model.data));
 				return processed;
 			}
 			

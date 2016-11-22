@@ -13,6 +13,7 @@ define([
 	'./TaskTypes.service',
 	'./Tasks.service',
 	'./Dependencies.service',
+	'./errorDialog.component',
 	'./withShortName.filter',
 	'./join.filter',
 	'lib/traverson-angular'
@@ -31,6 +32,7 @@ define([
 	TaskTypesService,
 	TasksService,
 	DependenciesService,
+	errorDialogComponent,
 	withShortNameFilterFactory,
 	joinFilterFactory
 ) {
@@ -50,6 +52,7 @@ define([
 		.service('TaskTypes', TaskTypesService)
 		.service('Tasks', TasksService)
 		.service('Dependencies', DependenciesService)
+		.component('preciseErrorDialog', errorDialogComponent)
 		.filter('withShortName', withShortNameFilterFactory)
 		.filter('join', joinFilterFactory);
 	

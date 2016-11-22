@@ -1,8 +1,10 @@
 define([
 	'lib/lodash',
+	'api/hal',
 	'util/util'
 ], function (
 	_,
+	HAL,
 	util
 ) {
 	'use strict';
@@ -53,7 +55,7 @@ define([
 						return builder
 							.follow('taskTypes', 'search', 'findByPhase')
 							.withTemplateParameters(_.assign({
-								phase: PreciseApi.hrefTo(self.data),
+								phase: HAL.resolve(PreciseApi.hrefTo(self.data)),
 							}, params))
 							.get();
 					}).then(Pages.wrapper('taskTypes'));

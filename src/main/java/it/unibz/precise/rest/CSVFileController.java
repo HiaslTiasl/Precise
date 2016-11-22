@@ -62,7 +62,7 @@ public class CSVFileController {
 		
 		String headerRow = headerRow(sep);
 		
-		DiagramGraph graph = new DiagramGraph(model);
+		DiagramGraph graph = DiagramGraph.of(model);
 		List<Task> orderedTasks = sccTarjan.findSCCs(graph).stream()
 			.flatMap(l -> l.stream().sorted(Task.shortIdentificationComparator()))
 			.collect(Collectors.toList());

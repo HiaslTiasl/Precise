@@ -29,7 +29,7 @@ public class DependencyAttributesController {
 		Dependency dependency = repository.findOne(id);
 		return dependency == null ? new ResponseEntity<>(HttpStatus.NOT_FOUND)
 			: new ResponseEntity<>(
-				new Resources<>(Util.mapToList(dependency.getAttributes(), resourceAssembler::toResource)),
+				new Resources<>(Util.mapToList(dependency.getAllowedAttributes(), resourceAssembler::toResource)),
 				HttpStatus.OK
 			);
 	}

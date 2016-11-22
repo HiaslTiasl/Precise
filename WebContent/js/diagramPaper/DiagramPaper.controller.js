@@ -7,13 +7,22 @@ define([
 ) {
 	'use strict';
 	
-	DiagramController.$inject = ['$scope', '$rootScope', '$timeout', '$uibModal', 'PreciseApi', 'PreciseDiagramPaper', 'DiagramPaperToolset', 'Pages', 'Tasks'];
+	DiagramController.$inject = [
+		'$scope', '$rootScope', '$timeout', '$uibModal', 'PreciseApi',
+		'PreciseDiagramPaper', 'DiagramPaperToolset', 'MDLFiles', 'Pages', 'Tasks'
+	];
 	
-	function DiagramController($scope, $rootScope, $timeout, $uibModal, PreciseApi, PreciseDiagraPaper, DiagramPaperToolset, Pages, Tasks) {
+	function DiagramController(
+		$scope, $rootScope, $timeout, $uibModal, PreciseApi,
+		PreciseDiagramPaper, DiagramPaperToolset, MDLFiles, Pages, Tasks
+	) {
 		var $ctrl = this;
 		
 		$ctrl.diagramToolset = DiagramPaperToolset;
 		$ctrl.onPaperInit = onPaperInit;
+
+		$ctrl.importDiagram = importDiagram;
+		$ctrl.getFileURL = getFileURL;
 
 		$ctrl.searchTextChanged = searchTextChanged;
 		$ctrl.searchQueryChanged = searchQueryChanged;
@@ -28,7 +37,7 @@ define([
 		
 		$ctrl.$onChanges = $onChanges;
 		
-		$ctrl.toolsets = ['Edit', 'View', 'Search'];
+		$ctrl.toolsets = ['File', 'Edit', 'View', 'Search'];
 		$ctrl.toolset = 'Edit';
 		
 		$ctrl.showLocations = true;
@@ -45,6 +54,23 @@ define([
 			if (changes.currentWarning && $ctrl.diaPaper) {
 				warningsChanged();
 			}
+		}
+		
+		function importDiagram() {
+			$uibModal.open({
+				component: 'preciseImportModel',
+				resolve: {
+					model: _.constant($ctrl.model),
+					title: _.constant('Diagram'),
+					subPath: _.constant(MDLFiles.DIAGRAM_PATH)
+				}
+			}).result
+				.then(loadDiagram)
+				.then($ctrl.onStructureChanged);
+		}
+		
+		function getFileURL(model) {
+			return MDLFiles.urlToModel(model, MDLFiles.DIAGRAM_PATH);
 		}
 		
 		function initSearch() {
@@ -113,13 +139,10 @@ define([
 		function onPaperInit(paper) {
 			$ctrl.diaPaper = new DiagramPaper(paper);
 			attachListeners();
-			PreciseDiagraPaper.toRawGraph($ctrl.model, paper.getArea()).then(function (rawGraph) {
-				$ctrl.diaPaper.fromJSON(rawGraph);
-			});
+			loadDiagram();
 		}
 		
 		function attachListeners() {
-			
 			// paper events -> scope events
 			$ctrl.diaPaper.on('all', broadcast);
 			
@@ -139,6 +162,15 @@ define([
 			onZoom($ctrl.paperPanZoom.getZoom());
 		}
 		
+		function loadDiagram() {
+			return PreciseDiagramPaper.toRawGraph(
+				$ctrl.model,
+				$ctrl.diaPaper.paper.getArea()
+			).then(function (rawGraph) {
+				$ctrl.diaPaper.fromJSON(rawGraph);
+			});
+		}
+		
 		function wrapInTimeout(fn) {
 			return _.partial($timeout, fn, 0, true);
 		}
@@ -154,7 +186,7 @@ define([
 		}
 		
 		function onPropertiesChange(event, type, data) {
-			$ctrl.diaPaper.updateSelected(data);
+			$ctrl.diaPaper.updateCell(data);
 		}
 		
 		function onPropertiesCancel(event, type) {

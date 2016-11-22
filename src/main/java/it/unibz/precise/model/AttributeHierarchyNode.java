@@ -181,6 +181,11 @@ public class AttributeHierarchyNode extends BaseEntity {
 		return pattern;
 	}
 	
+	@Override
+	public String toString() {
+		return "AttributeHierarchyNode [id=" + getId() + ", value=" + value + ", level=" + level + ", parent=" + parent + "]";
+	}
+
 	private static class AncestorIterator implements Iterator<AttributeHierarchyNode> {
 			
 		private AttributeHierarchyNode next;

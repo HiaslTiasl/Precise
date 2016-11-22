@@ -115,4 +115,9 @@ public class TaskType extends BaseEntity {
 		this.model = model;
 	}
 
+	@Override
+	public String toString() {
+		return "TaskType [id=" + getId() + ", name=" + name + "]";
+	}
+
 }

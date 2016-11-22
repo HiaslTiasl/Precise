@@ -12,6 +12,10 @@
 				</li>
 			</ul>
 		</div>
+		<div class="toolset" ng-switch-when="File">
+			<button class="btn btn-default" ng-click="$ctrl.importDiagram()">Import</button>
+			<a ng-href="{{::$ctrl.getFileURL($ctrl.model.data)}}" class="btn btn-default">Export</a>
+		</div>
 		<div class="toolset" ng-switch-when="Edit">
 			<!--
 				Using a wrapper element since repeating on buttons directly

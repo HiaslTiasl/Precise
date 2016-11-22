@@ -1,7 +1,7 @@
 package it.unibz.precise.model;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,11 +23,13 @@ import javax.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import it.unibz.precise.model.Scope.Type;
+import it.unibz.precise.model.validation.WellDefinedScope;
 
 @Entity
 @Table(uniqueConstraints={
 	@UniqueConstraint(columnNames={"source_id", "target_id"})
 })
+@WellDefinedScope
 public class Dependency extends BaseEntity {
 	
 	@Embeddable
@@ -181,15 +183,17 @@ public class Dependency extends BaseEntity {
 	}
 	
 	public boolean canHaveUnitScope() {
-		return source == null || target == null
-			|| source.getType().getPhase() == target.getType().getPhase();
+		Phase sourcePhase = source == null ? null : source.getType().getPhase();
+		Phase targetPhase = target == null ? null : target.getType().getPhase();
+		return sourcePhase == null || targetPhase == null
+			|| sourcePhase.equals(targetPhase);
 	}
 	
 	public void updateScope() {
 		if (scope == null)
 			scope = new Scope(Scope.Type.GLOBAL);
 		else {
-			scope.update(getAttributes());
+			scope.update(getAllowedAttributes(), true);
 			if (scope.getType() == Type.UNIT && !canHaveUnitScope())
 				scope.setType(Type.ATTRIBUTES);
 		}
@@ -208,26 +212,36 @@ public class Dependency extends BaseEntity {
 	}
 	
 	private static Stream<Attribute> attributesOf(Task task) {
-		return task == null ? null
-			: task.getType().getPhase().getAttributeHierarchyLevels().stream()
+		Phase phase = task == null ? null : task.getType().getPhase();
+		return phase == null ? Stream.empty()
+			: phase.getAttributeHierarchyLevels().stream()
 				.map(AttributeHierarchyLevel::getAttribute);
 	}
 	
 	@Transient
 	@JsonIgnore
-	public List<Attribute> getAttributes() {
+	public List<Attribute> getAllowedAttributes() {
 		Stream<Attribute> sourceAttrs = attributesOf(source);
 		Stream<Attribute> targetAttrs = attributesOf(target);
-		boolean noSourceAttrs = sourceAttrs == null;
-		boolean noTargetAttrs = targetAttrs == null;
 		
-		return noSourceAttrs && noTargetAttrs ? Collections.emptyList()
-			: noSourceAttrs ? targetAttrs.collect(Collectors.toList())
-			: noTargetAttrs ? sourceAttrs.collect(Collectors.toList())
-			: sourceAttrs.filter(
-				targetAttrs.collect(Collectors.toSet())::contains
-			)
+		return sourceAttrs.filter(targetAttrs.collect(Collectors.toSet())::contains)
 			.collect(Collectors.toList());
+	}
+	
+	@Transient
+	@JsonIgnore
+	public Stream<Attribute> getNotAllowedScopeAttributes() {
+		if (scope == null || scope.getAttributes() == null)
+			return Stream.empty();
+		Set<Attribute> sourceAttrs = attributesOf(source).collect(Collectors.toSet());
+		Set<Attribute> targetAttrs = attributesOf(target).collect(Collectors.toSet());
+		return scope.getAttributes().stream()
+			.filter(a -> !sourceAttrs.contains(a) || !targetAttrs.contains(a));
+	}
+	
+	public boolean removeNotAllowedScopeAttributes() {
+		return scope.getAttributes()
+			.removeAll(getNotAllowedScopeAttributes().collect(Collectors.toSet()));
 	}
 	
 	@PostLoad
@@ -237,6 +251,12 @@ public class Dependency extends BaseEntity {
 		updateSourceVertex();
 		updateTargetVertex();
 		updateScope();
+	}
+
+	@Override
+	public String toString() {
+		return "Dependency [id=" + getId() + ", source=" + source + ", target=" + target
+				+ ", alternate=" + alternate + ", chain=" + chain + ", scope=" + scope + "]";
 	}
 	
 }

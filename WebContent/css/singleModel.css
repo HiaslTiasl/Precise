@@ -45,17 +45,43 @@ precise-diagram-paper {
 
 .properties {
 	position: absolute;
-	top: 40px;
+	top: 45px;
 	right: 0;
 	bottom: 0;
 	left: 0;
+	padding: 5px;
+}
+
+.properties .scroll-pane {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 3em;
+	left: 0;
 	overflow-x: hidden;
 	overflow-y: scroll;
-	padding: 5px;
+	border-width: 1px 0 1px 0;
+	border-style: solid;
+	border-color: #eee;
+}
+
+.properties footer {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
 }
 
 .properties .form-group {
 	margin-bottom: 10px;
+}
+
+.properties legend {
+	font-size: 1.2em;
+}
+
+.properties legend[ng-click] {
+	cursor: pointer;
 }
 
 /******************************************

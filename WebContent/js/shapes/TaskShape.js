@@ -26,7 +26,7 @@ define([
 		HEADER_COL_WIDTH = WIDTH / 4,
 		NAME_HEIGHT = 2.5 * HEADER_ROW_HEIGHT,
 		LOC_POS_Y = HEADER_ROW_HEIGHT + NAME_HEIGHT,
-		DEFAULT_HEIGHT = LOC_POS_Y + DEFAULT_LOC_HEIGHT;
+		DEFAULT_HEIGHT = LOC_POS_Y;
 	
 	var NAME_PADDING = {
 		x: 5,
@@ -84,7 +84,7 @@ define([
 				'rect.task-type-craft': { x: 3 * HEADER_COL_WIDTH },
 				
 				'rect.task-type-name': { y: HEADER_ROW_HEIGHT, height: NAME_HEIGHT },
-				'rect.task-locations': { y: LOC_POS_Y,  height: DEFAULT_LOC_HEIGHT },
+				'rect.task-locations': { y: LOC_POS_Y,  height: 0, display: 'none' },
 				'rect.loc-entry': {
 					width: LOC_COL_WIDTH,
 					height: LOC_ROW_HEIGHT
@@ -103,8 +103,7 @@ define([
 		}, joint.shapes.basic.Generic.prototype.defaults),
 		
 		initialize: function (options) {
-			this.attrCount = options.data.type.phase.attributes.length;
-			this.locationsHeight = this.attrCount * LOC_ROW_HEIGHT;
+			this.updateAttrCount(options.data);
 
 			this.set('id', HAL.hrefTo(options.data));
 			
@@ -114,6 +113,11 @@ define([
 			this.update();
 			
 			joint.shapes.basic.Generic.prototype.initialize.apply(this, arguments);
+		},
+		
+		updateAttrCount: function (data) {
+			this.attrCount = _.size(_.get(data, ['type', 'phase', 'attributes']));
+			this.locationsHeight = this.attrCount * LOC_ROW_HEIGHT;
 		},
 		
 		updateHideLocations: function (model, hideLocations) {
@@ -143,8 +147,11 @@ define([
 		},
 		
 		update: function () {
-			var data = this.get('data'),
-				attributes = data.type.phase.attributes,
+			var data = this.get('data');
+			this.updateAttrCount(data);
+			var type = data.type,
+				phase = type.phase
+				attributes = phase && phase.attributes,
 				exclusiveness = data.exclusiveness,
 				exclusive = exclusiveness.type === 'GLOBAL'
 					|| (exclusiveness.type === 'ATTRIBUTES' && _.size(exclusiveness.attributes)),
@@ -160,18 +167,14 @@ define([
 				height += 10;
 			}
 			
-			this.set({
-				'position': data.position,
-				'size': { width: width, height: height }
-			});
 			var attrs = {
 				'rect.outline': {
 					width: width,
 					height: height,
 					transform: exclusive ? 'translate(-5,-5)' : ''
 				},
-				'rect.task-type-name':  { fill: colors.toCSS(data.type.phase.color) },
-				'rect.task-locations':  { height: this.locationsHeight },
+				'rect.task-type-name':  { fill: phase ? colors.toCSS(phase.color) : '#fff' },
+				'rect.task-locations':  { height: this.locationsHeight, display: this.locationsHeight > 0 ? 'inline' : 'none' },
 				'text.task-id':         { text: '#' + data.id },
 				'text.task-crew':       { text: crew },
 				'text.task-duration':   { text: duration },
@@ -205,9 +208,13 @@ define([
 						
 					}
 				}
-				this.attr(attrs);
 			}
+			this.attr(attrs);
 			this.updateName();
+			this.set({
+				'position': data.position,
+				'size': { width: width, height: height }
+			});
 		}
 		
 	}, {
@@ -308,7 +315,7 @@ define([
 		
 		renderLocations: function () {
 			var data = this.model.get('data'),
-				attributes = data.type.phase.attributes,
+				attributes = _.get(data, ['type', 'phase', 'attributes']),
 				locationPatterns = data.locationPatterns,
 				actualLocationCount = locationPatterns ? locationPatterns.length : 0,
 				truncateLocations = actualLocationCount > MAX_LOC_COL_COUNT,

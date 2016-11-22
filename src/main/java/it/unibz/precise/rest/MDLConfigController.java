@@ -1,7 +1,5 @@
 package it.unibz.precise.rest;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -11,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.unibz.precise.model.Model;
+import it.unibz.precise.model.validation.ValidationAdapter;
 import it.unibz.precise.rep.ModelRepository;
 import it.unibz.precise.rep.PhaseRepository;
 import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
@@ -47,7 +45,7 @@ public class MDLConfigController {
 	private PhaseRepository phaseRepository;
 
 	@Autowired
-	private Validator validator;
+	private ValidationAdapter validator;
 	
 	private MDLConfigAST configByName(MDLContext context, String name) {
 		Model model = repository.findByName(name);
@@ -59,7 +57,7 @@ public class MDLConfigController {
 		method=RequestMethod.GET
 	)
 	public ResponseEntity<?> get(@PathVariable String name) {
-		MDLConfigAST config = configByName(new MDLContext(), name);
+		MDLConfigAST config = configByName(MDLContext.create(), name);
 		if (config == null)
 			return ResponseEntity.notFound().build();
 		
@@ -78,8 +76,7 @@ public class MDLConfigController {
 	@Transactional
 	public void set(
 		@PathVariable String name,
-		@Valid @RequestBody(required=false) MDLFileAST mdlFile,
-		Errors errors,
+		@RequestBody(required=false) MDLFileAST mdlFile,
 		@RequestParam(name="use", required=false) String srcName
 	) {
 		Model model = repository.findByName(name);
@@ -87,7 +84,7 @@ public class MDLConfigController {
 		if (!model.getState().getConfigInfo().isEditable())
 			throw new IllegalStateException("Cannot configure an already configured model");
 		
-		MDLContext context = new MDLContext();
+		MDLContext context = MDLContext.create();
 		context.configs().updateEntity(MDLConfigAST.EMPTY_CONFIG, model);
 		repository.flush();
 		
@@ -97,7 +94,7 @@ public class MDLConfigController {
 		
 		context.configs().updateEntity(config, model);
 		
-		validator.validate(model, errors);
+		Errors errors = validator.validate(model);
 		if (errors.hasErrors())
 			throw new RepositoryConstraintViolationException(errors);
 		else {
@@ -115,7 +112,7 @@ public class MDLConfigController {
 	@Transactional
 	public ResponseEntity<Model> clear(@PathVariable String name) {
 		Model model = repository.findByName(name);
-		new MDLContext().configs().updateEntity(MDLConfigAST.EMPTY_CONFIG, model);
+		MDLContext.create().configs().updateEntity(MDLConfigAST.EMPTY_CONFIG, model);
 		return new ResponseEntity<>(model, HttpStatus.OK);
 	}
 

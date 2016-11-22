@@ -1,7 +1,5 @@
 package it.unibz.precise.rest;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -11,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.unibz.precise.model.Model;
+import it.unibz.precise.model.validation.ValidationAdapter;
 import it.unibz.precise.rep.ModelRepository;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
 import it.unibz.precise.rest.mdl.conversion.MDLContext;
@@ -34,9 +32,9 @@ public class MDLFileController {
 	
 	@Autowired
 	private ModelRepository repository;
-
+	
 	@Autowired
-	private Validator validator;
+	private ValidationAdapter validator;
 	
 	public static final String RESOURCE_NAME = "/files";
 	
@@ -59,7 +57,7 @@ public class MDLFileController {
 		produces=MediaType.APPLICATION_JSON_VALUE
 	)
 	public ResponseEntity<?> findOne(@PathVariable("name") String name) {
-		MDLFileAST mdl = new MDLContext().files().toMDL(repository.findByName(name));
+		MDLFileAST mdl = MDLContext.create().files().toMDL(repository.findByName(name));
 		return mdl == null
 			? ResponseEntity.notFound().build()
 			: ResponseEntity.ok()
@@ -74,13 +72,12 @@ public class MDLFileController {
 	)
 	public ResponseEntity<?> save(
 		@PathVariable("name") String name,
-		@Valid @RequestBody(required=false) MDLFileAST modelDTO,
-		Errors errors,
+		@RequestBody(required=false) MDLFileAST modelDTO,
 		@RequestParam(defaultValue="false") boolean update,
 		@RequestParam(name="use", required=false) String srcName)
 	{
 		if (modelDTO == null && srcName != null) {
-			modelDTO = new MDLContext().files().toMDL(repository.findByName(srcName));
+			modelDTO = MDLContext.create().files().toMDL(repository.findByName(srcName));
 			if (modelDTO == null)
 				return ResponseEntity.notFound().build();
 		}
@@ -96,9 +93,9 @@ public class MDLFileController {
 				repository.flush();		 
 			}
 		}
-		Model newModel = new MDLContext().files().toEntity(modelDTO);
+		Model newModel = MDLContext.create().files().toEntity(modelDTO);
 		newModel.setName(name);
-		validator.validate(newModel, errors);
+		Errors errors = validator.validate(newModel);
 		if (errors.hasErrors())
 			throw new RepositoryConstraintViolationException(errors);
 		else

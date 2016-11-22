@@ -38,5 +38,10 @@ public class OrderSpecification {
 	public void setOrderType(OrderType orderType) {
 		this.orderType = orderType;
 	}
+
+	@Override
+	public String toString() {
+		return "OrderSpecification [attribute=" + attribute + ", orderType=" + orderType + "]";
+	}
 	
 }

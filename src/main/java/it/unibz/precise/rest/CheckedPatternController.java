@@ -28,7 +28,7 @@ public class CheckedPatternController {
 	private ResponseEntity<Map<String, PatternEntry>> checkedPattern(Phase phase, Map<String, PatternEntry> pattern) {
 		return phase == null
 			? new ResponseEntity<>(HttpStatus.NOT_FOUND)
-			: new ResponseEntity<>(LocationPatterns.checkPattern(pattern, phase.getAttributeHierarchyLevels()), HttpStatus.OK);
+			: new ResponseEntity<>(LocationPatterns.checkPattern(pattern, phase), HttpStatus.OK);
 	}
 	
 	@RequestMapping(path="/phases/{id}/checkedPattern", method=RequestMethod.PUT)

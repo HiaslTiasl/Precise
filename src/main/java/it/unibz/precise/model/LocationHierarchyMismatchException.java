@@ -6,8 +6,8 @@ public class LocationHierarchyMismatchException extends InvalidLocationException
 
 	private static final long serialVersionUID = 1L;
 
-	public LocationHierarchyMismatchException(Map<String, PatternEntry> pattern) {
-		super(pattern, "The location has an invalid number of entries for the given hierarchy");
+	public LocationHierarchyMismatchException(Task task, Map<String, PatternEntry> pattern) {
+		super(task, pattern, "The location has an invalid number of entries for the given hierarchy");
 	}
 
 }

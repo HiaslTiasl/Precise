@@ -161,5 +161,10 @@ public class Phase extends BaseEntity {
 		updateLevelPositions();
 		countUnits();
 	}
+
+	@Override
+	public String toString() {
+		return "Phase [id=" + getId() + ", name=" + name + "]";
+	}
 	
 }

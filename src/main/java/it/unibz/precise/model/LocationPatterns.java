@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 public class LocationPatterns {
 	
+	public static Map<String, PatternEntry> locationToPattern(Location location, Phase phase) {
+		return phase == null ? null : nodeToPattern(location.getNode(), phase.getAttributeHierarchyLevels());
+	}
+
 	public static Map<String, PatternEntry> locationToPattern(Location location, List<AttributeHierarchyLevel> levels) {
 		return nodeToPattern(location.getNode(), levels);
 	}
@@ -46,6 +50,12 @@ public class LocationPatterns {
 		return entry;
 	}
 	
+	public static Map<String, PatternEntry> checkPattern(
+		Map<String, PatternEntry> pattern, Phase phase) throws InvalidLocationException
+	{
+		return phase == null ? null : checkPattern(pattern, phase.getAttributeHierarchyLevels());
+	}
+	
 	/**
 	 * Checks the given pattern in terms of allowed values.
 	 * A PatternEntry with a value that is not contained in its allowed values is set to wildcard.
@@ -77,15 +87,24 @@ public class LocationPatterns {
 	}
 	
 	public static AttributeHierarchyNode patternToNode(
+		Task task,
+		Map<String, PatternEntry> pattern, List<AttributeHierarchyLevel> levels)
+		throws InvalidLocationException
+	{
+		return patternToNode(task, pattern, levels, true);
+	}
+
+	public static AttributeHierarchyNode patternToNode(
+		Task task,
 		Map<String, PatternEntry> pattern,
-		List<AttributeHierarchyLevel> levels)
+		List<AttributeHierarchyLevel> levels, boolean strict)
 		throws InvalidLocationException
 	{
 		
 		int entryCount = pattern.size();
 		int levelCount = levels.size();
-		if (entryCount > levelCount)
-			throw new LocationHierarchyMismatchException(pattern);
+		if (strict && entryCount > levelCount)
+			throw new LocationHierarchyMismatchException(task, pattern);
 		
 		AttributeHierarchyNode parent = null;
 		
@@ -93,7 +112,8 @@ public class LocationPatterns {
 		
 		if (levelCount > 0) {
 			Map<String, AttributeHierarchyNode> tree = levels.get(0).getNodes();
-			for (int i = 0; i < entryCount; i++) {
+			int len = Math.min(entryCount, levelCount);
+			for (int i = 0; i < len; i++) {
 				AttributeHierarchyLevel level = levels.get(i);
 				String attrString = level.getAttribute().getName();
 				PatternEntry entry = pattern.get(attrString);
@@ -102,19 +122,25 @@ public class LocationPatterns {
 					encounteredWildcard = true;
 					tree = null;
 				}
-				else if (encounteredWildcard)
-					throw new MissingIntermediateEntryException(pattern, attrString);
+				else if (encounteredWildcard) {
+					if (strict)
+						throw new MissingIntermediateEntryException(task, pattern, attrString);
+					else
+						break;
+				}
 				else if (tree != null) {
 					String value = pattern.get(attrString).getValue();
 					
 					AttributeHierarchyNode node = tree.get(value);
 							
-					if (node == null)
-						throw new NonExistingLocationException(pattern, nodeToPattern(parent, levels), attrString, value);
-					else {
+					if (node != null) {
 						parent = node;
 						tree = node.getChildren();
 					}
+					else if (strict)
+						throw new NonExistingLocationException(task, pattern, nodeToPattern(parent, levels), attrString, value);
+					else
+						break;
 				}
 			}
 		}

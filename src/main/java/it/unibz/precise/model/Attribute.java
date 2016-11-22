@@ -12,7 +12,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(uniqueConstraints={
-	@UniqueConstraint(columnNames={"model_id", "name"})
+	@UniqueConstraint(columnNames={"model_id", "name"}, name="UC_ATTRIBUTE_NAME")
 })
 public class Attribute extends BaseEntity implements ShortNameProvider {
 
@@ -121,6 +121,11 @@ public class Attribute extends BaseEntity implements ShortNameProvider {
 		if (!(value instanceof Integer && hasPositionValue((int)value)) && !hasValue(s))
 			throw new InvalidAttributeValueException(this, s);
 		return s;
+	}
+
+	@Override
+	public String toString() {
+		return "Attribute [id=" + getId() + ", name=" + name + "]";
 	}
 	
 }

@@ -5,6 +5,8 @@ import java.util.List;
 import javax.persistence.Embeddable;
 import javax.persistence.ManyToMany;
 
+import it.unibz.util.Util;
+
 @Embeddable
 public class Scope {
 	
@@ -37,15 +39,10 @@ public class Scope {
 		this.type = type;
 	}
 	
-	public void updateType(List<Attribute> allAttributes) {
-		int attrCount = attributes == null ? 0 : attributes.size();
-		int totalAttrCount = allAttributes == null ? 0 : allAttributes.size();
-		if (attrCount == totalAttrCount)
-			type = Type.UNIT;
-		else if (attrCount == 0)
-			type = Type.GLOBAL;
-		else if (attrCount > 0 && attrCount < totalAttrCount)
-			type = Type.ATTRIBUTES;
+	public void updateType(List<Attribute> allAttributes, boolean strict) {
+		type = Util.size(attributes) == 0 ? Type.GLOBAL
+			: Util.containSameElements(attributes, allAttributes) ? Type.UNIT
+			: Type.ATTRIBUTES;
 	}
 
 	public List<Attribute> getAttributes() {
@@ -62,18 +59,27 @@ public class Scope {
 		}
 	}
 	
-	public void update(List<Attribute> allAttributes) {
+	public void update(List<Attribute> allowedAttributes) {
+		update(allowedAttributes, true);
+	}
+
+	public void update(List<Attribute> allowedAttributes, boolean strict) {
 		switch (type) {
 		case UNIT:
-			setAttributes(allAttributes);
+			setAttributes(allowedAttributes);
 			break;
 		case GLOBAL:
 			setAttributes(null);
 			break;
 		case ATTRIBUTES:
-			updateType(allAttributes);
+			updateType(allowedAttributes, strict);
 			break;
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "Scope [type=" + type + ", attributes=" + attributes + "]";
+	}
+	
 }

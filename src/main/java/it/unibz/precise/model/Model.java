@@ -10,6 +10,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -97,24 +98,30 @@ public class Model extends BaseEntity {
 	private int hoursPerDay = DEFAULT_HOURS_PER_DAY;
 
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
+	@Valid
 	private List<Attribute> attributes = new ArrayList<>();
 	
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
+	@Valid
 	private List<Phase> phases = new ArrayList<>();
 	
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
+	@Valid
 	private List<Craft> crafts = new ArrayList<>();
 
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
+	@Valid
 	private List<TaskType> taskTypes = new ArrayList<>();
 	
 	// Diagram
 	//---------------------------------------------------
 
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
+	@Valid
 	private List<Task> tasks = new ArrayList<>();
 	
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
+	@Valid
 	private List<Dependency> dependencies = new ArrayList<>();
 
 	public String getName() {

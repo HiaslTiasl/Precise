@@ -102,5 +102,10 @@ public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
 	public AttributeHierarchyLevel next() {
 		return phase.nextLevel(this);
 	}
+
+	@Override
+	public String toString() {
+		return "AttributeHierarchyLevel [id=" + getId() + ", phase=" + phase + ", attribute=" + attribute + "]";
+	}
 	
 }

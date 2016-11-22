@@ -6,16 +6,19 @@ public class NonExistingLocationException extends InvalidLocationException {
 
 	private static final long serialVersionUID = 1L;
 
-	public NonExistingLocationException(Map<String, PatternEntry> pattern,
+	public NonExistingLocationException(Task task, Map<String, PatternEntry> pattern,
 		Map<String, PatternEntry> parentPattern, Attribute attr, String value)
 	{
-		this(pattern, parentPattern, attr.getName(), value);
+		this(task, pattern, parentPattern, attr.getName(), value);
 	}
 
-	public NonExistingLocationException(Map<String, PatternEntry> pattern,
+	public NonExistingLocationException(Task task, Map<String, PatternEntry> pattern,
 		Map<String, PatternEntry> parentPattern, String attrName, String value)
 	{
-		super(pattern, "There is no " + attrName + "=" + value + " in location " + PatternEntry.toKeyValueString(parentPattern));
+		super(
+			task, pattern,
+			"There is no " + attrName + "=" + value + " in location " + PatternEntry.toKeyValueString(parentPattern)
+		);
 	}
 
 }

@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	AllModelsController.$inject = ['$scope', '$q', '$uibModal', 'PreciseApi', 'AllModels', 'Models', 'MDLFiles'];
+	AllModelsController.$inject = ['$scope', '$q', '$uibModal', 'toastr', 'PreciseApi', 'AllModels', 'Models', 'MDLFiles'];
 	
-	function AllModelsController($scope, $q, $uibModal, PreciseApi, AllModels, Models, MDLFiles) {
+	function AllModelsController($scope, $q, $uibModal, toastr, PreciseApi, AllModels, Models, MDLFiles) {
 		
 		var $ctrl = this;
 		
@@ -58,12 +58,21 @@ define([
 			return "files/" + model.name + ".csv";
 		}
 		
+		function showError(error) {
+			$uibModal.open({
+				component: 'preciseErrorDialog',
+				resolve: {
+					errors: function () {
+						return Array.isArray(error) ? error : [error];
+					} 
+				}
+			});
+		}
+		
 		function importFile(file) {
 			$ctrl.fileErrorMsg = null;
 			return file && AllModels.importFile(file)
-				.then(refreshModels, function (errReason) {
-					$ctrl.fileErrorMsg = errReason;
-				});
+				.then(refreshModels, showError);
 		}
 		
 		function duplicateModel(model) {

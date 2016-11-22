@@ -191,8 +191,10 @@ define([
 			}
 		},
 		
-		updateSelected: function (data) {
-			this.selectedView.model.set('data', data);
+		updateCell: function (data) {
+			var model = this.paper.model.getCell(HAL.hrefTo(data));
+			if (model)
+				model.set('data', data);
 		},
 		
 		addCell: function (ns, data) {

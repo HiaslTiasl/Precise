@@ -10,24 +10,31 @@ define([], function () {
 		$ctrl.fromChanged = fromChanged;
 		$ctrl.modelChanged = modelChanged;
 
-		$ctrl.sendConfig = sendConfig;
+		$ctrl.send = send;
 		$ctrl.cancel = cancel;
 		
 		$ctrl.from = 'file';
 		
+		$ctrl.$onInit = $onInit;
+		
 		var modelsPromise;
+		
+		function $onInit() {
+			$ctrl.title = $ctrl.resolve.title;
+			$ctrl.subPath = $ctrl.resolve.subPath;
+		}
 		
 		function fromChanged() {
 			if ($ctrl.from === 'model')
 				loadModels();
 		}
 		
-		function canUseConfigOf(model) {
+		function canSelectModel(model) {
 			return model.name !== $ctrl.resolve.model.data.name;
 		}
 		
 		function filterSelectableModels(models) {
-			return models.filter(canUseConfigOf);
+			return models.filter(canSelectModel);
 		}
 		
 		function loadModels() {
@@ -49,7 +56,7 @@ define([], function () {
 				$ctrl.selectedModel = null;
 		}
 		
-		function sendConfig() {
+		function send() {
 			return ($ctrl.file
 				? sendFile($ctrl.file)
 				: chooseModel($ctrl.selectedModel)
@@ -60,7 +67,7 @@ define([], function () {
 			return Files.newReader()
 				.readAsText(file)
 				.then(function (text) {
-					return MDLFiles.importJSON(MDLFiles.urlToModel($ctrl.resolve.model.data, true), text);
+					return MDLFiles.importJSON(MDLFiles.urlToModel($ctrl.resolve.model.data, $ctrl.subPath), text);
 				})
 				['catch'](PreciseApi.mapReason(function (reason) {
 					return $ctrl.fileError = PreciseApi.toErrorMessage(reason);
@@ -69,7 +76,7 @@ define([], function () {
 		
 		function chooseModel(data) {
 			return $http({
-				url: MDLFiles.urlToModel($ctrl.resolve.model.data, true),
+				url: MDLFiles.urlToModel($ctrl.resolve.model.data, $ctrl.subPath),
 				method: 'PUT',
 				headers: { 'Accept': 'application/json' },
 				params: { use: data.name }
@@ -83,7 +90,7 @@ define([], function () {
 	}
 	
 	return {
-		templateUrl: 'js/singleModel/singleModel-config.import-dialog.html',
+		templateUrl: 'js/singleModel/import-model-dialog.html',
 		controller: SingleModelConfigImportDialogController,
 		controllerAs: '$ctrl',
 		bindings: {

@@ -4,6 +4,8 @@ import java.util.List;
 
 public class MDLDiagramAST {
 	
+	public static final MDLDiagramAST EMPTY_DIAGRAM = new MDLDiagramAST();
+	
 	private List<MDLTaskAST> tasks;
 	private List<MDLDependencyAST> dependencies;
 
