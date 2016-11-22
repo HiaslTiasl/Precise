@@ -8,12 +8,16 @@ import java.util.stream.Collectors;
 
 import it.unibz.precise.model.Attribute;
 import it.unibz.precise.model.AttributeHierarchyLevel;
-import it.unibz.precise.model.InvalidLocationsException;
+import it.unibz.precise.model.InvalidTaskException;
 import it.unibz.precise.model.PatternEntry;
 import it.unibz.precise.model.Phase;
+import it.unibz.precise.model.Scope;
+import it.unibz.precise.model.Scope.Type;
 import it.unibz.precise.model.Task;
 import it.unibz.precise.model.Task.DurationType;
 import it.unibz.precise.model.TaskType;
+import it.unibz.precise.rest.mdl.ast.MDLOrderSpecificationAST;
+import it.unibz.precise.rest.mdl.ast.MDLScopeAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
 import it.unibz.util.Util;
 
@@ -34,7 +38,7 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 		mdlTask.setCrewSize(task.getCrewSize());
 		mdlTask.setCrewCount(task.getCrewCount());			
 		mdlTask.setExclusiveness(context().scopes().toMDL(task.getExclusiveness()));
-		mdlTask.setOrder(Util.mapToList(task.getOrderSpecifications(),context().orderSpecs()::toMDL));
+		mdlTask.setOrder(Util.mapToList(task.getOrderSpecifications(), context().orderSpecs()::toMDL));
 		mdlTask.setPosition(task.getPosition());
 		mdlTask.setLocations(Util.mapToList(task.getLocationPatterns(), this::toSimplePattern));
 	}
@@ -49,22 +53,39 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 		task.setCrewSize(mdlTask.getCrewSize());
 		task.setCrewCount(mdlTask.getCrewCount());
 		task.setDurationDays(mdlTask.getDurationDays());
-		task.setExclusiveness(context().scopes().toEntity(mdlTask.getExclusiveness()));
-		task.setOrderSpecifications(Util.mapToList(mdlTask.getOrder(),context().orderSpecs()::toEntity));
 		task.setPosition(mdlTask.getPosition());
 		
 		Phase phase = taskType.getPhase();
 		boolean strict = context().isStrictMode();
+		MDLScopeAST exclusiveness = mdlTask.getExclusiveness();
+		List<MDLOrderSpecificationAST> mdlOrder = mdlTask.getOrder();
 		if (phase != null) {
 			task.setLocationPatterns(
 				Util.mapToList(mdlTask.getLocations(), p -> toPattern(p, taskType.getPhase().getAttributeHierarchyLevels())),
 				strict
 			);
+			task.setExclusiveness(context().scopes().toEntity(exclusiveness));
+			task.setOrderSpecifications(
+				mdlOrder == null ? null
+				: mdlOrder.stream()
+					.map(context().orderSpecs()::toEntity)
+					.filter(os -> os != null && os.getAttribute() != null)
+					.collect(Collectors.toList())
+			);
 		}
-		else if (strict)
-			throw new InvalidLocationsException(task, "Cannot specify locations without referring to a phase");
-		else
+		else if (!strict) {
 			task.setLocationPatterns(new ArrayList<>());
+			task.setExclusiveness(new Scope(Type.UNIT));
+			task.setOrderSpecifications(new ArrayList<>());
+		}
+		else {
+			if (Util.size(mdlTask.getLocations()) > 0) 
+				throw new InvalidTaskException(task, "Cannot specify locations without referring to a phase");
+			if (exclusiveness != null && Util.size(exclusiveness.getAttributes()) > 0) 
+				throw new InvalidTaskException(task, "Cannot specify exclusiveness without referring to a phase");
+			if (Util.size(mdlTask.getOrder()) > 0)
+				throw new InvalidTaskException(task, "Cannot specify ordering without referring to a phase");
+		}
 	}
 	
 	@Override

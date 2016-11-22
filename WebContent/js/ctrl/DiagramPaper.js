@@ -65,11 +65,10 @@ define([
 			// Proxy all paper events
 			this.listenTo(this.paper, 'all', this.trigger);
 			// Selecting cells
-			this.paper.on('cell:pointerup', this.onCellPointerup, this);
+			this.listenTo(this.paper, 'cell:pointerup', this.onCellPointerup);
 			// React on internal operations
-			this.paper.model
-				.on('remove', this.onRemove, this)
-				.on('batch:stop', this.onBatchStop, this);
+			this.listenTo(this.paper.model, 'remove', this.onRemove)
+			this.listenTo(this.paper.model, 'batch:stop', this.onBatchStop)
 		},
 		
 		onCellPointerup: function (cellView, event, x, y) {

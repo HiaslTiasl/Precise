@@ -2,7 +2,7 @@ package it.unibz.precise.model;
 
 import java.util.Map;
 
-public class InvalidLocationException extends InvalidLocationsException {
+public class InvalidLocationException extends InvalidTaskException {
 
 	private static final long serialVersionUID = 1L;
 	
