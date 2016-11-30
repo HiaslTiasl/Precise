@@ -93,19 +93,7 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label for="total-quantity" class="col-sm-4 control-label">Total Quantity</label>
-					<div class="col-sm-8">
-						<div class="input-group">
-							<input id="total-quantity"
-								type="number"
-								class="form-control field-total-quantity"
-								ng-model="$ctrl.resource.data.totalQuantity"/>
-							<span class="input-group-addon">{{$ctrl.resource.data.type.unitOfMeasure}}</span>
-						</div>
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="quantity-per-day" class="col-sm-4 control-label">Quantity/day/crew</label>
+					<label for="quantity-per-day" class="col-sm-4 control-label">Crew Productivity</label>
 					<div class="col-sm-8">
 						<div class="input-group">
 							<input id="quantity-per-day"
@@ -113,6 +101,18 @@
 								step="0.1"
 								class="form-control field-quantity-per-day"
 								ng-model="$ctrl.resource.data.quantityPerDay"/>
+							<span class="input-group-addon">{{$ctrl.resource.data.type.unitOfMeasure}}/day</span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="total-quantity" class="col-sm-4 control-label">Total Quantity</label>
+					<div class="col-sm-8">
+						<div class="input-group">
+							<input id="total-quantity"
+								type="number"
+								class="form-control field-total-quantity"
+								ng-model="$ctrl.resource.data.totalQuantity"/>
 							<span class="input-group-addon">{{$ctrl.resource.data.type.unitOfMeasure}}</span>
 						</div>
 					</div>

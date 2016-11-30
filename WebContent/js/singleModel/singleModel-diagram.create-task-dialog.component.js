@@ -75,6 +75,7 @@ define([
 							phase: $ctrl.phase
 						});
 					},
+					phases: _.constant($ctrl.phases),
 					crafts: getCrafts
 				}
 			}).result.then(function (result) {
