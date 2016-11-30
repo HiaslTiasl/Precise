@@ -17,12 +17,17 @@ define([
 		$ctrl.isDisabledScopeType = isDisabledScopeType;
 		$ctrl.updateScopeType = updateScopeType;
 		$ctrl.updateScopeAttributes = updateScopeAttributes;
+		$ctrl.toggleCollapsed = toggleCollapsed;
 		
 		$ctrl.scopeTypes = [
             Scopes.Types.UNIT,
 			Scopes.Types.GLOBAL,
 			Scopes.Types.ATTRIBUTES
 		];
+		
+		$ctrl.collapsed = {
+			scope: false
+		};
 		
 		$ctrl.$onChanges = $onChanges;
 		
@@ -33,8 +38,9 @@ define([
 			}
 		}
 		
-		var getAttrName = _.property('name'),
-			scopeParts;
+		function toggleCollapsed(fieldset) {
+			$ctrl.collapsed[fieldset] = !$ctrl.collapsed[fieldset];
+		}
 		
 		function isDisabledScopeType(scopeType) {
 			return scopeType === Scopes.Types.UNIT && !canHaveUnitScope();

@@ -6,6 +6,7 @@
 	<thead>
 		<tr>
 			<th>Name</th>
+			<th>Short Name</th>
 			<th>Description</th>
 			<th>Unit of Measure</th>
 			<th>Craft</th>
@@ -16,6 +17,7 @@
 	<tbody>
 		<tr ng-repeat="tt in $ctrl.coll">
 			<td>{{tt.name}}</td>
+			<td>{{tt.shortName}}</td>
 			<td>{{tt.description}}</td>
 			<td>{{tt.unitOfMeasure}}</td>
 			<td>{{tt.craft | withShortName}}</td>
