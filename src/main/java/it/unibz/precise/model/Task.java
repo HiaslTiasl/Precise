@@ -207,7 +207,7 @@ public class Task extends BaseEntity {
 		case AUTO:
 			if (crewCount == null)
 				crewCount = DEFAULT_CREW_COUNT;
-			durationDays = (int)Math.ceil(exactDurationDays());
+			durationDays = hasWellDefinedDuration() ? (int)Math.ceil(exactDurationDays()) : null;
 			break;
 		case MANUAL:
 			totalQuantity = null;
@@ -216,9 +216,21 @@ public class Task extends BaseEntity {
 		}
 	}
 	
-	private double exactDurationDays() {
-		return durationType == DurationType.MANUAL
-			? durationDays
+	private boolean hasWellDefinedDuration() {
+		switch (durationType) {
+		case AUTO:
+			return durationDays != null;
+		case MANUAL:
+			return crewSize != null && crewCount != null 
+				&& totalQuantity != null && quantityPerDay != null;
+		default:
+			return false;
+		}
+	}
+	
+	private Float exactDurationDays() {
+		return !hasWellDefinedDuration() ? null
+			: durationType == DurationType.MANUAL ? durationDays
 			: totalQuantity / (crewCount * quantityPerDay);
 	}
 
@@ -231,8 +243,8 @@ public class Task extends BaseEntity {
 	}
 	
 	public Integer getManHours() {
-		return crewCount == null || crewSize == null ? null
-			: (int)(crewCount * crewSize * model.getHoursPerDay() * exactDurationDays());
+		Float days = exactDurationDays();
+		return days == null ? null : (int)(crewCount * crewSize * model.getHoursPerDay() * days);
 	}
 	
 	public Float getQuantityPerDay() {
