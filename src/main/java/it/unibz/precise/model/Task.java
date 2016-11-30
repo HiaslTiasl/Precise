@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
@@ -142,10 +141,19 @@ public class Task extends BaseEntity {
 		if (type != null && type.getPhase() != null) {
 			List<AttributeHierarchyLevel> levels = type.getPhase().getAttributeHierarchyLevels();
 			this.locations = patterns.stream()
-				.map(p -> LocationPatterns.patternToNode(this, p, levels, strict))
-				.map(Location::new)
-				.collect(Collectors.toList());
-			// Only replace patterns if they are valid locations
+//				.map(p -> LocationPatterns.patternToNode(this, p, levels, strict))
+//				.map(Location::new)
+//				.collect(Collectors.toList());
+				.collect(ArrayList::new, (list, p) -> {
+					try {
+						AttributeHierarchyNode node = LocationPatterns.patternToNode(this, p, levels, true);
+						list.add(new Location(node));
+					} catch (InvalidLocationException ile) {
+						if (strict)
+							throw ile;
+					}
+				}, List::addAll);
+			// Only replace patterns if no exception thrown
 			this.locationPatterns = patterns;
 		}
 	}
