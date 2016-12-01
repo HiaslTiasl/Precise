@@ -14,10 +14,13 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(uniqueConstraints={
-	@UniqueConstraint(columnNames={"model_id", "name"}),
-	@UniqueConstraint(columnNames={"model_id", "shortName"})
+	@UniqueConstraint(name=TaskType.UC_NAME, columnNames={"model_id", "name"}),
+	@UniqueConstraint(name=TaskType.UC_SHORTNAME, columnNames={"model_id", "shortName"})
 })
 public class TaskType extends BaseEntity {
+	
+	public static final String UC_NAME = "UC_TASKTYPE_NAME";
+	public static final String UC_SHORTNAME = "UC_TASKTYPE_SHORTNAME";
 	
 	@Column(nullable=false)
 	private String name;

@@ -21,9 +21,11 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(uniqueConstraints={
-	@UniqueConstraint(columnNames={"model_id", "name"})
+	@UniqueConstraint(name=Phase.UC_NAME, columnNames={"model_id", "name"})
 })
 public class Phase extends BaseEntity {
+	
+	public static final String UC_NAME = "UC_PHASE_NAME";
 	
 	@Column(nullable=false)
 	private String name;

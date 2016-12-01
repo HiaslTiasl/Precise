@@ -12,9 +12,11 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(uniqueConstraints={
-	@UniqueConstraint(columnNames={"model_id", "name"}, name="UC_ATTRIBUTE_NAME")
+	@UniqueConstraint(name=Attribute.UC_NAME, columnNames={"model_id", "name"})
 })
 public class Attribute extends BaseEntity implements ShortNameProvider {
+	
+	public static final String UC_NAME = "UC_ATTRIBUTE_NAME";
 
 	@Column(nullable=false)
 	private String name;

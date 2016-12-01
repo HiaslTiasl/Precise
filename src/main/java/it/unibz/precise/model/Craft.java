@@ -8,9 +8,13 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(uniqueConstraints={
-	@UniqueConstraint(columnNames={"model_id", "name"})
+	@UniqueConstraint(name=Craft.UC_NAME, columnNames={"model_id", "name"}),
+	@UniqueConstraint(name=Craft.UC_SHORTNAME, columnNames={"model_id", "shortName"})
 })
 public class Craft extends BaseEntity implements ShortNameProvider {
+	
+	public static final String UC_NAME = "UC_CRAFT_NAME";
+	public static final String UC_SHORTNAME = "UC_CRAFT_SHORTNAME";
 	
 	@Column(nullable=false)
 	private String name;

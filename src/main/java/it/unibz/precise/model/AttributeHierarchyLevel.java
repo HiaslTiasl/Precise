@@ -14,10 +14,13 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(uniqueConstraints={
-	@UniqueConstraint(columnNames={"phase_id", "attribute_id"}),
-	@UniqueConstraint(columnNames={"phase_id", "position"})
+	@UniqueConstraint(name=AttributeHierarchyLevel.UC_PHASE_ATTRIBUTE, columnNames={"phase_id", "attribute_id"}),
+	@UniqueConstraint(name=AttributeHierarchyLevel.UC_PHASE_POSITION, columnNames={"phase_id", "position"})
 })
 public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
+	
+	public static final String UC_PHASE_ATTRIBUTE = "UC_LEVEL_PHASE_ATTRIBUTE";
+	public static final String UC_PHASE_POSITION = "UC_LEVEL_PHASE_POSITION";
 
 	@ManyToOne
 	private Phase phase;

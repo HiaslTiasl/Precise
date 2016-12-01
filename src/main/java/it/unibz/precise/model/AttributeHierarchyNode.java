@@ -16,10 +16,19 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 @Entity
+@Table(uniqueConstraints={
+	@UniqueConstraint(name=AttributeHierarchyNode.UC_PARENT_VALUE, columnNames={"parent_id", "value"}),
+	//@UniqueConstraint(name=AttributeHierarchyNode.UC_LEVEL_VALUE, columnNames={"level_id", "value"})
+})
 public class AttributeHierarchyNode extends BaseEntity {
+	
+	public static final String UC_PARENT_VALUE = "UC_NODE_PARENT_VALUE";
+	//public static final String UC_LEVEL_VALUE = "UC_NODE_LEVEL_VALUE";
 	
 	@Column(nullable=false)
 	private String value;

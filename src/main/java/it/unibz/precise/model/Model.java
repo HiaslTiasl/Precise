@@ -18,9 +18,11 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(uniqueConstraints=@UniqueConstraint(name="UC_MODEL_NAME", columnNames="name"))
+@Table(uniqueConstraints=@UniqueConstraint(name=Model.UC_NAME, columnNames="name"))
 @JsonIgnoreProperties(value={"state"}, allowGetters=true)
 public class Model extends BaseEntity {
+	
+	public static final String UC_NAME = "UC_MODEL_NAME";
 	
 	public static final int DEFAULT_HOURS_PER_DAY = 8;
 	

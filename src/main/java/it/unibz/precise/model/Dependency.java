@@ -27,10 +27,12 @@ import it.unibz.precise.model.validation.WellDefinedScope;
 
 @Entity
 @Table(uniqueConstraints={
-	@UniqueConstraint(columnNames={"source_id", "target_id"})
+	@UniqueConstraint(name=Dependency.UC_SOURCE_TARGET, columnNames={"source_id", "target_id"})
 })
 @WellDefinedScope
 public class Dependency extends BaseEntity {
+	
+	public static final String UC_SOURCE_TARGET = "UC_DEPENDENCY_SOURCE_TARGET";
 	
 	@Embeddable
 	public static class LabelPosition {
