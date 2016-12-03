@@ -203,17 +203,28 @@ public class Task extends BaseEntity {
 	}
 	
 	public void updateDuration() {
+		if (crewSize == null)
+			crewCount = null;
+		else if (crewCount == null)
+			crewCount = DEFAULT_CREW_COUNT;
+		Float days = exactDurationDays();
 		switch (durationType) {
 		case AUTO:
-			if (crewCount == null)
-				crewCount = DEFAULT_CREW_COUNT;
-			durationDays = hasWellDefinedDuration() ? (int)Math.ceil(exactDurationDays()) : null;
+			durationDays = days == null ? null : (int)Math.ceil(days);
 			break;
 		case MANUAL:
-			totalQuantity = null;
-			quantityPerDay = null;
+			quantityPerDay = days == null || totalQuantity == null || !hasCrewParameters() ? null
+				: totalQuantity / (crewCount * days);
 			break;
 		}
+	}
+	
+	private boolean hasCrewParameters() {
+		return crewSize != null && crewCount != null;
+	}
+	
+	private boolean hasQuantities() {
+		return totalQuantity != null && quantityPerDay != null;
 	}
 	
 	private boolean hasWellDefinedDuration() {
@@ -221,8 +232,7 @@ public class Task extends BaseEntity {
 		case MANUAL:
 			return durationDays != null;
 		case AUTO:
-			return crewSize != null && crewCount != null 
-				&& totalQuantity != null && quantityPerDay != null;
+			return hasCrewParameters() && hasQuantities();
 		default:
 			return false;
 		}
@@ -233,7 +243,7 @@ public class Task extends BaseEntity {
 			: durationType == DurationType.MANUAL ? durationDays
 			: totalQuantity / (crewCount * quantityPerDay);
 	}
-
+	
 	public Integer getDurationDays() {
 		return durationDays;
 	}
@@ -244,7 +254,7 @@ public class Task extends BaseEntity {
 	
 	public Integer getManHours() {
 		Float days = exactDurationDays();
-		return days == null || crewCount == null || crewSize == null ? null
+		return days == null || !hasCrewParameters() ? null
 			: (int)(crewCount * crewSize * model.getHoursPerDay() * days);
 	}
 	

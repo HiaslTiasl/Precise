@@ -1,5 +1,6 @@
 package it.unibz.precise.model.projection;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
 import it.unibz.precise.model.Craft;
@@ -19,5 +20,8 @@ public interface ExpandedTaskTypeProjection {
 	Craft getCraft();
 	
 	PhaseSummaryProjection getPhase();
+	
+	@Value("#{target.tasks.size()}")
+	int getTaskCount();
 	
 }
