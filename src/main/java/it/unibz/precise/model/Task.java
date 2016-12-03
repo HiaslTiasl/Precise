@@ -218,9 +218,9 @@ public class Task extends BaseEntity {
 	
 	private boolean hasWellDefinedDuration() {
 		switch (durationType) {
-		case AUTO:
-			return durationDays != null;
 		case MANUAL:
+			return durationDays != null;
+		case AUTO:
 			return crewSize != null && crewCount != null 
 				&& totalQuantity != null && quantityPerDay != null;
 		default:
@@ -244,7 +244,8 @@ public class Task extends BaseEntity {
 	
 	public Integer getManHours() {
 		Float days = exactDurationDays();
-		return days == null ? null : (int)(crewCount * crewSize * model.getHoursPerDay() * days);
+		return days == null || crewCount == null || crewSize == null ? null
+			: (int)(crewCount * crewSize * model.getHoursPerDay() * days);
 	}
 	
 	public Float getQuantityPerDay() {
