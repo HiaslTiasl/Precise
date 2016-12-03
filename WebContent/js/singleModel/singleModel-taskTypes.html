@@ -5,25 +5,41 @@
 <table id="phase-table" class="table table-striped" st-table="$ctrl.coll" st-safe-src="$ctrl.taskTypes">
 	<thead>
 		<tr>
-			<th>Name</th>
-			<th>Short Name</th>
-			<th>Description</th>
-			<th>#tasks</th>
-			<th>Unit of Measure</th>
-			<th>Craft</th>
-			<th>Phase</th>
+			<th st-sort="name">Name</th>
+			<th st-sort="shortName">Short Name</th>
+			<th st-sort="unitOfMeasure">Unit of Measure</th>
+			<th st-sort="craft.name">Craft</th>
+			<th st-sort="phase.name">Phase</th>
+			<th st-sort="taskCount">#tasks</th>
 			<th></th>
+		</tr>
+		<tr>
+			<th>
+				<input st-search="name" placeholder="search" class="input-sm form-control" type="search"/>
+			</th>
+			<th>
+				<input st-search="shortName" placeholder="search" class="input-sm form-control" type="search"/>
+			</th>
+			<th>
+				<input st-search="unitOfMeasure" placeholder="search" class="input-sm form-control" type="search"/>
+			</th>
+			<th>
+				<input st-search="craft.name" placeholder="search" class="input-sm form-control" type="search"/>
+			</th>
+			<th>
+				<input st-search="phase.name" placeholder="search" class="input-sm form-control" type="search"/>
+			</th>
+			<th colspan="2"></th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr ng-repeat="tt in $ctrl.coll">
 			<td>{{tt.name}}</td>
 			<td>{{tt.shortName}}</td>
-			<td>{{tt.description}}</td>
-			<td>{{tt.taskCount}}</td>
 			<td>{{tt.unitOfMeasure}}</td>
 			<td>{{tt.craft | withShortName}}</td>
 			<td>{{tt.phase.name}}</td>
+			<td>{{tt.taskCount}}</td>
 			<td>
 				<button
 					class="btn btn-default"

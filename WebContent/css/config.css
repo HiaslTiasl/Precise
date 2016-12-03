@@ -11,6 +11,33 @@
 	text-align: center;
 }
 
+/* Sorted columns for SmartTable (using Glyphicons Halflings) */
+
+table[st-table] th[st-sort] {
+	cursor: pointer;
+}
+
+/* Hidden symbol to avoid flickering when sorting changes */
+table[st-table] th[st-sort]::after {
+	font-family: 'Glyphicons Halflings';
+	visibility: hidden;
+	content: '\e113';
+	margin-left: 0.25em;
+}
+
+table[st-table] th[st-sort].st-sort-ascent::after,
+table[st-table] th[st-sort].st-sort-descent::after {
+	visibility: visible;
+}
+
+table[st-table] th[st-sort].st-sort-ascent:after {
+	content: '\e113';
+}
+table[st-table] th[st-sort].st-sort-descent:after {
+	content: '\e114';
+}
+
+
 /* Override json-formatter styles */
 
 /* Hide constructor names 'Object', 'Array' etc.*/
