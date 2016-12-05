@@ -7,12 +7,12 @@ define([
 ) {
 	'use strict';
 	
-	TaskPropertiesController.$inject = ['$q', '$anchorScroll', '$timeout', 'PreciseApi', 'Tasks', 'TaskTypes', 'Scopes', 'OrderSpecifications', 'Phases', 'Pages'];
+	TaskPropertiesController.$inject = ['$q', '$uibModal', '$anchorScroll', '$timeout', 'PreciseApi', 'Tasks', 'TaskTypes', 'Scopes', 'OrderSpecifications', 'Phases', 'Pages'];
 	
-	function TaskPropertiesController($q, $anchorScroll, $timeout, PreciseApi, Tasks, TaskTypes, Scopes, OrderSpecifications, Phases, Pages) {
+	function TaskPropertiesController($q, $uibModal, $anchorScroll, $timeout, PreciseApi, Tasks, TaskTypes, Scopes, OrderSpecifications, Phases, Pages) {
 		var $ctrl = this;
 		
-		$ctrl.cancel = cancel;
+		$ctrl.editTaskDefinition = editTaskDefinition;
 		$ctrl.updateExlusivenessType = updateExlusivenessType;
 		$ctrl.updateExclusivenessAttributes = updateExclusivenessAttributes;
 		$ctrl.attrFilterForOrderSpec = attrFilterForOrderSpec;
@@ -58,11 +58,15 @@ define([
 			if ($ctrl.resource) {
 				$ctrl.exclusiveness = Scopes.toLocalRepresentation($ctrl.resource.data.exclusiveness);
 				$ctrl.order = OrderSpecifications.toLocalRepresentation($ctrl.resource.data.orderSpecifications);
-				var resourcePromise = $ctrl.resource.data.type.phase
-					? Phases.existingResource($ctrl.resource.model, $ctrl.resource.data.type.phase)
-					: $q.when($ctrl.resource.model)
-				resourcePromise.then(loadTaskTypesFrom);
+				loadTaskTypes();
 			}
+		}
+		
+		function loadTaskTypes() {
+			var resourcePromise = $ctrl.resource.data.type.phase
+				? Phases.existingResource($ctrl.resource.model, $ctrl.resource.data.type.phase)
+				: $q.when($ctrl.resource.model);
+			return resourcePromise.then(loadTaskTypesFrom);
 		}
 		
 		function loadTaskTypesFrom(resource) {
@@ -78,6 +82,40 @@ define([
 		
 		function toggleCollapsed(fieldset) {
 			$ctrl.collapsed[fieldset] = !$ctrl.collapsed[fieldset];
+		}
+		
+		function editTaskDefinition() {
+			var type = $ctrl.resource.data.type;
+			$uibModal.open({
+				component: 'preciseCreateTaskType',
+				resolve: {
+					resource: function () {
+						return TaskTypes.existingResource($ctrl.resource.model, type)
+							.then(function (tt) {
+								// Nested entities do not include their own singular link rel,
+								// which is the one we need since it has the 'projection' parameter.
+								// --> Reload to fix that
+								return tt.reload(); 
+							})
+							.then(function (tt) {
+								return TaskTypes.existingResource($ctrl.resource.model, tt);
+							});
+					},
+					phases: function () {
+						return type.phase ? null : $ctrl.resource.model.getTaskTypes({
+							projection: TaskTypes.Resource.prototype.defaultProjection
+						})
+						.then(Pages.collectRemaining);
+					},
+					crafts: function () {
+						return $ctrl.resource.model.getCrafts();
+					}
+				}
+			}).result.then(function (result) {
+				$ctrl.resource.data.type = result;
+				$ctrl.taskDefinitionChanged({ $result: result });
+				loadTaskTypes();
+			});
 		}
 		
 		function updateExlusivenessType() {
@@ -185,9 +223,6 @@ define([
 			return !OrderSpecifications.isAssignableTo(orderType, attribute);
 		}
 		
-		function cancel() {
-			$ctrl.cancelled();
-		}
 	}
 	
 	return {
@@ -197,7 +232,8 @@ define([
 		bindings: {
 			resource: '<',
 			done: '&',
-			cancelled: '&'
+			cancelled: '&',
+			taskDefinitionChanged: '&'
 		}
 	};
 	

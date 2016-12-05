@@ -48,6 +48,10 @@ define([
 			
 			defaultProjection: 'expandedTaskType',
 			
+			getTasks: function (params) {
+				return this.getList('tasks', params);
+			},
+			
 			getRequestData: function () {
 				var processed = _.omit(this.data, dontSendDirectly);
 				if (this.data.craft)

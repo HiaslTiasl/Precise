@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelDiagramController.$inject = ['$scope', '$uibModal', 'PreciseApi', 'Tasks', 'Dependencies', 'Phases'];
+	SingleModelDiagramController.$inject = ['$scope', '$uibModal', 'PreciseApi', 'TaskTypes', 'Tasks', 'Dependencies', 'Phases'];
 	
-	function SingleModelDiagramController($scope, $uibModal, PreciseApi, Tasks, Dependencies, Phases) {
+	function SingleModelDiagramController($scope, $uibModal, PreciseApi, TaskTypes, Tasks, Dependencies, Phases) {
 		
 		var $ctrl = this;
 		
@@ -15,6 +15,7 @@ define([
 
 		$ctrl.done = done;
 		$ctrl.cancelled = cancelled;
+		$ctrl.taskDefinitionChanged = taskDefinitionChanged;
 		
 		$ctrl.$onChanges = $onChanges;
 		
@@ -56,6 +57,21 @@ define([
 				})
 				.then(function (dependency) {
 					$scope.$broadcast('properties:change', 'dependency', dependency);
+				});
+		}
+		
+		function taskDefinitionChanged(data) {
+			TaskTypes
+				.existingResource($ctrl.model, data)
+				.then(function (resource) {
+					return resource.getTasks({
+						projection: Tasks.Resource.prototype.defaultProjection
+					});
+				})
+				.then(function (tasks) {
+					tasks.forEach(function (t) {
+						$scope.$broadcast('properties:change', 'task', t);
+					});
 				});
 		}
 		
@@ -132,7 +148,6 @@ define([
 		
 		function done(result) {
 			$scope.$broadcast('properties:change', $ctrl.resourceType, result);
-			showTask(result);
 		}
 		
 		function cancelled() {

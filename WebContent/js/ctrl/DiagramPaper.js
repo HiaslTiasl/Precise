@@ -108,7 +108,7 @@ define([
 					break;
 				}
 				if (changedData)
-					this.triggerNS('change', changedNS, [_.defaults(changedData, data)]);	
+					this.triggerNS('change', changedNS, [_.defaults(changedData, HAL.pickLinks(data))]);	
 			}
 		},
 		
@@ -149,12 +149,12 @@ define([
 		
 		changedLabel: function (options, cell, data) {
 			var labelPosition = cell.label(0).position;
-			return labelPosition === data.labelPosition ? null : { labelPosition: labelPosition };
+			return _.isEqual(labelPosition, data.labelPosition) ? null : { labelPosition: labelPosition };
 		},
 		
 		changedPositionData: function (options, cell, data) {
 			var position = cell.get('position');
-			return position === data.position ? null : { position: position };
+			return _.isEqual(position, data.position) ? null : { position: position };
 		},
 		
 		triggerNS: function (eventName, ns, args) {

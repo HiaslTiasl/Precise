@@ -11,7 +11,8 @@
 			ng-switch-when="task"
 			resource="$ctrl.resource"
 			done="$ctrl.done($result)"
-			cancelled="$ctrl.cancelled()">
+			cancelled="$ctrl.cancelled()"
+			task-definition-changed="$ctrl.taskDefinitionChanged($result)">
 		</task-properties>
 		<dependency-properties
 			class="properties"

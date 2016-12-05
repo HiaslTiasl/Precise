@@ -25,6 +25,8 @@
 					ng-model="$ctrl.resource.data.type"
 					ng-options="tt as (tt.shortName + ' - ' + tt.name) for tt in $ctrl.taskTypes track by tt.name">
 				</select>
+				<button class="btn btn-default" ng-click="$ctrl.editTaskDefinition()">Edit</button>
+				<!-- <button class="btn btn-default"></button> -->
 			</div>
 		</div>
 		<div class="form-group">
@@ -295,6 +297,6 @@
 			ng-disabled="!$ctrl.resource.data.type">
 			Done
 		</button>
-		<button class="btn btn-default" ng-click="$ctrl.cancel()">Cancel</button>
+		<button class="btn btn-default" ng-click="$ctrl.cancelled()">Cancel</button>
 	</div>
 </footer>

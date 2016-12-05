@@ -88,10 +88,10 @@ define([
 			},
 			
 			get: function (rel, params) {
-				var res = PreciseApi.from(PreciseApi.hrefTo(this.data, rel));
+				var req = PreciseApi.from(PreciseApi.hrefTo(this.data, rel));
 				
-				return !params ? res.followAndGet()
-					: res.traverse(function (builder) {
+				return !params ? req.followAndGet()
+					: req.traverse(function (builder) {
 						return builder
 							.withTemplateParameters(params)
 							.getUrl();				

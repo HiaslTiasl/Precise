@@ -20,7 +20,7 @@ define([
 		Tasks.resource = resource;
 		Tasks.newResource = newResource;
 		Tasks.existingResource = existingResource;
-		Tasks.Resource = Tasks;
+		Tasks.Resource = TaskResource;
 		
 
 		var getAttrName = _.property('name'),
@@ -60,7 +60,7 @@ define([
 		
 		function cloneExistingData(task) {
 			var data = _.cloneDeep(task);
-			if (data.type.phase)
+			if (data.type && data.type.phase)
 				Scopes.rereferenceAttributes(data.exclusiveness, data.type.phase.attributes);
 			return $q.when(data);
 		};

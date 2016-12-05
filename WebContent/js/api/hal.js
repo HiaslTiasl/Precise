@@ -26,11 +26,16 @@ define([
 		return _.get(obj, ['_embedded', rel]);
 	}
 	
+	function pickLinks(obj) {
+		return _.pick(obj, '_links');
+	}
+	
 	return {
 		linkTo: linkTo,
 		hrefTo: hrefTo,
 		embeddedArray: embeddedArray,
-		resolve: resolve
+		resolve: resolve,
+		pickLinks: pickLinks
 	};
 	
 });
