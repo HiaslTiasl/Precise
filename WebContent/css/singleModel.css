@@ -23,7 +23,7 @@ precise-diagram > .panels {
 precise-diagram-paper {
 	position: absolute;
 	top: 0;
-	right: 350px;
+	right: 400px;
 	bottom: 0;
 	left: 0;
 }
@@ -32,7 +32,7 @@ precise-diagram-paper {
 	position: absolute;
 	right: 0;
 	top: 0;
-	width: 340px;
+	width: 390px;
 	margin-left: 10px;
 	min-width: 200px;
 	vertical-align: top;

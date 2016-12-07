@@ -8,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -156,12 +155,10 @@ public class Model extends BaseEntity {
 			: State.MODELLING;
 	}
 	
-	@Transient
 	public int getHoursPerDay() {
 		return hoursPerDay;
 	}
 
-	@Transient
 	public void setHoursPerDay(int hoursPerDay) {
 		this.hoursPerDay = hoursPerDay;
 	}

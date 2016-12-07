@@ -3,7 +3,6 @@ package it.unibz.precise.model;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.Min;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -91,13 +90,13 @@ public class Pitch {
 		return (int)Math.ceil(durationDays * crewCount * quantityPerDay);
 	}
 	
-	@JsonIgnore
-	float getManDaysExact() {
+	float exactManDays() {
 		return crewCount * crewSize * exactDurationDays();
 	}
 	
+	
 	public int getManDays() {
-		return (int)Math.ceil(getManDaysExact());
+		return (int)Math.ceil(exactManDays());
 	}
 	
 	/**
@@ -112,34 +111,37 @@ public class Pitch {
 		final int MISSING_CREW_COUNT = 0x02;
 		final int MISSING_QUANTITY_PER_DAY = 0x04;
 		final int MISSING_TOTAL_QUANTITY = 0x08;
+		
 		int durationDaysMask   = durationDays   != 0 ? 0 : MISSING_DURATION_DAYS;
 		int crewCountMask      = crewCount      != 0 ? 0 : MISSING_CREW_COUNT;
 		int quantityPerDayMask = quantityPerDay != 0 ? 0 : MISSING_QUANTITY_PER_DAY;
 		int totalQuantityMask  = totalQuantity  != 0 ? 0 : MISSING_TOTAL_QUANTITY;
-		int totalMask = durationDaysMask
-			| crewCountMask
-			| quantityPerDayMask
-			| totalQuantityMask;
 		
-		if (totalMask == 0)
-			return checkPitchConsistency();
-		else if (Integer.bitCount(totalMask) == 1) {
-			switch (Integer.lowestOneBit(totalMask)) {
-			case MISSING_DURATION_DAYS:
-				durationDays = computeDurationDays();
-				break;
-			case MISSING_CREW_COUNT:
-				crewCount = computeCrewCount();
-				break;
-			case MISSING_QUANTITY_PER_DAY:
-				quantityPerDay = computeQuantityPerDay();
-				break;
-			case MISSING_TOTAL_QUANTITY:
-				totalQuantity = computeTotalQuantity();
-				break;
+		int totalMask = durationDaysMask | crewCountMask | quantityPerDayMask | totalQuantityMask;
+		
+		boolean consistent = true;
+		
+		if (totalMask == 0 && !checkPitchConsistency())
+			consistent = false;
+		else {
+			if (Integer.bitCount(totalMask) == 1) {
+				switch (Integer.lowestOneBit(totalMask)) {
+				case MISSING_DURATION_DAYS:
+					durationDays = computeDurationDays();
+					break;
+				case MISSING_CREW_COUNT:
+					crewCount = computeCrewCount();
+					break;
+				case MISSING_QUANTITY_PER_DAY:
+					quantityPerDay = computeQuantityPerDay();
+					break;
+				case MISSING_TOTAL_QUANTITY:
+					totalQuantity = computeTotalQuantity();
+					break;
+				}
 			}
 		}
-		return true;
+		return consistent;
 	}
 	
 	public boolean checkPitchConsistency() {

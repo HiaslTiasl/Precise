@@ -24,8 +24,7 @@ define([
 		
 
 		var getAttrName = _.property('name'),
-			dontSendDirectly    = ['exclusiveness', 'orderSpecifications', 'type', 'model', '_links'],
-			excludeForPitchOnly = ['exclusiveness', 'orderSpecifications'];
+			dontSendDirectly = ['pitch', 'exclusiveness', 'orderSpecifications', 'type', 'model', '_links'];
 		
 		function searchSimple(model, text) {
 			return PreciseApi.fromBase()
@@ -71,8 +70,6 @@ define([
 				type: null,
 				//durationType: 'AUTO',
 				pitch: {
-					totalQuantity: 0,
-					quantityPerDay: 0,
 					crewSize: 1,
 					crewCount: 1,
 				},
@@ -114,7 +111,7 @@ define([
 			
 			computePitches: function () {
 				var self = this;
-				return this.model.computePitches(self.data.pitch)
+				return this.model.computePitches(self.getPitchRequestData())
 					.then(function (result) {
 						_.assign(self.data, result);
 						return self;
@@ -177,8 +174,13 @@ define([
 				return this.checkPattern(newPattern);
 			},
 			
+			getPitchRequestData: function () {
+				return _.pick(this.data.pitch, Boolean);
+			},
+			
 			getRequestData: function () {
 				var processed = _.omit(this.data, dontSendDirectly);
+				processed.pitch = this.getPitchRequestData();
 				processed.exclusiveness = Scopes.toRequestRepresentation(this.data.exclusiveness);
 				processed.orderSpecifications = OrderSpecifications.toRequestRepresentation(this.data.orderSpecifications);
 				if (this.data.type)

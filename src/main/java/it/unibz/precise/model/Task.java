@@ -95,7 +95,7 @@ public class Task extends BaseEntity {
 	}
 	
 	public int getManHours() {
-		return (int)Math.ceil(model.getHoursPerDay() * pitch.getManDaysExact());
+		return (int)Math.ceil(model.getHoursPerDay() * pitch.exactManDays());
 	}
 
 	@JsonIgnore
