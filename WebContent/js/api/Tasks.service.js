@@ -24,7 +24,8 @@ define([
 		
 
 		var getAttrName = _.property('name'),
-			dontSendDirectly = ['exclusiveness', 'orderSpecifications', 'type', 'model', '_links'];
+			dontSendDirectly    = ['exclusiveness', 'orderSpecifications', 'type', 'model', '_links'],
+			excludeForPitchOnly = ['exclusiveness', 'orderSpecifications'];
 		
 		function searchSimple(model, text) {
 			return PreciseApi.fromBase()
@@ -68,11 +69,13 @@ define([
 		function initializeData(task) {
 			return $q.when({
 				type: null,
-				durationType: 'AUTO',
-				totalQuantity: 0,
-				quantityPerDay: 0,
-				crewSize: 1,
-				crewCount: 1,
+				//durationType: 'AUTO',
+				pitch: {
+					totalQuantity: 0,
+					quantityPerDay: 0,
+					crewSize: 1,
+					crewCount: 1,
+				},
 				exclusiveness: null,
 				orderSpecifications: [],
 				position: task.position
@@ -108,6 +111,15 @@ define([
 			},
 			
 			defaultProjection: 'expandedTask',
+			
+			computePitches: function () {
+				var self = this;
+				return this.model.computePitches(self.data.pitch)
+					.then(function (result) {
+						_.assign(self.data, result);
+						return self;
+					});
+			},
 			
 			showExclusiveness: function () {
 				if (!this.data)

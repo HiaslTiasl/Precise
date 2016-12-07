@@ -19,11 +19,15 @@ define([
 		
 		$ctrl.$onChanges = $onChanges;
 		
+		var resourceWrappers = {
+			task: Tasks.existingResource,
+			dependency: Dependencies.existingResource
+		};
+		
 		$scope.$on('cell:delete', deleteCell);
 		$scope.$on('task:new', newTaskHandler);
 		$scope.$on('dependency:new', newDependencyHandler);
-		$scope.$on('task:select', selectTaskHandler);
-		$scope.$on('dependency:select', selectDependencyHandler);
+		$scope.$on('diagram:select', selectHandler);
 		$scope.$on('task:change', diagramTaskChangeHandler);
 		$scope.$on('dependency:change', diagramDependencyChangeHandler);
 		
@@ -107,33 +111,20 @@ define([
 				});
 		}
 		
-		function selectTaskHandler(event, selectedView) {
+		function selectHandler(event, resourceType, selectedView) {
 			var data = selectedView && selectedView.model.get('data');
-			showTask(data);
+			showProperties(resourceType, data);
 		}
 		
-		function selectDependencyHandler(event, selectedView) {
-			var data = selectedView && selectedView.model.get('data');
-			showDependency(data);
-		}
-		
-		function showProperties(resourceWrapper, resourceType, data) {
+		function showProperties(resourceType, data) {
 			if (!data)
 				resetResource();
 			else {
-				resourceWrapper($ctrl.model, data).then(function (res) {
+				resourceWrappers[resourceType]($ctrl.model, data).then(function (res) {
 					$ctrl.resourceType = resourceType;
 					$ctrl.resource = res;
 				});
 			}
-		}
-		
-		function showTask(data) {
-			showProperties(Tasks.existingResource, 'task', data);
-		}
-		
-		function showDependency(data) {
-			showProperties(Dependencies.existingResource, 'dependency', data);			
 		}
 		
 		function loadWarnings() {
@@ -147,6 +138,7 @@ define([
 		}
 		
 		function done(result) {
+			showProperties($ctrl.resourceType, result);
 			$scope.$broadcast('properties:change', $ctrl.resourceType, result);
 		}
 		

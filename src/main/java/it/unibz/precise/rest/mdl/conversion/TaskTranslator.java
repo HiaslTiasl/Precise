@@ -14,7 +14,6 @@ import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Scope;
 import it.unibz.precise.model.Scope.Type;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.Task.DurationType;
 import it.unibz.precise.model.TaskType;
 import it.unibz.precise.rest.mdl.ast.MDLOrderSpecificationAST;
 import it.unibz.precise.rest.mdl.ast.MDLScopeAST;
@@ -29,17 +28,11 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 
 	@Override
 	protected void updateMDLImpl(Task task, MDLTaskAST mdlTask) {
-		DurationType durationType = task.getDurationType();
 		mdlTask.setDefinition(context().taskTypes().toMDL(task.getType()));
-		mdlTask.setDurationType(durationType);
-		mdlTask.setDurationDays(durationType == DurationType.MANUAL ? task.getDurationDays() : null);
-		mdlTask.setTotalQuantity(task.getTotalQuantity());
-		mdlTask.setQuantityPerDay(task.getQuantityPerDay());
-		mdlTask.setCrewSize(task.getCrewSize());
-		mdlTask.setCrewCount(task.getCrewCount());			
+		mdlTask.setPosition(task.getPosition());
+		mdlTask.setPitch(task.getPitch());
 		mdlTask.setExclusiveness(context().scopes().toMDL(task.getExclusiveness()));
 		mdlTask.setOrder(Util.mapToList(task.getOrderSpecifications(), context().orderSpecs()::toMDL));
-		mdlTask.setPosition(task.getPosition());
 		mdlTask.setLocations(Util.mapToList(task.getLocationPatterns(), this::toSimplePattern));
 	}
 	
@@ -47,13 +40,8 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 	protected void updateEntityImpl(MDLTaskAST mdlTask, Task task) {
 		TaskType taskType = context().taskTypes().toEntity(mdlTask.getDefinition());
 		task.setType(taskType);
-		task.setDurationType(mdlTask.getDurationType());
-		task.setTotalQuantity(mdlTask.getTotalQuantity());
-		task.setQuantityPerDay(mdlTask.getQuantityPerDay());
-		task.setCrewSize(mdlTask.getCrewSize());
-		task.setCrewCount(mdlTask.getCrewCount());
-		task.setDurationDays(mdlTask.getDurationDays());
 		task.setPosition(mdlTask.getPosition());
+		task.setPitch(mdlTask.getPitch());
 		
 		Phase phase = taskType.getPhase();
 		boolean strict = context().isStrictMode();

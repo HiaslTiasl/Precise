@@ -30,6 +30,7 @@ define([
 		this.getResponseData = getResponseData;
 		this.responseError = responseError;
 		this.getError = getError;
+		this.getErrorText = getErrorText;
 		this.deleteResource = deleteResource;
 		
 		this.asyncAlert = wrapAsync($window.alert, $window);
@@ -77,7 +78,7 @@ define([
 		function responseError(response) {
 			var data = response.data;
 			return !data
-				? { message: httpErrorMessage(response) }									// No error message -> report HTTP failure
+				? { message: httpErrorMessage(response) }								// No error message -> report HTTP failure
 				: data.errors || data;													// Something else
 		}
 		
@@ -88,13 +89,18 @@ define([
 				error = { message: reason };
 				break;
 			case 'object':
-				if (reason instanceof Error)
+				if ('message' in reason)
 					error = reason;
 				else if ('status' in reason && 'statusText' in reason)
 					error = responseError(reason);
 				break;
 			}
-			return error || 'Error';
+			return error || { message: 'Error' };
+		}
+		
+		function getErrorText(reason) {
+			var err = getError(reason);
+			return Array.isArray(err) ? _(err).map('message') : err.message
 		}
 		
 		function resolveSuccess(response) {

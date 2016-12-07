@@ -1,6 +1,6 @@
 package it.unibz.precise.model;
 
-public class InvalidTaskException extends RuntimeException {
+public class InvalidTaskException extends PreciseException {
 
 	private static final long serialVersionUID = 1L;
 

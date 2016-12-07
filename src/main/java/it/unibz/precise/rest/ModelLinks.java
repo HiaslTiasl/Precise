@@ -23,6 +23,12 @@ public class ModelLinks {
 			)
 			.withRel("warnings")
 		);
+		resource.add(
+			service.underBasePath(
+				linkTo(methodOn(PitchComputationController.class).computePitches(id, null))
+			)
+			.withRel("pitches")
+		);
 		return resource;
 	}
 

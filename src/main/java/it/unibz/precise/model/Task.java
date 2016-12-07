@@ -14,7 +14,6 @@ import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,8 +33,6 @@ public class Task extends BaseEntity {
 		(Task t) -> t.getType().getShortName()
 	).thenComparing(Task::getId);
 	
-	public enum DurationType { MANUAL, AUTO }
-
 	@NotNull(message="{task.type.required}")
 	@ManyToOne
 	private TaskType type;
@@ -55,21 +52,9 @@ public class Task extends BaseEntity {
 	@Embedded
 	private Scope exclusiveness = new Scope(Scope.Type.UNIT);
 	
-	private Integer totalQuantity;
+	@Embedded
+	private Pitch pitch;
 	
-	@Min(0)
-	private Integer crewSize;
-	
-	@Min(0)
-	private Integer crewCount;
-	
-	private DurationType durationType = DurationType.AUTO;
-	
-	@Min(0)
-	private Integer durationDays;
-	
-	private Float quantityPerDay;
-
 	private int units;
 	
 	@OneToMany(mappedBy="target")
@@ -99,6 +84,18 @@ public class Task extends BaseEntity {
 
 	public void setPosition(Position position) {
 		this.position = position;
+	}
+
+	public Pitch getPitch() {
+		return pitch;
+	}
+
+	public void setPitch(Pitch pitch) {
+		this.pitch = pitch;
+	}
+	
+	public int getManHours() {
+		return (int)Math.ceil(model.getHoursPerDay() * pitch.getManDaysExact());
 	}
 
 	@JsonIgnore
@@ -168,102 +165,6 @@ public class Task extends BaseEntity {
 	
 	public void addOrderSpecification(OrderSpecification orderSpecification) {
 		orderSpecifications.add(orderSpecification);
-	}
-	
-	public Integer getTotalQuantity() {
-		return totalQuantity;
-	}
-
-	public void setTotalQuantity(Integer totalQuantity) {
-		this.totalQuantity = totalQuantity;
-	}
-
-	public Integer getCrewSize() {
-		return crewSize;
-	}
-
-	public void setCrewSize(Integer crewSize) {
-		this.crewSize = crewSize;
-	}
-
-	public Integer getCrewCount() {
-		return crewCount;
-	}
-
-	public void setCrewCount(Integer crewCount) {
-		this.crewCount = crewCount;
-	}
-
-	public DurationType getDurationType() {
-		return durationType;
-	}
-
-	public void setDurationType(DurationType durationType) {
-		this.durationType = durationType;
-	}
-	
-	public void updateDuration() {
-		if (crewSize == null)
-			crewCount = null;
-		else if (crewCount == null)
-			crewCount = DEFAULT_CREW_COUNT;
-		Float days = exactDurationDays();
-		switch (durationType) {
-		case AUTO:
-			durationDays = days == null ? null : (int)Math.ceil(days);
-			break;
-		case MANUAL:
-			quantityPerDay = days == null || totalQuantity == null || !hasCrewParameters() ? null
-				: totalQuantity / (crewCount * days);
-			break;
-		}
-	}
-	
-	private boolean hasCrewParameters() {
-		return crewSize != null && crewCount != null;
-	}
-	
-	private boolean hasQuantities() {
-		return totalQuantity != null && quantityPerDay != null;
-	}
-	
-	private boolean hasWellDefinedDuration() {
-		switch (durationType) {
-		case MANUAL:
-			return durationDays != null;
-		case AUTO:
-			return hasCrewParameters() && hasQuantities();
-		default:
-			return false;
-		}
-	}
-	
-	private Float exactDurationDays() {
-		return !hasWellDefinedDuration() ? null
-			: durationType == DurationType.MANUAL ? durationDays
-			: totalQuantity / (crewCount * quantityPerDay);
-	}
-	
-	public Integer getDurationDays() {
-		return durationDays;
-	}
-
-	public void setDurationDays(Integer durationDays) {
-		this.durationDays = durationDays;
-	}
-	
-	public Integer getManHours() {
-		Float days = exactDurationDays();
-		return days == null || !hasCrewParameters() ? null
-			: (int)(crewCount * crewSize * model.getHoursPerDay() * days);
-	}
-	
-	public Float getQuantityPerDay() {
-		return quantityPerDay;
-	}
-
-	public void setQuantityPerDay(Float quantityPerDay) {
-		this.quantityPerDay = quantityPerDay;
 	}
 	
 	public int getUnits() {
@@ -354,7 +255,7 @@ public class Task extends BaseEntity {
 		updateLocations();
 		updateLocationPatterns();
 		updateExclusiveness();
-		updateDuration();
+		pitch.update();
 	}
 
 	@Override

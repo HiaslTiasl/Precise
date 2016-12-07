@@ -7,21 +7,15 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.IntSequenceGenerator;
 
+import it.unibz.precise.model.Pitch;
 import it.unibz.precise.model.Position;
-import it.unibz.precise.model.Task;
-import it.unibz.precise.model.Task.DurationType;
 
 @JsonIdentityInfo(generator=IntSequenceGenerator.class, property="id", scope=MDLTaskAST.class)
 @JsonIdentityReference(alwaysAsId=false)
 public class MDLTaskAST {
 	
 	private MDLTaskTypeAST definition;
-	private DurationType durationType;
-	private Integer totalQuantity;
-	private Float quantityPerDay;
-	private Integer crewSize;
-	private Integer crewCount = Task.DEFAULT_CREW_COUNT;
-	private Integer durationDays;
+	private Pitch pitch;
 	private MDLScopeAST exclusiveness;
 	private List<MDLOrderSpecificationAST> order;
 	private Position position;
@@ -35,52 +29,12 @@ public class MDLTaskAST {
 		this.definition = definition;
 	}
 
-	public DurationType getDurationType() {
-		return durationType;
+	public Pitch getPitch() {
+		return pitch;
 	}
 
-	public void setDurationType(DurationType durationType) {
-		this.durationType = durationType;
-	}
-
-	public Integer getTotalQuantity() {
-		return totalQuantity;
-	}
-
-	public void setTotalQuantity(Integer totalQuantity) {
-		this.totalQuantity = totalQuantity;
-	}
-
-	public Float getQuantityPerDay() {
-		return quantityPerDay;
-	}
-
-	public void setQuantityPerDay(Float quantityPerDay) {
-		this.quantityPerDay = quantityPerDay;
-	}
-
-	public Integer getCrewSize() {
-		return crewSize;
-	}
-
-	public void setCrewSize(Integer crewSize) {
-		this.crewSize = crewSize;
-	}
-
-	public Integer getCrewCount() {
-		return crewCount;
-	}
-
-	public void setCrewCount(Integer crewCount) {
-		this.crewCount = crewCount;
-	}
-
-	public Integer getDurationDays() {
-		return durationDays;
-	}
-
-	public void setDurationDays(Integer durationDays) {
-		this.durationDays = durationDays;
+	public void setPitch(Pitch pitch) {
+		this.pitch = pitch;
 	}
 
 	public MDLScopeAST getExclusiveness() {

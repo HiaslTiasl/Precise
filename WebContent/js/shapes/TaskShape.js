@@ -158,8 +158,9 @@ define([
 				locationPatterns = data.locationPatterns,
 				width = WIDTH,
 				height = LOC_POS_Y + this.locationsHeight,
-				crew = isNaN(data.crewSize) || isNaN(data.crewCount) ? '' : data.crewCount + '\u00d7' + data.crewSize,
-				duration = isNaN(data.durationDays) ? '' : data.durationDays + 'd',
+				pitch = data.pitch,
+				crew = isNaN(pitch.crewSize) || isNaN(pitch.crewCount) ? '' : pitch.crewCount + '\u00d7' + pitch.crewSize,
+				duration = isNaN(pitch.durationDays) ? '' : pitch.durationDays + 'd',
 				craft = _.get(data, ['type', 'craft', 'shortName'], '');
 
 			if (exclusive) {

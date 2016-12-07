@@ -1,7 +1,10 @@
 package it.unibz.precise;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -17,17 +20,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import it.unibz.precise.model.PreciseException;
 import it.unibz.precise.model.validation.ExceptionResolver;
 import it.unibz.precise.rest.MDLFileController;
 
 @ControllerAdvice(basePackageClasses = {RepositoryController.class, MDLFileController.class})
-public class DataAccessExceptionHandler {
+public class DefaultExceptionHandler {
 	
 	private ExceptionResolver<DataAccessException, String[]> uniquenessExceptionResolver;
 	private MessageSourceAccessor messageSourceAccessor;
 	
+	private Log logger = LogFactory.getLog(getClass());
+	
 	@Autowired
-	DataAccessExceptionHandler(
+	DefaultExceptionHandler(
 		ApplicationContext applicationContext,
 		ExceptionResolver<DataAccessException, String[]> uniquenessExceptionResolver
 	) {
@@ -50,11 +56,30 @@ public class DataAccessExceptionHandler {
 	@ExceptionHandler
 	public ResponseEntity<ExceptionMessage> handle(DataAccessException e) {
 		String[] uniqFields = uniquenessExceptionResolver.resolve(e);
-		return ResponseEntity.status(HttpStatus.CONFLICT)
-			.body(new ExceptionMessage(uniqFields != null
-				? new DuplicateKeyException(Arrays.toString(uniqFields) +  " must be unique")
-				: e
-			));
+		Exception actualReason = uniqFields != null
+			? new DuplicateKeyException(Arrays.toString(uniqFields) +  " must be unique")
+			: e;
+		return handle(actualReason, HttpStatus.CONFLICT);
+	}
+	
+	@ExceptionHandler
+	public void handle(InvocationTargetException e) throws Throwable {
+		throw e.getCause();
+	}
+
+	@ExceptionHandler
+	public ResponseEntity<ExceptionMessage> handle(PreciseException e) {
+		return handle(e, HttpStatus.BAD_REQUEST);
+	}
+
+	//@ExceptionHandler
+	public ResponseEntity<ExceptionMessage> handle(Throwable t) {
+		return handle(t, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	private ResponseEntity<ExceptionMessage> handle(Throwable t, HttpStatus status) {
+		logger.debug(t);
+		return ResponseEntity.status(status).body(new ExceptionMessage(t));
 	}
 	
 }

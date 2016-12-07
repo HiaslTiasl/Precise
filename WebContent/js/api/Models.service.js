@@ -108,6 +108,13 @@ define([
 			
 			getWarnings: function () {
 				return this.getList('warnings');
+			},
+			
+			computePitches: function (pitch) {
+				return PreciseApi.from(this.getURL('pitches'))
+					.traverse(function (builder) {
+						return builder.put(pitch);
+					});
 			}
 		
 		});

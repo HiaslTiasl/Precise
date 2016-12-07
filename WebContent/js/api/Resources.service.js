@@ -1,8 +1,10 @@
 define([
 	'lib/lodash',
+	'api/hal',
 	'util/util'
 ], function (
 	_,
+	HAL,
 	util
 ) {
 	'use strict';
@@ -43,6 +45,21 @@ define([
 				return projection && {
 					projection: projection
 				};
+			},
+			
+			getURL: function (rel, params) {
+				var url = PreciseApi.hrefTo(this.data, rel);
+				if (params) {
+					url = HAL.resolve(url);
+					if (params.projection) {
+						var query = 'projection=' + params.projection;
+						if (!_.includes(url, '?'))
+							url = url + '?' + query;
+						else if (!_.includes(url, query))
+							url = url + '&' + query;
+					}
+				}
+				return url;
 			},
 			
 			create: function (projection) {
@@ -88,21 +105,7 @@ define([
 			},
 			
 			get: function (rel, params) {
-				var req = PreciseApi.from(PreciseApi.hrefTo(this.data, rel));
-				
-				return !params ? req.followAndGet()
-					: req.traverse(function (builder) {
-						return builder
-							.withTemplateParameters(params)
-							.getUrl();				
-					}).then(function (url) {
-						var query = 'projection=' + params.projection;
-						if (!_.includes(url, '?'))
-							url = url + '?' + query;
-						else if (!_.includes(url, query))
-							url = url + '&' + query;
-						return PreciseApi.from(url).followAndGet();
-					}, alert);
+				return PreciseApi.from(this.getURL(rel, params)).followAndGet();
 			},
 			
 			getPage: function (rel, params) {

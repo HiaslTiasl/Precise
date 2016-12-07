@@ -19,6 +19,7 @@ import it.unibz.precise.graph.SCCTarjan;
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.PatternEntry;
+import it.unibz.precise.model.Pitch;
 import it.unibz.precise.model.Task;
 import it.unibz.precise.model.TaskType;
 import it.unibz.precise.rep.ModelRepository;
@@ -95,16 +96,17 @@ public class CSVFileController {
 	
 	private String dataRow(Task task, String sep, String locSep, String taskSep) {
 		TaskType type = task.getType();
+		Pitch pitch = task.getPitch();
 		return Stream.of(
 			type.getName(),
 			type.getShortName(),
 			task.getId(),
-			task.getCrewSize(),
-			task.getCrewCount(),
-			task.getDurationDays(),
+			pitch.getCrewSize(),
+			pitch.getCrewCount(),
+			pitch.getDurationDays(),
 			type.getUnitOfMeasure(),
-			task.getTotalQuantity(),
-			task.getQuantityPerDay(),
+			pitch.getTotalQuantity(),
+			pitch.getQuantityPerDay(),
 			task.getManHours(),
 			task.getLocationPatterns().stream()
 				.map(PatternEntry::toValueString)

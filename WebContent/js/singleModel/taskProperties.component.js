@@ -13,6 +13,7 @@ define([
 		var $ctrl = this;
 		
 		$ctrl.editTaskDefinition = editTaskDefinition;
+		$ctrl.computePitches = computePitches;
 		$ctrl.updateExlusivenessType = updateExlusivenessType;
 		$ctrl.updateExclusivenessAttributes = updateExclusivenessAttributes;
 		$ctrl.attrFilterForOrderSpec = attrFilterForOrderSpec;
@@ -59,7 +60,12 @@ define([
 				$ctrl.exclusiveness = Scopes.toLocalRepresentation($ctrl.resource.data.exclusiveness);
 				$ctrl.order = OrderSpecifications.toLocalRepresentation($ctrl.resource.data.orderSpecifications);
 				loadTaskTypes();
+				computePitches();
 			}
+		}
+		
+		function setPitchError(pitchError) {
+			$ctrl.pitchError = pitchError;
 		}
 		
 		function loadTaskTypes() {
@@ -116,6 +122,12 @@ define([
 				$ctrl.taskDefinitionChanged({ $result: result });
 				loadTaskTypes();
 			});
+		}
+		
+		function computePitches() {
+			$ctrl.resource.computePitches()
+				.then(_.constant(null), PreciseApi.getErrorText)
+				.then(setPitchError);
 		}
 		
 		function updateExlusivenessType() {

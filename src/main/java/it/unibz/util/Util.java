@@ -70,4 +70,12 @@ public class Util {
 			&& (size1 == 0 || asSet(coll1).equals(asSet(coll2)));
 	}
 	
+	public static Number zeroToNull(Number n) {
+		return n.doubleValue() != 0 ? n : null;
+	}
+	
+	public static Number nullToZero(Number n) {
+		return n == null ? 0 : n;
+	}
+	
 }
