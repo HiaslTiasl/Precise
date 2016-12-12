@@ -14,19 +14,23 @@ define([
 	util
 ) {
 	
-	var hideLocations = true;
+	var COL_WIDTH  = 20,
+		ROW_HEIGHT = 20,
+		COLS       = 8;
 	
-	var LOC_COL_WIDTH = 20,
-		LOC_ROW_HEIGHT = LOC_COL_WIDTH,
-		DEFAULT_LOC_HEIGHT = 1 * LOC_ROW_HEIGHT,
-		MAX_LOC_COL_COUNT = 8;
-	
-	var WIDTH = MAX_LOC_COL_COUNT * LOC_COL_WIDTH,
-		HEADER_ROW_HEIGHT = LOC_ROW_HEIGHT,
-		HEADER_COL_WIDTH = WIDTH / 4,
-		NAME_HEIGHT = 2.5 * HEADER_ROW_HEIGHT,
-		LOC_POS_Y = HEADER_ROW_HEIGHT + NAME_HEIGHT,
-		DEFAULT_HEIGHT = LOC_POS_Y;
+	var WIDTH             = COLS * COL_WIDTH,
+		HEADER_ROW_HEIGHT = ROW_HEIGHT,
+		HEADER_COL_WIDTH  = 2 * COL_WIDTH,
+		NAME_POS_Y        = HEADER_ROW_HEIGHT,
+		NAME_HEIGHT       = 2.5 * ROW_HEIGHT,
+		CONSTR_ROW_POS_Y  = NAME_POS_Y + NAME_HEIGHT,
+		CONSTR_ROW_HEIGHT = ROW_HEIGHT,
+		CONSTR_COL_WIDTH  = 4 * COL_WIDTH,
+		LOC_POS_Y         = CONSTR_ROW_POS_Y + CONSTR_ROW_HEIGHT,
+		LOC_COL_WIDTH     = COL_WIDTH,
+		LOC_ROW_HEIGHT    = ROW_HEIGHT,
+		MAX_LOC_COL_COUNT = COLS
+		DEFAULT_HEIGHT    = LOC_POS_Y;
 	
 	var NAME_PADDING = {
 		x: 5,
@@ -39,10 +43,10 @@ define([
 		'task-id',
 		'task-crew',
 		'task-duration',
-		'task-type-craft',
-		'task-type-name',
 		'task-order',
-		'task-exclusiveness'
+		'task-exclusiveness',
+		'task-type-craft',
+		'task-type-name'
 	];
 	
 	var indexClasses = ['task-id-index', 'task-workers-index', 'task-units-index', 'task-craft-index'];
@@ -78,13 +82,21 @@ define([
 					width: HEADER_COL_WIDTH,
 					height: HEADER_ROW_HEIGHT
 				},
-				'rect.task-id':         { x: 0 * HEADER_COL_WIDTH },
-				'rect.task-crew':       { x: 1 * HEADER_COL_WIDTH },
-				'rect.task-duration':   { x: 2 * HEADER_COL_WIDTH },
-				'rect.task-type-craft': { x: 3 * HEADER_COL_WIDTH },
+				'rect.task-id':            { x: 0 * HEADER_COL_WIDTH },
+				'rect.task-crew':          { x: 1 * HEADER_COL_WIDTH },
+				'rect.task-duration':      { x: 2 * HEADER_COL_WIDTH },
+				'rect.task-type-craft':    { x: 3 * HEADER_COL_WIDTH },
 				
-				'rect.task-type-name': { y: HEADER_ROW_HEIGHT, height: NAME_HEIGHT },
-				'rect.task-locations': { y: LOC_POS_Y,  height: 0, display: 'none' },
+				'rect.task-order, rect.task-exclusiveness': {
+					y: CONSTR_ROW_POS_Y,
+					width: CONSTR_COL_WIDTH,
+					height: CONSTR_ROW_HEIGHT
+				},
+				'rect.task-order':         { x: 0 * CONSTR_COL_WIDTH },
+				'rect.task-exclusiveness': { x: 1 * CONSTR_COL_WIDTH },
+				
+				'rect.task-type-name':     { y: HEADER_ROW_HEIGHT, height: NAME_HEIGHT },
+				'rect.task-locations':     { y: LOC_POS_Y,  height: 0, display: 'none' },
 				'rect.loc-entry': {
 					width: LOC_COL_WIDTH,
 					height: LOC_ROW_HEIGHT
@@ -121,13 +133,15 @@ define([
 		},
 		
 		updateHideLocations: function (model, hideLocations) {
-			model.attr('.loc-entry, .trunc', { display: hideLocations ? 'none' : 'inline' });
+			model.attr('.loc-entry, .trunc, .task-order, .task-exclusiveness', {
+				display: hideLocations ? 'none' : 'inline'
+			});
 			model.updateName();
 		},
 		
 		updateName: function () {
 			var hideLocations = this.get('hideLocations'),
-				nameHeight = hideLocations ? this.locationsHeight + NAME_HEIGHT : NAME_HEIGHT,
+				nameHeight = hideLocations ? this.locationsHeight + CONSTR_ROW_HEIGHT + NAME_HEIGHT : NAME_HEIGHT,
 				fontSize = hideLocations ? '150%' : '100%',
 				nameStyle = { 'font-size': fontSize },
 				type = this.get('data').type,
@@ -150,11 +164,11 @@ define([
 			var data = this.get('data');
 			this.updateAttrCount(data);
 			var type = data.type,
-				phase = type.phase
+				phase = type.phase,
 				attributes = phase && phase.attributes,
 				exclusiveness = data.exclusiveness,
-				exclusive = exclusiveness.type === 'GLOBAL'
-					|| (exclusiveness.type === 'ATTRIBUTES' && _.size(exclusiveness.attributes)),
+				orderSpecifications = data.orderSpecifications,
+				exclusive = exclusiveness.type !== 'UNIT',
 				locationPatterns = data.locationPatterns,
 				width = WIDTH,
 				height = LOC_POS_Y + this.locationsHeight,
@@ -174,12 +188,26 @@ define([
 					height: height,
 					transform: exclusive ? 'translate(-5,-5)' : ''
 				},
-				'rect.task-type-name':  { fill: phase ? colors.toCSS(phase.color) : '#fff' },
-				'rect.task-locations':  { height: this.locationsHeight, display: this.locationsHeight > 0 ? 'inline' : 'none' },
-				'text.task-id':         { text: '#' + data.id },
-				'text.task-crew':       { text: crew },
-				'text.task-duration':   { text: duration },
-				'text.task-type-craft': { text: craft }
+				'rect.task-type-name':     { fill: phase ? colors.toCSS(phase.color) : '#fff' },
+				'rect.task-locations':     { height: this.locationsHeight, display: this.locationsHeight > 0 ? 'inline' : 'none' },
+				'text.task-id':            { text: '#' + data.id },
+				'text.task-crew':          { text: crew },
+				'text.task-duration':      { text: duration },
+				'text.task-type-craft':    { text: craft },
+				'text.task-exclusiveness': {
+					text: 'ex: (' + _.chain(exclusiveness).get('attributes').map('shortName').join(',').value() + ')'
+				},
+				'text.task-order': {
+					text: 'or: (' + _.chain(orderSpecifications).filter(function (os) {
+						return os.orderType !== 'NONE';
+					}).map(function (os) {
+						var label = os.attribute.shortName;
+						switch (os.orderType) {
+						case 'PARALLEL'  : return '|' + label + '|';
+						case 'ASCENDING' : return       label + '\u2191';
+						case 'DESCENDING': return       label + '\u2193';
+						}
+					}).join(',').value() + ')' },
 			};
 			if (locationPatterns) {
 				attrs['text.trunc'] = {

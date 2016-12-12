@@ -15,8 +15,6 @@ define([
 		CHAIN_FILTER_ID = 'chain-precedence',
 		ALT_CROSS_SIZE = 16;
 	
-	var getScopeLabel = _.property('shortName');
-	
 	var DependencyShape = util.set(joint.shapes, ['precise', 'DependencyShape'], joint.dia.Link.extend({
 		
 		// --------------------- Custom markup -------------------------
@@ -107,7 +105,7 @@ define([
 				}, data.labelPosition),
 				attrs: {
 					text: {
-						text: _.chain(data.scope).get('attributes').map(getScopeLabel).join(', ').value(),
+						text: _.chain(data.scope).get('attributes').map('shortName').join(', ').value(),
 					}
 				}
 			});

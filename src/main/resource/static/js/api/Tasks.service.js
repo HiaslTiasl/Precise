@@ -175,14 +175,17 @@ define([
 			},
 			
 			getPitchRequestData: function () {
-				return _.pick(this.data.pitch, Boolean);
+				return this.pitch && _.pick(this.data.pitch, Boolean);
 			},
 			
 			getRequestData: function () {
 				var processed = _.omit(this.data, dontSendDirectly);
-				processed.pitch = this.getPitchRequestData();
-				processed.exclusiveness = Scopes.toRequestRepresentation(this.data.exclusiveness);
-				processed.orderSpecifications = OrderSpecifications.toRequestRepresentation(this.data.orderSpecifications);
+				if (this.data.pitch)
+					processed.pitch = this.getPitchRequestData();
+				if (this.data.exclusiveness)
+					processed.exclusiveness = Scopes.toRequestRepresentation(this.data.exclusiveness);
+				if (this.data.orderSpecifications)
+					processed.orderSpecifications = OrderSpecifications.toRequestRepresentation(this.data.orderSpecifications);
 				if (this.data.type)
 					processed.type = HAL.resolve(HAL.hrefTo(this.data.type));
 				if (!this.exists)

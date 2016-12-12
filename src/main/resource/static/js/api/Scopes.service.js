@@ -25,13 +25,15 @@ define([
 		this.updateAttributes = updateAttributes;
 		
 		function rereferenceAttributes(scope, attributes) {
-			var scopeLen = _.size(scope.attributes),
+			if (scope) {
+				var scopeLen = _.size(scope.attributes),
 				attrLen = attributes.length;
-			for (var scopeIdx = 0, attrIdx = 0; scopeIdx < scopeLen; scopeIdx++) {
-				var name = scope.attributes[scopeIdx].name;
-				while (attrIdx < attrLen && attributes[attrIdx].name !== name)
-					attrIdx++;
-				scope.attributes[scopeIdx] = attributes[attrIdx];
+				for (var scopeIdx = 0, attrIdx = 0; scopeIdx < scopeLen; scopeIdx++) {
+					var name = scope.attributes[scopeIdx].name;
+					while (attrIdx < attrLen && attributes[attrIdx].name !== name)
+						attrIdx++;
+					scope.attributes[scopeIdx] = attributes[attrIdx];
+				}
 			}
 		};
 		
