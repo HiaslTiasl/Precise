@@ -108,7 +108,7 @@ define([
 							});
 					},
 					phases: function () {
-						return type.phase ? null : $ctrl.resource.model.getTaskTypes({
+						return type.phase ? null : $ctrl.resource.model.getPhases({
 							projection: TaskTypes.Resource.prototype.defaultProjection
 						})
 						.then(Pages.collectRemaining);

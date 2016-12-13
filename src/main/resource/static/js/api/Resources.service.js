@@ -74,13 +74,8 @@ define([
 			},
 			
 			reload: function (projection) {
-				var self = this;
-				return PreciseApi.from(PreciseApi.hrefTo(self.data, self.rels.singular))
-					.traverse(function (builder) {
-						return builder
-							.withTemplateParameters(self.getTemplateParams(projection))
-							.get();
-					});
+				return PreciseApi.from(this.getURL('self', this.getTemplateParams(projection)))
+					.followAndGet();
 			},
 			
 			update: function (projection) {

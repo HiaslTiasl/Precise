@@ -182,9 +182,10 @@ define([
 			},
 			
 			getRequestData: function () {
-				var processed = _.omit(this.data, dontSendDirectly);
-				if (this.data.pitch)
-					processed.pitch = this.getPitchRequestData();
+				var processed = _.omit(this.data, dontSendDirectly),
+					pitchData = this.getPitchRequestData();
+				if (pitchData && _.some(pitchData))
+					processed.pitch = pitchData;
 				if (this.data.exclusiveness)
 					processed.exclusiveness = Scopes.toRequestRepresentation(this.data.exclusiveness);
 				if (this.data.orderSpecifications)
