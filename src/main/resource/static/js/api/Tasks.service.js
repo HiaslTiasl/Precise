@@ -60,6 +60,8 @@ define([
 		
 		function cloneExistingData(task) {
 			var data = _.cloneDeep(task);
+			if (!data.pitch)
+				data.pitch = {};
 			if (data.type && data.type.phase)
 				Scopes.rereferenceAttributes(data.exclusiveness, data.type.phase.attributes);
 			return $q.when(data);
@@ -110,8 +112,9 @@ define([
 			defaultProjection: 'expandedTask',
 			
 			computePitches: function () {
-				var self = this;
-				return this.model.computePitches(self.getPitchRequestData())
+				var self = this,
+					pitchData = self.getPitchRequestData();
+				return !pitchData ? $q.when() : this.model.computePitches(pitchData)
 					.then(function (result) {
 						_.assign(self.data, result);
 						return self;
@@ -175,7 +178,7 @@ define([
 			},
 			
 			getPitchRequestData: function () {
-				return this.pitch && _.pick(this.data.pitch, Boolean);
+				return this.data.pitch && _.pick(this.data.pitch, Boolean);
 			},
 			
 			getRequestData: function () {
