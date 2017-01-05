@@ -45,19 +45,12 @@ public abstract class OneToManyBidirection<One, OneOfMany, Many> {
 	}
 	
 	public void setOne(OneOfMany oneOfMany, One one) {
-		if (one != null)
-			setOneImpl(oneOfMany, one);
-	}
-	
-	protected One setOneImpl(OneOfMany oneOfMany, One one) {
 		One oldOne = getOne(oneOfMany);
 		if (oldOne != null)
 			removeImpl(getMany(oldOne), oneOfMany);
-		if (one != null) {
-			setOne.accept(oneOfMany, one);
+		setOne.accept(oneOfMany, one);
+		if (one != null)
 			addIfAbsent(getMany(one), oneOfMany);
-		}
-		return oldOne;
 	}
 	
 	public void addOneOfMany(One one, OneOfMany oneOfMany) {
@@ -81,7 +74,7 @@ public abstract class OneToManyBidirection<One, OneOfMany, Many> {
 	
 	protected void adjustManyToOne(One one, Many many) {
 		if (many != null)
-			stream(many).forEach(oneOfMany -> setOneImpl(oneOfMany, one));
+			stream(many).forEach(oneOfMany -> setOne(oneOfMany, one));
 	}
 	
 }
