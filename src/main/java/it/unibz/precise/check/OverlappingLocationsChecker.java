@@ -1,5 +1,15 @@
 package it.unibz.precise.check;
 
+import it.unibz.precise.check.ConsistencyWarning.Category;
+import it.unibz.precise.check.ConsistencyWarning.TaskLocation;
+import it.unibz.precise.model.AttributeHierarchyNode;
+import it.unibz.precise.model.Location;
+import it.unibz.precise.model.Model;
+import it.unibz.precise.model.PatternEntry;
+import it.unibz.precise.model.Task;
+import it.unibz.precise.model.TaskType;
+
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -10,21 +20,24 @@ import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 
-import it.unibz.precise.check.ConsistencyWarning.TaskLocation;
-import it.unibz.precise.model.AttributeHierarchyNode;
-import it.unibz.precise.model.Location;
-import it.unibz.precise.model.Model;
-import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
-
 @Service
 public class OverlappingLocationsChecker implements ConsistencyChecker {
-
+	
 	public static final String WARNING_TYPE = "overlap";
 	
-	public static final String WARNING_MESSAGE_OVERLAP = "The following locations overlap each other: ";
-	public static final String WARNING_MESSAGE_DUPLICATE = "The following locations are duplicates: ";
-	public static final String WARNING_MESSAGE_GLOBAL = "The following locations are global and overlap all other locations: ";
+	public static final String WARNING_MESSAGE_OVERLAP   = "Location {0} overlaps with: {2}.";
+	public static final String WARNING_MESSAGE_DUPLICATE = "Duplicate locations: {0}.";
+	public static final String WARNING_MESSAGE_GLOBAL    = "The global locations {0} overlap all other locations.";
+	
+	@Override
+	public Category getCategory() {
+		return Category.COMPLETENESS;
+	}
+	
+	@Override
+	public String getType() {
+		return WARNING_TYPE;
+	}
 	
 	@Override
 	public Stream<ConsistencyWarning> check(Model model) {
@@ -78,18 +91,21 @@ public class OverlappingLocationsChecker implements ConsistencyChecker {
 	}
 	
 	private ConsistencyWarning warnGlobalLocations(List<TaskLocation> globalLocations) {
-		String msg = WARNING_MESSAGE_GLOBAL + indicesInTasks(globalLocations);
-		return new ConsistencyWarning(WARNING_TYPE, msg, null, globalLocations);
+		String msg = MessageFormat.format(WARNING_MESSAGE_GLOBAL, locationsInTasks(globalLocations));
+		return warning(msg, null, globalLocations);
 	}
 	
 	private ConsistencyWarning warnDuplicateLocations(List<TaskLocation> duplicates) {
-		String msg = WARNING_MESSAGE_DUPLICATE + indicesInTasks(duplicates);
-		return new ConsistencyWarning(WARNING_TYPE, msg, null, duplicates);
+		String msg = MessageFormat.format(WARNING_MESSAGE_DUPLICATE, locationsInTasks(duplicates));
+		return warning(msg, null, duplicates);
 	}
 	
 	private ConsistencyWarning warnOverlappingLocations(List<TaskLocation> overlappingLocations) {
-		String msg = WARNING_MESSAGE_OVERLAP + indicesInTasks(overlappingLocations);
-		return new ConsistencyWarning(WARNING_TYPE, msg, null, overlappingLocations);
+		String msg = MessageFormat.format(WARNING_MESSAGE_OVERLAP,
+			overlappingLocations.get(0),
+			locationsInTasks(overlappingLocations.subList(1, overlappingLocations.size()))
+		);
+		return warning(msg, null, overlappingLocations);
 	}
 	
 	private Map<Task, List<TaskLocation>> groupByTasks(List<TaskLocation> taskLocationStream) {
@@ -98,16 +114,21 @@ public class OverlappingLocationsChecker implements ConsistencyChecker {
 			.collect(Collectors.groupingBy(TaskLocation::getTask));
 	}
 	
-	private String indicesInTasks(List<TaskLocation> globalLocations) {
-		return groupByTasks(globalLocations).entrySet().stream()
-			.map(e -> "locations "
-				+ e.getValue().stream()
-					.map(TaskLocation::getIndex)
-					.map(String::valueOf)
-					.collect(Collectors.joining(", "))
-				+ " in task " + e.getKey().getShortIdentification()
-			)
+	private String locationsInTasks(List<TaskLocation> taskLocations) {
+		return groupByTasks(taskLocations).entrySet().stream()
+			.map(e -> locationsInTask(
+				e.getValue().stream().map(TaskLocation::getLocation),
+				e.getKey()
+			))
 			.collect(Collectors.joining(", "));
+	}
+	
+	private String locationsInTask(Stream<Location> locations, Task task) {
+		return locations.map(Location::getNode)
+				.map(AttributeHierarchyNode::getPattern)
+				.map(PatternEntry::toValueString)
+				.collect(Collectors.joining(", "))
+			+ " in task " + task.getShortIdentification();
 	}
 
 }

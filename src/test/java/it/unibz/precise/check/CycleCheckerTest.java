@@ -40,7 +40,7 @@ public class CycleCheckerTest {
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
 	
 	@Autowired
-	private CycleChecker cycleChecker;
+	private DiagramCycleChecker cycleChecker;
 	
 	@Parameter(0)
 	public String name;
