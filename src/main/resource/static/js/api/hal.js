@@ -19,7 +19,7 @@ define([
 	}
 	
 	function resolve(url, params) {
-		return urlTemplate.parse(url).expand(params || {});
+		return url && urlTemplate.parse(url).expand(params || {});
 	}
 	
 	function embeddedArray(obj, rel) {
