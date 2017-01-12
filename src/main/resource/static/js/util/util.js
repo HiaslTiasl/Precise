@@ -84,6 +84,10 @@ define([
 			&& Math.floor(value) === value;
 	}
 	
+	function satisfies(filter, value) {
+		return typeof filter === 'function' ? filter(value) : _.isEqual(filter, value);
+	}
+	
 	function swap(obj, key1, key2) {
 		var temp = obj[key1];
 		obj[key1] = obj[key2];
@@ -98,6 +102,7 @@ define([
 		set: set,
 		defineClass: defineClass,
 		isInteger: isInteger,
+		satisfies: satisfies,
 		swap: swap
 	};
 });

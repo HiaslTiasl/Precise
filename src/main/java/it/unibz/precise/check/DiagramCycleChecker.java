@@ -1,6 +1,5 @@
 package it.unibz.precise.check;
 
-import it.unibz.precise.check.ConsistencyWarning.Category;
 import it.unibz.precise.model.BaseEntity;
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Model;

@@ -1,6 +1,5 @@
 package it.unibz.precise.check;
 
-import it.unibz.precise.check.ConsistencyWarning.Category;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.Task;
 import it.unibz.precise.model.TaskType;

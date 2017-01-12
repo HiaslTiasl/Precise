@@ -47,10 +47,8 @@ define([
 		}
 		
 		function createCraft() {
-			openModal({
-				resource: function () {
-					return Crafts.newResource($ctrl.model);
-				}
+			openModal(function () {
+				return Crafts.newResource($ctrl.model);
 			});
 		}
 		

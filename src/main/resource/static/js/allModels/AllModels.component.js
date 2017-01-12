@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	AllModelsController.$inject = ['$scope', '$q', '$uibModal', 'toastr', 'PreciseApi', 'AllModels', 'Models', 'MDLFiles'];
+	AllModelsController.$inject = ['$scope', '$q', '$uibModal', 'errorHandler', 'PreciseApi', 'AllModels', 'Models', 'MDLFiles'];
 	
-	function AllModelsController($scope, $q, $uibModal, toastr, PreciseApi, AllModels, Models, MDLFiles) {
+	function AllModelsController($scope, $q, $uibModal, errorHandler, PreciseApi, AllModels, Models, MDLFiles) {
 		
 		var $ctrl = this;
 		
@@ -32,7 +32,7 @@ define([
 		
 		function refreshModels() {
 			AllModels.clearCache();
-			return AllModels.getModels().then(setModels);
+			return AllModels.getModels().then(setModels, errorHandler.handle);
 		}
 		
 		function openModal(resource) {
@@ -72,12 +72,12 @@ define([
 		function importFile(file) {
 			$ctrl.fileErrorMsg = null;
 			return file && AllModels.importFile(file)
-				.then(refreshModels, showError);
+				.then(refreshModels, errorHandler.handle);
 		}
 		
 		function duplicateModel(model) {
 			return AllModels.duplicateModel(model)
-				.then(refreshModels);
+				.then(refreshModels, errorHandler.handle);
 		}
 		
 		function deleteModel(model) {
@@ -87,9 +87,7 @@ define([
 			].join('\n'))
 			.then(function () {
 				return AllModels.deleteModel(model)
-					.then(refreshModels, function (reason) {
-						PreciseApi.asyncAlert(PreciseApi.toErrorMessage(reason));
-					});
+					.then(refreshModels, errorHandler.handle);
 			});
 		}
 	}

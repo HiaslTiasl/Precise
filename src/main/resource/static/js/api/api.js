@@ -13,6 +13,7 @@ define([
 	'./TaskTypes.service',
 	'./Tasks.service',
 	'./Dependencies.service',
+	'./errorHandler.factory',
 	'./errorDialog.component',
 	'./withShortName.filter',
 	'./join.filter',
@@ -32,6 +33,7 @@ define([
 	TaskTypesService,
 	TasksService,
 	DependenciesService,
+	errorHandlerFactory,
 	errorDialogComponent,
 	withShortNameFilterFactory,
 	joinFilterFactory
@@ -52,6 +54,7 @@ define([
 		.service('TaskTypes', TaskTypesService)
 		.service('Tasks', TasksService)
 		.service('Dependencies', DependenciesService)
+		.factory('errorHandler', errorHandlerFactory)
 		.component('preciseErrorDialog', errorDialogComponent)
 		.filter('withShortName', withShortNameFilterFactory)
 		.filter('join', joinFilterFactory);

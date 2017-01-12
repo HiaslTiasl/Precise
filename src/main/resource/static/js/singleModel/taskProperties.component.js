@@ -7,9 +7,9 @@ define([
 ) {
 	'use strict';
 	
-	TaskPropertiesController.$inject = ['$q', '$uibModal', '$anchorScroll', '$timeout', 'PreciseApi', 'Tasks', 'TaskTypes', 'Scopes', 'OrderSpecifications', 'Phases', 'Pages'];
+	TaskPropertiesController.$inject = ['$q', '$uibModal', '$anchorScroll', '$timeout', 'errorHandler', 'PreciseApi', 'Tasks', 'TaskTypes', 'Scopes', 'OrderSpecifications', 'Phases', 'Pages'];
 	
-	function TaskPropertiesController($q, $uibModal, $anchorScroll, $timeout, PreciseApi, Tasks, TaskTypes, Scopes, OrderSpecifications, Phases, Pages) {
+	function TaskPropertiesController($q, $uibModal, $anchorScroll, $timeout, errorHandler, PreciseApi, Tasks, TaskTypes, Scopes, OrderSpecifications, Phases, Pages) {
 		var $ctrl = this;
 		
 		$ctrl.editTaskDefinition = editTaskDefinition;
@@ -55,6 +55,8 @@ define([
 
 		$ctrl.$onChanges = $onChanges;
 		
+		var getTaskAttributes = _.property(['type', 'phase', 'attributes']);
+		
 		function $onChanges() {
 			if ($ctrl.resource) {
 				$ctrl.exclusiveness = Scopes.toLocalRepresentation($ctrl.resource.data.exclusiveness);
@@ -83,7 +85,7 @@ define([
 			.then(Pages.collectRemaining)
 			.then(function (taskTypes) {
 				$ctrl.taskTypes = taskTypes;
-			});			
+			}, errorHandler.handle);			
 		}
 		
 		function toggleCollapsed(fieldset) {
@@ -120,8 +122,8 @@ define([
 			}).result.then(function (result) {
 				$ctrl.resource.data.type = result;
 				$ctrl.taskDefinitionChanged({ $result: result });
-				loadTaskTypes();
-			});
+				return loadTaskTypes();
+			})['catch'](errorHandler.handle);
 		}
 		
 		function computePitches() {
@@ -131,11 +133,11 @@ define([
 		}
 		
 		function updateExlusivenessType() {
-			Scopes.updateType($ctrl.exclusiveness, _.get($ctrl.resource.data, ['type', 'phase', 'attributes']));
+			Scopes.updateType($ctrl.exclusiveness, getTaskAttributes($ctrl.resource.data));
 		}
 		
 		function updateExclusivenessAttributes() {
-			Scopes.updateAttributes($ctrl.exclusiveness, _.get($ctrl.resource.data, ['type', 'phase', 'attributes']));
+			Scopes.updateAttributes($ctrl.exclusiveness, getTaskAttributes($ctrl.resource.data));
 		}
 		
 		function attrFilterForOrderSpec(os) {
@@ -155,7 +157,7 @@ define([
 		}
 		
 		function addOrderSpec() {
-			var attr = _.find(_.get($ctrl.resource.data, ['type', 'phase', 'attributes']), canSelectForOrderSpec);
+			var attr = _.find(getTaskAttributes($ctrl.resource.data), canSelectForOrderSpec);
 			if (attr)
 				selectedOrderSpecAttribute(attr);
 			$ctrl.order.specs.push({
@@ -178,7 +180,7 @@ define([
 		}
 		
 		function canAddOrderSpec() {
-			return _.size($ctrl.order.specs) < _.size(_.get($ctrl.resource.data, ['type', 'phase', 'attributes']));
+			return _.size($ctrl.order.specs) < _.size(getTaskAttributes($ctrl.resource.data));
 		}
 		
 		function canMoveUpOrderSpec(index) {
@@ -196,7 +198,7 @@ define([
 				// but SmartTable does not notice that and the view is not updated.
 				// See https://github.com/lorenzofox3/Smart-Table/issues/205
 				_.assign($ctrl.resource.data.locationPatterns[patternNum], checkedPattern);
-			});
+			}, errorHandler.handle);
 		}
 		
 		function addPattern() {
@@ -206,7 +208,7 @@ define([
 				$timeout(function () {
 					$anchorScroll('location-' + num);
 				});
-			});
+			}, errorHandler.handle);
 		}
 		
 		function removePattern(index) {
@@ -214,7 +216,7 @@ define([
 		}
 		
 		function sendTask() {
-			var attributes = _.get($ctrl.resource.data, ['type', 'phase', 'attributes']),
+			var attributes = getTaskAttributes($ctrl.resource.data),
 				exclusiveness = attributes && Scopes.fromLocalRepresentation($ctrl.exclusiveness, attributes),
 				orderSpecifications = attributes && OrderSpecifications.fromLocalRepresentation($ctrl.order, attributes);
 			$ctrl.resource.data.exclusiveness = exclusiveness;
@@ -222,9 +224,7 @@ define([
 			return $ctrl.resource.send('expandedTask')
 				.then(function (result) {
 					$ctrl.done({ $result: result });
-				}, function (reason) {
-					alert(PreciseApi.toErrorMessage(reason));
-				});
+				}, errorHandler.handle);
 		}
 
 		function isDisabledPatternEntry(patternEntry) {

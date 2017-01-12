@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelConfigController.$inject = ['$http', '$state', '$uibModal', 'Pages', 'Files', 'MDLFiles', 'AllModels'];
+	SingleModelConfigController.$inject = ['$http', '$state', '$uibModal', 'errorHandler', 'Pages', 'Files', 'MDLFiles', 'AllModels'];
 	
-	function SingleModelConfigController($http, $state, $uibModal, Pages, Files, MDLFiles, AllModels) {
+	function SingleModelConfigController($http, $state, $uibModal, errorHandler, Pages, Files, MDLFiles, AllModels) {
 		
 		var $ctrl = this;
 		
@@ -33,7 +33,7 @@ define([
 		
 		function loadPhases() {
 			$ctrl.model.getPhases({ projection: 'expandedPhase' })
-				.then(setPhases);
+				.then(setPhases, errorHandler.handle);
 		}
 		
 		function setPhases(phases) {
@@ -53,7 +53,7 @@ define([
 		
 		function clearConfig() {
 			MDLFiles.clearConfig($ctrl.model.data)
-				.then($ctrl.reload);
+				.then($ctrl.reload, errorHandler.handle);
 		}
 		
 	}

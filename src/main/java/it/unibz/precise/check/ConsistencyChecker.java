@@ -1,6 +1,5 @@
 package it.unibz.precise.check;
 
-import it.unibz.precise.check.ConsistencyWarning.Category;
 import it.unibz.precise.check.ConsistencyWarning.TaskLocation;
 import it.unibz.precise.model.BaseEntity;
 import it.unibz.precise.model.Model;
@@ -8,7 +7,7 @@ import it.unibz.precise.model.Model;
 import java.util.List;
 import java.util.stream.Stream;
 
-public interface ConsistencyChecker {
+public interface ConsistencyChecker extends ConsistencyClassification {
 	
 	Category getCategory();
 	

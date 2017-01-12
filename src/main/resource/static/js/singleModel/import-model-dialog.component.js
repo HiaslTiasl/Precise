@@ -1,9 +1,9 @@
 define([], function () {
 	'use strict';
 	
-	SingleModelConfigImportDialogController.$inject = ['$http', 'PreciseApi', 'Files', 'MDLFiles', 'AllModels']
+	SingleModelConfigImportDialogController.$inject = ['$http', 'errorHandler', 'PreciseApi', 'Files', 'MDLFiles', 'AllModels']
 	
-	function SingleModelConfigImportDialogController($http, PreciseApi, Files, MDLFiles, AllModels) {
+	function SingleModelConfigImportDialogController($http, errorHandler, PreciseApi, Files, MDLFiles, AllModels) {
 		
 		var $ctrl = this;
 		
@@ -42,7 +42,7 @@ define([], function () {
 				.then(filterSelectableModels)
 				.then(function (models) {
 					return $ctrl.selectableModels = models;
-				}));
+				}, errorHandler.handle));
 		}
 		
 		function modelChanged() {
@@ -60,7 +60,7 @@ define([], function () {
 			return ($ctrl.file
 				? sendFile($ctrl.file)
 				: chooseModel($ctrl.selectedModel)
-			).then($ctrl.modalInstance.close);
+			).then($ctrl.modalInstance.close, errorHandler.handle);
 		}
 		
 		function sendFile(file) {
@@ -70,7 +70,9 @@ define([], function () {
 					return MDLFiles.importJSON(MDLFiles.urlToModel($ctrl.resolve.model.data, $ctrl.subPath), text);
 				})
 				['catch'](PreciseApi.mapReason(function (reason) {
-					return $ctrl.fileError = PreciseApi.toErrorMessage(reason);
+					// TODO: Choose what to do: either this or toast
+					$ctrl.fileError = PreciseApi.getErrorText(reason.data);
+					return reason;
 				}));
 		}
 		

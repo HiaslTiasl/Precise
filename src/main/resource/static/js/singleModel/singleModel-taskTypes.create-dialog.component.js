@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelTaskTypeCreateDialogController.$inject = ['TaskTypes'];
+	SingleModelTaskTypeCreateDialogController.$inject = ['TaskTypes', 'errorHandler'];
 	
-	function SingleModelTaskTypeCreateDialogController(TaskTypes) {
+	function SingleModelTaskTypeCreateDialogController(TaskTypes, errorHandler) {
 		
 		var $ctrl = this;
 		
@@ -25,7 +25,7 @@ define([
 		
 		function sendTaskType() {
 			$ctrl.resource.send()
-				.then($ctrl.modalInstance.close);
+				.then($ctrl.modalInstance.close, errorHandler.ignoring('cancel').handle);
 		}
 		
 		function cancel() {

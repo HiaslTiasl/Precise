@@ -7,9 +7,9 @@ define([
 ) {
 	'use strict';
 	
-	DependencyPropertiesController.$inject = ['$q', 'PreciseApi', 'Scopes', 'Tasks'];
+	DependencyPropertiesController.$inject = ['$q', 'errorHandler', 'PreciseApi', 'Scopes', 'Tasks'];
 	
-	function DependencyPropertiesController($q, PreciseApi, Scopes, Tasks) {
+	function DependencyPropertiesController($q, errorHandler, PreciseApi, Scopes, Tasks) {
 		var $ctrl = this;
 		
 		$ctrl.cancel = cancel;
@@ -24,6 +24,8 @@ define([
 			Scopes.Types.GLOBAL,
 			Scopes.Types.ATTRIBUTES
 		];
+		
+		var getTaskPhaseName = _.property(['type', 'phase', 'name']);
 		
 		$ctrl.collapsed = {
 			scope: false
@@ -49,7 +51,7 @@ define([
 		function canHaveUnitScope() {
 			var data = $ctrl.resource.data;
 			return !data.source || !data.target
-				|| _.get(data.source, ['type', 'phase', 'name']) === _.get(data.target, ['type', 'phase', 'name']);
+				|| getTaskPhaseName(data.source) === getTaskPhaseName(data.target);
 		}
 		
 		function updateScopeType() {
@@ -67,9 +69,7 @@ define([
 			return $ctrl.resource.send('dependencySummary')
 				.then(function (result) {
 					$ctrl.done({ $result: result });
-				}, function (reason) {
-					alert(PreciseApi.toErrorMessage(reason));
-				});
+				}, errorHandler.handle);
 		}
 
 		function cancel() {

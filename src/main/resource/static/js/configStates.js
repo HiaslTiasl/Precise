@@ -1,5 +1,7 @@
 define([
+	'lib/lodash'
 ], function (
+	_
 ) {
 	'use strict';
 	
@@ -85,7 +87,7 @@ define([
 		$transitionsProvider.onError({
 			entering: 'singleModel'
 		}, function (trans) {
-			if (trans.error().statusCode == 404)
+			if (_.get(trans.error(), ['httpResponse', 'status']) === 404)
 				trans.router.stateService.go('allModels')
 		});
 	}

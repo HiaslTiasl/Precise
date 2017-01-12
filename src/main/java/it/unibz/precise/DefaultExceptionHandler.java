@@ -56,9 +56,9 @@ public class DefaultExceptionHandler {
 	@ExceptionHandler
 	public ResponseEntity<ExceptionMessage> handle(DataAccessException e) {
 		String[] uniqFields = uniquenessExceptionResolver.resolve(e);
-		Exception actualReason = uniqFields != null
+		Throwable actualReason = uniqFields != null
 			? new DuplicateKeyException(Arrays.toString(uniqFields) +  " must be unique")
-			: e;
+			: e.getMostSpecificCause();
 		return handle(actualReason, HttpStatus.CONFLICT);
 	}
 	

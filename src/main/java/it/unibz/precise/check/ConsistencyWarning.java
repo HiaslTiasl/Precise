@@ -1,22 +1,12 @@
 package it.unibz.precise.check;
 
-import java.util.Comparator;
-import java.util.List;
-
 import it.unibz.precise.model.BaseEntity;
 import it.unibz.precise.model.Location;
 import it.unibz.precise.model.Task;
 
-public class ConsistencyWarning {
-	
-	public enum Category {
-		COMPLETENESS,
-		SATISFIABILITY
-	}
-	
-	public static Comparator<ConsistencyWarning> BY_CATEGORY_AND_TYPE =
-		Comparator.comparing(ConsistencyWarning::getCategory)
-			.thenComparing(ConsistencyWarning::getType);
+import java.util.List;
+
+public class ConsistencyWarning implements ConsistencyClassification {
 	
 	private Category category;
 	

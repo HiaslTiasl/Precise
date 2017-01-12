@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelDiagramCreateTaskDialogController.$inject = ['$uibModal', 'PreciseApi', 'Pages', 'Tasks', 'TaskTypes', 'Phases'];
+	SingleModelDiagramCreateTaskDialogController.$inject = ['$uibModal', 'errorHandler', 'PreciseApi', 'Pages', 'Tasks', 'TaskTypes', 'Phases'];
 	
-	function SingleModelDiagramCreateTaskDialogController($uibModal, PreciseApi, Pages, Tasks, TaskTypes, Phases) {
+	function SingleModelDiagramCreateTaskDialogController($uibModal, errorHandler, PreciseApi, Pages, Tasks, TaskTypes, Phases) {
 		
 		var $ctrl = this;
 		
@@ -33,7 +33,7 @@ define([
 		function computePitches() {
 			$ctrl.resource.computePitches()
 				.then(_.constant(null), PreciseApi.getErrorText)
-				.then(setPitchError);
+				.then(setPitchError, errorHandler.handle);
 		}
 		
 		function setTaskDefinitions(taskTypes) {
@@ -93,7 +93,7 @@ define([
 				$ctrl.taskTypes.push(result);
 				$ctrl.resource.data.type = result;
 				taskDefinitionChanged();
-			});
+			}, errorHandler.ignoring('cancel').handle);
 		}
 		
 		function createTask() {

@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelDiagramController.$inject = ['$scope', '$uibModal', 'PreciseApi', 'TaskTypes', 'Tasks', 'Dependencies', 'Phases'];
+	SingleModelDiagramController.$inject = ['$scope', '$uibModal', 'errorHandler', 'PreciseApi', 'TaskTypes', 'Tasks', 'Dependencies', 'Phases'];
 	
-	function SingleModelDiagramController($scope, $uibModal, PreciseApi, TaskTypes, Tasks, Dependencies, Phases) {
+	function SingleModelDiagramController($scope, $uibModal, errorHandler, PreciseApi, TaskTypes, Tasks, Dependencies, Phases) {
 		
 		var $ctrl = this;
 		
@@ -18,6 +18,25 @@ define([
 		$ctrl.taskDefinitionChanged = taskDefinitionChanged;
 		
 		$ctrl.$onChanges = $onChanges;
+		
+		var errorHandlers = {
+			remove: {
+				task: errorHandler.wrapIf(PreciseApi.isHttpConflict, {
+					title: 'Cannot delete task',
+					message: 'Remove all dependencies attached before deleting the task'
+				}),
+				dependency: errorHandler.wrapIf(PreciseApi.isHttpConflict, titleErrorWrapper('Cannot delete dependency')),
+			},
+			change: {
+				task: errorHandler,
+				taskDefinition: errorHandler,
+				dependency: errorHandler
+			},
+			add: {
+				task: errorHandler,
+				dependency: errorHandler
+			}
+		};
 		
 		var resourceWrappers = {
 			task: Tasks.existingResource,
@@ -42,6 +61,15 @@ define([
 			$ctrl.resource = null;
 		}
 		
+		function titleErrorWrapper(title) {
+			return function (error) {
+				return {
+					title: title,
+					message: error.message
+				};
+			};
+		}
+		
 		function diagramTaskChangeHandler(event, data) {
 			Tasks
 				.existingResource($ctrl.model, data)
@@ -50,7 +78,7 @@ define([
 				})
 				.then(function (task) {
 					$scope.$broadcast('properties:change', 'task', task);
-				});
+				}, errorHandlers.change.task.handle);
 		}
 		
 		function diagramDependencyChangeHandler(event, data) {
@@ -61,7 +89,7 @@ define([
 				})
 				.then(function (dependency) {
 					$scope.$broadcast('properties:change', 'dependency', dependency);
-				});
+				}, errorHandlers.change.dependency.handle);
 		}
 		
 		function taskDefinitionChanged(data) {
@@ -76,14 +104,14 @@ define([
 					tasks.forEach(function (t) {
 						$scope.$broadcast('properties:change', 'task', t);
 					});
-				});
+				}, errorHandlers.change.taskDefinition.handle);
 		}
 		
 		function deleteCell(event, type, data) {
 			PreciseApi.deleteResource(data)
 				.then(function () {
 					$scope.$broadcast('cell:deleted', type, data);
-				});
+				}, errorHandlers.remove[type].handle);
 		}
 		
 		function newTaskHandler(event, data) {
@@ -108,7 +136,7 @@ define([
 				})
 				.then(function (dependency) {
 					$scope.$broadcast('properties:created', 'dependency', dependency);
-				});
+				}, errorHandlers.add.dependency.handle);
 		}
 		
 		function selectHandler(event, resourceType, selectedView) {
@@ -130,7 +158,7 @@ define([
 		function loadWarnings() {
 			$ctrl.model.getWarnings().then(function (warnings) {
 				$ctrl.warnings = warnings;
-			});
+			}, errorHandler.handle);
 		}
 		
 		function showWarning(w) {

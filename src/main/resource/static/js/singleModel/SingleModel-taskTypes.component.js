@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelTaskTypesController.$inject = ['$uibModal', 'Pages', 'TaskTypes'];
+	SingleModelTaskTypesController.$inject = ['$uibModal', 'errorHandler', 'Pages', 'TaskTypes'];
 	
-	function SingleModelTaskTypesController($uibModal, Pages, TaskTypes) {
+	function SingleModelTaskTypesController($uibModal, errorHandler, Pages, TaskTypes) {
 		var $ctrl = this;
 		
 		$ctrl.createTaskType = createTaskType;
@@ -24,9 +24,7 @@ define([
 		
 		function loadTaskTypes() {
 			$ctrl.model.getTaskTypes({ projection: 'expandedTaskType' })
-				.then(setTaskTypes, function (err) {
-					console.log(err);
-				});
+				.then(setTaskTypes, errorHandler.handle);
 		}
 		
 		function setTaskTypes(taskTypes) {
@@ -66,7 +64,7 @@ define([
 				.then(function (resource) {
 					return resource.delete();
 				})
-				.then(loadTaskTypes);
+				.then(loadTaskTypes, errorHandler.handle);
 		}
 		
 	}

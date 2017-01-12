@@ -1,7 +1,7 @@
 package it.unibz.precise.rest;
 
 import it.unibz.precise.check.ConsistencyChecker;
-import it.unibz.precise.check.ConsistencyWarning;
+import it.unibz.precise.check.ConsistencyClassification;
 import it.unibz.precise.model.BaseEntity;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.projection.EmptyProjection;
@@ -23,15 +23,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RepositoryRestController
 public class WarningsController {
 	
-	@Autowired
 	private List<ConsistencyChecker> consistencyCheckers;
-	
-	@Autowired
 	private ModelRepository modelRepository;
-	
-	@Autowired
 	private ProjectionFactory projectionFactory;
 	
+	@Autowired
+	public WarningsController(List<ConsistencyChecker> consistencyCheckers, ModelRepository modelRepository, ProjectionFactory projectionFactory) {
+		this.consistencyCheckers = consistencyCheckers;
+		this.modelRepository = modelRepository;
+		this.projectionFactory = projectionFactory;
+		consistencyCheckers.sort(ConsistencyClassification.BY_CATEGORY_AND_TYPE);
+	}
+
 	@RequestMapping(path="/models/{id}/warnings", method=RequestMethod.GET)
 	public ResponseEntity<?> getWarnings(@PathVariable("id") long id) {
 		Model model = modelRepository.findOne(id);
@@ -39,10 +42,12 @@ public class WarningsController {
 		if (model == null)
 			return ResponseEntity.notFound().build();
 		
+		// Logic-wise, the following could be parallelized (using .parallelStream()),
+		// but that results in random errors thrown from Hibernate.
+		// Apparently, the way Hibernate retrieves entities is not thread-safe.
 		List<WarningResourceContent> projected = consistencyCheckers.stream()
 			.flatMap(c -> c.check(model))
 			.filter(Objects::nonNull)		// In case some checker fails to ensure this
-			.sorted(ConsistencyWarning.BY_CATEGORY_AND_TYPE)
 			.map(w -> new WarningResourceContent(w, this::mapEntity))
 			.collect(Collectors.toList());
 		

@@ -8,12 +8,12 @@ define([
 	'use strict';
 	
 	DiagramController.$inject = [
-		'$scope', '$rootScope', '$timeout', '$uibModal', 'PreciseApi',
+		'$scope', '$rootScope', '$timeout', '$uibModal', 'errorHandler', 'PreciseApi',
 		'PreciseDiagramPaper', 'DiagramPaperToolset', 'MDLFiles', 'Pages', 'Tasks'
 	];
 	
 	function DiagramController(
-		$scope, $rootScope, $timeout, $uibModal, PreciseApi,
+		$scope, $rootScope, $timeout, $uibModal, errorHandler, PreciseApi,
 		PreciseDiagramPaper, DiagramPaperToolset, MDLFiles, Pages, Tasks
 	) {
 		var $ctrl = this;
@@ -118,7 +118,7 @@ define([
 				
 				req.then(Pages.collectRemaining).then(function (tasks) {
 					$ctrl.diaPaper.showSearchResults(tasks)
-				});
+				}, errorHandler.handle);
 			}
 		}
 		
@@ -168,7 +168,7 @@ define([
 				$ctrl.diaPaper.paper.getArea()
 			).then(function (rawGraph) {
 				$ctrl.diaPaper.fromJSON(rawGraph);
-			});
+			}, errorHandler.handle);
 		}
 		
 		function wrapInTimeout(fn) {
@@ -202,7 +202,7 @@ define([
 			PreciseApi.deleteResource(data)['catch'](function () {
 				$ctrl.diaPaper.addCell(type, data);
 			})
-			.then($ctrl.onStructureChanged);
+			.then($ctrl.onStructureChanged, errorHandler.handle);
 		}
 		
 		function warningsChanged() {

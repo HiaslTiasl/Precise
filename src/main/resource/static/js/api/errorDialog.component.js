@@ -1,8 +1,4 @@
-define([
-	
-], function (
-	
-) {
+define(function () {
 	'use strict';
 	
 	ErrorDialogComponentController.$inject = [];
@@ -16,6 +12,10 @@ define([
 		
 		function $onInit() {
 			$ctrl.errors = $ctrl.resolve.errors;
+			if (!Array.isArray($ctrl.errors)) {
+				$ctrl.title = errors.title;
+				$ctrl.errors = [$ctrl.errors];
+			}
 		}
 		
 		function close() {

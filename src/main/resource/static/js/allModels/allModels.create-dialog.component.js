@@ -1,9 +1,9 @@
 define([], function () {
 	'use strict';
 	
-	AllModelsCreateDialogController.$inject = ['Models'];
+	AllModelsCreateDialogController.$inject = ['Models', 'errorHandler'];
 	
-	function AllModelsCreateDialogController(Models) {
+	function AllModelsCreateDialogController(Models, errorHandler) {
 		
 		var $ctrl = this;
 		
@@ -18,7 +18,7 @@ define([], function () {
 		
 		function sendModel() {
 			$ctrl.resource.send()
-				.then($ctrl.modalInstance.close);
+				.then($ctrl.modalInstance.close, errorHandler.handle);
 		}
 		
 		function cancel() {

@@ -16,7 +16,8 @@ define([
 		// register the traverson-hal plug-in for media type 'application/hal+json'
 		traverson.registerMediaType(JsonHalAdapter.mediaType, JsonHalAdapter);
 		
-		var getResponseData = _.property('data');
+		var getResponseData = _.property('data'),
+			getErrorStatus = _.property(['httpResponse', 'status']);
 		
 		this.basePath = basePath;
 		this.linkTo = HAL.linkTo;
@@ -30,7 +31,11 @@ define([
 		this.getResponseData = getResponseData;
 		this.responseError = responseError;
 		this.getError = getError;
+		this.wrapError = wrapError;
 		this.getErrorText = getErrorText;
+		this.isHttpClientError = isHttpClientError;
+		this.isHttpConflict = isHttpConflict;
+		this.isHttpBadRequest = isHttpBadRequest;
 		this.deleteResource = deleteResource;
 		
 		this.asyncAlert = wrapAsync($window.alert, $window);
@@ -74,28 +79,37 @@ define([
 			].join(' ');
 		}
 		
+		function isHttpResponse(obj) {
+			return 'status' in obj && 'statusText' in obj;
+		}
+		
+		function wrapError(data, reason) {
+			return {
+				data: typeof data === 'object' ? data : { message: data.toString() },
+				reason: reason,
+				httpResponse: reason && (isHttpResponse(reason) ? reason : reason.httpResponse)
+			};
+		}
+		
 		// TODO: improve
 		function responseError(response) {
-			var data = response.data;
-			return !data
-				? { message: httpErrorMessage(response) }								// No error message -> report HTTP failure
-				: data.errors || data;													// Something else
+			return wrapError(response.data || httpErrorMessage(response), response);
 		}
 		
 		function getError(reason) {
 			var error;
 			switch (typeof reason) {
 			case 'string':
-				error = { message: reason };
+				error = wrapError(reason);
 				break;
 			case 'object':
 				if ('message' in reason)
 					error = reason;
-				else if ('status' in reason && 'statusText' in reason)
+				else if (isHttpResponse(reason))
 					error = responseError(reason);
 				break;
 			}
-			return error || { message: 'Error' };
+			return error || wrapError('Error');
 		}
 		
 		function getErrorText(reason) {
@@ -107,13 +121,28 @@ define([
 			if (typeof response === 'string')	// getUrl was called -> just forward the resulting URL
 				return response;
 			var data = response.body;
-			if (data && typeof data === 'string')
-				data = response.body = response.data = JSON.parse(data);
+			if (data && typeof data === 'string') {
+				// Only consider JSON content to avoid showing HTML code as error message
+				var parsed = _.attempt(JSON.parse, data);
+				data = response.body = response.data = _.isError(parsed) ? null : parsed;
+			}
 			return isSuccess(response) ? data : $q.reject(getError(response));
 		}
 		
 		function isSuccess(response) {
 			return _.inRange(response.statusCode, 200, 300);
+		}
+		
+		function isHttpClientError(error) {
+			return _.inRange(getErrorStatus(error), 400, 500);
+		}
+		
+		function isHttpConflict(error) {
+			return getErrorStatus(error) === 409;
+		}
+		
+		function isHttpBadRequest(error) {
+			return getErrorStatus(error) === 400;
 		}
 		
 		function Request(url) {

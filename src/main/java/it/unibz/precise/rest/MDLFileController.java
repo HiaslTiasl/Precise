@@ -38,14 +38,8 @@ public class MDLFileController {
 	
 	public static final String RESOURCE_NAME = "/files";
 	
-	public static final String FILE_EXT = ".mdl";
-	public static final String PATH_TO_FILE = "/{name}" + FILE_EXT;
-	
-
-	@RequestMapping("/**")
-	public ResponseEntity<?> fallback() {
-		return ResponseEntity.notFound().build();
-	}
+	public static final String FILE_EXT = ".mdl";			// Used for exporting only; imports work with any extension, only the syntax counts
+	public static final String PATH_TO_FILE = "/{name}";
 	
 	static String getContentDisposition(String name) {
 		return FileDownload.getContentDisposition(name + MDLFileController.FILE_EXT);

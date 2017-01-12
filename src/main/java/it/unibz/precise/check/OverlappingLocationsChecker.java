@@ -1,6 +1,5 @@
 package it.unibz.precise.check;
 
-import it.unibz.precise.check.ConsistencyWarning.Category;
 import it.unibz.precise.check.ConsistencyWarning.TaskLocation;
 import it.unibz.precise.model.AttributeHierarchyNode;
 import it.unibz.precise.model.Location;

@@ -1,9 +1,9 @@
 define([], function () {
 	'use strict';
 	
-	SingleModelCraftCreateDialogController.$inject = ['Crafts'];
+	SingleModelCraftCreateDialogController.$inject = ['Crafts', 'errorHandler'];
 	
-	function SingleModelCraftCreateDialogController(Crafts) {
+	function SingleModelCraftCreateDialogController(Crafts, errorHandler) {
 		
 		var $ctrl = this;
 		
@@ -18,7 +18,7 @@ define([], function () {
 		
 		function sendCraft() {
 			$ctrl.resource.send()
-				.then($ctrl.modalInstance.close);
+				.then($ctrl.modalInstance.close, errorHandler.handle);
 		}
 		
 		function cancel() {
