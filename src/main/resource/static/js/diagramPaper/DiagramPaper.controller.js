@@ -8,12 +8,12 @@ define([
 	'use strict';
 	
 	DiagramController.$inject = [
-		'$scope', '$rootScope', '$timeout', '$uibModal', 'errorHandler', 'PreciseApi',
+		'$scope', '$rootScope', '$q', '$timeout', '$uibModal', 'errorHandler', 'PreciseApi',
 		'PreciseDiagramPaper', 'DiagramPaperToolset', 'MDLFiles', 'Pages', 'Tasks'
 	];
 	
 	function DiagramController(
-		$scope, $rootScope, $timeout, $uibModal, errorHandler, PreciseApi,
+		$scope, $rootScope, $q, $timeout, $uibModal, errorHandler, PreciseApi,
 		PreciseDiagramPaper, DiagramPaperToolset, MDLFiles, Pages, Tasks
 	) {
 		var $ctrl = this;
@@ -183,10 +183,12 @@ define([
 		function onPropertiesCreated(event, type, data) {
 			$ctrl.diaPaper.addCell(type, data);
 			$ctrl.onStructureChanged();
+			$ctrl.onDiagramChanged();
 		}
 		
 		function onPropertiesChange(event, type, data) {
 			$ctrl.diaPaper.updateCell(data);
+			$ctrl.onDiagramChanged();
 		}
 		
 		function onPropertiesCancel(event, type) {
@@ -196,13 +198,19 @@ define([
 		function onCellDeleted(event, type, data) {
 			$ctrl.diaPaper.removeCell(type, data);
 			$ctrl.onStructureChanged();
+			$ctrl.onDiagramChanged();
 		}
 		
 		function onDiagramRemove(event, type, data) {
 			PreciseApi.deleteResource(data)['catch'](function () {
 				$ctrl.diaPaper.addCell(type, data);
 			})
-			.then($ctrl.onStructureChanged, errorHandler.handle);
+			.then(function () {
+				return $q.all([
+					$ctrl.onStructureChanged(),
+					$ctrl.onDiagramChanged()
+				]);
+			}, errorHandler.handle);
 		}
 		
 		function warningsChanged() {

@@ -16,8 +16,11 @@ define([
 		$ctrl.done = done;
 		$ctrl.cancelled = cancelled;
 		$ctrl.taskDefinitionChanged = taskDefinitionChanged;
+		$ctrl.loadWarnings = loadWarnings;
 		
 		$ctrl.$onChanges = $onChanges;
+		
+		var warningsLoaded = false;
 		
 		var errorHandlers = {
 			remove: {
@@ -51,9 +54,11 @@ define([
 		$scope.$on('dependency:change', diagramDependencyChangeHandler);
 		
 		function $onChanges(changes) {
-			if (changes.model) {
+			if (!warningsLoaded && changes.model) {
+				warningsLoaded = true;
 				loadWarnings();
 			}
+				
 		}
 		
 		function resetResource() {

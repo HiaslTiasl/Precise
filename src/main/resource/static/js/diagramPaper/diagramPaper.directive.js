@@ -36,6 +36,7 @@ function (
 	            hideLocations: '<',
 	            currentWarning: '<',
 				onStructureChanged: '&',
+				onDiagramChanged: '&',
 				onZoom: '&'
 	        },
 	        controller: 'DiagramPaperController',

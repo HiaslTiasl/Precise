@@ -2,7 +2,8 @@
 	<precise-diagram-paper
 		model="$ctrl.model"
 		current-warning="$ctrl.currentWarning"
-		on-structure-changed="$ctrl.reload()">
+		on-structure-changed="$ctrl.reload()"
+		on-diagram-changed="$ctrl.loadWarnings()">
 	</precise-diagram-paper>
 	<div id="properties-wrapper" ng-switch on="$ctrl.resourceType">
 		<header>Properties</header>
