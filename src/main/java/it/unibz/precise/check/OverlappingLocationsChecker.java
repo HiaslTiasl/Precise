@@ -124,7 +124,7 @@ public class OverlappingLocationsChecker implements ConsistencyChecker {
 	
 	private String locationsInTask(Stream<Location> locations, Task task) {
 		return locations.map(Location::getNode)
-				.map(AttributeHierarchyNode::getPattern)
+				.map(n -> AttributeHierarchyNode.toPattern(n, task.getType().getPhase().getAttributeHierarchyLevels()))
 				.map(PatternEntry::toValueString)
 				.collect(Collectors.joining(", "))
 			+ " in task " + task.getShortIdentification();
