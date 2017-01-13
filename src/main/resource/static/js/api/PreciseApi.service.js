@@ -116,7 +116,7 @@ define([
 		}
 		
 		function isError(obj) {
-			return !isHttpResponse(obj) && util.hasProps(obj, 'message');
+			return util.hasProps(obj, 'message');
 		}
 		
 		function isErrorData(data) {
@@ -124,7 +124,7 @@ define([
 		}
 		
 		function isWrappedError(obj) {
-			return obj && isErrorData(obj.data);
+			return obj && !isHttpResponse(obj) && isErrorData(obj.data);
 		}
 		
 		function getErrorText(reason) {
@@ -192,7 +192,7 @@ define([
 				return $q(function (resolve, reject) {
 					$timeout(function () {
 						var result = nativeFn.apply(thisArg, args);
-						if (successFilter && successFilter(result))
+						if (!successFilter || successFilter(result))
 							resolve(result);
 						else
 							reject(result);

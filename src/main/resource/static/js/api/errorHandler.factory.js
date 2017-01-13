@@ -20,7 +20,7 @@ define([
 					providedError = typeof errProvider !== 'function' ? errProvider : null;
 				return new ErrorHandler(function (error) {
 					return that.handle(util.satisfies(errFilter, error)
-						? PreciseApi.wrapError(providedError || errProvider(error))
+						? PreciseApi.wrapError(providedError || errProvider(error), error)
 						: error
 					);
 				});

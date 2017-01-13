@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelTaskTypesController.$inject = ['$uibModal', 'errorHandler', 'Pages', 'TaskTypes'];
+	SingleModelTaskTypesController.$inject = ['$q', '$uibModal', 'errorHandler', 'PreciseApi', 'Pages', 'TaskTypes'];
 	
-	function SingleModelTaskTypesController($uibModal, errorHandler, Pages, TaskTypes) {
+	function SingleModelTaskTypesController($q, $uibModal, errorHandler, PreciseApi, Pages, TaskTypes) {
 		var $ctrl = this;
 		
 		$ctrl.createTaskType = createTaskType;
@@ -15,6 +15,13 @@ define([
 		$ctrl.deleteTaskType = deleteTaskType;
 		
 		$ctrl.$onChanges = $onChanges;
+		
+		var MSG_DEF_HAS_TASKS = 'There are tasks referencing this definition';
+		
+		var deleteErrorHandler = errorHandler.wrapIf(PreciseApi.isHttpConflict, {
+			title: 'Cannot delete task definition',
+			message: 'The tasks referencing this definition cannot be deleted automatically'
+		});
 		
 		function $onChanges(changes) {
 			if (changes.model) {
@@ -59,12 +66,21 @@ define([
 		}
 		
 		function deleteTaskType(taskType) {
-			TaskTypes
-				.existingResource($ctrl.model, taskType)
-				.then(function (resource) {
-					return resource.delete();
-				})
-				.then(loadTaskTypes, errorHandler.handle);
+			var permission = !taskType.taskCount ? $q.when() :  PreciseApi.asyncConfirm([
+				MSG_DEF_HAS_TASKS,
+				'',
+				'If you delete the definition, you will lose these tasks as well.',
+				'Delete anyway?'
+			].join('\n'));
+			
+			permission.then(function () {
+				TaskTypes
+					.existingResource($ctrl.model, taskType)
+					.then(function (resource) {
+						return resource.delete();
+					})
+					.then(loadTaskTypes, deleteErrorHandler.handle);
+			});
 		}
 		
 	}

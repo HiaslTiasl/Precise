@@ -5,9 +5,9 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelCraftsController.$inject = ['$uibModal', 'Pages', 'Crafts'];
+	SingleModelCraftsController.$inject = ['$uibModal', 'errorHandler', 'PreciseApi', 'Pages', 'Crafts'];
 	
-	function SingleModelCraftsController($uibModal, Pages, Crafts) {
+	function SingleModelCraftsController($uibModal, errorHandler, PreciseApi, Pages, Crafts) {
 		var $ctrl = this;
 		
 		$ctrl.createCraft = createCraft;
@@ -15,6 +15,11 @@ define([
 		$ctrl.deleteCraft = deleteCraft;
 		
 		$ctrl.$onChanges = $onChanges;
+		
+		var deleteErrorHandler = errorHandler.wrapIf(PreciseApi.isHttpConflict, {
+			title: 'Cannot delete craft',
+			message: 'There are task definitions referencing this craft'
+		});
 		
 		function $onChanges(changes) {
 			if (changes.model) {
@@ -24,9 +29,7 @@ define([
 		
 		function loadCrafts() {
 			$ctrl.model.getCrafts()
-				.then(setCrafts, function (err) {
-					console.log(err);
-				});
+				.then(setCrafts, errorHandler.handle);
 		}
 		
 		function setCrafts(crafts) {
@@ -58,7 +61,7 @@ define([
 				.then(function (resource) {
 					return resource.delete();
 				})
-				.then(loadCrafts);
+				.then(loadCrafts, deleteErrorHandler.handle);
 		}
 		
 	}

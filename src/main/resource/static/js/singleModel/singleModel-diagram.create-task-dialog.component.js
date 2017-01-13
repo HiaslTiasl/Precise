@@ -93,7 +93,7 @@ define([
 				$ctrl.taskTypes.push(result);
 				$ctrl.resource.data.type = result;
 				taskDefinitionChanged();
-			}, errorHandler.ignoring('cancel').handle);
+			}, errorHandler.handle);
 		}
 		
 		function createTask() {

@@ -25,7 +25,7 @@ define([
 		
 		function sendTaskType() {
 			$ctrl.resource.send()
-				.then($ctrl.modalInstance.close, errorHandler.ignoring('cancel').handle);
+				.then($ctrl.modalInstance.close, errorHandler.handle);
 		}
 		
 		function cancel() {
