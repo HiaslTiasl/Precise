@@ -94,7 +94,7 @@ define([
 		}
 		
 		function getHttpStatus(obj) {
-			return getHttpResponse(obj).status;
+			return _.get(getHttpResponse(obj), 'status');
 		}
 		
 		function wrapErrorData(data) {
