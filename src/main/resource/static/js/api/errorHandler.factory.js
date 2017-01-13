@@ -34,7 +34,7 @@ define([
 		svc.toastr = new ErrorHandler(openToastr);
 		
 		function defaultHandle(error) {
-			return Array.isArray(error.data)
+			return Array.isArray(error && error.data)
 				? openDialog(error)
 				: openToastr(error);
 		}
@@ -49,12 +49,9 @@ define([
 		
 		function openToastr(error) {
 			$log.error(error);
-			var data = error.data;
 			return toastr.error(
-				Array.isArray(data)
-					? error.data.map(PreciseApi.getErrorText).join('\n\n')
-					: PreciseApi.getErrorText(data),
-				data && data.title
+				PreciseApi.getErrorText(error),
+				_.get(error, ['data', 'title'])
 			);
 		}
 		

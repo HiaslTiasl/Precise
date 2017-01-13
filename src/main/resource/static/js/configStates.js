@@ -87,8 +87,16 @@ define([
 		$transitionsProvider.onError({
 			entering: 'singleModel'
 		}, function (trans) {
-			if (_.get(trans.error(), ['httpResponse', 'status']) === 404)
-				trans.router.stateService.go('allModels')
+			var error = trans.error(),
+				injector = trans.injector(),
+				PreciseApi = injector.get('PreciseApi');
+			
+			if (PreciseApi.isHttpNotFound(error)) {
+				var errorHandler = injector.get('errorHandler'),
+					wrappedErr = PreciseApi.wrapError('Cannot find model "' + trans.params().name + '"', error);
+				errorHandler.handle(wrappedErr);
+				trans.router.stateService.go('allModels');
+			}
 		});
 	}
 	

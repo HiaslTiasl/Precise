@@ -44,6 +44,17 @@ define([
 		return cur[arr[last]] = value;
 	}
 	
+	function hasProps(obj) {
+		var res = false;
+		if (obj && typeof obj === 'object') {
+			var len = arguments.length;
+			res = true;
+			for (var i = 1; res && i < len; i++)
+				res = arguments[i] in obj;
+		}
+		return res;
+	}
+	
 	/** Adapted from java.util.Arrays.binarySearch */
 	function binarySearch(arr, fromIndex, toIndex, key, compare) {
 		if (typeof compare !== "function")
@@ -100,6 +111,7 @@ define([
 		strInsert: strInsert,
 		strInsertBefore: strInsertBefore,
 		set: set,
+		hasProps: hasProps,
 		defineClass: defineClass,
 		isInteger: isInteger,
 		satisfies: satisfies,

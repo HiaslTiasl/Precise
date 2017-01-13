@@ -9,6 +9,7 @@ define([
 	HAL,
 	util
 ) {
+	'use strict';
 	
 	ApiService.$inject = ['$window', '$timeout', '$q', 'traverson'];
 	
@@ -17,7 +18,11 @@ define([
 		traverson.registerMediaType(JsonHalAdapter.mediaType, JsonHalAdapter);
 		
 		var getResponseData = _.property('data'),
-			getErrorStatus = _.property(['httpResponse', 'status']);
+			isHttpSuccess     = httpStatusChecker(200, 300),
+			isHttpClientError = httpStatusChecker(400, 500),
+			isHttpBadRequest  = httpStatusChecker(400),
+			isHttpNotFound    = httpStatusChecker(404),
+			isHttpConflict    = httpStatusChecker(409);
 		
 		this.basePath = basePath;
 		this.linkTo = HAL.linkTo;
@@ -29,13 +34,12 @@ define([
 		this.resultOf = resultOf;
 		this.mapReason = mapReason;
 		this.getResponseData = getResponseData;
-		this.responseError = responseError;
-		this.getError = getError;
 		this.wrapError = wrapError;
 		this.getErrorText = getErrorText;
 		this.isHttpClientError = isHttpClientError;
-		this.isHttpConflict = isHttpConflict;
 		this.isHttpBadRequest = isHttpBadRequest;
+		this.isHttpNotFound = isHttpNotFound;
+		this.isHttpConflict = isHttpConflict;
 		this.deleteResource = deleteResource;
 		
 		this.asyncAlert = wrapAsync($window.alert, $window);
@@ -43,9 +47,11 @@ define([
 		
 		var basePath = 'api';
 		
-		function getErrorMessage(error) {
-			return error
-				&& (error.property + '=' + error.invalidValue + ': ' + error.message); 
+		function httpStatusChecker(min, max) {
+			return function (response) {
+				var status = getHttpStatus(response);
+				return max ? _.inRange(status, min, max) : status === min;
+			};
 		}
 		
 		function from(url) {
@@ -61,7 +67,7 @@ define([
 		}
 		
 		function resultOf(request) {
-			return request.result.then(resolveSuccess, getError);
+			return request.result.then(resolveSuccess, wrapError);
 		}
 		
 		function mapReason(mapper) {
@@ -80,41 +86,50 @@ define([
 		}
 		
 		function isHttpResponse(obj) {
-			return 'status' in obj && 'statusText' in obj;
+			return util.hasProps(obj, 'status', 'statusText');
 		}
 		
-		function wrapError(data, reason) {
+		function getHttpResponse(obj) {
+			return obj && (isHttpResponse(obj) ? obj : obj.httpResponse);
+		}
+		
+		function getHttpStatus(obj) {
+			return getHttpResponse(obj).status;
+		}
+		
+		function wrapErrorData(data) {
+			return isErrorData(data) ? data : { message: String(data || 'Error') };
+		}
+		
+		function wrapError(val, reason) {
+			// Do not re-wrap
+			if (isWrappedError(val))
+				return val;
+			
+			var http = isHttpResponse(val);
+			
 			return {
-				data: typeof data === 'object' ? data : { message: data.toString() },
-				reason: reason,
-				httpResponse: reason && (isHttpResponse(reason) ? reason : reason.httpResponse)
+				data: wrapErrorData(http ? val.data || httpErrorMessage(val) : val),
+				reason: (http && val) || reason,
+				httpResponse: (http && getHttpResponse(val)) || getHttpResponse(reason)
 			};
 		}
 		
-		// TODO: improve
-		function responseError(response) {
-			return wrapError(response.data || httpErrorMessage(response), response);
+		function isError(obj) {
+			return !isHttpResponse(obj) && util.hasProps(obj, 'message');
 		}
 		
-		function getError(reason) {
-			var error;
-			switch (typeof reason) {
-			case 'string':
-				error = wrapError(reason);
-				break;
-			case 'object':
-				if ('message' in reason)
-					error = reason;
-				else if (isHttpResponse(reason))
-					error = responseError(reason);
-				break;
-			}
-			return error || wrapError('Error');
+		function isErrorData(data) {
+			return Array.isArray(data) ? data.every(isError) : isError(data);
+		}
+		
+		function isWrappedError(obj) {
+			return obj && isErrorData(obj.data);
 		}
 		
 		function getErrorText(reason) {
-			var err = getError(reason);
-			return Array.isArray(err) ? _(err).map('message') : err.message
+			var errData = isErrorData(reason) ? reason : wrapError(reason).data;
+			return errData && (Array.isArray(errData) ? _(errData).map('message') : errData.message);
 		}
 		
 		function resolveSuccess(response) {
@@ -126,23 +141,7 @@ define([
 				var parsed = _.attempt(JSON.parse, data);
 				data = response.body = response.data = _.isError(parsed) ? null : parsed;
 			}
-			return isSuccess(response) ? data : $q.reject(getError(response));
-		}
-		
-		function isSuccess(response) {
-			return _.inRange(response.statusCode, 200, 300);
-		}
-		
-		function isHttpClientError(error) {
-			return _.inRange(getErrorStatus(error), 400, 500);
-		}
-		
-		function isHttpConflict(error) {
-			return getErrorStatus(error) === 409;
-		}
-		
-		function isHttpBadRequest(error) {
-			return getErrorStatus(error) === 400;
+			return isHttpSuccess(response) ? data : $q.reject(wrapError(response));
 		}
 		
 		function Request(url) {
