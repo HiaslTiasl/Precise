@@ -16,6 +16,7 @@ public class JacksonModule extends SimpleModule {
 	@Override
 	public void setupModule(SetupContext context) {
 		context.setMixInAnnotations(Color.class, ColorMixin.class);
+		context.addDeserializationProblemHandler(new CustomDeserializationProblemHandler());
 	}
 	
 	
