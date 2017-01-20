@@ -2,7 +2,6 @@ package it.unibz.precise.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
-import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,7 +22,6 @@ import it.unibz.precise.rest.mdl.ast.MDLFileAST;
 import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
 @RestController
-@ExposesResourceFor(MDLFileAST.class)
 @RequestMapping(
 	path=MDLFileController.RESOURCE_NAME,
 	produces={MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE}
@@ -39,7 +37,7 @@ public class MDLFileController {
 	public static final String RESOURCE_NAME = "/files";
 	
 	public static final String FILE_EXT = ".mdl";			// Used for exporting only; imports work with any extension, only the syntax counts
-	public static final String PATH_TO_FILE = "/{name}";
+	public static final String PATH_TO_FILE = "/{name}.*";
 	
 	static String getContentDisposition(String name) {
 		return FileDownload.getContentDisposition(name + MDLFileController.FILE_EXT);
