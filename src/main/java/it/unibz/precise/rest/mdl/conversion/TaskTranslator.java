@@ -77,12 +77,12 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 	}
 	
 	@Override
-	public Task createEntity(MDLTaskAST mdl) {
+	public Task createEntity() {
 		return new Task();
 	}
 
 	@Override
-	public MDLTaskAST createMDL(Task entity) {
+	public MDLTaskAST createMDL() {
 		return new MDLTaskAST();
 	}
 	

@@ -10,12 +10,12 @@ class ModelTranslator extends AbstractMDLTranslator<Model, MDLModelAST> {
 	}
 
 	@Override
-	public Model createEntity(MDLModelAST mdl) {
+	public Model createEntity() {
 		return new Model();
 	}
 
 	@Override
-	public MDLModelAST createMDL(Model entity) {
+	public MDLModelAST createMDL() {
 		return new MDLModelAST();
 	}
 

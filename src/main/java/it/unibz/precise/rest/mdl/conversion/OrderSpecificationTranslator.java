@@ -5,17 +5,17 @@ import it.unibz.precise.rest.mdl.ast.MDLOrderSpecificationAST;
 
 public class OrderSpecificationTranslator extends AbstractMDLTranslator<OrderSpecification, MDLOrderSpecificationAST> {
 	
-	public OrderSpecificationTranslator(MDLContext context) {
+	OrderSpecificationTranslator(MDLContext context) {
 		super(context);
 	}
 
 	@Override
-	public OrderSpecification createEntity(MDLOrderSpecificationAST mdlOrderSpec) {
+	public OrderSpecification createEntity() {
 		return new OrderSpecification();
 	}
 
 	@Override
-	public MDLOrderSpecificationAST createMDL(OrderSpecification orderSpec) {
+	public MDLOrderSpecificationAST createMDL() {
 		return new MDLOrderSpecificationAST();
 	}
 

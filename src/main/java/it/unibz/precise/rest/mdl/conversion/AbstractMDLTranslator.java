@@ -4,7 +4,7 @@ public abstract class AbstractMDLTranslator<E, MDL> implements MDLTranslator<E, 
 	
 	private final MDLContext context;
 	
-	public AbstractMDLTranslator(MDLContext context) {
+	AbstractMDLTranslator(MDLContext context) {
 		this.context = context;
 	}
 	
@@ -29,13 +29,13 @@ public abstract class AbstractMDLTranslator<E, MDL> implements MDLTranslator<E, 
 	}
 	
 	public MDL toMDL(E entity) {
-		MDL mdl = entity == null ? null : createMDL(entity);
+		MDL mdl = entity == null ? null : createMDL();
 		updateMDL(entity, mdl);
 		return mdl;
 	}
 	
 	public E toEntity(MDL mdl) {
-		E entity = mdl == null ? null : createEntity(mdl);
+		E entity = mdl == null ? null : createEntity();
 		updateEntity(mdl, entity);
 		return entity;
 	}

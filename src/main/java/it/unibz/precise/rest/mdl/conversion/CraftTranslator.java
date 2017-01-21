@@ -5,7 +5,7 @@ import it.unibz.precise.rest.mdl.ast.MDLCraftAST;
 
 public class CraftTranslator extends AbstractMDLTranslator<Craft, MDLCraftAST> {
 
-	public CraftTranslator(MDLContext context) {
+	CraftTranslator(MDLContext context) {
 		super(context);
 	}
 
@@ -22,12 +22,12 @@ public class CraftTranslator extends AbstractMDLTranslator<Craft, MDLCraftAST> {
 	}
 	
 	@Override
-	public Craft createEntity(MDLCraftAST mdl) {
+	public Craft createEntity() {
 		return new Craft();
 	}
 	
 	@Override
-	public MDLCraftAST createMDL(Craft entity) {
+	public MDLCraftAST createMDL() {
 		return new MDLCraftAST();
 	}
 

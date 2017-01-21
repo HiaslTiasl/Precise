@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,6 +83,10 @@ public class MDLConfigController {
 			.body(mdlFile);
 	}
 	
+	/**
+	 * Imports the configuration of the given {@link MDLFileAST} into the model of the specified name.
+	 * If no model such model exists, a new one is created.
+	 */
 	@RequestMapping(
 		path=PATH_TO_FILE,
 		method=RequestMethod.PUT
@@ -126,18 +129,22 @@ public class MDLConfigController {
 		}
 		return toBeCreated
 			? ResponseEntity.created(URI.create(request.getRequestURL().toString())).build()
-			: ResponseEntity.ok().build();
+			: ResponseEntity.noContent().build();
 	}
 	
+	/** */
 	@RequestMapping(
 		path=PATH_TO_FILE,
 		method=RequestMethod.DELETE
 	)
 	@Transactional
-	public ResponseEntity<Model> clear(@PathVariable String name) {
+	public ResponseEntity<?> clear(@PathVariable String name) {
 		Model model = repository.findByName(name);
+		if (model == null)
+			return ResponseEntity.notFound().build();
+		
 		MDLContext.create().configs().updateEntity(MDLConfigAST.EMPTY_CONFIG, model);
-		return new ResponseEntity<>(model, HttpStatus.OK);
+		return ResponseEntity.noContent().build();
 	}
 
 }

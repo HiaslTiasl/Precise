@@ -23,12 +23,12 @@ class DiagramTranslator extends AbstractMDLTranslator<Model, MDLDiagramAST> {
 	}
 
 	@Override
-	public Model createEntity(MDLDiagramAST mdl) {
+	public Model createEntity() {
 		return new Model();
 	}
 
 	@Override
-	public MDLDiagramAST createMDL(Model entity) {
+	public MDLDiagramAST createMDL() {
 		return new MDLDiagramAST();
 	}
 

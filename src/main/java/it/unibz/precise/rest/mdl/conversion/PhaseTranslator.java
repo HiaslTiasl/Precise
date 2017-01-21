@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class PhaseTranslator extends AbstractMDLTranslator<Phase, MDLPhaseAST> {
 	
-	public PhaseTranslator(MDLContext context) {
+	PhaseTranslator(MDLContext context) {
 		super(context);
 	}
 
@@ -44,12 +44,12 @@ public class PhaseTranslator extends AbstractMDLTranslator<Phase, MDLPhaseAST> {
 	}
 	
 	@Override
-	public Phase createEntity(MDLPhaseAST mdl) {
+	public Phase createEntity() {
 		return new Phase();
 	}
 
 	@Override
-	public MDLPhaseAST createMDL(Phase entity) {
+	public MDLPhaseAST createMDL() {
 		return new MDLPhaseAST();
 	}
 	

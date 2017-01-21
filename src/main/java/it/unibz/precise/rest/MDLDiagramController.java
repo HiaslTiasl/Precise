@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -151,7 +150,7 @@ public class MDLDiagramController {
 		}
 		return toBeCreated
 			? ResponseEntity.created(URI.create(request.getRequestURL().toString())).build()
-			: ResponseEntity.ok().build();
+			: ResponseEntity.noContent().build();
 	}
 
 	private void setNewTaskTypeAcronyms(Set<TaskType> newTaskTypes, Set<TaskType> oldTaskTypes) {
@@ -209,10 +208,13 @@ public class MDLDiagramController {
 		method=RequestMethod.DELETE
 	)
 	@Transactional
-	public ResponseEntity<Model> clear(@PathVariable String name) {
+	public ResponseEntity<?> clear(@PathVariable String name) {
 		Model model = repository.findByName(name);
+		if (model == null)
+			return ResponseEntity.notFound().build();
+		
 		MDLContext.create().diagrams().updateEntity(MDLDiagramAST.EMPTY_DIAGRAM, model);
-		return new ResponseEntity<>(model, HttpStatus.OK);
+		return ResponseEntity.noContent().build();
 	}
 
 }

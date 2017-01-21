@@ -8,17 +8,17 @@ import it.unibz.util.Util;
 
 public class ScopeTranslator extends AbstractMDLTranslator<Scope, MDLScopeAST> {
 	
-	public ScopeTranslator(MDLContext context) {
+	ScopeTranslator(MDLContext context) {
 		super(context);
 	}
 
 	@Override
-	public Scope createEntity(MDLScopeAST mdlScope) {
+	public Scope createEntity() {
 		return new Scope();
 	}
 
 	@Override
-	public MDLScopeAST createMDL(Scope scope) {
+	public MDLScopeAST createMDL() {
 		return new MDLScopeAST();
 	}
 

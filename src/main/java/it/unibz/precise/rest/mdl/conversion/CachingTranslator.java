@@ -17,7 +17,7 @@ public class CachingTranslator<E, MDL> extends AbstractMDLTranslator<E, MDL> {
 	private boolean cacheInverseDirection;
 	private boolean sealed;
 
-	public CachingTranslator(MDLTranslator<E, MDL> delegate, Function<E, Object> entityKeyMapper, Function<MDL, Object> mdlKeyMapper) {
+	CachingTranslator(MDLTranslator<E, MDL> delegate, Function<E, Object> entityKeyMapper, Function<MDL, Object> mdlKeyMapper) {
 		super(delegate.context());
 		this.delegate = delegate;
 		entitiesToMDL = new ConcurrentHashMap<>();
@@ -84,13 +84,13 @@ public class CachingTranslator<E, MDL> extends AbstractMDLTranslator<E, MDL> {
 	}
 
 	@Override
-	public E createEntity(MDL mdl) {
-		return delegate.createEntity(mdl);
+	public E createEntity() {
+		return delegate.createEntity();
 	}
 
 	@Override
-	public MDL createMDL(E entity) {
-		return delegate.createMDL(entity);
+	public MDL createMDL() {
+		return delegate.createMDL();
 	}
 
 	@Override

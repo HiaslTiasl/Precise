@@ -24,12 +24,12 @@ class FileTranslator extends AbstractMDLTranslator<Model, MDLFileAST> {
 	}
 
 	@Override
-	public Model createEntity(MDLFileAST mdl) {
+	public Model createEntity() {
 		return new Model();
 	}
 
 	@Override
-	public MDLFileAST createMDL(Model entity) {
+	public MDLFileAST createMDL() {
 		return new MDLFileAST();
 	}
 	
