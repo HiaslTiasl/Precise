@@ -1,8 +1,11 @@
 package it.unibz.precise.rest;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
@@ -94,12 +97,18 @@ public class MDLDiagramController {
 		method=RequestMethod.PUT
 	)
 	@Transactional
-	public void set(
+	public ResponseEntity<?> set(
+		HttpServletRequest request,
 		@PathVariable String name,
 		@RequestBody(required=false) MDLFileAST mdlFileSrc,
 		@RequestParam(name="use", required=false) String srcName
 	) {
 		Model dstModel = repository.findByName(name);
+		boolean toBeCreated = dstModel == null;
+		if (toBeCreated) {
+			dstModel = new Model();
+			dstModel.setName(name);
+		}
 		
 		MDLContext context = destinationContext();
 
@@ -117,35 +126,16 @@ public class MDLDiagramController {
 		if (diaSrc == null && srcName != null)
 			diaSrc = mdlByName(MDLContext.create().diagrams(), srcName);
 		
-		Set<TaskType> oldTaskTypes = new HashSet<>(dstModel.getTaskTypes());
-		Set<String> acronyms = oldTaskTypes.stream()
-			.map(TaskType::getShortName)
-			.collect(Collectors.toSet());
-		
 		context.diagrams().updateEntity(diaSrc, dstModel);
-		
+
+		Set<TaskType> oldTaskTypes = new HashSet<>(dstModel.getTaskTypes());
 		Set<TaskType> newTaskTypes = dstModel.getTasks().stream()
 			.map(Task::getType)
 			.filter(tt -> !oldTaskTypes.contains(tt))
 			.collect(Collectors.toSet());
 		
-		for (TaskType tt : newTaskTypes) {
-			String acr = tt.getShortName();
-			String originalAcr = acr;
-			int max = 10;
-			for (int i = 1; acronyms.contains(acr); i++) {
-				if (i >= max) {
-					throw new IllegalStateException(
-						"Cannot find unique acronym for task type " + tt + ". Tried "
-						+ originalAcr + '-' + 1 + " until " + originalAcr + '-' + max + '.'
-					);
-				}
-				acr = originalAcr + '-' + i;
-			}
-			tt.setShortName(acr);
-			acronyms.add(acr);
-			dstModel.addTaskType(tt);
-		}
+		setNewTaskTypeAcronyms(newTaskTypes, oldTaskTypes);
+		newTaskTypes.forEach(dstModel::addTaskType);
 		
 		Errors errors = validator.validate(dstModel);
 		if (errors.hasErrors())
@@ -156,7 +146,33 @@ public class MDLDiagramController {
 			taskTypeRepository.save(dstModel.getTaskTypes());
 			taskRepository.save(dstModel.getTasks());
 			dependencyRepository.save(dstModel.getDependencies());
-			//repository.save(model);
+			if (toBeCreated)
+				repository.save(dstModel);
+		}
+		return toBeCreated
+			? ResponseEntity.created(URI.create(request.getRequestURL().toString())).build()
+			: ResponseEntity.ok().build();
+	}
+
+	private void setNewTaskTypeAcronyms(Set<TaskType> newTaskTypes, Set<TaskType> oldTaskTypes) {
+		Set<String> existingAcronyms = oldTaskTypes.stream()
+			.map(TaskType::getShortName)
+			.collect(Collectors.toSet());
+		for (TaskType tt : newTaskTypes) {
+			String acr = tt.getShortName();
+			String originalAcr = acr;
+			int max = 10;
+			for (int i = 1; existingAcronyms.contains(acr); i++) {
+				if (i >= max) {
+					throw new IllegalStateException(
+						"Cannot find unique acronym for task type " + tt + ". Tried "
+						+ originalAcr + '-' + 1 + " until " + originalAcr + '-' + max + '.'
+					);
+				}
+				acr = originalAcr + '-' + i;
+			}
+			tt.setShortName(acr);
+			existingAcronyms.add(acr);
 		}
 	}
 	

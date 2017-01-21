@@ -1,9 +1,12 @@
 package it.unibz.precise.rest;
 
+import java.net.URI;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +66,7 @@ public class MDLFileController {
 		method=RequestMethod.PUT
 	)
 	public ResponseEntity<?> save(
+		HttpServletRequest request,
 		@PathVariable("name") String name,
 		@RequestBody(required=false) MDLFileAST modelDTO,
 		@RequestParam(defaultValue="false") boolean update,
@@ -92,7 +96,7 @@ public class MDLFileController {
 			throw new RepositoryConstraintViolationException(errors);
 		else
 			repository.save(newModel);
-		return ResponseEntity.status(HttpStatus.CREATED).build();
+		return ResponseEntity.created(URI.create(request.getRequestURL().toString())).build();
 	}
 	
 }

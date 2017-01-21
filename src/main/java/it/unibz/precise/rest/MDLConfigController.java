@@ -1,5 +1,9 @@
 package it.unibz.precise.rest;
 
+import java.net.URI;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +30,10 @@ import it.unibz.precise.rest.mdl.conversion.MDLContext;
 /**
  * Exposes the configuration part in MDL files.
  * 
+ * The structure of the files is the same as with complete MDL files,
+ * but only the configuration part is considered.
+ * This allows to use existing MDL files with this class.
+ * 
  * @author MatthiasP
  *
  */
@@ -51,21 +59,24 @@ public class MDLConfigController {
 	@Autowired
 	private ValidationAdapter validator;
 	
+	/** Looks up the model of the given name in the repository and returns it as a {@link MDLConfigAST}. */
 	private MDLConfigAST configByName(MDLContext context, String name) {
 		Model model = repository.findByName(name);
 		return context.configs().toMDL(model);
 	}
 	
+	/** Exports the model of the given name as an {@link MDLFileAST} that only contains the configuration part. */
 	@RequestMapping(
 		path=PATH_TO_FILE,
 		method=RequestMethod.GET
 	)
 	public ResponseEntity<?> get(@PathVariable String name) {
-		MDLConfigAST config = configByName(MDLContext.create(), name);
+		MDLContext context = MDLContext.create();
+		MDLConfigAST config = configByName(context, name);
 		if (config == null)
 			return ResponseEntity.notFound().build();
 		
-		MDLFileAST mdlFile = new MDLFileAST();
+		MDLFileAST mdlFile = context.files().createMDL();
 		mdlFile.setConfiguration(config);
 		
 		return ResponseEntity.ok()
@@ -78,23 +89,28 @@ public class MDLConfigController {
 		method=RequestMethod.PUT
 	)
 	@Transactional
-	public void set(
+	public ResponseEntity<?> set(
+		HttpServletRequest request,
 		@PathVariable String name,
 		@RequestBody(required=false) MDLFileAST mdlFile,
 		@RequestParam(name="use", required=false) String srcName
 	) {
 		Model model = repository.findByName(name);
-		
-		if (!model.getState().getConfigInfo().isEditable())
+		boolean toBeCreated = model == null;
+		if (toBeCreated) {
+			model = new Model();
+			model.setName(name);
+		}
+		else if (!model.getState().getConfigInfo().isEditable())
 			throw new IllegalStateException("Cannot configure an already configured model");
 		
 		MDLContext context = MDLContext.create();
 		context.configs().updateEntity(MDLConfigAST.EMPTY_CONFIG, model);
 		repository.flush();
 		
-		MDLConfigAST config = mdlFile == null ? null : mdlFile.getConfiguration();
-		if (config == null && srcName != null)
-			config = configByName(context, srcName);
+		MDLConfigAST config = mdlFile != null ? mdlFile.getConfiguration()
+			: srcName != null ? configByName(context, srcName)
+			: null;
 		
 		context.configs().updateEntity(config, model);
 		
@@ -103,10 +119,14 @@ public class MDLConfigController {
 			throw new RepositoryConstraintViolationException(errors);
 		else {
 			// We need to save the newly created phases manually.
-			// Changes to the model table will be saved automatically.
 			phaseRepository.save(model.getPhases());
-			//repository.save(model);
+			// If the model already existed, changes will be saved automatically.
+			if (toBeCreated)
+				repository.save(model);
 		}
+		return toBeCreated
+			? ResponseEntity.created(URI.create(request.getRequestURL().toString())).build()
+			: ResponseEntity.ok().build();
 	}
 	
 	@RequestMapping(
