@@ -2,7 +2,6 @@ package it.unibz.precise.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
-import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,17 +23,22 @@ import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
 import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
+/**
+ * Exposes the configuration part in MDL files.
+ * 
+ * @author MatthiasP
+ *
+ */
 @RestController
-@ExposesResourceFor(MDLConfigAST.class)
 @RequestMapping(
 	path=MDLConfigController.RESOURCE_NAME,
 	produces={MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE}
 )
 public class MDLConfigController {
 	
-	public static final String RESOURCE_NAME = "/files";
+	public static final String RESOURCE_NAME = MDLFileController.RESOURCE_NAME + "/config";
 	
-	public static final String PATH_TO_FILE = MDLFileController.PATH_TO_FILE + "/config";
+	public static final String PATH_TO_FILE = MDLFileController.PATH_TO_FILE;
 	
 	public static final String FILE_SUFFIX = " (config)";
 	

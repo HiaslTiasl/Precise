@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.RepositoryConstraintViolationException;
-import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,7 +31,6 @@ import it.unibz.precise.rep.ModelRepository;
 import it.unibz.precise.rep.TaskRepository;
 import it.unibz.precise.rep.TaskTypeRepository;
 import it.unibz.precise.rest.mdl.ast.MDLAttributeAST;
-import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
 import it.unibz.precise.rest.mdl.ast.MDLCraftAST;
 import it.unibz.precise.rest.mdl.ast.MDLDiagramAST;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
@@ -42,16 +40,15 @@ import it.unibz.precise.rest.mdl.conversion.MDLContext;
 import it.unibz.precise.rest.mdl.conversion.MDLTranslator;
 
 @RestController
-@ExposesResourceFor(MDLConfigAST.class)
 @RequestMapping(
 	path=MDLDiagramController.RESOURCE_NAME,
 	produces={MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE}
 )
 public class MDLDiagramController {
 	
-	public static final String RESOURCE_NAME = "/files";
+	public static final String RESOURCE_NAME = MDLFileController.RESOURCE_NAME + "/diagram";
 	
-	public static final String PATH_TO_FILE = MDLFileController.PATH_TO_FILE + "/diagram";
+	public static final String PATH_TO_FILE = MDLFileController.PATH_TO_FILE;
 	
 	public static final String FILE_SUFFIX = " (diagram)";
 	

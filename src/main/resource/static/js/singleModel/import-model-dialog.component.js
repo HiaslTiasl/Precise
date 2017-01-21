@@ -21,7 +21,7 @@ define([], function () {
 		
 		function $onInit() {
 			$ctrl.title = $ctrl.resolve.title;
-			$ctrl.subPath = $ctrl.resolve.subPath;
+			$ctrl.mdlContext = $ctrl.resolve.mdlContext;
 		}
 		
 		function fromChanged() {
@@ -67,7 +67,7 @@ define([], function () {
 			return Files.newReader()
 				.readAsText(file)
 				.then(function (text) {
-					return MDLFiles.importJSON(MDLFiles.urlToModel($ctrl.resolve.model.data, $ctrl.subPath), text);
+					return MDLFiles.importJSON($ctrl.mdlContext.getModelUrl($ctrl.resolve.model.data), text);
 				})
 				['catch'](PreciseApi.mapReason(function (reason) {
 					// TODO: Choose what to do: either this or toast
@@ -78,7 +78,7 @@ define([], function () {
 		
 		function chooseModel(data) {
 			return $http({
-				url: MDLFiles.urlToModel($ctrl.resolve.model.data, $ctrl.subPath),
+				url: $ctrl.mdlContext.getModelUrl($ctrl.resolve.model.data),
 				method: 'PUT',
 				headers: { 'Accept': 'application/json' },
 				params: { use: data.name }

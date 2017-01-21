@@ -12,8 +12,8 @@ define([
 		var $ctrl = this;
 		
 		$ctrl.refreshModels = refreshModels;
-		$ctrl.getMDLFileURI = MDLFiles.urlToModel;
-		$ctrl.getCSVFileURI = getCSVFileURI;
+		$ctrl.getMDLFileURI = getMDLFileURI;
+		$ctrl.getCSVFileURI = AllModels.getCSVFileURI;
 		$ctrl.createModel = createModel;
 		$ctrl.editModel = editModel;
 		$ctrl.importFile = importFile;
@@ -34,6 +34,10 @@ define([
 			AllModels.clearCache();
 			return AllModels.getModels().then(setModels, errorHandler.handle);
 		}
+
+		function getMDLFileURI(model) {
+			return MDLFiles.base.getModelUrl(model);
+		}
 		
 		function openModal(resource) {
 			$uibModal.open({
@@ -52,10 +56,6 @@ define([
 			openModal(function () {
 				return Models.existingResource(_.clone(model));
 			});
-		}
-		
-		function getCSVFileURI(model) {
-			return "files/" + model.name + ".csv";
 		}
 		
 		function showError(error) {

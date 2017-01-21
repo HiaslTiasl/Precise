@@ -1,50 +1,61 @@
-define([], function () {
+define([
+	'util/util'
+], function (
+	util
+) {
 	'use strict';
 	
-	MDLFilesService.$inject = ['$http', 'Upload', 'PreciseApi', 'SingleModel']
+	mdlFilesFactory.$inject = ['$http', 'Upload', 'PreciseApi', 'SingleModel'];
 	
-	function MDLFilesService($http, Upload, PreciseApi, SIngleMOdel) {
+	var MDLContext = util.defineClass({
 		
-		var svc = this;
+		constructor: function (basePath) {
+			this.basePath = basePath;
+		},
 		
-		svc.fileNameOf = fileNameOf;
-		svc.urlToModel = urlToModel;
-		svc.urlToFile = urlToFile;
+		getModelUrl: function (model) {
+			return this.getFileUrl(this.getFileName(model));
+		},
+		
+		getFileUrl: function (file) {
+			return this.basePath + file;
+		},
+		
+		getFileName: function (model) {
+			var name = typeof model === 'object' ? model.name : model;
+			return name + '.mdl';
+		}
+	
+	});
+	
+	function mdlFilesFactory($http, Upload, PreciseApi, SIngleMOdel) {
+		
+		var basePath = 'files/',
+			configPath = basePath + 'config/',
+			diagramPath = basePath + 'diagram/';
+		
+		var svc = {
+			base: new MDLContext(basePath),
+			config: new MDLContext(configPath),
+			diagram: new MDLContext(diagramPath),
+			importJSON: importJSON,
+			duplicate: duplicate,
+			clearConfig: clearConfig
+		};
+		
 		svc.importJSON = importJSON;
 		svc.duplicate = duplicate;
 		svc.clearConfig = clearConfig;
 		
-		svc.CONFIG_PATH = '/config';
-		svc.DIAGRAM_PATH = '/diagram';
-		
-		var basePath = 'files/';
 		
 		var headers = {
 			'Content-Type': 'application/json',
 			'Accept': 'application/json'
 		};
 		
-		function fileNameOf(model) {
-			var name = typeof model === 'object' ? model.name : model;
-			return name + '.mdl';
-		}
-		
-		function appendSubPath(fileURL, subPath) {
-			return fileURL + subPath;
-		}
-		
-		function urlToFile(fileName, subPath) {
-			var url = basePath + fileName;
-			return subPath ? appendSubPath(url, subPath) : url;
-		}
-		
-		function urlToModel(model, subPath) {
-			return urlToFile(fileNameOf(model), subPath);
-		}
-		
 		function clearConfig(model) {
 			return $http({
-				url: urlToModel(model, true),
+				url: this.config.getModelUrl(model),
 				method: 'DELETE',
 			}).then(PreciseApi.getResponseData);
 		}
@@ -67,8 +78,10 @@ define([], function () {
 			})
 		}
 		
+		return svc;
+		
 	}
 	
-	return MDLFilesService;
+	return mdlFilesFactory;
 	
 });

@@ -62,7 +62,7 @@ define([
 				resolve: {
 					model: _.constant($ctrl.model),
 					title: _.constant('Diagram'),
-					subPath: _.constant(MDLFiles.DIAGRAM_PATH)
+					mdlContext: _.constant(MDLFiles.diagram)
 				}
 			}).result
 				.then(loadDiagram)
@@ -70,7 +70,7 @@ define([
 		}
 		
 		function getFileURL(model) {
-			return MDLFiles.urlToModel(model, MDLFiles.DIAGRAM_PATH);
+			return MDLFiles.diagram.getModelUrl(model);
 		}
 		
 		function initSearch() {

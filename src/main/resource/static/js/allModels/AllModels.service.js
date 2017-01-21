@@ -15,6 +15,7 @@ define([
 		svc.importFile = importFile;
 		svc.deleteModel = deleteModel;
 		svc.duplicateModel = duplicateModel;
+		svc.getCSVFileURI = getCSVFileURI;
 		svc.cachedModels = null;
 		svc.clearCache = clearCache;
 		
@@ -34,7 +35,7 @@ define([
 			return Files.newReader()
 				.readAsText(file)
 				.then(function (json) {
-					return MDLFiles.importJSON(MDLFiles.urlToFile(file.name), json)
+					return MDLFiles.importJSON(MDLFiles.base.getFileUrl(file.name), json)
 				})
 				.then(clearCache, PreciseApi.mapReason(PreciseApi.wrapError));
 		}
@@ -47,7 +48,11 @@ define([
 		}
 		
 		function duplicateModel(model) {
-			return MDLFiles.duplicate(MDLFiles.urlToModel(model.name + ' - copy'), model.name)
+			return MDLFiles.duplicate(MDLFiles.base.getModelUrl(model.name + ' - copy'), model.name)
+		}
+		
+		function getCSVFileURI(model) {
+			return "files/" + model.name + ".csv";
 		}
 	}
 	

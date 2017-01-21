@@ -36,8 +36,8 @@ public class MDLFileController {
 	
 	public static final String RESOURCE_NAME = "/files";
 	
-	public static final String FILE_EXT = ".mdl";			// Used for exporting only; imports work with any extension, only the syntax counts
-	public static final String PATH_TO_FILE = "/{name}.*";
+	public static final String FILE_EXT = ".mdl";				// Used for exporting only; imports work with any extension, only the syntax counts.
+	public static final String PATH_TO_FILE = "/{name}";		// Extension is optional and arbitrary (Spring exposes the same method with ".*" appended to the path).
 	
 	static String getContentDisposition(String name) {
 		return FileDownload.getContentDisposition(name + MDLFileController.FILE_EXT);

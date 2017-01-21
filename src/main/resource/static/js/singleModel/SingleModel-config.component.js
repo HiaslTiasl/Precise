@@ -12,7 +12,6 @@ define([
 		var $ctrl = this;
 		
 		$ctrl.getFileURL = getFileURL;
-		$ctrl.getFileName = getFileName;
 		$ctrl.importConfig = importConfig;
 		$ctrl.clearConfig = clearConfig;
 
@@ -24,11 +23,7 @@ define([
 		}
 		
 		function getFileURL(model) {
-			return MDLFiles.urlToModel(model, MDLFiles.CONFIG_PATH);
-		}
-		
-		function getFileName(model) {
-			return MDLFiles.fileNameOf(model.name + ' (config)');
+			return MDLFiles.config.getModelUrl(model);
 		}
 		
 		function loadPhases() {
@@ -46,7 +41,7 @@ define([
 				resolve: {
 					model: _.constant($ctrl.model),
 					title: _.constant('Configuration'),
-					subPath: _.constant(MDLFiles.CONFIG_PATH)
+					mdlContext: _.constant(MDLFiles.config)
 				}
 			}).result.then($ctrl.reload);
 		}
