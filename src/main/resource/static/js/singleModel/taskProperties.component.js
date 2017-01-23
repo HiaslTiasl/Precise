@@ -150,20 +150,19 @@ define([
 			return !$ctrl.order.attrs[a.name];
 		}
 		
-		function selectedOrderSpecAttribute(newAttr, oldAttr) {
-			if (oldAttr)
-				$ctrl.order.attrs[oldAttr.name] = false;
-			$ctrl.order.attrs[newAttr.name] = true;
+		function selectedOrderSpecAttribute() {
+			OrderSpecifications.checkLocalRepresentation($ctrl.order);
 		}
 		
 		function addOrderSpec() {
 			var attr = _.find(getTaskAttributes($ctrl.resource.data), canSelectForOrderSpec);
-			if (attr)
-				selectedOrderSpecAttribute(attr);
-			$ctrl.order.specs.push({
-				orderType: OrderSpecifications.Types.NONE,
-				attribute: attr
-			});
+			if (attr) {
+				$ctrl.order.specs.push({
+					orderType: OrderSpecifications.Types.NONE,
+					attribute: attr
+				});
+				selectedOrderSpecAttribute();
+			}
 		}
 		
 		function moveUpOrderSpec(index) {

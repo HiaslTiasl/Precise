@@ -1,3 +1,7 @@
+/**
+ * Angular module for the all-models part.
+ * @module allModels/allModels
+ */
 define([
 	'lib/angular',
 	'api/api',
@@ -5,25 +9,21 @@ define([
 	'./AllModels.service',
 	'./AllModels.component',
 	'./allModels.create-dialog.component',
-	'./allModels.run',
 	'lib/smart-table',
-	'lib/ng-file-upload',
-	'lib/xeditable'
+	'lib/ng-file-upload'
 ], function (
 	angular,
 	api,
 	singleModel,
 	AllModelsService,
 	allModelsComponent,
-	allModelsCreateDialogComponent,
-	runner
+	allModelsCreateDialogComponent
 ) {
 	'use strict';
 	
-	return angular.module('precise.allModels', ['smart-table', 'ngFileUpload', 'xeditable', api.name, singleModel.name])
+	return angular.module('precise.allModels', ['smart-table', 'ngFileUpload', api.name, singleModel.name])
 		.service('AllModels', AllModelsService)
 		.component('preciseAllModels', allModelsComponent)
-		.component('preciseCreateModel', allModelsCreateDialogComponent)
-		.run(runner);
+		.component('preciseCreateModel', allModelsCreateDialogComponent);
 	
 });

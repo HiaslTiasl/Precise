@@ -178,34 +178,32 @@
 						<span class="glyphicon glyphicon-plus"></span>
 					</button>
 				</div>
-				<table id="location-table" class="table table-striped" st-table="orderSpecs" st-safe-src="$ctrl.order.specs">
+				<table id="orderspec-table" class="table table-striped" st-table="orderSpecs" st-safe-src="$ctrl.order.specs">
 					<thead>
 						<tr>
 							<th>Attribute</th>
 							<th>Order Type</th>
-							<th></th>
+							<th class="btn-column"></th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr ng-repeat="o in orderSpecs track by $index">
 							<td>
-								<a href
-									editable-select="o.attribute"
-									buttons="no"
-									e-ng-options="a as (a | withShortName) for a in $ctrl.resource.data.type.phase.attributes | filter:$ctrl.attrFilterForOrderSpec(o):true track by a.name"
-									onbeforesave="$ctrl.selectedOrderSpecAttribute($data, o.attribute)">
-									{{ (o.attribute | withShortName) || '----'}}
-								</a>
+								<select
+									ng-model="o.attribute"
+									ng-options="a as (a | withShortName) for a in $ctrl.resource.data.type.phase.attributes | filter:$ctrl.attrFilterForOrderSpec(o):true track by a.name"
+									ng-change="$ctrl.selectedOrderSpecAttribute()">
+									<option value="">----</option>
+								</select>
 							</td>
 							<td>
-								<a href
-									editable-select="o.orderType"
-									buttons="no"
-									e-ng-options="t as t.displayName disable when $ctrl.isDisabledOrderType(t, o.attribute) for t in $ctrl.orderTypes">
-									{{ o.orderType.displayName }}
-								</a>
+								<select
+									ng-model="o.orderType"
+									ng-options="t as t.displayName disable when $ctrl.isDisabledOrderType(t, o.attribute) for t in $ctrl.orderTypes">
+									<option value="">----</option>
+								</select>
 							</td>
-							<td>
+							<td class="btn-column">
 								<button
 									class="btn btn-default btn-xs"
 									ng-click="$ctrl.moveUpOrderSpec($index)"
@@ -244,15 +242,17 @@
 					</div>
 				</div>
 				<div class="toolbar">
-					<a href ng-click="$ctrl.addPattern()">
+					<button
+						class="btn btn-primary btn-xs"
+						ng-click="$ctrl.addPattern()">
 						<span class="glyphicon glyphicon-plus"></span>
-					</a>
+					</button>
 				</div>
 				<table id="location-table" class="table table-striped" st-table="locs" st-safe-src="$ctrl.resource.data.locationPatterns">
 					<thead>
 						<tr>
 							<th ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">{{::(attr | withShortName)}}</th>
-							<th></th>
+							<th class="btn-column"></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -265,20 +265,13 @@
 									ng-disabled="$ctrl.isDisabledPatternEntry(pattern[attr.name])"
 									ng-change="$ctrl.updatePattern(pattern, patternNum, attr, pattern[attr.name].value)">
 								</select>
-<!-- 								<a href
-									editable-select="pattern[attr.name].value"
-									e-ng-options="value for value in pattern[attr.name].allowedValues"
-									ng-class="{disabled: $ctrl.isDisabledPatternEntry(pattern[attr.name])}"
-									ng-disabled="$ctrl.isDisabledPatternEntry(pattern[attr.name])"
-									buttons="no"
-									onbeforesave="$ctrl.updatePattern(pattern, patternNum, attr, $data)">
-									{{ pattern[attr.name].value }}
-								</a> -->
 							</td>
-							<td>
-								<a href ng-click="$ctrl.removePattern(patternNum)">
+							<td class="btn-column">
+								<button
+									class="btn btn-danger btn-xs"
+									ng-click="$ctrl.removePattern(patternNum)">
 									<span class="glyphicon glyphicon-trash"></span>
-								</a>
+								</button>
 							</td>
 						</tr>
 					</tbody>

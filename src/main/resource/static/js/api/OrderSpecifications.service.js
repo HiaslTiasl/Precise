@@ -21,6 +21,7 @@ define([
 		this.isAssignableTo = isAssignableTo;
 		this.rereferenceAttributes = rereferenceAttributes;
 		this.toLocalRepresentation = toLocalRepresentation;
+		this.checkLocalRepresentation = checkLocalRepresentation;
 		this.fromLocalRepresentation = fromLocalRepresentation;
 		this.toRequestRepresentation = toRequestRepresentation;
 		
@@ -33,16 +34,20 @@ define([
 			orderSpecs.forEach(function (os) {
 				os.attribute = attrsByName[os.attribute.name];
 			});
-		};
+		}
+		
+		function collectAttrs(orderSpecs, dst) {
+			return _.chain(orderSpecs)
+				.map('attribute')
+				.transform(function (acc, attr) {
+					acc[attr.name] = true;
+				}, dst || {})
+				.value();
+		}
 		
 		function toLocalRepresentation(orderSpecs) {
 			return {
-				attrs: _.chain(orderSpecs)
-					.map('attribute')
-					.transform(function (acc, attr) {
-						acc[attr.name] = true;
-					}, {})
-					.value(),
+				attrs: collectAttrs(orderSpecs),
 				specs: _.map(orderSpecs, function (os) {
 					return {
 						orderType: Types[os.orderType],
@@ -50,6 +55,15 @@ define([
 					};
 				})
 			};
+		}
+		
+		function checkLocalRepresentation(order) {
+			// Reset attributes map
+			_.forEach(order.attrs, function (value, key, attrs) {
+				attrs[key] = false;
+			});
+			// Set attributes contained in specs
+			collectAttrs(order.specs, order.attrs);
 		}
 		
 		function fromLocalRepresentation(order, attributes) {
