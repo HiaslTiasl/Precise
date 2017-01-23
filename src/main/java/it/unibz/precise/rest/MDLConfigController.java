@@ -86,6 +86,9 @@ public class MDLConfigController {
 	/**
 	 * Imports the configuration of the given {@link MDLFileAST} into the model of the specified name.
 	 * If no model such model exists, a new one is created.
+	 * Instead of sending a file, a query parameter {@literal "use"} can be used to specify the name of
+	 * an existing model whose configuration should be used. 
+	 * @throws IllegalStateException if the configuration of the model is not editable (because a diagram exists)
 	 */
 	@RequestMapping(
 		path=PATH_TO_FILE,
@@ -132,7 +135,7 @@ public class MDLConfigController {
 			: ResponseEntity.noContent().build();
 	}
 	
-	/** */
+	/** Clear the configuration of the model of the given name. */
 	@RequestMapping(
 		path=PATH_TO_FILE,
 		method=RequestMethod.DELETE

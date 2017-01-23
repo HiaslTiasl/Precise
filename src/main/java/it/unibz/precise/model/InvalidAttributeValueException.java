@@ -1,5 +1,11 @@
 package it.unibz.precise.model;
 
+/**
+ * An exception for values that are not contained in the attribute's range.
+ * 
+ * @author MatthiasP
+ *
+ */
 public class InvalidAttributeValueException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;

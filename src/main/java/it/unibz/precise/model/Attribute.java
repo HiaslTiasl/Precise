@@ -10,6 +10,13 @@ import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+/**
+ * A named range of possibly ordered values.
+ * Used to identify locations.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Entity
 @Table(uniqueConstraints={
 	@UniqueConstraint(name=Attribute.UC_NAME, columnNames={"model_id", "name"})
@@ -46,6 +53,7 @@ public class Attribute extends BaseEntity implements ShortNameProvider {
 	@ManyToOne
 	private Model model;
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -54,6 +62,7 @@ public class Attribute extends BaseEntity implements ShortNameProvider {
 		this.name = name;
 	}
 
+	@Override
 	public String getShortName() {
 		return shortName != null ? shortName : name;
 	}
@@ -106,18 +115,26 @@ public class Attribute extends BaseEntity implements ShortNameProvider {
 		this.model = model;
 	}
 	
+	/** Indicates whether the range has a value at the given position. */
 	public boolean hasPosition(int pos) {
 		return pos >= 1 && pos <= range.size();
 	}
 	
+	/** Indicates whether the given value is contained in the range. */
 	public boolean hasValue(String value) {
 		return range.contains(value);
 	}
 
+	/** Indicates whether the given value is contained in the range that goes from 1 to {@code n}. */
 	private boolean hasPositionValue(int value) {
 		return isValuesMatchPositions() && hasPosition(value);
 	}
 	
+	/**
+	 * Checks whether the given value is contained in the range.
+	 * If successful, a string representation of the value is returned,
+	 * otherwise an exception is thrown.
+	 */
 	public String checkValue(Object value) {
 		String s = value == null ? null : value.toString();
 		if (!(value instanceof Integer && hasPositionValue((int)value)) && !hasValue(s))

@@ -7,6 +7,12 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator;
 
+/**
+ * Represents a phase in an MDL file.
+ * 
+ * @author MatthiasP
+ *
+ */
 @JsonIdentityInfo(generator=PropertyGenerator.class, property="name", scope=MDLPhaseAST.class)
 @JsonIdentityReference(alwaysAsId=false)
 public class MDLPhaseAST {

@@ -39,8 +39,17 @@ import it.unibz.precise.rest.mdl.ast.MDLFileAST;
 import it.unibz.precise.rest.mdl.ast.MDLPhaseAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskTypeAST;
 import it.unibz.precise.rest.mdl.conversion.MDLContext;
-import it.unibz.precise.rest.mdl.conversion.MDLTranslator;
 
+/**
+ * Exposes the diagram part in MDL files.
+ * 
+ * The structure of the files is the same as with complete MDL files,
+ * but only the configuration part is considered.
+ * This allows to use existing MDL files with this class.
+ * 
+ * @author MatthiasP
+ *
+ */
 @RestController
 @RequestMapping(
 	path=MDLDiagramController.RESOURCE_NAME,
@@ -69,21 +78,24 @@ public class MDLDiagramController {
 	@Autowired
 	private ValidationAdapter validator;
 	
-	private <MDL> MDL mdlByName(MDLTranslator<Model, MDL> translator, String name) {
+	/** Looks up the model of the given name in the repository and returns it as a {@link MDLDiagramAST}. */
+	private MDLDiagramAST diagramByName(MDLContext context, String name) {
 		Model model = repository.findByName(name);
-		return translator.toMDL(model);
+		return context.diagrams().toMDL(model);
 	}
 	
+	/** Exports the model of the given name as an {@link MDLFileAST} that only contains the configuration part. */
 	@RequestMapping(
 		path=PATH_TO_FILE,
 		method=RequestMethod.GET
 	)
 	public ResponseEntity<?> get(@PathVariable String name) {
-		MDLDiagramAST dia = mdlByName(MDLContext.create().diagrams(), name);
+		MDLContext context = MDLContext.create();
+		MDLDiagramAST dia = diagramByName(context, name);
 		if (dia == null)
 			return ResponseEntity.notFound().build();
 		
-		MDLFileAST mdlFile = new MDLFileAST();
+		MDLFileAST mdlFile = context.files().createMDL();
 		mdlFile.setDiagram(dia);
 		
 		return ResponseEntity.ok()
@@ -91,6 +103,13 @@ public class MDLDiagramController {
 			.body(mdlFile);
 	}
 	
+	/**
+	 * Imports the diagram of the given {@link MDLFileAST} into the model of the specified name.
+	 * If no model such model exists, a new one is created.
+	 * Instead of sending a file, a query parameter {@literal "use"} can be used to specify the name of
+	 * an existing model whose diagram should be used. 
+	 * @throws IllegalStateException if the configuration of the model is not editable (because a diagram exists)
+	 */
 	@RequestMapping(
 		path=PATH_TO_FILE,
 		method=RequestMethod.PUT
@@ -109,24 +128,26 @@ public class MDLDiagramController {
 			dstModel.setName(name);
 		}
 		
-		MDLContext context = destinationContext();
-
-		// Perform one translation from entities to MDL to populate the cache, ...
-		context.files().toMDL(dstModel);
-		// ... then prevent creation of further attributes, phases, and crafts.
-		context.attributes().seal();
-		context.phases().seal();
-		context.crafts().seal();
+		// Setup the context
+		MDLContext context = destinationContext(dstModel);
 		
+		// Clear the old diagram
 		context.diagrams().updateEntity(MDLDiagramAST.EMPTY_DIAGRAM, dstModel);
 		repository.flush();
 		
+		// Obtain diagram, either from file sent or existing model indicated by srcName
 		MDLDiagramAST diaSrc = mdlFileSrc == null ? null : mdlFileSrc.getDiagram();
 		if (diaSrc == null && srcName != null)
-			diaSrc = mdlByName(MDLContext.create().diagrams(), srcName);
+			diaSrc = diagramByName(MDLContext.create(), srcName);
 		
+		// Update the diagram part
 		context.diagrams().updateEntity(diaSrc, dstModel);
 
+		// The diagram part now possibly references task types not contained in the configuration part
+		// -> fix this now
+		// Before adding the new task types to the configuration, make sure their acronyms (shortNames)
+		// do not clash with existing ones.
+		
 		Set<TaskType> oldTaskTypes = new HashSet<>(dstModel.getTaskTypes());
 		Set<TaskType> newTaskTypes = dstModel.getTasks().stream()
 			.map(Task::getType)
@@ -134,17 +155,18 @@ public class MDLDiagramController {
 			.collect(Collectors.toSet());
 		
 		setNewTaskTypeAcronyms(newTaskTypes, oldTaskTypes);
+		// Now acronyms are unique -> add task types to the configuration
 		newTaskTypes.forEach(dstModel::addTaskType);
 		
 		Errors errors = validator.validate(dstModel);
 		if (errors.hasErrors())
 			throw new RepositoryConstraintViolationException(errors);
 		else {
-			// We need to save the newly created phases manually.
-			// Changes to the model table will be saved automatically.
+			// We need to save the newly entities manually.
 			taskTypeRepository.save(dstModel.getTaskTypes());
 			taskRepository.save(dstModel.getTasks());
 			dependencyRepository.save(dstModel.getDependencies());
+			// If the model already existed, changes will be saved automatically.
 			if (toBeCreated)
 				repository.save(dstModel);
 		}
@@ -153,6 +175,11 @@ public class MDLDiagramController {
 			: ResponseEntity.noContent().build();
 	}
 
+	/**
+	 * Check if acronyms of {@code newTaskTypes} clash with those of {@code oldTaskTypes} and attempt
+	 * to assign new ones (adding numbers) if needed.
+	 * @throws IllegalStateException if too many attempts in assigning a new number failed.
+	 */
 	private void setNewTaskTypeAcronyms(Set<TaskType> newTaskTypes, Set<TaskType> oldTaskTypes) {
 		Set<String> existingAcronyms = oldTaskTypes.stream()
 			.map(TaskType::getShortName)
@@ -171,16 +198,21 @@ public class MDLDiagramController {
 				acr = originalAcr + '-' + i;
 			}
 			tt.setShortName(acr);
-			existingAcronyms.add(acr);
+			existingAcronyms.add(acr);		// cannot reuse new acronyms for multiple task types
 		}
 	}
 	
-	private MDLContext destinationContext() {
-		return MDLContext.create().switchStrictMode(false)
-			//.files().context()
-			//.models().context()
-			//.configs().context()
-			//.diagrams().context()
+	/**
+	 * Create a {@link MDLContext} for updating the diagram of {@code dstModel} such that:
+	 * <ul>
+	 * <li> attributes, phases, crafts, and task types are cached and matched by name
+	 * <li> only existing attributes, phases, and crafts can be used (other references set to null)
+	 * <li> new task types may be created
+	 * <li> conversion results are cached in both directions (MDL <--> entities)
+	 * </ul>
+	 */
+	private MDLContext destinationContext(Model dstModel) {
+		MDLContext context = MDLContext.create().switchStrictMode(false)
 			.attributes()
 				.usingKeys(Attribute::getName, MDLAttributeAST::getName)
 				.cacheInverseDirection(true)
@@ -197,12 +229,19 @@ public class MDLDiagramController {
 				.usingKeys(TaskType::getName, MDLTaskTypeAST::getName)
 				.cacheInverseDirection(true)
 				.context();
-			//.tasks().context()
-			//.dependencies().context()
-			//.scopes().context()
-			//.orderSpecs().context()
+		
+		// Perform one translation from entities to MDL to populate the cache with existing instances, ...
+		context.files().toMDL(dstModel);
+		// ... then prevent creation of further attributes, phases, and crafts.
+		context
+			.attributes().seal(true).context()
+			.phases().seal(true).context()
+			.crafts().seal(true).context();
+			
+		return context;
 	}
 	
+	/** Clear the diagram of the model of the given name. */
 	@RequestMapping(
 		path=PATH_TO_FILE,
 		method=RequestMethod.DELETE

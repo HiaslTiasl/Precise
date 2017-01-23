@@ -4,6 +4,12 @@ import java.util.List;
 
 import it.unibz.precise.model.Scope;
 
+/**
+ * Represents a scope in an MDL file.
+ * 
+ * @author MatthiasP
+ *
+ */
 public class MDLScopeAST {
 	
 	private Scope.Type type;

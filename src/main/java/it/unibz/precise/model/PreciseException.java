@@ -1,5 +1,11 @@
 package it.unibz.precise.model;
 
+/**
+ * Base class for commonly referring to custom exceptions.
+ * 
+ * @author MatthiasP
+ *
+ */
 public abstract class PreciseException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;

@@ -8,16 +8,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+/**
+ * Wraps {@link Validator} and automatically calls it with an appropriate {@link ValidationErrors}
+ * instance.
+ * 
+ * This is useful in MDL-controllers since we have MDL-classes instead of Entities as parameters,
+ * so we cannot ask Spring to automatically create corresponding Errors for us.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Service
 public class ValidationAdapter {
 	
 	@Autowired
 	private Validator validator;
 	@Autowired
-	private ObjectFactory<PersistentEntities> entities;
+	private ObjectFactory<PersistentEntities> entitiesFactory;
 	
 	public Errors validate(Object object) {
-		ValidationErrors errors = new ValidationErrors(object, entities.getObject());
+		ValidationErrors errors = new ValidationErrors(object, entitiesFactory.getObject());
 		validator.validate(object, errors);
 		return errors;
 	}

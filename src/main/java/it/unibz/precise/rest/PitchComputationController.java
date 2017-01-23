@@ -16,6 +16,13 @@ import it.unibz.precise.model.Task;
 import it.unibz.precise.model.projection.PitchProjection;
 import it.unibz.precise.rep.ModelRepository;
 
+/**
+ * Exposes {@link Pitch}es and allows check them for consistency,
+ * compute missing parameters, and compute the resulting man-hours.
+ * 
+ * @author MatthiasP
+ *
+ */
 @RepositoryRestController
 public class PitchComputationController {
 	
@@ -26,7 +33,7 @@ public class PitchComputationController {
 	private ProjectionFactory projectionFactory;
 	
 	@RequestMapping(
-		path="/models/{id}/pitches",
+		path="/tasks/{id}/pitches",
 		method={RequestMethod.PUT, RequestMethod.PATCH}
 	)
 	public ResponseEntity<?> computePitches(
@@ -45,6 +52,7 @@ public class PitchComputationController {
 		task.setModel(model);
 		task.setPitch(pitch);
 		
+		// Project the task to a PitchProjection such that only the pitch and the man-hours are included
 		return ResponseEntity.ok(projectionFactory.createProjection(PitchProjection.class, task));
 	}
 	

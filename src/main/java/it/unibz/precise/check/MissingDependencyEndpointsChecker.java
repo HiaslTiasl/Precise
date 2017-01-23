@@ -10,6 +10,12 @@ import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 
+/**
+ * Checks whether all {@link Dependency}s have both a source and a target task.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Service
 public class MissingDependencyEndpointsChecker implements ConsistencyChecker {
 
@@ -32,10 +38,11 @@ public class MissingDependencyEndpointsChecker implements ConsistencyChecker {
 	@Override
 	public Stream<ConsistencyWarning> check(Model model) {
 		return model.getDependencies().stream()
-			.map(this::check)
-			.filter(Objects::nonNull);
+			.map(this::check)				// Check each dependencies
+			.filter(Objects::nonNull);		// filter out empty warnings
 	}
 	
+	/** Return a ConsistencyWarning if {@code d} is missing a source of a target, otherwise return null. */
 	private ConsistencyWarning check(Dependency d) {
 		boolean missingSource = d.getSource() == null;
 		boolean missingTarget = d.getTarget() == null;
@@ -46,6 +53,10 @@ public class MissingDependencyEndpointsChecker implements ConsistencyChecker {
 			: null;
 	}
 	
+	/**
+	 * Produce a warning for the given template and dependency.
+	 * @see ConsistencyChecker#warning(String, java.util.List, java.util.List)
+	 */
 	private ConsistencyWarning warning(String msgTemplate, Dependency d) {
 		return warning(MessageFormat.format(msgTemplate, d), Arrays.asList(d), null);
 	}

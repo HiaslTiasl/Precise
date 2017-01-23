@@ -1,14 +1,15 @@
 package it.unibz.precise.model;
 import java.util.List;
 
-import it.unibz.precise.model.Attribute;
-import it.unibz.precise.model.Dependency;
-import it.unibz.precise.model.Model;
-import it.unibz.precise.model.Phase;
-import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
 import it.unibz.util.CollectionBidirection;
+import it.unibz.util.OneToManyBidirection;
 
+/**
+ * {@link OneToManyBidirection}s from {@link Model} to other classes.
+ * 
+ * @author MatthiasP
+ *
+ */
 class ModelToMany {
 	
 	static final CollectionBidirection<Model, Craft, List<Craft>> CRAFTS =

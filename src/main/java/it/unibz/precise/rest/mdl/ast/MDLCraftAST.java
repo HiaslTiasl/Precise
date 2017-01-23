@@ -6,6 +6,12 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator;
 
 import it.unibz.precise.model.ShortNameProvider;
 
+/**
+ * Represents a craft in an MDL file.
+ * 
+ * @author MatthiasP
+ *
+ */
 @JsonIdentityInfo(generator=PropertyGenerator.class, property="name", scope=MDLCraftAST.class)
 @JsonIdentityReference(alwaysAsId=false)
 public class MDLCraftAST implements ShortNameProvider {

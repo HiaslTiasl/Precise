@@ -4,6 +4,12 @@ import it.unibz.precise.model.Model;
 import it.unibz.precise.rest.mdl.ast.MDLDiagramAST;
 import it.unibz.util.Util;
 
+/**
+ * {@link MDLTranslator} for the diagram part.
+ * 
+ * @author MatthiasP
+ *
+ */
 class DiagramTranslator extends AbstractMDLTranslator<Model, MDLDiagramAST> {
 	
 	DiagramTranslator(MDLContext context) {

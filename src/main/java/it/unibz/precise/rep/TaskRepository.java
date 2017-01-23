@@ -13,10 +13,26 @@ import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Task;
 import it.unibz.precise.model.TaskType;
 
+/**
+ * Repository for {@link Task}s.
+ * 
+ * @author MatthiasP
+ *
+ */
 public interface TaskRepository extends JpaRepository<Task, Long> {
 	
+	// TODO: remove?
 	Page<Task> findByModel(@Param("model") Model model, Pageable pageable);
 	
+	/**
+	 * Find tasks of the given model that match the given query text.
+	 * The text is matched against the ID, the task definition name, the phase name,
+	 * and the craft name. If at least one of this matches succeeds, the task is returned.
+	 * 
+	 * Note: This is not a full text search.
+	 * In particular, the query text is not split into multiple tokens at whitespaces etc.
+	 * It is, however, matched case insensitive.
+	 */
 	@RestResource(path = "simple", rel = "simple")
 	@Query("SELECT t FROM Task t"
 			+ " where t.model = :model"
@@ -32,6 +48,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 		Pageable pageable
 	);
 	
+	/** Find tasks that match all specified (non-null) criteria. */
 	@RestResource(path = "advanced", rel = "advanced")
 	@Query("SELECT t FROM Task t"
 		+ " where t.model = :model"

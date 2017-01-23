@@ -8,6 +8,12 @@ import java.util.stream.Stream;
 import it.unibz.precise.model.Attribute;
 import it.unibz.precise.rest.mdl.ast.MDLAttributeAST;
 
+/**
+ * {@link MDLTranslator} for attributes.
+ * 
+ * @author MatthiasP
+ *
+ */
 class AttributeTranslator extends AbstractMDLTranslator<Attribute, MDLAttributeAST> {
 	
 	AttributeTranslator(MDLContext context) {
@@ -29,7 +35,7 @@ class AttributeTranslator extends AbstractMDLTranslator<Attribute, MDLAttributeA
 		attribute.setName(mdlAttribute.getName());
 		attribute.setShortName(mdlAttribute.getShortName());
 		attribute.setDescription(mdlAttribute.getDescription());
-		attribute.setRange(resolveRange(attribute, mdlAttribute.getRange()));
+		setRange(attribute, mdlAttribute.getRange());
 		attribute.setOrdered(mdlAttribute.isOrdered());
 	}
 	
@@ -43,7 +49,13 @@ class AttributeTranslator extends AbstractMDLTranslator<Attribute, MDLAttributeA
 		return new MDLAttributeAST();
 	}
 	
-	private static List<String> resolveRange(Attribute attribute, Object range) {
+	/**
+	 * Applies the given {@code range} as specified in MDL to the given attribute.
+	 * The {@code range} may be given either as an integer {@code n} denoting the range
+	 * from 1 to {@code n}, or as a {@link List}.
+	 * @throws IllegalArgumentException if {@code range} is neither an integer nor a list.
+	 */
+	private void setRange(Attribute attribute, Object range) {
 		Stream<String> values;
 		if (range instanceof Integer) {
 			values = IntStream.rangeClosed(1, (int)range).mapToObj(String::valueOf);
@@ -53,7 +65,7 @@ class AttributeTranslator extends AbstractMDLTranslator<Attribute, MDLAttributeA
 			values = ((List<?>)range).stream().map(String::valueOf);
 		else
 			throw new IllegalArgumentException("Range of attribute '" + attribute.getName() + "'; expected list or integer");
-		return values.collect(Collectors.toList());
+		attribute.setRange(values.collect(Collectors.toList()));
 	}
 
 }

@@ -9,9 +9,28 @@ import java.util.Map;
 import it.unibz.precise.check.SCCFinder;
 
 /**
- * https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java
+ * SCCFinder based on
+ * <a href="https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm">
+ * 	Tarjan's strongly connected components algorithm
+ * </a>.
+ * Note that this algorithm also topologically sorts SCCs.
+ * 
+ * The following implementation was used as a starting point:
+ * <a href="https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java">
+ * 	https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java
+ * </a>.
+ * The biggest change from that implementation is to consider generic graphs as opposed to
+ * graphs represented as integer adjacency lists.
+ * This reduces the amount of converting back and forth between representations.
+ * 
+ * @see <a href="https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm">
+ * 	Tarjan's strongly connected components algorithm
+ * </a>
+ * @see <a href="https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java">
+ * 	https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java
+ * </a>
+ * @see TopologicalSort
  */
-// optimized version of https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
 public class SCCTarjan implements SCCFinder {
 
 
@@ -19,43 +38,62 @@ public class SCCTarjan implements SCCFinder {
 		return new Run<T>(graph).dfs();
 	}
 	
+	/**
+	 * Encapsulates one execution of {@link #findSCCs(Graph)}.
+	 * 
+	 * @author MatthiasP
+	 *
+	 * @param <T>
+	 */
 	private static class Run<T> {
-		private Graph<T> graph;
-		private ArrayList<T> stack;
-		private Map<T, Integer> lowlinks;
-		private List<List<T>> components;
-		private int time;
+		private Graph<T> graph;				// The graph to be checked
+		private ArrayList<T> stack;			// Stack of nodes
+		private Map<T, Integer> nodeTimes;	// Earliest time (lowest SCC index) for reaching node. Also used to mark nodes as visited.
+		private List<List<T>> components;	// Resulting SCCs
+		private int time;					// Current time (number of visited nodes)
 		
+		/** Initialize the run based on {@code graph}. */
 		private Run(Graph<T> graph) {
 			this.graph = graph;
 			int n = graph.nodes().size();
 			stack = new ArrayList<>(n);
-			lowlinks = new HashMap<>(n);
+			nodeTimes = new HashMap<>(n);
 			components = new ArrayList<>(n);
 		}
 		
+		/** Indicates whether {@code node} was visited already. */
 		private boolean visited(T node) {
-			return lowlinks.containsKey(node);
+			return nodeTimes.containsKey(node);
 		}
 		
+		/** Visits {@code node}, i.e. inits its time, adds it the the stack, and increments time. */
 		private void visit(T node) {
-			lowlinks.put(node, time++);
+			nodeTimes.put(node, time++);
 			stack.add(node);
 		}
 		
+		/** Pops the top-most node from the stack. */
 		private T pop() {
 			return stack.remove(stack.size() - 1);
 		}
 		
+		/** Start visiting nodes in depth-first order. */
 		private List<List<T>> dfs() {
 			for (T node : graph.nodes()) {
 				if (!visited(node))
 					dfs(node);
 			}
+			// Reverse to obtain topological sort. 
 			Collections.reverse(components);
 			return components;
 		}
 		
+		/**
+		 * Visit {@code node} and continue visiting recursively, in depth-first order.
+		 * After returning from recursion, set {@code node}'s time to the lowest reachable one.
+		 * Otherwise, if the time does not need to be adjusted, there is an SCC containing {@code node}
+		 * and all other nodes above it in the stack.
+		 */
 		private void dfs(T node) {
 			visit(node);
 			boolean isComponentRoot = true;
@@ -66,22 +104,24 @@ public class SCCTarjan implements SCCFinder {
 			for (T suc : successors) {
 				if (!visited(suc))
 					dfs(suc);
-				int sucLow = lowlinks.get(suc);
-				if (lowlinks.get(node) > sucLow) {
-					lowlinks.put(node, sucLow);
+				int sucLow = nodeTimes.get(suc);
+				if (nodeTimes.get(node) > sucLow) {
+					// node can reach an earlier node -> it is not the root of the component
+					nodeTimes.put(node, sucLow);
 					isComponentRoot = false;
 				}
 			}
 
 			if (isComponentRoot) {
+				// node can reach all other nodes above it in the stack
+				// -> pop all these nodes from the stack and add them as a SCC to the result.
 				List<T> component = new ArrayList<>();
 				T n;
 				do {
 					n = pop();
 					component.add(n);
-					lowlinks.put(n, Integer.MAX_VALUE);
+					nodeTimes.put(n, Integer.MAX_VALUE);
 				} while (!n.equals(node));
-				// Collections.reverse(component);
 				components.add(component);
 			}
 		}

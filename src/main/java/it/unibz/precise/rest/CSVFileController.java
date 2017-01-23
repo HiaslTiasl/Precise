@@ -24,6 +24,49 @@ import it.unibz.precise.model.Task;
 import it.unibz.precise.model.TaskType;
 import it.unibz.precise.rep.ModelRepository;
 
+/**
+ * Exports a model as a CSV file.
+ * 
+ * The file has the following columns:
+ * 
+ * <table border="1">
+ * 	<thead>
+ * 		<tr>
+ * 			<th>Name</th>
+ * 			<th>Acronym</th>
+ * 			<th>ID</th>
+ * 			<th>Crew Size</th>
+ * 			<th>Crew Count</th>
+ * 			<th>Duration</th>
+ * 			<th>Unit of Measure</th>
+ * 			<th>Total Quantity</th>
+ * 			<th>Quantity Per Day</th>
+ * 			<th>Man-hours</th>
+ * 			<th>Locations</th>
+ * 			<th>Predecessors</th>
+ * 		</tr>
+ * 	</thead>
+ * 	<tbody>
+ * 		<tr>
+ * 			<th>Concrete Pouring</th>
+ * 			<th>C</th>
+ * 			<th>39</th>
+ * 			<th>3</th>
+ * 			<th>1</th>
+ * 			<th>40</th>
+ * 			<th>sqm</th>
+ * 			<th>1000</th>
+ * 			<th>25</th>
+ * 			<th>960</th>
+ * 			<th>*-*</th>
+ * 			<th>B#38, G#43</th> 
+ * 		</tr>
+ * 	</tbody>
+ * </table>
+ * 
+ * @author MatthiasP
+ *
+ */
 @RestController
 @RequestMapping(
 	path=CSVFileController.RESOURCE_NAME,
@@ -45,6 +88,10 @@ public class CSVFileController {
 	
 	public static final String PATH_TO_FILE = "/{name}" + FILE_EXT;
 	
+	/**
+	 * Exports the CSV file.
+	 * The format can be configured by setting custom separators in URL query parameters.
+	 */
 	@RequestMapping(
 		path=PATH_TO_FILE,
 		method=RequestMethod.GET,
@@ -63,6 +110,8 @@ public class CSVFileController {
 		
 		String headerRow = headerRow(sep);
 		
+		// List tasks in topological order.
+		// Tasks in a SCCs are sorted lexicographically by short identification.
 		DiagramGraph graph = DiagramGraph.of(model);
 		List<Task> orderedTasks = sccTarjan.findSCCs(graph).stream()
 			.flatMap(l -> l.stream().sorted(Task.shortIdentificationComparator()))
@@ -77,6 +126,7 @@ public class CSVFileController {
 			.body(String.join(nl, headerRow, dataRows));
 	}
 	
+	/** Returns the header row of the CSV. */
 	private static String headerRow(String sep) {
 		return String.join(sep,
 			"Name",
@@ -94,6 +144,7 @@ public class CSVFileController {
 		);
 	}
 	
+	/** Returns a data row corresponding to the given task. */
 	private String dataRow(Task task, String sep, String locSep, String taskSep) {
 		TaskType type = task.getType();
 		Pitch pitch = task.getPitch();
@@ -118,7 +169,7 @@ public class CSVFileController {
 				.map(String::valueOf)
 				.collect(Collectors.joining(taskSep))
 		)
-		.map(cell -> ESCAPE + Objects.toString(cell, "") + ESCAPE)
+		.map(cell -> ESCAPE + Objects.toString(cell, "") + ESCAPE)		// Some fields may contain separators (e.g. name, locations, predecessors)
 		.collect(Collectors.joining(sep));
 	}
 	

@@ -11,6 +11,12 @@ import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 
+/**
+ * Checks if all task definitions in a model have a phase associated.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Service
 public class MissingPhaseChecker implements ConsistencyChecker {
 	
@@ -35,9 +41,13 @@ public class MissingPhaseChecker implements ConsistencyChecker {
 			.filter(Objects::nonNull);
 	}
 	
+	/**
+	 * Returns a {@link ConsistencyWarning} if {@code taskDef} is used in the diagram but has no phase,
+	 * otherwise returns null.
+	 */
 	private ConsistencyWarning check(TaskType taskDef) {
 		List<Task> tasks = taskDef.getTasks();
-		// Only give a warning if there is at least one box
+		// If there are no task boxes, then the task definition is not used in the diagram.
 		return taskDef.getPhase() != null || tasks.isEmpty() ? null
 			: warning(MessageFormat.format(WARNING_MESSAGE, taskDef.getName()), tasks, null);
 	}

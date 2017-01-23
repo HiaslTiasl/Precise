@@ -4,6 +4,12 @@ import org.springframework.validation.annotation.Validated;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+/**
+ * Represents an MDL file.
+ * 
+ * @author MatthiasP
+ *
+ */
 @JsonPropertyOrder({"model", "configuration", "diagram"})
 @Validated
 public class MDLFileAST {

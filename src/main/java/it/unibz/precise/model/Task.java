@@ -22,6 +22,18 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import it.unibz.util.Util;
 
+/**
+ * Represents an activity to be executed in a set of locations.
+ * Corresponds to a box in the diagram.
+ * The activity is determined by the {@link TaskType}, together with the
+ * corresponding {@link Phase} and the required {@link Craft}.
+ * 
+ * Further contains {@link Pitch} parameters, a {@link Position} in the diagram,
+ * and a {@link Scope} of the task's exclusiveness. 
+ * 
+ * @author MatthiasP
+ *
+ */
 @Entity
 @JsonPropertyOrder(value={"type"})
 @JsonIgnoreProperties(value={"manHours", "durationHours"}, allowGetters=true)
@@ -40,11 +52,13 @@ public class Task extends BaseEntity {
 	@Embedded
 	private Position position;
 
+	// Use pattern representation in JSON representation instead
+	@JsonIgnore		
 	@ElementCollection
 	private List<Location> locations = new ArrayList<>();
 	
 	@Transient
-	private List<Map<String, PatternEntry>> locationPatterns = new ArrayList<>();
+	private List<Map<String, PatternEntry>> locationPatterns = new ArrayList<>();		// pattern representation of locations
 	
 	@ElementCollection
 	private List<OrderSpecification> orderSpecifications = new ArrayList<>();
@@ -94,34 +108,37 @@ public class Task extends BaseEntity {
 		this.pitch = pitch;
 	}
 	
+	/** Returns man-hours based on pitch parameters and working hours per day. */
 	public int getManHours() {
 		return (int)Math.ceil(model.getHoursPerDay() * pitch.exactManDays());
 	}
 
-	@JsonIgnore
 	public List<Location> getLocations() {
 		return locations;
 	}
 
-	@JsonIgnore
 	public void setLocations(List<Location> locations) {
 		this.locations = locations;
-		updateLocationPatterns();
+		updateLocationPatterns();							// Reflect changes in patterns
 	}
 	
 	public void addLocation(Location location) {
 		locations.add(location);
-		locationPatterns.add(locationToPattern(location));
+		locationPatterns.add(locationToPattern(location));	// Reflect changes in patterns
 	}
 	
+	/** Update locations. */
 	public void updateLocations() {
 		locations.forEach(Location::update);
+		updateLocationPatterns();							// Reflect changes in patterns
 	}
 	
+	/** Update location patterns based on locations. */
 	public void updateLocationPatterns() {
 		this.locationPatterns = Util.mapToList(locations, this::locationToPattern);
 	}
 	
+	/** Convert the given location to a pattern representation using this task's phase. */
 	private Map<String, PatternEntry> locationToPattern(Location location) {
 		return LocationPatterns.locationToPattern(location, type.getPhase());
 	}
@@ -134,13 +151,19 @@ public class Task extends BaseEntity {
 		setLocationPatterns(patterns, true);
 	}
 
+	/**
+	 * Set the given location patterns.
+	 * @param patterns The location patterns to be set
+	 * @param strict Indicates whether all patterns must be valid.
+	 *        If true, an exception is thrown on the first invalid pattern.
+	 *        Otherwise, only valid patterns are used.
+	 * @throws InvalidLocationException if {@code strict} is set and at least one pattern
+	 *         is invalid.
+	 */
 	public void setLocationPatterns(List<Map<String, PatternEntry>> patterns, boolean strict) {
 		if (type != null && type.getPhase() != null) {
 			List<AttributeHierarchyLevel> levels = type.getPhase().getAttributeHierarchyLevels();
 			this.locations = patterns.stream()
-//				.map(p -> LocationPatterns.patternToNode(this, p, levels, strict))
-//				.map(Location::new)
-//				.collect(Collectors.toList());
 				.collect(ArrayList::new, (list, p) -> {
 					try {
 						AttributeHierarchyNode node = LocationPatterns.patternToNode(this, p, levels, true);
@@ -175,6 +198,7 @@ public class Task extends BaseEntity {
 		return exclusiveness;
 	}
 	
+	/** Update the scope of exclusiveness */
 	public void updateExclusiveness() {
 		if (exclusiveness == null || type.getPhase() == null)
 			exclusiveness = new Scope(Scope.Type.UNIT);
@@ -182,7 +206,7 @@ public class Task extends BaseEntity {
 			exclusiveness.update(Util.mapToList(
 				type.getPhase().getAttributeHierarchyLevels(),
 				AttributeHierarchyLevel::getAttribute
-			), true);
+			));
 		}
 	}
 
@@ -226,23 +250,30 @@ public class Task extends BaseEntity {
 		this.out = out;
 	}
 	
+	/** Returns a textual identification consisting of the definitinon's short name and the ID. */
 	public String getShortIdentification() {
 		return type.getShortName() + '#' + getId();
 	}
 	
+	/** Compares two tasks by shortName first and then by ID. */
 	public static Comparator<Task> shortIdentificationComparator() {
 		return shortNameAndIDComparator;
 	}
 	
+	/** Updates the number of units contained in locations of the task. */
 	public void countUnits() {
 		Phase phase = type.getPhase();
-		units = phase == null ? 0
+		// N.B. We assume that the number of units in CAs does not change,
+		// so no need to recompute those.
+		// Also, we assume that locations are non-overlapping here.
+		units = phase == null ? 0		// No phase -> no locations -> no units
 			: locations.stream()
 				.map(Location::getNode)
 				.mapToInt(loc -> loc != null ? loc.getUnits() : phase.getUnits())
 				.sum();
 	}
 	
+	/** Initialize fields that depend on other fields. */
 	@PrePersist
 	@PreUpdate
 	public void initDependentFields() {
@@ -250,10 +281,10 @@ public class Task extends BaseEntity {
 		updateDependentFields();
 	}
 
+	/** Update fields that depend on other fields. */
 	@PostLoad
 	public void updateDependentFields() {
 		updateLocations();
-		updateLocationPatterns();
 		updateExclusiveness();
 		pitch.update();
 	}

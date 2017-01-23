@@ -9,26 +9,32 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+/**
+ * Represents a level in the CA hierarchy of a phase.
+ * A {@code AttributeHierarchyLevel} has a phase, an attribute, contains several {@link AttributeHierarchyNode}s.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Entity
 @Table(uniqueConstraints={
 	@UniqueConstraint(name=AttributeHierarchyLevel.UC_PHASE_ATTRIBUTE, columnNames={"phase_id", "attribute_id"}),
 	@UniqueConstraint(name=AttributeHierarchyLevel.UC_PHASE_POSITION, columnNames={"phase_id", "position"})
 })
-public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
+public class AttributeHierarchyLevel extends BaseEntity {
 	
 	public static final String UC_PHASE_ATTRIBUTE = "UC_LEVEL_PHASE_ATTRIBUTE";
 	public static final String UC_PHASE_POSITION = "UC_LEVEL_PHASE_POSITION";
 
 	@ManyToOne
-	private Phase phase;
+	private Phase phase;			// The phase this CA hierarchy corresponds to
 	
 	@ManyToOne
-	private Attribute attribute;
+	private Attribute attribute;	// The attribute that values at this level correspond to
 	
-	private int position;
+	private int position;			// The position of this level (attribute) in the hierarchy (phase), starting from 1.
 	
 	@OneToMany(mappedBy="level", cascade=CascadeType.ALL, orphanRemoval=true)
 	@MapKey(name="value")
@@ -53,11 +59,6 @@ public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
 		this.phase = phase;
 	}
 
-	@Transient
-	public Long getPhaseID() {
-		return phase == null ? null : phase.getId();
-	}
-
 	public Attribute getAttribute() {
 		return attribute;
 	}
@@ -74,10 +75,12 @@ public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
 		this.position = position;
 	}
 
+	/** Indicates whether this level is the leaf level in the hierarchy. */
 	public boolean isUnit() {
 		return position == phase.getAttributeHierarchyLevels().size();
 	}
 	
+	/** Indicates whether the next level is the leaf level in the hierarchy. */
 	public boolean hasOnlyUnits() {
 		return position == phase.getAttributeHierarchyLevels().size() - 1;
 	}
@@ -96,10 +99,6 @@ public class AttributeHierarchyLevel extends BaseEntity implements Ordered {
 	
 	void internalSetNodes(Map<String, AttributeHierarchyNode> nodes) {
 		this.nodes = nodes;
-	}
-	
-	public AttributeHierarchyNode findNodeByValue(String value) {
-		return nodes.get(value);
 	}
 	
 	public AttributeHierarchyLevel next() {

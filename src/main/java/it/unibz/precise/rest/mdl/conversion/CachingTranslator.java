@@ -1,57 +1,82 @@
 package it.unibz.precise.rest.mdl.conversion;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+/**
+ * A delegating {@link MDLTranslator} that caches the returned results.
+ * 
+ * Caching can be customized in the following ways:
+ * <ul>
+ * 	<li>{@link #usingKeys(Function, Function)}: Provide custom key functions for entities and MDLs for the cache entries (default is identity).
+ * 	<li>{@link #cacheInverseDirection(boolean)}: Sync cache for both directions.
+ * 	<li>{@link #seal(boolean)}: Prevent creation of new instances, i.e. translation returns cached instances if available or null otherwise.
+ * </ul>
+ * 
+ * @author MatthiasP
+ * @see MDLContext
+ *
+ * @param <E> The entity type.
+ * @param <MDL> The MDL representation type.
+ */
 public class CachingTranslator<E, MDL> extends AbstractMDLTranslator<E, MDL> {
 	
-	private final MDLTranslator<E, MDL> delegate;
+	private final MDLTranslator<E, MDL> delegate;					// The underlying translator whose results are to be cached
 	
-	private final Map<Object, MDL> entitiesToMDL;
-	private final Map<Object, E> mdlToEntities;
+	private final ConcurrentHashMap<Object, MDL> entitiesToMDL;		// Cached MDLs by entity keys
+	private final ConcurrentHashMap<Object, E> mdlToEntities;		// Cached entities by MDL keys
 	
-	private Function<E, Object> entityKeyMapper;
-	private Function<MDL, Object> mdlKeyMapper;
+	private Function<E, Object> entityKeyMapper;					// Maps entities to cache keys
+	private Function<MDL, Object> mdlKeyMapper;						// Maps MDLs to cache keys
 
-	private boolean cacheInverseDirection;
-	private boolean sealed;
+	private boolean cacheInverseDirection;							// Sync the two caches?
+	private boolean sealed;											// Return null if not cached?
 
-	CachingTranslator(MDLTranslator<E, MDL> delegate, Function<E, Object> entityKeyMapper, Function<MDL, Object> mdlKeyMapper) {
+	/** Create a new {@code CachingTranslator} for the given delegate. */
+	CachingTranslator(MDLTranslator<E, MDL> delegate) {
 		super(delegate.context());
 		this.delegate = delegate;
 		entitiesToMDL = new ConcurrentHashMap<>();
 		mdlToEntities = new ConcurrentHashMap<>();
-		usingKeys(entityKeyMapper, mdlKeyMapper);
+		this.entityKeyMapper = e -> e;
+		this.mdlKeyMapper = mdl -> mdl;
 	}
 	
+	/** Wrap the given {@link MDLTranslator} in a {@link CachingTranslator}. */
 	public static <E, MDL> CachingTranslator<E, MDL> cache(MDLTranslator<E, MDL> delegate) {
-		return cache(delegate, e -> e, mdl -> mdl);
+		return new CachingTranslator<>(delegate);
 	}
 	
-	public static <E, MDL> CachingTranslator<E, MDL> cache(
-		MDLTranslator<E, MDL> delegate,
-		Function<E, Object> entityKey,
-		Function<MDL, Object> mdlKey
-	) {
-		return new CachingTranslator<>(delegate, entityKey, mdlKey);
-	}
-	
+	/**
+	 * Cache instances under keys specified by the provided mapper functions.
+	 * If entity {@code e} translates to {@code m}, then {@code m} is cached under
+	 * {@code entityKeyMapper.apply(e)}.
+	 * In particular, if two entities {@code e1} and {@code e2} map to the same key {@code k}},
+	 * the same cache entry will be used for both.
+	 * The direction from MDLs to entities is analog.
+	 */
 	public CachingTranslator<E, MDL> usingKeys(Function<E, Object> entityKeyMapper, Function<MDL, Object> mdlKeyMapper) {
 		this.entityKeyMapper = entityKeyMapper;
 		this.mdlKeyMapper = mdlKeyMapper;
-		entitiesToMDL.clear();
-		mdlToEntities.clear();
+		clearCache();
 		return this;
 	}
 	
+	/**
+	 * Specifies whether the caches in the two direction should be synchronized.
+	 * If true, it is ensured that {@code toMDL(e) == mdl} iff {@code toEnttity(mdl) == e}. 
+	 */
 	public CachingTranslator<E, MDL> cacheInverseDirection(boolean cacheInverseDirection) {
 		this.cacheInverseDirection = cacheInverseDirection;
 		return this;
 	}
 	
-	public CachingTranslator<E, MDL> seal() {
-		this.sealed = true;
+	/**
+	 * Prevents creation of further instances during translation.
+	 * Translation returns cached instances if available, or null otherwise. 
+	 */
+	public CachingTranslator<E, MDL> seal(boolean sealed) {
+		this.sealed = sealed;
 		return this;
 	}
 	
@@ -73,11 +98,21 @@ public class CachingTranslator<E, MDL> extends AbstractMDLTranslator<E, MDL> {
 		return entity;
 	}
 	
-	private <T, R> R convertAndCache(T input, Map<Object, R> cache, Function<T, Object> keyMapper, Function<T, R> delegateMethod) {
+	/**
+	 * Helper method for translations.
+	 * Looks up the given {@code input} in the {@code cache} using {@code keyMapper}.
+	 * If the resulting key is found, the cached instance is returned.
+	 * Otherwise, if sealed, null is returned.
+	 * Otherwise, the given {@code delegateMethod} is called, the result is cached under the
+	 * obtained key and then returned.
+	 */
+	private <T, R> R convertAndCache(T input, ConcurrentHashMap<Object, R> cache, Function<T, Object> keyMapper, Function<T, R> delegateMethod) {
 		Object key = keyMapper.apply(input);
+		// Directly use the cache if sealed instead of passing null to computeIfAbsent.
 		return sealed ? cache.get(key) : cache.computeIfAbsent(key, k -> delegateMethod.apply(input));
 	}
 	
+	/** Clear cache. */
 	public void clearCache() {
 		entitiesToMDL.clear();
 		mdlToEntities.clear();

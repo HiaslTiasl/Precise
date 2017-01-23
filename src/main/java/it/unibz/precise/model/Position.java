@@ -3,6 +3,12 @@ package it.unibz.precise.model;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+/**
+ * Represents a position on the diagram plane.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Embeddable
 public class Position {
 

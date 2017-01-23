@@ -12,12 +12,20 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+/**
+ * Represents a task definition.
+ * Belongs to a {@link Phase} and must be executed by a certain {@link Craft}.
+ * May be used for several task boxes in a diagram.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Entity
 @Table(uniqueConstraints={
 	@UniqueConstraint(name=TaskType.UC_NAME, columnNames={"model_id", "name"}),
 	@UniqueConstraint(name=TaskType.UC_SHORTNAME, columnNames={"model_id", "shortName"})
 })
-public class TaskType extends BaseEntity {
+public class TaskType extends BaseEntity implements ShortNameProvider {
 	
 	public static final String UC_NAME = "UC_TASKTYPE_NAME";
 	public static final String UC_SHORTNAME = "UC_TASKTYPE_SHORTNAME";
@@ -41,6 +49,7 @@ public class TaskType extends BaseEntity {
 	@ManyToOne
 	private Model model;
 	
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -49,6 +58,7 @@ public class TaskType extends BaseEntity {
 		this.name = name;
 	}
 
+	@Override
 	public String getShortName() {
 		return shortName;
 	}
@@ -122,5 +132,5 @@ public class TaskType extends BaseEntity {
 	public String toString() {
 		return "TaskType [id=" + getId() + ", name=" + name + "]";
 	}
-
+	
 }

@@ -13,15 +13,23 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import it.unibz.precise.model.Task;
 
+/**
+ * Spring Data REST specific configuration
+ * 
+ * @author MatthiasP
+ *
+ */
 @Configuration
 public class RepositoryConfiguration extends RepositoryRestConfigurerAdapter {
 
+	/** Include IDs of tasks in responses, because they are shown in boxes. */
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
     	// The task ID must be shown in the diagram
         config.exposeIdsFor(Task.class);
     }
     
+    /** Make ProjectionFactory injectable. */
     @Bean
     public ProjectionFactory projectionFactory() {
     	return new SpelAwareProxyProjectionFactory();
@@ -36,7 +44,7 @@ public class RepositoryConfiguration extends RepositoryRestConfigurerAdapter {
         return new LocalValidatorFactoryBean();
     }
 
-
+    /** Trigger Bean validation whenever entities are created or updated. */
     @Override
     public void configureValidatingRepositoryEventListener(ValidatingRepositoryEventListener validatingListener) {
         Validator validator = validator();

@@ -2,6 +2,12 @@ package it.unibz.precise.rest.mdl.ast;
 
 import it.unibz.precise.model.OrderType;
 
+/**
+ * Represents an order specification (attribute + order type) in an MDL file.
+ * 
+ * @author MatthiasP
+ *
+ */
 public class MDLOrderSpecificationAST {
 
 	private MDLAttributeAST attribute;

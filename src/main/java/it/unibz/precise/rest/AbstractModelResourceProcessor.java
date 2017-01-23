@@ -3,20 +3,28 @@ package it.unibz.precise.rest;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-import java.util.function.Function;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.stereotype.Service;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceProcessor;
 
-@Service
-public class ModelLinks {
+import it.unibz.precise.model.HasLongId;
+import it.unibz.precise.model.Model;
+
+/**
+ * Custom {@link ResourceProcessor} for {@link Model} or a projection thereof.
+ * 
+ * @author MatthiasP
+ *
+ * @param <T> The type represented by the resources (either {@link Model} or a projection thereof).
+ */
+public abstract class AbstractModelResourceProcessor<T extends HasLongId> implements ResourceProcessor<Resource<T>> {
 	
 	@Autowired
 	private BasePathAwareLinks service;
-	
-	public <T extends ResourceSupport> T withCustomLinks(T resource, Function<T, Long> getID) {
-		long id = getID.apply(resource);
+
+	@Override
+	public Resource<T> process(Resource<T> resource) {
+		long id = resource.getContent().getId();
 		resource.add(
 			service.underBasePath(
 				linkTo(methodOn(WarningsController.class).getWarnings(id))

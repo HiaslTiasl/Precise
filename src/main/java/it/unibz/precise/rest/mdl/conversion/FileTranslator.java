@@ -3,6 +3,12 @@ package it.unibz.precise.rest.mdl.conversion;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
 
+/**
+ * {@link MDLTranslator} for MDL files.
+ * 
+ * @author MatthiasP
+ *
+ */
 class FileTranslator extends AbstractMDLTranslator<Model, MDLFileAST> {
 	
 	FileTranslator(MDLContext context) {

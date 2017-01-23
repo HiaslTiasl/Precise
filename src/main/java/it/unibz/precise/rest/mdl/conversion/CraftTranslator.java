@@ -3,6 +3,12 @@ package it.unibz.precise.rest.mdl.conversion;
 import it.unibz.precise.model.Craft;
 import it.unibz.precise.rest.mdl.ast.MDLCraftAST;
 
+/**
+ * {@link MDLTranslator} for crafts.
+ * 
+ * @author MatthiasP
+ *
+ */
 public class CraftTranslator extends AbstractMDLTranslator<Craft, MDLCraftAST> {
 
 	CraftTranslator(MDLContext context) {

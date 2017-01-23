@@ -2,6 +2,12 @@ package it.unibz.precise.model;
 
 import java.util.Map;
 
+/**
+ * Base class for exceptions representing for illegal locations.
+ * 
+ * @author MatthiasP
+ *
+ */
 public class InvalidLocationException extends InvalidTaskException {
 
 	private static final long serialVersionUID = 1L;

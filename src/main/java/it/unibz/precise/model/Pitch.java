@@ -6,6 +6,14 @@ import javax.validation.constraints.Min;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+/**
+ * Encapsulates pitch parameters regarding crews, productivities, quantities and durations.
+ * 
+ * Any parameter equal to zero is interpreted as missing.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Embeddable
 public class Pitch {
 	
@@ -67,6 +75,7 @@ public class Pitch {
 		this.totalQuantity = totalQuantity;
 	}
 
+	/** Returns the durations in days as a floating point value. */
 	private float exactDurationDays() {
 		float totalQuantityPerDay = crewCount * quantityPerDay;
 		return totalQuantity != 0 && totalQuantityPerDay != 0
@@ -74,37 +83,45 @@ public class Pitch {
 			: durationDays;
 	}
 	
+	/** Compute duration in days from other fields. */
 	private int computeDurationDays() {
 		return (int)Math.ceil(totalQuantity / (crewCount * quantityPerDay));
 	}
 	
+	/** Compute crew count from other fields. */
 	private int computeCrewCount() {
 		return (int)Math.ceil(totalQuantity / (durationDays * quantityPerDay));
 	}
 	
+	/** Compute quantity per day (i.e. crew productivity) from other fields. */
 	private float computeQuantityPerDay() {
-		return (float)totalQuantity / (durationDays * crewCount);
+		return (float)totalQuantity / (crewCount * durationDays);
 	}
 	
+	/** Compute total quantity from other fields. */
 	private int computeTotalQuantity() {
-		return (int)Math.ceil(durationDays * crewCount * quantityPerDay);
+		return (int)Math.ceil(crewCount * quantityPerDay * durationDays);
 	}
 	
+	/** Returns man days as a floating point number. */
 	float exactManDays() {
 		return crewCount * crewSize * exactDurationDays();
 	}
-	
-	
+
+	/** Returns man days. */
 	public int getManDays() {
 		return (int)Math.ceil(exactManDays());
 	}
 	
 	/**
 	 * Update pitch fields.
-	 * If exactly one field is not specified, it is computed based on the others.
+	 * If exactly one of crew count, productivity, total quantity, or duration is missing,
+	 * it can be computed by the others according to:
+	 * <pre> {@code
+	 * 	totalQuantity = crewCount * quantityPerDay * durationDays
+	 * }</pre>
 	 * If all fields are specified, it is checked whether they are consistent.
 	 * Otherwise nothing is done.
-	 * @throws InconsistentPitchException if pitch fields are inconsistent.
 	 */
 	public boolean update() {
 		final int MISSING_DURATION_DAYS = 0x01;
@@ -144,6 +161,7 @@ public class Pitch {
 		return consistent;
 	}
 	
+	/** Checks whether the given parameters are consistent. */
 	public boolean checkPitchConsistency() {
 		return durationDays == 0 || totalQuantity == 0 || crewCount == 0 || quantityPerDay == 0
 			|| durationDays == computeDurationDays();

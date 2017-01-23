@@ -1,12 +1,6 @@
 package it.unibz.precise.check;
 
-import it.unibz.precise.model.BaseEntity;
-import it.unibz.precise.model.Dependency;
-import it.unibz.precise.model.Model;
-import it.unibz.precise.model.Task;
-
 import java.text.MessageFormat;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +10,18 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.unibz.precise.model.BaseEntity;
+import it.unibz.precise.model.Dependency;
+import it.unibz.precise.model.Model;
+import it.unibz.precise.model.Task;
+
+/**
+ * Checks a process models for cycles at the diagram level.
+ * 
+ * @author MatthiasP
+ * @see DiagramGraph
+ *
+ */
 @Service
 public class DiagramCycleChecker implements ConsistencyChecker {
 	
@@ -27,14 +33,6 @@ public class DiagramCycleChecker implements ConsistencyChecker {
 	private SCCFinder sccFinder;
 	
 	@Override
-	public Stream<ConsistencyWarning> check(Model model) {
-		List<List<Task>> sccs = sccFinder.findSCCs(DiagramGraph.of(model));
-		return sccs.stream()
-			.filter(SCCFinder::isNonTrivialComponent)
-			.map(this::warning);
-	}
-	
-	@Override
 	public Category getCategory() {
 		return Category.SATISFIABILITY;
 	}
@@ -44,19 +42,35 @@ public class DiagramCycleChecker implements ConsistencyChecker {
 		return WARNING_TYPE;
 	}
 	
-	private ConsistencyWarning warning(List<Task> tasks) {
-		Collections.reverse(tasks);
-		Set<Task> taskSet = new HashSet<>(tasks);
+	/**
+	 * Find non-trivial SCCs in the diagram of {@code model} and return a {@link ConsistencyWarning}
+	 * for each of them.
+	 */
+	@Override
+	public Stream<ConsistencyWarning> check(Model model) {
+		List<List<Task>> sccs = sccFinder.findSCCs(DiagramGraph.of(model));
+		return sccs.stream()
+			.filter(SCCFinder::isNonTrivialComponent)
+			.map(this::warning);
+	}
+	
+	/** Produce a warning about the given SCC. */
+	private ConsistencyWarning warning(List<Task> scc) {
+		// Put tasks into a set for fast lookup
+		Set<Task> taskSet = new HashSet<>(scc);
 		
-		Stream<Dependency> dependencies = tasks.stream()
+		// Project dependencies to the tasks in scc
+		Stream<Dependency> dependencies = scc.stream()
 			.map(Task::getOut)
 			.flatMap(List::stream)
 			.filter(d -> taskSet.contains(d.getTarget()));
 		
-		List<BaseEntity> entities = Stream.concat(tasks.stream(), dependencies).collect(Collectors.toList());
+		// Collect tasks and dependencies in a single list
+		List<BaseEntity> entities = Stream.concat(scc.stream(), dependencies).collect(Collectors.toList());
 		
+		// Create message
 		String msg = MessageFormat.format(WARNING_MESSAGE, 
-			tasks.stream()
+			scc.stream()
 				.sorted(Task.shortIdentificationComparator())
 				.map(Task::getShortIdentification)
 				.map(String::valueOf)

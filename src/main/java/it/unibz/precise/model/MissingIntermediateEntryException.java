@@ -2,6 +2,12 @@ package it.unibz.precise.model;
 
 import java.util.Map;
 
+/**
+ * Exception for an invalid location for wildcards used on intermediary levels in the hierarchy.
+ * 
+ * @author MatthiasP
+ *
+ */
 public class MissingIntermediateEntryException extends InvalidLocationException {
 	
 	private static final long serialVersionUID = 1L;

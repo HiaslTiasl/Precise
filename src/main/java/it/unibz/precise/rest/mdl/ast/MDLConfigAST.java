@@ -6,6 +6,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import it.unibz.precise.model.Model;
 
+/**
+ * Represents the configuration of an MDL file.
+ * 
+ * @author MatthiasP
+ *
+ */
 @JsonPropertyOrder({"hoursPerDay", "attributes", "phases", "crafts", "taskDefinitions"})
 public class MDLConfigAST {
 	

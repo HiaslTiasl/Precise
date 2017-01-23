@@ -16,6 +16,14 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * Represents a process model, i.e. contains configuration part as well as flow part.
+ * All other persistent entities are linked to exactly one model, either directly or
+ * indirectly.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Entity
 @Table(uniqueConstraints=@UniqueConstraint(name=Model.UC_NAME, columnNames="name"))
 @JsonIgnoreProperties(value={"state"}, allowGetters=true)
@@ -24,66 +32,6 @@ public class Model extends BaseEntity {
 	public static final String UC_NAME = "UC_MODEL_NAME";
 	
 	public static final int DEFAULT_HOURS_PER_DAY = 8;
-	
-	/**
-	 * The state of the model.
-	 * 
-	 * There are 3 possible states depending on which among configuration and diagram is empty
-	 * 
-	 * state       | config    | diagram 
-	 * ------------|-----------|----------
-	 * EMPTY       |     empty |     empty
-	 * CONFIGURING | not empty |     empty
-	 * MODELLING   | not empty | not empty
-	 * 
-	 * Each state contains information about each part (config and diagram) via a PartInfo object.
-	 */
-	public static enum State {
-		
-		EMPTY(true, true),
-		CONFIGURING(false, true),
-		MODELLING(false, false);
-		
-		private PartInfo configInfo;
-		private PartInfo diagramInfo;
-		
-		private State(boolean emptyConfig, boolean emptyDiagram) {
-			this.configInfo  = new PartInfo(emptyConfig, emptyDiagram);
-			this.diagramInfo = new PartInfo(emptyDiagram, !emptyConfig);
-		}
-
-		public PartInfo getConfigInfo() {
-			return configInfo;
-		}
-
-		public PartInfo getDiagramInfo() {
-			return diagramInfo;
-		}
-		
-	}
-	
-	/**
-	 * Encapsulates information about a model part, i.e. configuration or diagram.
-	 */
-	public static class PartInfo {
-		
-		private boolean empty;
-		private boolean editable;
-		
-		public PartInfo(boolean empty, boolean editable) {
-			this.empty = empty;
-			this.editable = editable;
-		}
-		
-		public boolean isEmpty() {
-			return empty;
-		}
-		
-		public boolean isEditable() {
-			return editable;
-		}
-		
-	}
 	
 	@Column(nullable=false)
 	@NotNull(message="{model.name.notempty}")
@@ -114,7 +62,7 @@ public class Model extends BaseEntity {
 	@Valid
 	private List<TaskType> taskTypes = new ArrayList<>();
 	
-	// Diagram
+	// Flow (Diagram)
 	//---------------------------------------------------
 
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
@@ -141,14 +89,17 @@ public class Model extends BaseEntity {
 		this.description = description;
 	}
 	
+	/** Indicates whether the diagram part is empty. */
 	private boolean isDiagramEmpty() {
 		return tasks.isEmpty() && dependencies.isEmpty();
 	}
 	
+	/** Indicates whether the configuration part is empty. */
 	private boolean isConfigEmpty() {
 		return phases.isEmpty() && attributes.isEmpty() && taskTypes.isEmpty();
 	}
 	
+	/** Returns a {@link State} describing the current configuration and diagram parts. */
 	public State getState() {
 		return isConfigEmpty() ? State.EMPTY
 			: isDiagramEmpty() ? State.CONFIGURING
@@ -253,6 +204,64 @@ public class Model extends BaseEntity {
 	
 	public void addDependency(Dependency dependency) {
 		ModelToMany.DEPENDENCIES.addOneOfMany(this, dependency);
+	}
+	
+	/**
+	 * The state of the model.
+	 * 
+	 * There are 3 possible states depending on which among configuration and diagram is empty
+	 * 
+	 * state       | config    | diagram 
+	 * ------------|-----------|----------
+	 * EMPTY       |     empty |     empty
+	 * CONFIGURING | not empty |     empty
+	 * MODELLING   | not empty | not empty
+	 * 
+	 * Each state contains information about each part (config and diagram) via a PartInfo object.
+	 */
+	public static enum State {
+		
+		EMPTY(true, true),
+		CONFIGURING(false, true),
+		MODELLING(false, false);
+		
+		private PartInfo configInfo;
+		private PartInfo diagramInfo;
+		
+		private State(boolean emptyConfig, boolean emptyDiagram) {
+			this.configInfo  = new PartInfo(emptyConfig, emptyDiagram);
+			this.diagramInfo = new PartInfo(emptyDiagram, !emptyConfig);
+		}
+
+		public PartInfo getConfigInfo() {
+			return configInfo;
+		}
+
+		public PartInfo getDiagramInfo() {
+			return diagramInfo;
+		}
+		
+	}
+	
+	/** Encapsulates information about a model part, i.e. configuration or diagram. */
+	public static class PartInfo {
+		
+		private boolean empty;
+		private boolean editable;
+		
+		public PartInfo(boolean empty, boolean editable) {
+			this.empty = empty;
+			this.editable = editable;
+		}
+		
+		public boolean isEmpty() {
+			return empty;
+		}
+		
+		public boolean isEditable() {
+			return editable;
+		}
+		
 	}
 	
 }

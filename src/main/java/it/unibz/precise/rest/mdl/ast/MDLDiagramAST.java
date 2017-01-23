@@ -2,6 +2,12 @@ package it.unibz.precise.rest.mdl.ast;
 
 import java.util.List;
 
+/**
+ * Represents the diagram of an MDL file.
+ * 
+ * @author MatthiasP
+ *
+ */
 public class MDLDiagramAST {
 	
 	public static final MDLDiagramAST EMPTY_DIAGRAM = new MDLDiagramAST();

@@ -6,6 +6,12 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator;
 
 import it.unibz.precise.model.ShortNameProvider;
 
+/**
+ * Represents an attribute in an MDL file
+ * 
+ * @author MatthiasP
+ *
+ */
 @JsonIdentityInfo(generator=PropertyGenerator.class, property="name", scope=MDLAttributeAST.class)
 @JsonIdentityReference(alwaysAsId=false)
 public class MDLAttributeAST implements ShortNameProvider {

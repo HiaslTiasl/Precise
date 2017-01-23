@@ -8,10 +8,14 @@ import org.springframework.data.rest.core.config.Projection;
 
 import it.unibz.precise.model.Phase;
 
+/**
+ * Phase with attributes as {@link AttributeSummaryProjection}
+ * 
+ * @author MatthiasP
+ *
+ */
 @Projection(name="phaseSummary", types=Phase.class)
 public interface PhaseSummaryProjection {
-	
-	long getId();
 	
 	String getName();
 	

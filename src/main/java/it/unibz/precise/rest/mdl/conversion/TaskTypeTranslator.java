@@ -3,6 +3,12 @@ package it.unibz.precise.rest.mdl.conversion;
 import it.unibz.precise.model.TaskType;
 import it.unibz.precise.rest.mdl.ast.MDLTaskTypeAST;
 
+/**
+ * {@link MDLTranslator} for task definitions.
+ * 
+ * @author MatthiasP
+ *
+ */
 class TaskTypeTranslator extends AbstractMDLTranslator<TaskType, MDLTaskTypeAST> {
 	
 	TaskTypeTranslator(MDLContext context) {

@@ -25,6 +25,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.unibz.precise.model.Scope.Type;
 import it.unibz.precise.model.validation.WellDefinedScope;
 
+/**
+ * Represents a precedence relation between two {@link Task}s,
+ * i.e. a precedence from a source task to a target task.
+ * Has a {@link Scope} and two flags {@code alternate} and {@code chain}
+ * that can be set individually.
+ * 
+ * The path of the dependency can be controlled by a list of vertices,
+ * which the path must pass in order.
+ * 
+ * The source and target of a dependency can temporarily be coordinates
+ * on the plane rather than tasks.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Entity
 @Table(uniqueConstraints={
 	@UniqueConstraint(name=Dependency.UC_SOURCE_TARGET, columnNames={"source_id", "target_id"})
@@ -34,6 +49,17 @@ public class Dependency extends BaseEntity {
 	
 	public static final String UC_SOURCE_TARGET = "UC_DEPENDENCY_SOURCE_TARGET";
 	
+	/**
+	 * Represents the visual position of a label (scope) in the diagram
+	 * in terms of a relative distance on the path from source to target
+	 * and an orthogonal offset to the resulting position.
+	 * 
+	 * This is the way JointJS represents label positions, and allows
+	 * labels to nicely adjust themselves when the dependency path changes.
+	 * 
+	 * @author MatthiasP
+	 *
+	 */
 	@Embeddable
 	public static class LabelPosition {
 		
@@ -59,8 +85,8 @@ public class Dependency extends BaseEntity {
 		}
 	}
 	
-	private boolean alternate;
-	private boolean chain;
+	private boolean alternate;			// Do alternate precedence semantics apply?
+	private boolean chain;				// Do chain prededence semantics apply?
 
 	@ManyToOne
 	private Task source;
@@ -73,7 +99,7 @@ public class Dependency extends BaseEntity {
 		@AttributeOverride(name="x", column=@Column(name="source_x")),
 		@AttributeOverride(name="y", column=@Column(name="source_y"))
 	})
-	private Position sourceVertex;
+	private Position sourceVertex;		// 
 
 	@Embedded
 	@AttributeOverrides({
@@ -184,6 +210,11 @@ public class Dependency extends BaseEntity {
 		this.scope = scope;
 	}
 	
+	/**
+	 * Indicates whether the dependency can have unit scope, i.e. whether source
+	 * and target are of the same phase.
+	 * TODO: Shouldn't this only be restricted when the leaf attribute is "unit"?
+	 */
 	public boolean canHaveUnitScope() {
 		Phase sourcePhase = source == null ? null : source.getType().getPhase();
 		Phase targetPhase = target == null ? null : target.getType().getPhase();
@@ -191,11 +222,12 @@ public class Dependency extends BaseEntity {
 			|| sourcePhase.equals(targetPhase);
 	}
 	
+	/** Update the scope of the dependency. */
 	public void updateScope() {
 		if (scope == null)
 			scope = new Scope(Scope.Type.GLOBAL);
 		else {
-			scope.update(getAllowedAttributes(), true);
+			scope.update(getAllowedAttributes());
 			if (scope.getType() == Type.UNIT && !canHaveUnitScope())
 				scope.setType(Type.ATTRIBUTES);
 		}
@@ -213,6 +245,7 @@ public class Dependency extends BaseEntity {
 		this.model = model;
 	}
 	
+	/** Returns a stream of attributes in the phase of the given task, or null if the task has no phase. */
 	private static Stream<Attribute> attributesOf(Task task) {
 		Phase phase = task == null ? null : task.getType().getPhase();
 		return phase == null ? Stream.empty()
@@ -220,6 +253,11 @@ public class Dependency extends BaseEntity {
 				.map(AttributeHierarchyLevel::getAttribute);
 	}
 	
+	/**
+	 * Returns the set of allowed attributes in the scope of this dependency,
+	 * which is defined as the intersection of the attributes of the phases
+	 * of the two associated tasks.
+	 */
 	@Transient
 	@JsonIgnore
 	public List<Attribute> getAllowedAttributes() {
@@ -230,6 +268,7 @@ public class Dependency extends BaseEntity {
 			.collect(Collectors.toList());
 	}
 	
+	/** Returns the attributes in the scope that are actually not allowed. */
 	@Transient
 	@JsonIgnore
 	public Stream<Attribute> getNotAllowedScopeAttributes() {
@@ -241,11 +280,13 @@ public class Dependency extends BaseEntity {
 			.filter(a -> !sourceAttrs.contains(a) || !targetAttrs.contains(a));
 	}
 	
+	/** Removes all not allowed attributes from the scope. */
 	public boolean removeNotAllowedScopeAttributes() {
 		return scope != null && scope.getAttributes() != null
 			&& scope.getAttributes().removeAll(getNotAllowedScopeAttributes().collect(Collectors.toSet()));
 	}
 	
+	/** Update fields that depend on other fields. */
 	@PostLoad
 	@PrePersist
 	@PreUpdate

@@ -2,6 +2,13 @@ package it.unibz.precise.model;
 
 import java.util.Map;
 
+/**
+ * Represents an exception for an invalid location because the indicated path does not exist in the
+ * hierarchy.
+ * 
+ * @author MatthiasP
+ *
+ */
 public class NonExistingLocationException extends InvalidLocationException {
 
 	private static final long serialVersionUID = 1L;

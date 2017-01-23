@@ -5,13 +5,14 @@ import java.util.Map;
 
 import org.springframework.data.rest.core.config.Projection;
 
+import it.unibz.precise.model.HasLongId;
 import it.unibz.precise.model.PatternEntry;
 import it.unibz.precise.model.Pitch;
 import it.unibz.precise.model.Position;
 import it.unibz.precise.model.Task;
 
 @Projection(name="expandedTask", types=Task.class)
-public interface ExpandedTaskProjection {
+public interface ExpandedTaskProjection extends HasLongId {
 	
 	long getId();
 	

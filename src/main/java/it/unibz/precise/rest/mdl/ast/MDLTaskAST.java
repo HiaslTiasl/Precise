@@ -10,6 +10,12 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators.IntSequenceGenerator;
 import it.unibz.precise.model.Pitch;
 import it.unibz.precise.model.Position;
 
+/**
+ * Represents a task in an MDL file.
+ * 
+ * @author MatthiasP
+ *
+ */
 @JsonIdentityInfo(generator=IntSequenceGenerator.class, property="id", scope=MDLTaskAST.class)
 @JsonIdentityReference(alwaysAsId=false)
 public class MDLTaskAST {

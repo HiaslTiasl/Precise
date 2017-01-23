@@ -20,6 +20,12 @@ import it.unibz.precise.rest.mdl.ast.MDLScopeAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
 import it.unibz.util.Util;
 
+/**
+ * {@link MDLTranslator} for tasks.
+ * 
+ * @author MatthiasP
+ *
+ */
 class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 	
 	TaskTranslator(MDLContext context) {
@@ -48,6 +54,7 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 		MDLScopeAST exclusiveness = mdlTask.getExclusiveness();
 		List<MDLOrderSpecificationAST> mdlOrder = mdlTask.getOrder();
 		if (phase != null) {
+			// The task has a phase and therefore a chance to have valid locations, exclusiveness and order specifications.
 			task.setLocationPatterns(
 				Util.mapToList(mdlTask.getLocations(), p -> toPattern(p, taskType.getPhase().getAttributeHierarchyLevels())),
 				strict
@@ -62,18 +69,17 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 			);
 		}
 		else if (!strict) {
+			// No phase but not strict -> use default values
 			task.setLocationPatterns(new ArrayList<>());
 			task.setExclusiveness(new Scope(Type.UNIT));
 			task.setOrderSpecifications(new ArrayList<>());
 		}
-		else {
-			if (Util.size(mdlTask.getLocations()) > 0) 
-				throw new InvalidTaskException(task, "Cannot specify locations without referring to a phase");
-			if (exclusiveness != null && Util.size(exclusiveness.getAttributes()) > 0) 
-				throw new InvalidTaskException(task, "Cannot specify exclusiveness without referring to a phase");
-			if (Util.size(mdlTask.getOrder()) > 0)
-				throw new InvalidTaskException(task, "Cannot specify ordering without referring to a phase");
-		}
+		else if (Util.size(mdlTask.getLocations()) > 0) 
+			throw new InvalidTaskException(task, "Cannot specify locations without referring to a phase");
+		else if (exclusiveness != null && Util.size(exclusiveness.getAttributes()) > 0) 
+			throw new InvalidTaskException(task, "Cannot specify exclusiveness without referring to a phase");
+		else if (Util.size(mdlTask.getOrder()) > 0)
+			throw new InvalidTaskException(task, "Cannot specify ordering without referring to a phase");
 	}
 	
 	@Override
@@ -86,6 +92,7 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 		return new MDLTaskAST();
 	}
 	
+	/** Replace {@link PatternEntry}s with their values. */
 	private Map<String, String> toSimplePattern(Map<String, PatternEntry> pattern) {
 		return pattern.values().stream()
 			.collect(Collectors.toMap(
@@ -94,6 +101,7 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 			));
 	}
 
+	/** Replace values with corresponding {@link PatternEntry}s. */
 	private Map<String, PatternEntry> toPattern(Map<String, String> simplePattern, List<AttributeHierarchyLevel> levels) {
 		return levels.stream()
 			.map(AttributeHierarchyLevel::getAttribute)

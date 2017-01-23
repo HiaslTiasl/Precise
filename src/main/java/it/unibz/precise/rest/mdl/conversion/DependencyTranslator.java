@@ -7,6 +7,12 @@ import it.unibz.precise.rest.mdl.ast.MDLDependencyAST;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * {@link MDLTranslator} for dependencies.
+ * 
+ * @author MatthiasP
+ *
+ */
 class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependencyAST> {
 	
 	DependencyTranslator(MDLContext context) {
@@ -40,6 +46,8 @@ class DependencyTranslator extends AbstractMDLTranslator<Dependency, MDLDependen
 		dependency.setVertices(vertices == null ? null : new ArrayList<>(vertices));
 		dependency.setLabelPosition(mdlDependency.getLabelPosition());
 		dependency.setScope(context().scopes().toEntity(mdlDependency.getScope()));
+		// Satisfy validation by removing not allowed scope attributes if not in strict mode.
+		// In strict mode, nothing is done here and validation will fail if the scope is not valid as-is.
 		if (!context().isStrictMode())
 			dependency.removeNotAllowedScopeAttributes();
 	}

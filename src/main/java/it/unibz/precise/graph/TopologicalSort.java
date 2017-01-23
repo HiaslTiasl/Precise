@@ -5,6 +5,15 @@ import java.util.stream.Collectors;
 
 import it.unibz.precise.check.SCCFinder;
 
+/**
+ * Topologically sorts a graph.
+ * The implementation uses {@link SCCTarjan} to perform the sorting.
+ * 
+ * @author MatthiasP
+ * @see Graph
+ * @see SCCTarjan
+ * @param <T>
+ */
 public class TopologicalSort<T> {
 	
 	private Graph<T> graph;

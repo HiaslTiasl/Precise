@@ -1,5 +1,15 @@
 package it.unibz.precise.jackson;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
+
 import it.unibz.precise.rest.mdl.ast.MDLAttributeAST;
 import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
 import it.unibz.precise.rest.mdl.ast.MDLCraftAST;
@@ -13,24 +23,31 @@ import it.unibz.precise.rest.mdl.ast.MDLScopeAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskTypeAST;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
-
+/**
+ * Customized Jackson {@link DeserializationProblemHandler}.
+ * 
+ * A {@code DeserializationProblemHandler} is called whenever Jackson encounters a problem
+ * during deserialization and has a chance to recover from the problem, throw a custom exception,
+ * or indicate that the problem was not handled.
+ * 
+ * This is useful when catching the default exception in {@link HttpMessageConversionExceptionHandler}
+ * and converting it to a custom message does not work because the exception thrown by Jackson does
+ * not include all the data needed for the custom message.
+ * 
+ * @author MatthiasP
+ * @see HttpMessageConversionExceptionHandler
+ *
+ */
 public class CustomDeserializationProblemHandler extends DeserializationProblemHandler {
 	
-	private final Map<Class<?>, String> mdlClassNames = new HashMap<>();
+	private final Map<Class<?>, String> mdlClassNames = new HashMap<>();	// Map from MCD-classes to descriptive names
 	
+	/** Create a {@code CustomDeserializationProblemHandler} */
 	public CustomDeserializationProblemHandler() {
 		initMdlClassNames();
 	}
 	
+	/** Fill {@code mdlClassNames}. */
 	private void initMdlClassNames() {
 		mdlClassNames.put(MDLFileAST.class, "MDL-file");
 		
@@ -50,10 +67,12 @@ public class CustomDeserializationProblemHandler extends DeserializationProblemH
 		mdlClassNames.put(MDLOrderSpecificationAST.class, "order specification");
 	}
 	
+	/** Returns a name describing the given class, if known. */
 	private String getClassName(Class<?> c) {
 		return mdlClassNames.get(c);
 	}
 	
+	/** Returns a name describing the type of the given {@link JsonToken}, if known. */
 	private String getTokenTypeName(JsonToken t) {
 		switch (t) {
 		case START_ARRAY:
@@ -85,14 +104,22 @@ public class CustomDeserializationProblemHandler extends DeserializationProblemH
 			DeserializationContext ctxt, Class<?> instClass,
 			JsonParser p, String msg) throws IOException
 	{
+		// Give base implementation a chance to handle the problem
 		Object instance = super.handleMissingInstantiator(ctxt, instClass, p, msg);
 		if (instance == DeserializationProblemHandler.NOT_HANDLED) {
+			// Base implementation could not handle the problem
+			// -> check if we know a name of the given class
 			String className = getClassName(instClass);
 			if (className != null) {
+				// Report that an object of the given name was expected
 				msg = "Expected " + className;
+				// Attempt to obtain the actual type of the value that could not be deserialized
+				// to the expected type by looking at the current token.
 				String tokenTypeName = getTokenTypeName(p.currentToken());
 				if (tokenTypeName != null)
 					msg += ", got " + tokenTypeName;
+				// Return a corresponding error message.
+				// Pass the JsonParser so the problematic location in the file is known.
 				throw JsonMappingException.from(p, msg);
 			}
 		}

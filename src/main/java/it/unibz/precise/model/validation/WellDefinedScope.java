@@ -8,6 +8,13 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
+/**
+ * The scope must only contain attributes that are included in the phases of both
+ * the source and the target.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=DependencyScopeValidator.class)

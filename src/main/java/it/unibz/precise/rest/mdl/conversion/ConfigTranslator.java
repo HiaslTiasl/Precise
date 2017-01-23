@@ -4,6 +4,12 @@ import it.unibz.precise.model.Model;
 import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
 import it.unibz.util.Util;
 
+/**
+ * {@link MDLTranslator} for the configuration part.
+ * 
+ * @author MatthiasP
+ *
+ */
 class ConfigTranslator extends AbstractMDLTranslator<Model, MDLConfigAST> {
 	
 	ConfigTranslator(MDLContext context) {

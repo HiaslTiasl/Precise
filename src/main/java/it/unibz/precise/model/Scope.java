@@ -1,5 +1,6 @@
 package it.unibz.precise.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.Embeddable;
@@ -7,11 +8,19 @@ import javax.persistence.ManyToMany;
 
 import it.unibz.util.Util;
 
+/**
+ * Represents a scope in terms of attributes.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Embeddable
 public class Scope {
 	
 	public enum Type {
-		UNIT, GLOBAL, ATTRIBUTES;
+		UNIT,				// all attributes of the phase
+		GLOBAL,				// no attributes
+		ATTRIBUTES;			// a proper, non-empty subset of the attributes in the phase
 	}
 	
 	private Type type;
@@ -39,7 +48,8 @@ public class Scope {
 		this.type = type;
 	}
 	
-	public void updateType(List<Attribute> allAttributes, boolean strict) {
+	/** Update {@code type} by comparing {@code attribute} to {@code allAttributes} */
+	public void updateType(List<Attribute> allAttributes) {
 		type = Util.size(attributes) == 0 ? Type.GLOBAL
 			: Util.containSameElements(attributes, allAttributes) ? Type.UNIT
 			: Type.ATTRIBUTES;
@@ -58,21 +68,21 @@ public class Scope {
 			this.attributes.addAll(attributes);
 		}
 	}
-	
-	public void update(List<Attribute> allowedAttributes) {
-		update(allowedAttributes, true);
-	}
 
-	public void update(List<Attribute> allowedAttributes, boolean strict) {
+	/** Update the scope based on the given allowed attributes. */
+	public void update(List<Attribute> allowedAttributes) {
 		switch (type) {
 		case UNIT:
+			// we want to have as much attributes as possible
 			setAttributes(allowedAttributes);
 			break;
 		case GLOBAL:
-			setAttributes(null);
+			// no attributes
+			setAttributes(Collections.emptyList());
 			break;
 		case ATTRIBUTES:
-			updateType(allowedAttributes, strict);
+			// change type if needed
+			updateType(allowedAttributes);
 			break;
 		}
 	}

@@ -17,9 +17,17 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+/**
+ * Represents a node in the CA hierarchy, i.e. a CA.
+ * Has an {@link AttributeHierarchyLevel}, a value for the corresponding attribute,
+ * and a parent {@code AttributeHierarchyNode} of the level above, if any, and children
+ * {@code AttributeHierarchyNode}s of the next level, if any.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Entity
 @Table(uniqueConstraints={
 	@UniqueConstraint(name=AttributeHierarchyNode.UC_PARENT_VALUE, columnNames={"parent_id", "value"}),
@@ -31,19 +39,19 @@ public class AttributeHierarchyNode extends BaseEntity {
 	//public static final String UC_LEVEL_VALUE = "UC_NODE_LEVEL_VALUE";
 	
 	@Column(nullable=false)
-	private String value;
+	private String value;						// The particular value of this node
 
 	@ManyToOne
-	private AttributeHierarchyLevel level;
+	private AttributeHierarchyLevel level;		// The level of the node in the hierarchy, determines phase and attribute
 	
 	@ManyToOne
-	private AttributeHierarchyNode parent;
+	private AttributeHierarchyNode parent;		// The parent node
 
 	@OneToMany(mappedBy="parent", cascade=CascadeType.ALL, orphanRemoval=true)
 	@MapKey(name="value")
-	private Map<String, AttributeHierarchyNode> children = new HashMap<>();
+	private Map<String, AttributeHierarchyNode> children = new HashMap<>();		// Children nodes
 	
-	private int units = 1;
+	private int units = 1;						// Total number of units (leaf nodes) contained
 	
 	/**
 	 * Indicates whether the children values range from 1 to children.size().
@@ -78,11 +86,6 @@ public class AttributeHierarchyNode extends BaseEntity {
 		this.level = level;
 	}
 
-	@Transient
-	public Long getLevelID() {
-		return level == null ? null : level.getId();
-	}
-	
 	public AttributeHierarchyNode getParent() {
 		return parent;
 	}
@@ -95,10 +98,12 @@ public class AttributeHierarchyNode extends BaseEntity {
 		this.parent = parent;
 	}
 	
+	/** Returns an iterator for traversing through the {@link #getParent() parent} relation until null is reached. */
 	public Iterator<AttributeHierarchyNode> ancestors() {
 		return new AncestorIterator(this);
 	}
 	
+	/** Returns an ordered ancestor nodes, starting from the current node and terminating with the root node. */
 	public Stream<AttributeHierarchyNode> ancestorStream() {
 		return StreamSupport.stream(
 			Spliterators.spliteratorUnknownSize(ancestors(), Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL),
@@ -145,7 +150,10 @@ public class AttributeHierarchyNode extends BaseEntity {
 		this.valuesMatchPositions = valuesMatchPositions;
 	}
 	
+	/** Recursively updates {@link #units}. */
 	public void countUnits() {
+		// N.B. The current model does not assume a "unit-like" leaf level, i.e. with values from 1 to n.
+		// Also, special cases such as hierarchies with a single atribute only must be considered here.
 		units = level.isUnit() ? 1
 			: level.hasOnlyUnits() ? children.size()
 			: children.values().stream()
@@ -154,10 +162,16 @@ public class AttributeHierarchyNode extends BaseEntity {
 				.sum();
 	}
 	
+	/** Returns a map representation for this node, mapping attribute names to {@link PatternEntry}s. */
 	public Map<String, PatternEntry> getPattern() {
 		return toPattern(this, level.getPhase().getAttributeHierarchyLevels());
 	}
 	
+	/**
+	 * Returns a map representation for the given node and levels.
+	 * If {@code node == null}, a pattern corresponding to a global location is returned,
+	 * i.e. all attributes are mapped to {@link PatternEntry#WILDCARD_VALUE}.
+	 */
 	public static Map<String, PatternEntry> toPattern(AttributeHierarchyNode node, List<AttributeHierarchyLevel> levels) {
 		Map<String, PatternEntry> pattern = new LinkedHashMap<>();
 		if (node != null)
@@ -166,21 +180,25 @@ public class AttributeHierarchyNode extends BaseEntity {
 		return pattern;
 	}
 	
+	/** Add a mapping to the given pattern. */
 	private static void addToPattern(Map<String, PatternEntry> pattern, Attribute attribute, String value) {
 		String attrName = attribute.getName();
 		pattern.put(attrName, new PatternEntry(attrName, value));
 	}
 	
+	/** Add a mapping for the node's level and value to the given pattern. */
 	private void addToPattern(Map<String, PatternEntry> pattern) {
 		addToPattern(pattern, level.getAttribute(), value);
 	}
 	
+	/** Recursively add mappings for all ancestors, beginning with root node. */
 	private void addAncestorsTo(Map<String, PatternEntry> pattern) {
 		if (parent != null)
 			parent.addAncestorsTo(pattern);
 		addToPattern(pattern);
 	}
 	
+	/** Map attributes to {@link PatternEntry#WILDCARD_VALUE} if not mapped to an actual value. */
 	private static Map<String, PatternEntry> addWildcardsTo(Map<String, PatternEntry> pattern, List<AttributeHierarchyLevel> levels) {
 		if (pattern == null)
 			pattern = new LinkedHashMap<>();
@@ -195,6 +213,7 @@ public class AttributeHierarchyNode extends BaseEntity {
 		return "AttributeHierarchyNode [id=" + getId() + ", value=" + value + ", level=" + level + ", parent=" + parent + "]";
 	}
 
+	/** An iterator traversing through the {@link #getParent() parent} relation until null is reached. */
 	private static class AncestorIterator implements Iterator<AttributeHierarchyNode> {
 			
 		private AttributeHierarchyNode next;

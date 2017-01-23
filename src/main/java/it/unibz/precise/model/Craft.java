@@ -6,6 +6,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+/**
+ * Represents a type of workers.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Entity
 @Table(uniqueConstraints={
 	@UniqueConstraint(name=Craft.UC_NAME, columnNames={"model_id", "name"}),

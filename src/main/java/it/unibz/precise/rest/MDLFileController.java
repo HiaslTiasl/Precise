@@ -24,6 +24,12 @@ import it.unibz.precise.rep.ModelRepository;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
 import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
+/**
+ * Exposes models as MDL files.
+ * 
+ * @author MatthiasP
+ *
+ */
 @RestController
 @RequestMapping(
 	path=MDLFileController.RESOURCE_NAME,
@@ -42,10 +48,12 @@ public class MDLFileController {
 	public static final String FILE_EXT = ".mdl";				// Used for exporting only; imports work with any extension, only the syntax counts.
 	public static final String PATH_TO_FILE = "/{name}";		// Extension is optional and arbitrary (Spring exposes the same method with ".*" appended to the path).
 	
+	/** Returns the "Content-Disposition" HTTP Header value with a filename corresponding to the given model name. */
 	static String getContentDisposition(String name) {
 		return FileDownload.getContentDisposition(name + MDLFileController.FILE_EXT);
 	}
 	
+	/** Returns the model of the specified name as a {@link MDLFileAST}. */
 	@RequestMapping(
 		path=PATH_TO_FILE,
 		method=RequestMethod.GET,
@@ -60,6 +68,13 @@ public class MDLFileController {
 				.body(mdl);
 	}
 	
+	/**
+	 * Imports the given {@link MDLFileAST} into as a new model of the specified name.
+	 * Overwriting an existing model is not allowed unless the {@literal "update"} query parameters
+	 * is set to explicitly indicate that overwriting is intended.
+	 * Instead of sending a file, a query parameter {@literal "use"} can be used to specify the name of
+	 * an existing model that should be used. 
+	 */
 	@Transactional
 	@RequestMapping(
 		path=PATH_TO_FILE,
@@ -72,6 +87,7 @@ public class MDLFileController {
 		@RequestParam(defaultValue="false") boolean update,
 		@RequestParam(name="use", required=false) String srcName)
 	{
+		boolean toBeCreated = true;
 		if (modelDTO == null && srcName != null) {
 			modelDTO = MDLContext.create().files().toMDL(repository.findByName(srcName));
 			if (modelDTO == null)
@@ -81,6 +97,7 @@ public class MDLFileController {
 			// If explicitly requested, allow to overwrite a model with the given name
 			Model oldModel = repository.findByName(name);
 			if (oldModel != null) {
+				toBeCreated = false;
 				// Delete old model before inserting the new one to avoid name conflict.
 				// Flush to ensure proper order: first delete, then insert.
 				// The transaction around the whole method ensures the deletion is rolled back
@@ -94,9 +111,11 @@ public class MDLFileController {
 		Errors errors = validator.validate(newModel);
 		if (errors.hasErrors())
 			throw new RepositoryConstraintViolationException(errors);
-		else
+		else if (toBeCreated)
 			repository.save(newModel);
-		return ResponseEntity.created(URI.create(request.getRequestURL().toString())).build();
+		return toBeCreated
+			? ResponseEntity.created(URI.create(request.getRequestURL().toString())).build()
+			: ResponseEntity.noContent().build();
 	}
 	
 }

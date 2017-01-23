@@ -5,6 +5,12 @@ import java.util.List;
 import it.unibz.precise.model.Dependency.LabelPosition;
 import it.unibz.precise.model.Position;
 
+/**
+ * Represents a dependency in an MDL file.
+ * 
+ * @author MatthiasP
+ *
+ */
 public class MDLDependencyAST {
 
 	private boolean alternate;

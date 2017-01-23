@@ -3,6 +3,15 @@ package it.unibz.precise.model;
 import javax.persistence.Embeddable;
 import javax.persistence.ManyToOne;
 
+/**
+ * Part of an ordering constraint of a {@link Task}.
+ * 
+ * Orderings are defined as ordered list of {@code OrderSpecification}s,  
+ * which associate {@link Attribute}s to a {@link OrderType}s.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Embeddable
 public class OrderSpecification {
 	

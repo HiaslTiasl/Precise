@@ -24,6 +24,18 @@ import it.unibz.precise.rest.mdl.ast.MDLScopeAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskTypeAST;
 
+/**
+ * Context for {@link MDLTranslator}s.
+ * 
+ * Provides a configurable {@link CachingTranslator} for each MDL types.
+ * 
+ * Provides a {@link #isStrictMode() strict mode} flag that can be accessed from underlying translators
+ * to switch between strict and fault-tolerant error handling.
+ * 
+ * 
+ * @author MatthiasP
+ *
+ */
 public class MDLContext {
 	
 	private final CachingTranslator<Model, MDLFileAST> fileTranslator;
@@ -41,6 +53,10 @@ public class MDLContext {
 	
 	private boolean strictMode = true;
 	
+	/**
+	 * Private constructor.
+	 * Use {@link #create()} from outside. 
+	 */
 	private MDLContext() {
 		fileTranslator       = cache(new FileTranslator(this));
 		modelTranslator      = cache(new ModelTranslator(this));
@@ -56,6 +72,7 @@ public class MDLContext {
 		orderSpecTranslator  = cache(new OrderSpecificationTranslator(this));
 	}
 	
+	/** Create a new {@code MDLContext}. */
 	public static MDLContext create() {
 		return new MDLContext();
 	}

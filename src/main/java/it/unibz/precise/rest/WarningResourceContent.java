@@ -12,6 +12,16 @@ import it.unibz.precise.check.ConsistencyWarning;
 import it.unibz.precise.model.BaseEntity;
 import it.unibz.util.Util;
 
+/**
+ * Representation of warnings as returned to the client.
+ * Needed for being able to convert entities and locations
+ * into another representation that does not have cycles.
+ * This is done by a {@link Function} provided to the constructor.
+ * Conversion of locations instead is fully handled by this class.
+ * 
+ * @author MatthiasP
+ *
+ */
 @Relation(value="warning", collectionRelation="warnings")
 public class WarningResourceContent {
 	
@@ -20,6 +30,7 @@ public class WarningResourceContent {
 	
 	private Function<BaseEntity, ?> entityMapper;
 	
+	/** Create a {@code WarningResourceContent} for the given warning, using the given specified {@code entityMapper}. */
 	public WarningResourceContent(ConsistencyWarning warning, Function<BaseEntity, ?> entityMapper) {
 		this.warning = warning;
 		this.entityMapper = entityMapper;
@@ -35,11 +46,13 @@ public class WarningResourceContent {
 		return warning.getMessage();
 	}
 
+	/** Returns the entities transformed by the entity mapper. */
 	@JsonProperty("entities")
 	public List<?> getEntities() {
 		return Util.mapToList(warning.getEntities(), entityMapper::apply);
 	}
 	
+	/** Returns the locations transformed into {@link LocationContent}s. */
 	@JsonProperty("locations")
 	public List<?> getLocations() {
 		return Util.mapToList(
@@ -48,6 +61,10 @@ public class WarningResourceContent {
 		);
 	}
 	
+	/**
+	 * Representation of locations as an index within the corresponding task.
+	 * The task is expected to be transformed by an entity mapper before being passed.
+	 */
 	public static class LocationContent {
 		private Object task;
 		private int index;

@@ -8,8 +8,15 @@ import org.springframework.data.repository.query.Param;
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Model;
 
+/**
+ * Repository for {@link Dependency}s.
+ * 
+ * @author MatthiasP
+ *
+ */
 public interface DependencyRepository extends PagingAndSortingRepository<Dependency, Long> {
 	
+	// TODO remove?
 	Page<Dependency> findByModel(@Param("model") Model model, Pageable pageable);
 
 }

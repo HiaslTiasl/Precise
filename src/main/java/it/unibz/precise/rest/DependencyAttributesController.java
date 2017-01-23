@@ -15,6 +15,12 @@ import it.unibz.precise.model.Dependency;
 import it.unibz.precise.rep.DependencyRepository;
 import it.unibz.util.Util;
 
+/**
+ * Exposes {@link Dependency#getAllowedAttributes()}.
+ * 
+ * @author MatthiasP
+ *
+ */
 @RepositoryRestController
 public class DependencyAttributesController {
 	

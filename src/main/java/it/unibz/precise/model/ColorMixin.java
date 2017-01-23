@@ -5,6 +5,12 @@ import java.awt.Color;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Customized JSON representation of {@link Color}s.
+ * 
+ * @author MatthiasP
+ *
+ */
 @JsonAutoDetect(
     fieldVisibility = JsonAutoDetect.Visibility.NONE,
     isGetterVisibility = JsonAutoDetect.Visibility.NONE,
