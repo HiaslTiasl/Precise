@@ -124,38 +124,39 @@ public class Pitch {
 	 * Otherwise nothing is done.
 	 */
 	public boolean update() {
-		final int MISSING_DURATION_DAYS = 0x01;
-		final int MISSING_CREW_COUNT = 0x02;
+		// Assign each field to a bit index
+		// N.B. crew size is independent from other fields
+		final int MISSING_DURATION_DAYS    = 0x01;
+		final int MISSING_CREW_COUNT       = 0x02;
 		final int MISSING_QUANTITY_PER_DAY = 0x04;
-		final int MISSING_TOTAL_QUANTITY = 0x08;
+		final int MISSING_TOTAL_QUANTITY   = 0x08;
 		
 		int durationDaysMask   = durationDays   != 0 ? 0 : MISSING_DURATION_DAYS;
 		int crewCountMask      = crewCount      != 0 ? 0 : MISSING_CREW_COUNT;
 		int quantityPerDayMask = quantityPerDay != 0 ? 0 : MISSING_QUANTITY_PER_DAY;
 		int totalQuantityMask  = totalQuantity  != 0 ? 0 : MISSING_TOTAL_QUANTITY;
 		
+		// Compute bitmask: 0 = available, 1 = missing (Because of Integer.lowestOneBit)
 		int totalMask = durationDaysMask | crewCountMask | quantityPerDayMask | totalQuantityMask;
 		
 		boolean consistent = true;
 		
-		if (totalMask == 0 && !checkPitchConsistency())
-			consistent = false;
-		else {
-			if (Integer.bitCount(totalMask) == 1) {
-				switch (Integer.lowestOneBit(totalMask)) {
-				case MISSING_DURATION_DAYS:
-					durationDays = computeDurationDays();
-					break;
-				case MISSING_CREW_COUNT:
-					crewCount = computeCrewCount();
-					break;
-				case MISSING_QUANTITY_PER_DAY:
-					quantityPerDay = computeQuantityPerDay();
-					break;
-				case MISSING_TOTAL_QUANTITY:
-					totalQuantity = computeTotalQuantity();
-					break;
-				}
+		if (totalMask == 0)								// All available -> check consistency
+			consistent = checkPitchConsistency();
+		else if (Integer.bitCount(totalMask) == 1) {	
+			switch (Integer.lowestOneBit(totalMask)) {	// Exactly one missing -> compute it
+			case MISSING_DURATION_DAYS:
+				durationDays = computeDurationDays();
+				break;
+			case MISSING_CREW_COUNT:
+				crewCount = computeCrewCount();
+				break;
+			case MISSING_QUANTITY_PER_DAY:
+				quantityPerDay = computeQuantityPerDay();
+				break;
+			case MISSING_TOTAL_QUANTITY:
+				totalQuantity = computeTotalQuantity();
+				break;
 			}
 		}
 		return consistent;
