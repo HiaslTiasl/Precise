@@ -1,3 +1,7 @@
+/**
+ * JointJS model and view for dependencies
+ * @module "shapes/DependencyShape"
+ */
 define([
 	'lib/lodash',
 	'lib/joint',
@@ -11,16 +15,25 @@ define([
 ) {
 	'use strict';
 	
+	var MODEL_CLASSPATH = 'precise.DependencyShape',	// Path of the class under joint.shapes unless and type attribute, so JointJS can find the class
+		VIEW_CLASSPATH = MODEL_CLASSPATH + 'View';		// As expected by JointJS to find the view implementation of a model class
+	
 	var ARROW_MARKER = 'm 0 10 l -24 10 l 24 10 z',
 		CHAIN_FILTER_ID = 'chain-precedence',
 		ALT_CROSS_SIZE = 16;
 	
-	var DependencyShape = util.set(joint.shapes, ['precise', 'DependencyShape'], joint.dia.Link.extend({
+	/**
+	 * JointJS cell model of a dependency.
+	 * @constructor
+	 * @extends joint.dia.Link
+	 */
+	var DependencyShape = util.set(joint.shapes, MODEL_CLASSPATH, joint.dia.Link.extend({
 		
 		// --------------------- Custom markup -------------------------
 		//
 		// Changes wrt. default markup are annotated with comments.
 		
+		/** Basic markup. */
 		markup: [
 			'<path class="connection" stroke="black" d="M 0 0 0 0"/>',
 			'<path class="marker-source" fill="black" stroke="black" d="M 0 0 0 0"/>',
@@ -35,6 +48,7 @@ define([
 			'<g class="link-tools"/>'
 		].join(''),
 		
+		/** Markup for link tools. */
 		toolMarkup: [
 			'<g class="link-tool">',
 				'<g class="tool-remove" event="remove">',
@@ -52,6 +66,7 @@ define([
 			'</g>'
 		].join(''),
 
+		/** Markup for link vertices. */
 		vertexMarkup: [
 			'<g class="marker-vertex-group" transform="translate(<%= x %>, <%= y %>)">',
 				// Increased radius
@@ -64,6 +79,7 @@ define([
 			'</g>'
 		].join(''),
 
+		/** Markup for arrowheads for moving endpoints. */
 		arrowheadMarkup: [
 			'<g class="marker-arrowhead-group marker-arrowhead-group-<%= end %>">',
 				// Increased size
@@ -71,50 +87,63 @@ define([
 			'</g>'
 		].join(''),
 		
+		/** Overrides default properties. */
 		defaults: joint.util.deepSupplement({
-			type: 'precise.DependencyShape'
+			type: MODEL_CLASSPATH 
 		}, joint.dia.Link.prototype.defaults),
 		
+		/** Overrides model initialization. */
 		initialize: function (options) {
+			// Set the ID before JointJS does so
 			this.set('id', HAL.hrefTo(options.data));
 			
+			// Update properties when the data changes
 			this.on('change:data', this.update, this);
+			// Toggle visibility of labels depending on the "hideLabels" property
 			this.on('change:hideLabels', this.updateHideLabels, this);
 			
+			// Update properties based on initial data
 	        this.update();
-	        
-	        joint.dia.Cell.prototype.initialize.apply(this, arguments);
+	        // Call superclass implementation
+	        joint.dia.Link.prototype.initialize.apply(this, arguments);
 		},
 		
+		/** Property "hideLabels" changed, so update visibility of labels. */
 		updateHideLabels: function (model, hideLabels) {
 			this.attr('.labels/display', hideLabels ? 'none' : 'inline')
 		},
 		
+		/** Property "data" changed, so update properties and attributes. */
 		update: function () {
 			var data = this.get('data') || {};
 			
+			// Set JointJS specific properties
 			this.set({
 				source: data.source ? { id: HAL.resolve(HAL.hrefTo(data.source)) } : data.sourceVertex,
 				target: data.target ? { id: HAL.resolve(HAL.hrefTo(data.target)) } : data.targetVertex,
 				vertices: data.vertices
 			});
+			// Set position and text of 
 			this.label(0, {
 				position: _.assign({
-					distance: 0.5,
-					offset: -20
+					distance: 0.5,		// Defaults to half the distance
+					offset: -20			// Defaults to 20 above dependency if from left to right
 				}, data.labelPosition),
 				attrs: {
 					text: {
+						// Short attribute names joint by comma
 						text: _.chain(data.scope).get('attributes').map('shortName').join(', ').value(),
 					}
 				}
 			});
 			var attrs = {
+				// Cross indicating alternate precedence, only shown if dependency is alternate, and scaled up of also chain
 				'.alt-cross': {
 					'visibility': data.alternate ? 'visible' : 'hidden',
 					style: { 'stroke-width': data.chain ? ('4px') : undefined },
 					'transform': data.chain ? 'scale(1.4)' : ''
 				},
+				// The arrow line, double if chain
 				'.connection': {
 					filter: data.chain ? 'url(#' + CHAIN_FILTER_ID + ')' : 'none',
 					style: { 'stroke-width': data.chain ? '3px' : undefined }
@@ -122,11 +151,13 @@ define([
 			};
 			
 			this.attr(attrs);
+			// Also update visibility of labels
 			this.updateHideLabels(this, this.get('hideLabels'));
 		}
 		
 	}, {
 		// Static properties
+		// Endpoint information regarding corresponding vertex property and opposite endpoint
 		endInfo: {
 			source: {
 				vertex: 'sourceVertex',
@@ -140,6 +171,7 @@ define([
 		
 	}));
 	
+	// Color matrix that increases contrast
 	var intensify = [
 		1, 0, 0,    0, 0, 
 		0, 1, 0,    0, 0,
@@ -147,6 +179,7 @@ define([
 		0, 0, 0, 1000, 0
 	].join(' ');
 	
+	// Color matrix that maps alpha to white
 	var visibleToWhite = [
 		0, 0, 0, 0, 1, 
 		0, 0, 0, 0, 1,
@@ -154,7 +187,21 @@ define([
 		0, 0, 0, 1, 0
 	].join(' ');
 	
-	util.set(joint.shapes, 'precise.DependencyShapeView', joint.dia.LinkView.extend({
+	/**
+	 * JointJS cell view for dependencies.
+	 * Uses JointJS batch operations for complex operations that involve dragging
+	 * (i.e. moving endpoints, vertices, or labels) to trigger events only when
+	 * such operations are finished, which can be used to update the server.
+	 * @constructor
+	 * @extends joint.dia.LinkView
+	 */
+	util.set(joint.shapes, VIEW_CLASSPATH, joint.dia.LinkView.extend({ 
+		/**
+		 * SVG filter for producing double-stroked paths, used for chain precedences.
+		 * Achieves this by scaling up the input image, and drawing it again on top but
+		 * in white.
+		 * The contrast is increased to make it look cleaner.
+		 */
 		filterMarkup: [
 			'<filter id="' + CHAIN_FILTER_ID + '" filterUnits="userSpaceOnUse">',
 				'<feColorMatrix in="SourceGraphic" result="inner" type="matrix" values="' + intensify + '"/>',
@@ -167,56 +214,68 @@ define([
 			'</filter>'
 		].join(''),
 		
+		/** Maps this._action as reported by JointJS to custom batch operation names. */
 		batchNameByAction: {
 			'vertex-move': 'vertices-change',
 			'arrowhead-move': 'end-change',
 			'label-move': 'label-change'
 		},
 		
+		/** Overrides default options. */
 		options: _.defaults({
-			sampleInterval: 20	// Fixes issues regarding label positioning for short links
+			sampleInterval: 20	// Smaller than default to fix issues regarding label positioning for short links
 		}, joint.dia.LinkView.prototype.options),
 		
-		initialize: function () {
-			this.batchOptions = _.transform(this.batchNameByAction, function (res, batchName) {
-				res[batchName] = {
-					batchName: batchName,
-					other: { cell: this.model }
-				};
-			}, {}, this);
-			joint.dia.LinkView.prototype.initialize.apply(this, arguments);
+		/** Creates a JointJS batch options object for the given name and optional other options. */
+		createBatchOptions: function (name, other) {
+			return {
+				batchName: name,
+				other: _.assign({
+					cell: this.model	// Always include the cell model, unless overridden by other
+				}, other)
+			};
 		},
 		
+		/** Removes the vertex of the given index in a batch operation. */
 		removeVertex: function (idx) {
-			var opt = this.batchOptions['vertices-change'];
+			var opt = this.createBatchOptions('vertices-change');
 			this.model.trigger('batch:start', opt);
 			joint.dia.LinkView.prototype.removeVertex.call(this, idx);
 			this.model.trigger('batch:stop', opt);
 		},
 		
+		/** Adds the given vertex in a batch operation. */
 		addVertex: function (vertex) {
-			var opt = this.batchOptions['vertices-change'];
+			var opt = this.createBatchOptions('vertices-change');
 			this.model.trigger('batch:start', opt);
         	joint.dia.LinkView.prototype.addVertex.call(this, vertex);
         	this.model.trigger('batch:stop', opt);
 		},
 		
-		addOtherBatchOptionsTo: function (opt) {			
-			if (opt.batchName === 'end-change')
-				opt.other.end = this._arrowhead;
-		},
-		
+		/**
+		 * The pointer was put down on the dependency or a tool of it, so start the batch
+		 * operation corresponding to that tool, if any.
+		 */
 		pointerdown: function () {
 			joint.dia.LinkView.prototype.pointerdown.apply(this, arguments);
 			var batchName = this.batchNameByAction[this._action];
-			if (!this.ongoingBatch && batchName) {
-				var opt = this.batchOptions[batchName];
-				this.addOtherBatchOptionsTo(opt);
+			
+			if (this.ongoingBatch)	// Should never be the case
+				this.ongoingBatch = null;
+			else if (batchName) {
+				var opt = this.createBatchOptions(batchName, {
+					end: this._arrowhead	// Set to name of endpoint for 'arrowhead-move' operation 
+				});
+				// Remember that this operation is ongoing
 				this.ongoingBatch = opt;
 				this.model.trigger('batch:start', opt);
 			}
 		},
 		
+		/**
+		 * The pointer released from the dependency or a tool of it, so stop the
+		 * currently ongoing batch operation, if any.
+		 */
 		pointerup: function () {
 			joint.dia.LinkView.prototype.pointerup.apply(this, arguments);
 			if (this.ongoingBatch) {
@@ -225,42 +284,64 @@ define([
 			}
 		},
 		
+		/**
+		 * There was a double-click on the dependency, so add a vertex if the
+		 * click was on the arrow line.
+		 */
 		pointerdblclick: function (evt, x, y) {
-            if (joint.V(evt.target).hasClass('connection') || joint.V(evt.target).hasClass('connection-wrap'))
+			var vTarget = joint.V(evt.target);
+            if (vTarget.hasClass('connection') || vTarget.hasClass('connection-wrap'))
             	this.addVertex({ x: x, y: y });
         },
         
+        /** The model changed, so update the view. */
         update: function () {
+        	// Call super to update SVG attributes
         	joint.dia.LinkView.prototype.update.apply(this, arguments);
         	this.updateAltCrossPosition();
         	this.updateFilter();
         	return this;
         },
         
+        /** Updates position and orientation of the cross of the alternate precedence. */
         updateAltCrossPosition: function () {
-        	// See joint.dia.LinkView.prototype.updateLabelPositions.
-        	var connectionElement = this._V.connection.node,
-            	connectionLength = this.getConnectionLength(),
-            	startCoords = this.getPointAtLength(0),
-            	coords = this.getPointAtLength(20),
-            	angle = 90 - joint.g.point(startCoords).theta(coords),
-            	prevTransform = joint.V.decomposeMatrix(this._V.altCross.transform());
-        	
-        	this._V.altCross.attr('transform', '')
-	        	.rotate(angle)
-	        	.translate(coords.x, coords.y)
-	        	.scale(prevTransform.scaleX, prevTransform.scaleY);
+        	// Only do something for alternate precedences, otherwise the cross is not visible anyway.
+        	if (this.model.get('data').alternate) {
+        		// See joint.dia.LinkView.prototype.updateLabelPositions.
+	        	var connectionElement = this._V.connection.node,
+	            	connectionLength = this.getConnectionLength(),
+	            	startCoords = this.getPointAtLength(0),
+	            	crossCoords = this.getPointAtLength(20),
+	            	angle = 90 - joint.g.point(startCoords).theta(crossCoords),
+	            	prevTransform = joint.V.decomposeMatrix(this._V.altCross.transform());
+	        	
+	        	this._V.altCross.attr('transform', '')
+		        	.rotate(angle)
+		        	.translate(crossCoords.x, crossCoords.y)
+		        	.scale(prevTransform.scaleX, prevTransform.scaleY);
+        	}
         },
         
+        /**
+         * Updates the SVG filter.
+         * An SVG filter has a viewbox to which it applies, but in our case we cannot
+         * statically know the dimensions of such a viewbox.
+         * Therefore, we update the viewbox dynamically whenever updating a dependency.
+         */
         updateFilter: function () {
+        	// Only do something for alternate precedences, otherwise the cross is not visible anyway.
         	if (this.model.get('data').chain) {
         		var vDefs = joint.V(this.paper.defs),
         			vFilter = vDefs.findOne('#' + CHAIN_FILTER_ID),
         			bbox = this.paper.viewport.getBBox();
+        		// Append the filter definition to the SVG if missing
+        		// Note that this might be necessary more than once because the SVG is recreated whenever
+        		// the user opens a diagram.
         		if (!vFilter) {
         			vFilter = joint.V(this.filterMarkup);
         			vDefs.append(vFilter);
         		}
+        		// Set the filter viewbox to the diagram dimensions
         		vFilter.attr({
         			x: bbox.x,
         			y: bbox.y,
@@ -272,14 +353,26 @@ define([
         
 	}, {
 		
+		/** Returns vertices that can be used to ensure that a loop on the given taskView is visible. */
 		computeLoopVertices: function (taskView, vertices, opt) {
 			var selector = joint.dia.LinkView.makeSelector(taskView.model),
 				element = taskView.el.querySelector(selector),
-				bbox = taskView.getStrokeBBox(element);
-			return joint.routers.orthogonal(vertices, opt || {}, {
-				sourceBBox: bbox,
-				targetBBox: bbox
-			});
+				bbox = taskView.getStrokeBBox(element),
+				// Dirty hack!
+				// ===========
+				// We use the JointJS 'orthogonal' router to compute an orthogonal route for us.
+				// JointJS routers compute additional link vertices that are only displayed but not stored,
+				// so they can change dynamically, e.g. for avoiding obstacles.
+				// They expect a link view, but we want to send the computed vertices to the server and
+				// only then create the link and therefore the link view.
+				// Therefore, we create a mock link link view that only contains the properties
+				// required by this specific router, namely the bounding boxes of the source
+				// and the target task.
+				dummyLinkView = {
+					sourceBBox: bbox,
+					targetBBox: bbox
+				};
+			return joint.routers.orthogonal(vertices, opt || {}, dummyLinkView);
 		}
 	
 	}));

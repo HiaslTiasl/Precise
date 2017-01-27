@@ -26,3 +26,7 @@ figure {
 .container.content {
 	margin-bottom: 2em;
 }
+
+precise-error-dialog table {
+	width: 100%;
+}

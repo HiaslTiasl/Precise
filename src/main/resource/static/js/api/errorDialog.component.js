@@ -1,8 +1,16 @@
+/**
+ * Component for displaying multiple errors in a modal dialog.
+ * @module "api/errorDialog.component"
+ */
 define(function () {
 	'use strict';
 	
 	ErrorDialogComponentController.$inject = [];
 	
+	/** 
+	 * Component controller.
+	 * @constructor
+	 */
 	function ErrorDialogComponentController() {
 		
 		var $ctrl = this;
@@ -11,13 +19,16 @@ define(function () {
 		$ctrl.$onInit = $onInit;
 		
 		function $onInit() {
-			$ctrl.errors = $ctrl.resolve.errors;
-			if (!Array.isArray($ctrl.errors)) {
+			$ctrl.error = $ctrl.resolve.error;
+			if (Array.isArray($ctrl.error.data))
+				$ctrl.errData = $ctrl.error.data;
+			else {
+				$ctrl.errData = [$ctrl.errors.data];
 				$ctrl.title = errors.title;
-				$ctrl.errors = [$ctrl.errors];
 			}
 		}
 		
+		/** Close the dialog. */
 		function close() {
 			$ctrl.modalInstance.close();
 		}

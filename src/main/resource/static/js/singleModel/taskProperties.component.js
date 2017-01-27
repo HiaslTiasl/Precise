@@ -1,3 +1,7 @@
+/**
+ * Angular component for task properties.
+ * @module "singleModel/taskProperties.component"
+ */
 define([
 	'lib/lodash',
 	'util/util'
@@ -17,28 +21,25 @@ define([
 		$ctrl.updateExlusivenessType = updateExlusivenessType;
 		$ctrl.updateExclusivenessAttributes = updateExclusivenessAttributes;
 		$ctrl.attrFilterForOrderSpec = attrFilterForOrderSpec;
-		$ctrl.selectedOrderSpecAttribute = selectedOrderSpecAttribute
-		$ctrl.addOrderSpec = addOrderSpec;
-		$ctrl.removeOrderSpec = removeOrderSpec;
-		$ctrl.canAddOrderSpec = canAddOrderSpec;
-		$ctrl.canMoveDownOrderSpec = canMoveDownOrderSpec;
-		$ctrl.canMoveUpOrderSpec = canMoveUpOrderSpec;
-		$ctrl.moveUpOrderSpec = moveUpOrderSpec;
-		$ctrl.moveDownOrderSpec = moveDownOrderSpec;
+		$ctrl.changedOrderEntryAttribute = changedOrderEntryAttribute
+		$ctrl.addDefaultOrderEntry = addDefaultOrderEntry;
+		$ctrl.canAddOrderEntry = canAddOrderEntry;
+		$ctrl.isDisabledOrderType = isDisabledOrderType;
 		$ctrl.addPattern = addPattern;
 		$ctrl.removePattern = removePattern;
 		$ctrl.updatePattern = updatePattern;
-		$ctrl.sendTask = sendTask;
 		$ctrl.isDisabledPatternEntry = isDisabledPatternEntry;
-		$ctrl.isDisabledOrderType = isDisabledOrderType;
+		$ctrl.sendTask = sendTask;
 		$ctrl.toggleCollapsed = toggleCollapsed;
 		
+		/** Scope types in display order. */
 		$ctrl.scopeTypes = [
 			Scopes.Types.UNIT,
 			Scopes.Types.GLOBAL,
 			Scopes.Types.ATTRIBUTES
 		];
 		
+		/** Order types in display order. */
 		$ctrl.orderTypes = [
 			OrderSpecifications.Types.NONE,
 			OrderSpecifications.Types.PARALLEL,
@@ -46,6 +47,7 @@ define([
 			OrderSpecifications.Types.DESCENDING
 		];
 		
+		/** Indicates which of the fieldsets are collapsed. */
 		$ctrl.collapsed = {
 			pitches: true,
 			exclusiveness: true,
@@ -55,21 +57,29 @@ define([
 
 		$ctrl.$onChanges = $onChanges;
 		
+		/** Returns all attributes for locations of the given tasks. */
 		var getTaskAttributes = _.property(['type', 'phase', 'attributes']);
 		
 		function $onChanges() {
 			if ($ctrl.resource) {
+				// Use local representations of scope and ordering
 				$ctrl.exclusiveness = Scopes.toLocalRepresentation($ctrl.resource.data.exclusiveness);
 				$ctrl.order = OrderSpecifications.toLocalRepresentation($ctrl.resource.data.orderSpecifications);
+				// Init available task types and validate pitch parameters
 				loadTaskTypes();
 				computePitches();
 			}
 		}
 		
+		/** Show the given error regarding pitch parameters. */
 		function setPitchError(pitchError) {
 			$ctrl.pitchError = pitchError;
 		}
 		
+		/**
+		 * Loads the list of task types, either from the phase, if available,
+		 * or from the model otherwise.
+		 */
 		function loadTaskTypes() {
 			var resourcePromise = $ctrl.resource.data.type.phase
 				? Phases.existingResource($ctrl.resource.model, $ctrl.resource.data.type.phase)
@@ -77,6 +87,10 @@ define([
 			return resourcePromise.then(loadTaskTypesFrom);
 		}
 		
+		/**
+		 * Loads the list of task types associated to the given resource,
+		 * which can be either a model or a phase.
+		 */
 		function loadTaskTypesFrom(resource) {
 			// Reset old list of task types first so they cannot be selected.
 			resource.getTaskTypes({
@@ -88,10 +102,12 @@ define([
 			}, errorHandler.handle);			
 		}
 		
+		/** Toggle collapsing of the given fieldset. */
 		function toggleCollapsed(fieldset) {
 			$ctrl.collapsed[fieldset] = !$ctrl.collapsed[fieldset];
 		}
 		
+		/** Opens a dialog for editing the selected task definition. */
 		function editTaskDefinition() {
 			var type = $ctrl.resource.data.type;
 			$uibModal.open({
@@ -100,9 +116,7 @@ define([
 					resource: function () {
 						return TaskTypes.existingResource($ctrl.resource.model, type)
 							.then(function (tt) {
-								// Nested entities do not include their own singular link rel,
-								// which is the one we need since it has the 'projection' parameter.
-								// --> Reload to fix that
+								// Reload to ensure that we are dealing with a first-class resource
 								return tt.reload(); 
 							})
 							.then(function (tt) {
@@ -110,6 +124,7 @@ define([
 							});
 					},
 					phases: function () {
+						// Fix phase to the current one if available
 						return type.phase ? null : $ctrl.resource.model.getPhases({
 							projection: TaskTypes.Resource.prototype.defaultProjection
 						})
@@ -121,99 +136,111 @@ define([
 				}
 			}).result.then(function (result) {
 				$ctrl.resource.data.type = result;
+				// Call outer change handler
 				$ctrl.taskDefinitionChanged({ $result: result });
 				return loadTaskTypes();
 			})['catch'](errorHandler.handle);
 		}
 		
+		/** 
+		 * Ask the server to compute missing pitch parameters and resulting
+		 * man-hours, or to check whether the given parameters are consistent.
+		 */
 		function computePitches() {
 			$ctrl.resource.computePitches()
 				.then(_.constant(null), PreciseApi.getErrorText)
 				.then(setPitchError);
 		}
 		
+		/** Updates type of exclusiveness scope based on scope attributes and available attributes. */
 		function updateExlusivenessType() {
 			Scopes.updateType($ctrl.exclusiveness, getTaskAttributes($ctrl.resource.data));
 		}
 		
+		/** Updates attributes of exclusiveness scope based on scope type and available attributes. */
 		function updateExclusivenessAttributes() {
 			Scopes.updateAttributes($ctrl.exclusiveness, getTaskAttributes($ctrl.resource.data));
 		}
 		
+		/**
+		 * Returns a function that indicates whether a given attribute can be selected
+		 * as the new attribute for the given order specification.
+		 * Useful as an argument to the Angular filter "filter"
+		 * @example
+		 * 	... attrs | filter:$ctrl.attrFilterForOrderSpec(os)
+		 */
 		function attrFilterForOrderSpec(os) {
 			return function (a) {
-				return a.name === os.attribute.name || canSelectForOrderSpec(a);
+				return a.name === os.attribute.name		// The selected option must be seletible
+					|| (!$ctrl.order.hasAttribute(a) && !isDisabledOrderType(os, a));
 			}
 		}
 		
-		function canSelectForOrderSpec(a) {
-			return !$ctrl.order.attrs[a.name];
+		/**
+		 * An attribute was selected for an order spec, so update the local representation to refresh
+		 * the set of attributes in use.
+		 */
+		function changedOrderEntryAttribute() {
+			$ctrl.order.check();
 		}
 		
-		function selectedOrderSpecAttribute() {
-			OrderSpecifications.checkLocalRepresentation($ctrl.order);
+		/** Adds a new entry to the order specification if possible. */
+		function addDefaultOrderEntry() {
+			$ctrl.order.addDefaultEntry(getTaskAttributes($ctrl.resource.data));
 		}
 		
-		function addOrderSpec() {
-			var attr = _.find(getTaskAttributes($ctrl.resource.data), canSelectForOrderSpec);
-			if (attr) {
-				$ctrl.order.specs.push({
-					orderType: OrderSpecifications.Types.NONE,
-					attribute: attr
-				});
-				selectedOrderSpecAttribute();
-			}
+		/** Indicates whether another entry can be added to the order specification. */
+		function canAddOrderEntry() {
+			return $ctrl.order.canAddEntry(getTaskAttributes($ctrl.resource.data));
 		}
 		
-		function moveUpOrderSpec(index) {
-			util.swap($ctrl.order.specs, index, index - 1);
+		/** Indicates whether the given order type is disabled for the given attribute. */
+		function isDisabledOrderType(orderType, attribute) {
+			return !OrderSpecifications.isAssignableTo(orderType, attribute);
 		}
 		
-		function moveDownOrderSpec(index) {
-			util.swap($ctrl.order.specs, index, index + 1);
-		}
-		
-		function removeOrderSpec(index) {
-			var removed = $ctrl.order.specs.splice(index, 1);
-			$ctrl.order.attrs[removed[0].attribute.name] = false;
-		}
-		
-		function canAddOrderSpec() {
-			return _.size($ctrl.order.specs) < _.size(getTaskAttributes($ctrl.resource.data));
-		}
-		
-		function canMoveUpOrderSpec(index) {
-			return index > 0;						
-		}
-		
-		function canMoveDownOrderSpec(index) {
-			return index < _.size($ctrl.order.specs) - 1;			
-		}
-		
+		/** Updates the given attribute to the given value in the given pattern. */
 		function updatePattern(pattern, patternNum, attr, newValue) {
 			return $ctrl.resource.updatePattern(pattern, attr, newValue).then(function (checkedPattern) {
 				// Copy all properties from the checked pattern to the current one.
 				// N.B: In principle we could also just replace the whole pattern at once,
 				// but SmartTable does not notice that and the view is not updated.
 				// See https://github.com/lorenzofox3/Smart-Table/issues/205
+				// Also note that we must consider the whole pattern returned, not
+				// only the updated attribute, since, in principle, the server can update
+				// all attributes (in practice only the changed and the following ones).
 				_.assign($ctrl.resource.data.locationPatterns[patternNum], checkedPattern);
 			}, errorHandler.handle);
 		}
 		
+		/**
+		 * Add another location pattern to the table. The new pattern is initialized as a global
+		 * pattern, which can be refined by the user afterwards.
+		 */
 		function addPattern() {
 			return $ctrl.resource.globalPattern().then(function (checkedPattern) {
 				var num = $ctrl.resource.data.locationPatterns.length;
 				$ctrl.resource.data.locationPatterns.push(checkedPattern);
+				// We add a location to the bottom of a table that is itself at the bottom
+				// of the properties scroll pane, so it is likely not visible without scrolling,
+				// so we do the scrolling for the user.
 				$timeout(function () {
 					$anchorScroll('location-' + num);
 				});
 			}, errorHandler.handle);
 		}
 		
+		/** Removes the location pattern at the given index.  */
 		function removePattern(index) {
 			$ctrl.resource.data.locationPatterns.splice(index, 1);
 		}
+
+		/** Indicates whether editing the given pattern entry should be disabled. */
+		function isDisabledPatternEntry(patternEntry) {
+			return _.get(patternEntry, ['allowedValues', 'length'], 0) <= 1;
+		}
 		
+		/** Sends the task to the server to apply the changes. */
 		function sendTask() {
 			var attributes = getTaskAttributes($ctrl.resource.data),
 				exclusiveness = attributes && Scopes.fromLocalRepresentation($ctrl.exclusiveness, attributes),
@@ -222,16 +249,9 @@ define([
 			$ctrl.resource.data.orderSpecifications = orderSpecifications;
 			return $ctrl.resource.send('expandedTask')
 				.then(function (result) {
+					// Call outer change handler 
 					$ctrl.done({ $result: result });
 				}, errorHandler.handle);
-		}
-
-		function isDisabledPatternEntry(patternEntry) {
-			return _.get(patternEntry, ['allowedValues', 'length'], 0) <= 1;
-		}
-		
-		function isDisabledOrderType(orderType, attribute) {
-			return !OrderSpecifications.isAssignableTo(orderType, attribute);
 		}
 		
 	}

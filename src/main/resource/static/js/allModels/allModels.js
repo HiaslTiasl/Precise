@@ -1,6 +1,6 @@
 /**
  * Angular module for the all-models part.
- * @module allModels/allModels
+ * @module "allModels/allModels"
  */
 define([
 	'lib/angular',

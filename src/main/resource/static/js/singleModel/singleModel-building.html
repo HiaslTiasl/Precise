@@ -54,6 +54,7 @@
 		<label for="building" class="col-sm-2 control-label">Building:</label>
 		<div class="col-sm-10">
 			<p id="building" class="form-control-static">
+				<!-- Visualizes the building as a pretty formatted JSON tree with collapsible properties -->
 				<json-formatter ng-show="$ctrl.phase" json="$ctrl.phase.buildingTree" open="3"></json-formatter>
 			</p>
 		</div>

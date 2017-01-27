@@ -5,34 +5,12 @@ define([
 ) {
 	'use strict';
 	
-	function limitArray(arr, length) {
-		while (arr.length > length)
-			arr.pop();
-	}
-
-	function mapInto(dst, src, mapper, thisArg) {
-		for (var i = 0, len = src.length; i < len; i++) {
-			var val = src[i];
-			dst[i] = thisArg
-				? mapper.call(thisArg, val, i, src)
-				: mapper(val, i, src);
-		}
-		limitArray(dst, len);
-		return dst;
-	}
-	
-	function strInsert(str, newStr, index) {
-		return str.substring(0, index) + newStr + str.substring(index);
-	}
-	
-	function strInsertBefore(str, newStr, subStr) {
-		return strInsert(str, newStr, str.indexOf(subStr));
-	}
-	
-	function nativeCompare(a, b) {
-		return a < b;
-	}
-	
+	/**
+	 * Sets the given value under the given path of the given object.
+	 * The path can either be an array of properties or a string where
+	 * '.' is interpreted as property delimiter.
+	 * Returns value.
+	 */
 	function set(obj, path, value) {
 		var arr = typeof path === "string" ? path.split('.') : path,
 			last = arr.length - 1,
@@ -44,6 +22,10 @@ define([
 		return cur[arr[last]] = value;
 	}
 	
+	/** 
+	 * Indicates whether the given object has all properties specified
+	 * in the following arguments.
+	 */
 	function hasProps(obj) {
 		var res = false;
 		if (obj && typeof obj === 'object') {
@@ -55,27 +37,11 @@ define([
 		return res;
 	}
 	
-	/** Adapted from java.util.Arrays.binarySearch */
-	function binarySearch(arr, fromIndex, toIndex, key, compare) {
-		if (typeof compare !== "function")
-			compare = nativeCompare;
-		var low = fromIndex || 0,
-			high = toIndex >= 0 ? toIndex - 1 : arr.length;
-		
-		while (low <= high) {
-			var mid = (low + high) >>> 1,
-				midVal = arr[mid],
-				cmp = compare(midVal, key);
-			if (cmp < 0)
-				low = mid + 1;
-			else if (cmp > 0)
-				high = mid - 1;
-			else
-				return mid; // key found
-		}
-		return -(low + 1);  // key not found.
-	}
-	
+	/**
+	 * Sets the given prototype object as the prototype property of its
+	 * constructor property.
+	 * The parent constructor is optional.
+	 */
 	function defineClass(Parent, proto) {
 		if (!proto) {
 			proto = Parent;
@@ -88,17 +54,47 @@ define([
 		return proto.constructor;
 	}
 	
-	// https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger#Polyfill
+	/**
+	 * Indicates whether the given value is an integer.
+	 * @see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger#Polyfill
+	 */
 	function isInteger(value) {
 		return typeof value === "number"
 			&& isFinite(value) 
 			&& Math.floor(value) === value;
 	}
 	
-	function satisfies(filter, value) {
-		return typeof filter === 'function' ? filter(value) : _.isEqual(filter, value);
+	/**
+	 * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+	 * Returns a random integer between min (included) and max (included)
+	 * using Math.round() will give you a non-uniform distribution!
+	 */
+	function getRandomIntIncl(min, max) {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 	
+	/** Returns true. */
+	function getTrue() {
+		return true;
+	}
+	
+	/** Indicates whether the given collection is empty. */
+	function isEmpty(collection) {
+		return _.some(collection, getTrue);
+	}
+	
+	/**
+	 * Indicates whether the given value satisfies the given filter.
+	 * If filter is a function, it is satisfied iff invoking it with value returns a truthy value.
+	 * Otherwise, the filter is satisfied iff it (deeply) equals to value.
+	 */
+	function satisfies(filter, value) {
+		return typeof filter === 'function' ? !!filter(value) : _.isEqual(filter, value);
+	}
+	
+	/** Swaps the values of the two given keys (indices) in the given object (array). */
 	function swap(obj, key1, key2) {
 		var temp = obj[key1];
 		obj[key1] = obj[key2];
@@ -106,14 +102,11 @@ define([
 	}
 	
 	return {
-		limitArray: limitArray,
-		mapInto: mapInto,
-		strInsert: strInsert,
-		strInsertBefore: strInsertBefore,
 		set: set,
 		hasProps: hasProps,
 		defineClass: defineClass,
 		isInteger: isInteger,
+		getRandomIntIncl: getRandomIntIncl,
 		satisfies: satisfies,
 		swap: swap
 	};

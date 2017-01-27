@@ -2,6 +2,7 @@
 	<div class="container-fluid">
 		<!-- Brand and toggle get grouped for better mobile display -->
 		<div class="navbar-header">
+			<!-- Single menu button for small screens based on bootstrap example, but does not work currently... -->
 			<button
 				class="navbar-toggle"
 				ng-click="$ctrl.menuOpen = !$ctrl.menuOpen"
@@ -22,8 +23,6 @@
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<div class="collapse navbar-collapse" uib-collapse="!$ctrl.menuOpen">
 			<ul class="nav navbar-nav">
-			
-				<!-- Comment out to remove dropdown -->
 				<li>
 					<div class="btn-group navbar-btn" uib-dropdown>
 						<button class="btn btn-default">
@@ -31,8 +30,6 @@
 						</button>
 						<button class="btn btn-default" uib-dropdown-toggle><span class="caret"></span></button>
 						<ul class="dropdown-menu" uib-dropdown-menu>
-							<!--  -->
-
 							<li ng-class="{active: $ctrl.$state.is('singleModel.config')}">
 								<a ui-sref="singleModel.config({name: $ctrl.model.data.name})">
 									{{$ctrl.$state.get('singleModel.config').data.title}}
@@ -48,9 +45,11 @@
 				</li>
 			</ul>
 		</div>
+		<!-- Link to help site -->
 		<!-- <ul class="nav navbar-nav navbar-right">
 			<li><a href="./doc.html">Info</a></li>
 		</ul> -->
 	</div>
 </nav>
+<!-- Actual content -->
 <ui-view class="content container-fluid"></ui-view>

@@ -173,12 +173,12 @@
 				<div class="toolbar">
 					<button
 						class="btn btn-primary btn-xs"
-						ng-click="$ctrl.addOrderSpec()"
-						ng-disabled="!$ctrl.canAddOrderSpec()">
+						ng-click="$ctrl.addDefaultOrderEntry()"
+						ng-disabled="!$ctrl.canAddOrderEntry()">
 						<span class="glyphicon glyphicon-plus"></span>
 					</button>
 				</div>
-				<table id="orderspec-table" class="table table-striped" st-table="orderSpecs" st-safe-src="$ctrl.order.specs">
+				<table id="orderspec-table" class="table table-striped" st-table="$ctrl.order.specs">
 					<thead>
 						<tr>
 							<th>Attribute</th>
@@ -187,12 +187,12 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr ng-repeat="o in orderSpecs track by $index">
+						<tr ng-repeat="o in $ctrl.order.specs track by $index">
 							<td>
 								<select
 									ng-model="o.attribute"
 									ng-options="a as (a | withShortName) for a in $ctrl.resource.data.type.phase.attributes | filter:$ctrl.attrFilterForOrderSpec(o):true track by a.name"
-									ng-change="$ctrl.selectedOrderSpecAttribute()">
+									ng-change="$ctrl.changedOrderEntryAttribute()">
 									<option value="">----</option>
 								</select>
 							</td>
@@ -206,19 +206,19 @@
 							<td class="btn-column">
 								<button
 									class="btn btn-default btn-xs"
-									ng-click="$ctrl.moveUpOrderSpec($index)"
-									ng-disabled="!$ctrl.canMoveUpOrderSpec($index)">
+									ng-click="$ctrl.order.moveToPrev($index)"
+									ng-disabled="!$ctrl.order.canMoveToPrev($index)">
 									<span class="glyphicon glyphicon-chevron-up"></span>
 								</button>
 								<button
 									class="btn btn-default btn-xs"
-									ng-click="$ctrl.moveDownOrderSpec($index)"
-									ng-disabled="!$ctrl.canMoveDownOrderSpec($index)">
+									ng-click="$ctrl.order.moveToNext($index)"
+									ng-disabled="!$ctrl.order.canMoveToNext($index)">
 									<span class="glyphicon glyphicon-chevron-down"></span>
 								</button>
 								<button
 									class="btn btn-danger btn-xs"
-									ng-click="$ctrl.removeOrderSpec($index)">
+									ng-click="$ctrl.order.removeEntry($index)">
 									<span class="glyphicon glyphicon-trash"></span>
 								</button>
 							</td>

@@ -11,10 +11,10 @@
 			</tr>
 		</thead>
 		<tbody>
-			<tr ng-repeat="e in $ctrl.errors">
-				<td>{{::e.message || e}}</td>
-				<td>{{::e.invalidValue}}</td>
-				<td>{{::e.property}}<td>
+			<tr ng-repeat="e in $ctrl.errData">
+				<td>{{::e.message || e}}</td>	<!-- The error message -->
+				<td>{{::e.invalidValue}}</td>	<!-- The value that is invalid -->
+				<td>{{::e.property}}<td>		<!-- The path to the invalid value -->
 			</tr>
 		</tbody>
 	</table>

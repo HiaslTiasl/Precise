@@ -1,3 +1,7 @@
+/**
+ * Wrapper around tinycolor.
+ * @module "api/colors"
+ */
 define([
 	'lib/tinycolor'
 ] ,function (

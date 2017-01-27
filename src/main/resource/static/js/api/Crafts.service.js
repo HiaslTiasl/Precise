@@ -1,3 +1,7 @@
+/**
+ * Angular service for dealing with craft resources.
+ * @module "api/Crafts.service"
+ */
 define([
 	'lib/lodash',
 	'util/util'
@@ -9,6 +13,7 @@ define([
 	
 	CraftsService.$inject = ['$q', 'PreciseApi', 'Resources', 'Pages'];
 	
+	/** @constructor */
 	function CraftsService($q, PreciseApi, Resources, Pages) {
 		
 		var Crafts = this;
@@ -18,20 +23,31 @@ define([
 		Crafts.resource = resource;
 		Crafts.Resource = CraftResource;
 		
-		var dontSendDirectly = ['_links'];
+		var dontSendDirectly = ['_links'];		// Properties that should not be sent as they are
 		
-		function newResource(model, taskType) {
-			return resource(model, taskType, false);
+		/** Returns a promise of a new resource that does not exist on the server. */
+		function newResource(model, craft) {
+			return resource(model, craft, false);
 		}
 		
-		function existingResource(model, taskType) {
-			return resource(model, taskType, true);
+		/** Returns a promise of a resource that already exists on the server. */
+		function existingResource(model, craft) {
+			return resource(model, craft, true);
 		}
 		
-		function resource(model, taskType, existing) {
-			return $q.when(new CraftResource(model, taskType, existing));
+		/** Returns a promise of a new craft resource. */
+		function resource(model, craft, existing) {
+			// N.B. Actually we already have all the data, so technically
+			// there is no need to return a promise, but we do anyway
+			// in the favor of a uniform interface across resource services.
+			return $q.when(new CraftResource(model, craft, existing));
 		}
 		
+		/**
+		 * A resource representing a craft
+		 * @constructor
+		 * @extends module:"api/Resource.service"#Base
+		 */
 		function CraftResource(model, data, existing) {
 			Resources.Base.call(this, data, existing);
 			this.model = model;
@@ -49,7 +65,9 @@ define([
 			defaultProjection: null,
 			
 			getRequestData: function () {
+				// omit special fields
 				var processed = _.omit(this.data, dontSendDirectly);
+				// set model link for new resources
 				if (!this.exists)
 					processed.model = PreciseApi.hrefTo(this.model.data);
 				return processed;

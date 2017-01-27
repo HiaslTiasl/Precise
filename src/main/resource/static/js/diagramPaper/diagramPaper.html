@@ -1,5 +1,7 @@
 <div class="panels">
+	<!-- Toolbar of the diagram -->
 	<div class="toolbar" ng-switch on="$ctrl.toolset">
+		<!-- Show the title of the currently active toolset and allow the user to switch to another one -->
 		<div class="btn-group toolset-chooser" uib-dropdown>
 			<button class="btn btn-default" uib-dropdown-toggle>
 				<span class="glyphicon glyphicon-menu-hamburger"></span> {{$ctrl.toolset}}
@@ -12,17 +14,19 @@
 				</li>
 			</ul>
 		</div>
+		<!-- File toolset: provides import/export of diagram part -->
 		<div class="toolset" ng-switch-when="File">
 			<button class="btn btn-default" ng-click="$ctrl.importDiagram()">Import</button>
 			<a ng-href="{{::$ctrl.getFileURL($ctrl.model.data)}}" class="btn btn-default">Export</a>
 		</div>
+		<!-- Edit toolset: allows to add and remove tasks and dependencies -->
 		<div class="toolset" ng-switch-when="Edit">
 			<!--
 				Using a wrapper element since repeating on buttons directly
 				would eliminate whitespaces between them in the resulting markup
 				and therefore also in the view.
 			-->
-			<span ng-repeat="t in $ctrl.diagramToolset">
+			<span ng-repeat="t in $ctrl.diagramEditToolset">
 				<button
 					class="btn btn-default"
 					ng-class="{'active': $ctrl.diaPaper.editMode === t.editMode}"
@@ -32,6 +36,7 @@
 				</button>
 			</span>
 		</div>
+		<!-- View toolset: allows to show/hide locations and dependency scopes. -->
 		<div class="toolset" ng-switch-when="View">
 			<label class="checkbox-inline">
 				<input type="checkbox" ng-model="$ctrl.showLocations" ng-change="$ctrl.hideLocationsChanged()">
@@ -42,6 +47,7 @@
 				Dependency Scopes
 			</label>
 		</div>
+		<!-- Search toolset: allows to search for tasks and highlight them in the diagram. -->
 		<div class="toolset" ng-switch-when="Search">
 			<form class="form-inline">
 				<div class="form-group has-feedback">
@@ -51,6 +57,7 @@
 								<span class="glyphicon glyphicon-search"></span>
 							</button>
 						</span>
+						<!-- Simple search query input -->
 						<input
 							id="simple-search" 
 							type="search"
@@ -60,11 +67,13 @@
 							ng-change="$ctrl.searchTextChanged()"
 							ng-model-options="{ updateOn: 'default blur submit', debounce: { default: 200, blur: 0, submit: 0 } }"/>
 					</div>
+					<!-- Clear simple search query -->
 					<span
 						class="form-control-feedback glyphicon glyphicon-remove"
 						ng-click="$ctrl.cancelSearch()"
 						ng-if="$ctrl.searchText">
 					</span>
+					<!-- Advanced search input-->
 					<div
 						class="input-group"
 						ng-if="$ctrl.advancedSearch"
@@ -72,9 +81,11 @@
 						dropdown-append-to-body
 						auto-close="outsideClick">
 						<div class="input-group-btn">
+							<!-- Open the query parameter form -->
 							<button class="btn btn-default" uib-dropdown-toggle>
 								<span class="glyphicon glyphicon-edit"></span>
 							</button>
+							<!-- Query parameter form in a dropdown -->
 							<ul class="dropdown-menu" uib-dropdown-menu>
 								<li>
 									<div class="container-fluid">
@@ -133,6 +144,7 @@
 							ng-model="$ctrl.searchQuery"
 							readonly/>
 					</div>
+					<!-- Clear avdanced search query -->
 					<span
 						class="glyphicon glyphicon-remove form-control-feedback"
 						ng-click="$ctrl.cancelSearch()"
@@ -140,14 +152,15 @@
 					</span>
 				</div>
 				<div class="form-group">
-					<!-- <button type="submit" class="btn btn-primary" ng-click="$ctrl.search()">Search</button> -->
-					<!-- <button class="btn btn-default" ng-click="$ctrl.cancelSearch()">Cancel</button> -->
+					<!-- Switch between simple and advanced search -->
 					<a href ng-click="$ctrl.advancedSearch = !$ctrl.advancedSearch">
 						{{$ctrl.advancedSearch ? 'Simple' : 'Advanced'}}
 					</a>
 				</div>
 			</form>
 		</div>
+		<!-- Zoom controls, always visible regardless of the currently selected toolset -->
+		<!-- TODO: improve layout for smaller screens, maybe have a separate toolset for zoom! -->
 		<div class="other-tools form-inline">
 			Zoom:
 			<span class="input-group input-group-sm">
@@ -171,10 +184,12 @@
 				</button>
 			</span>
 			<span class="divider"></span>
+			<!-- Open the legend -->
 			<a href ng-click="$ctrl.openLegend()">
 				<span class="glyphicon glyphicon-info-sign">
 			</span></a>
 		</div>
 	</div>
+	<!-- Container element for the JointJS paper -->
 	<div class="joint-paper"></div>
 </div>

@@ -1,7 +1,11 @@
+/**
+ * Angular module for working with a DiagramPaper.
+ * @module "diagramPaper/diagramPaper"
+ */
 define([
 	'lib/angular',
 	'api/api',
-	'./DiagramPaper.toolset',
+	'./DiagramPaper.editToolset',
 	'./DiagramPaper.service',
 	'./DiagramPaper.controller',
 	'./diagramPaper.directive',
@@ -9,7 +13,7 @@ define([
 ], function (
 	angular,
 	api,
-	diagramPaperToolset,
+	DiagramPaperEditToolset,
 	DiagramPaperService,
 	DiagramPaperController,
 	diagramPaperDirective
@@ -17,7 +21,7 @@ define([
 	'use strict';
 	
 	return angular.module('precise.diagram.paper', ['ui.bootstrap', api.name])
-		.constant('DiagramPaperToolset', diagramPaperToolset)
+		.constant('DiagramPaperEditToolset', DiagramPaperEditToolset)
 		.service('PreciseDiagramPaper', DiagramPaperService)
 		.controller('DiagramPaperController', DiagramPaperController)
 		.directive('preciseDiagramPaper', diagramPaperDirective);

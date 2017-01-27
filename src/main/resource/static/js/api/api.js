@@ -1,3 +1,7 @@
+/**
+ * Angular module for working with the backend server
+ * @module "api/api"
+ */
 define([
 	'lib/angular',
 	'./PreciseApi.service',
@@ -14,6 +18,7 @@ define([
 	'./Tasks.service',
 	'./Dependencies.service',
 	'./errorHandler.factory',
+	'./DefaultResourceDialog.controller',
 	'./errorDialog.component',
 	'./withShortName.filter',
 	'./join.filter',
@@ -34,6 +39,7 @@ define([
 	TasksService,
 	DependenciesService,
 	errorHandlerFactory,
+	DefaultResourceDialogController,
 	errorDialogComponent,
 	withShortNameFilterFactory,
 	joinFilterFactory
@@ -55,6 +61,7 @@ define([
 		.service('Tasks', TasksService)
 		.service('Dependencies', DependenciesService)
 		.factory('errorHandler', errorHandlerFactory)
+		.controller('DefaultResourceDialog', DefaultResourceDialogController)
 		.component('preciseErrorDialog', errorDialogComponent)
 		.filter('withShortName', withShortNameFilterFactory)
 		.filter('join', joinFilterFactory);

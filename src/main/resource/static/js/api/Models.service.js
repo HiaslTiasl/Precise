@@ -1,3 +1,7 @@
+/**
+ * Angular service for dealing with model resources.
+ * @module "api/Models.service"
+ */
 define([
 	'lib/lodash',
 	'util/util'
@@ -9,6 +13,10 @@ define([
 	
 	ModelsService.$inject = ['PreciseApi', 'Resources', 'Pages'];
 	
+	/**
+	 * Service constructor.
+	 * @constructor
+	 */
 	function ModelsService(PreciseApi, Resources, Pages) {
 		
 		var Models = this;
@@ -25,6 +33,7 @@ define([
 		var REL_SINGULAR = 'model',
 			REL_PLURAL = 'models';
 		
+		/** Returns a promise of the first page of models. */
 		function firstPage(templateParams) {
 			return PreciseApi.fromBase().traverse(function (builder) {
 				return builder
@@ -34,6 +43,7 @@ define([
 			}).then(Pages.wrapper(REL_PLURAL));
 		}
 		
+		/** Returns a promise of the list of all models. */
 		function findAll(templateParams) {
 			return firstPage(templateParams)
 				.then(function (page) {
@@ -41,6 +51,10 @@ define([
 				});
 		}
 		
+		/**
+		 * Returns a promise of the model of the specified name.
+		 * Accepts additional template parameters (e.g. for projections).
+		 */
 		function findByName(name, templateParams) {
 			return PreciseApi.fromBase()
 				.traverse(function (builder) {
@@ -53,24 +67,36 @@ define([
 				}).then(Models.existingResource);
 		}
 		
+		/**
+		 * Returns a promise of the model of the specified name and includes
+		 * state information in the result.
+		 */
 		function findByNameWithPartInfos(name) {
 			return findByName(name, {
 				projection: 'modelSummary'
 			});
 		}
 		
+		/** Returns a promise of a new resource that does not exist on the server. */
 		function newResource(model) {
 			return resource(model, false);
 		}
 		
+		/** Returns a promise of a resource that already exists on the server. */
 		function existingResource(model) {
 			return resource(model, true);
 		}
 		
+		/** Returns a promise of a model resource. */
 		function resource(model, existing) {
 			return new ModelResource(model, existing);
 		}
 		
+		/** 
+		 * Represents a model resource.
+		 * @constructor
+		 * @extends module:"api/Resource.service"#Base
+		 */
 		function ModelResource(data, existing) {
 			Resources.Base.call(this, data, existing);
 		}
@@ -85,6 +111,13 @@ define([
 			},
 			
 			defaultProjection: null,
+			
+			computePitches: function (pitchData) {
+				return PreciseApi.from(this.getURL('pitches'))
+					.traverse(function (builder) {
+						return builder.put(pitchData);
+					});
+			},
 		
 			getTasks: function (params) {
 				return this.getList('tasks', params);
@@ -108,13 +141,6 @@ define([
 			
 			getWarnings: function () {
 				return this.getList('warnings');
-			},
-			
-			computePitches: function (pitch) {
-				return PreciseApi.from(this.getURL('pitches'))
-					.traverse(function (builder) {
-						return builder.put(pitch);
-					});
 			}
 		
 		});

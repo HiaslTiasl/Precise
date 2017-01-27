@@ -28,6 +28,7 @@
 				ng-if="::!$ctrl.phaseFixed">
 				<option value="">-- Select a phase --</option>
 			</select>
+			<!-- Static display of phase if fixed -->
 			<p class="form-control-static" ng-if="::$ctrl.phaseFixed">
 				{{$ctrl.resource.data.phase.name}}
 			</p>
@@ -48,6 +49,6 @@
 	</form>
 </div>
 <div class="modal-footer">
-	<button class="btn btn-primary" type="submit" form="task-type-form" ng-click="$ctrl.sendTaskType()">OK</button>
+	<button class="btn btn-primary" type="submit" form="task-type-form" ng-click="$ctrl.send()">OK</button>
 	<button class="btn btn-cancel" type="button" form="task-type-form" ng-click="$ctrl.cancel()">Cancel</button>
 </div>

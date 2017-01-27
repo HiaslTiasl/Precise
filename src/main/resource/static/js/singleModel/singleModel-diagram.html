@@ -1,8 +1,11 @@
 <div class="panels">
+	<!-- The DiagramPaper itself -->
+	<!-- reload the model on structural changes to refresh info about whether config and diagram are empty and editable -->
+	<!-- reload the warnings on all changes to keep them up-to-date -->
 	<precise-diagram-paper
 		model="$ctrl.model"
 		current-warning="$ctrl.currentWarning"
-		on-structure-changed="$ctrl.reload()"
+		on-structure-changed="$ctrl.reload()"		
 		on-diagram-changed="$ctrl.loadWarnings()">
 	</precise-diagram-paper>
 	<div id="properties-wrapper" ng-switch on="$ctrl.resourceType">

@@ -1,4 +1,5 @@
 <div class="modal-header">
+	<!-- Indicate whether model is created or edited, and show name if available. -->
 	<h3 class="modal-title">{{$ctrl.resource.exists ? 'Edit Model ' + $ctrl.resource.data.name : 'New Model'}}</h3>
 </div>
 <div class="modal-body">
@@ -15,6 +16,6 @@
 	</form>
 </div>
 <div class="modal-footer">
-	<button class="btn btn-primary" type="submit" form="model-form" ng-click="$ctrl.sendModel()">OK</button>
+	<button class="btn btn-primary" type="submit" form="model-form" ng-click="$ctrl.send()">OK</button>
 	<button class="btn btn-cancel" type="button" form="model-form" ng-click="$ctrl.cancel()">Cancel</button>
 </div>

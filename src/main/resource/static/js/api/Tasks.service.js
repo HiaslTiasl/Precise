@@ -1,3 +1,7 @@
+/**
+ * Angular service for dealing with task resources.
+ * @module "api/Tasks.service"
+ */
 define([
 	'lib/lodash',
 	'api/hal',
@@ -11,6 +15,10 @@ define([
 	
 	TasksService.$inject = ['$q', 'PreciseApi', 'Pages', 'Resources', 'Scopes', 'OrderSpecifications'];
 	
+	/**
+	 * Service constructor
+	 * @constructor
+	 */
 	function TasksService($q, PreciseApi, Pages, Resources, Scopes, OrderSpecifications) {
 		
 		var Tasks = this;
@@ -22,10 +30,13 @@ define([
 		Tasks.existingResource = existingResource;
 		Tasks.Resource = TaskResource;
 		
-
 		var getAttrName = _.property('name'),
 			dontSendDirectly = ['pitch', 'exclusiveness', 'orderSpecifications', 'type', 'model', '_links'];
 		
+		/**
+		 * Sends the given text as a simple search query to the server
+		 * and returns a promise of the resulting tasks as a paged resource.
+		 */
 		function searchSimple(model, text) {
 			return PreciseApi.fromBase()
 			.traverse(function (builder) {
@@ -39,6 +50,10 @@ define([
 			}).then(Pages.wrapper('tasks'));
 		}
 
+		/**
+		 * Sends the given parameters as an advanced search query to the server
+		 * and returns a promise of the resulting tasks as a paged resource.
+		 */
 		function searchAdvanced(model, params) {
 			return PreciseApi.fromBase()
 				.traverse(function (builder) {
@@ -54,10 +69,17 @@ define([
 				}).then(Pages.wrapper('tasks'));
 		}
 		
+		/** Returns a promise that transforms the given task data to the initial data of the resource. */
 		function getData(task, exists) {
 			return exists ? cloneExistingData(task) : initializeData(task);
 		}
 		
+		/**
+		 * Returns a promise that transforms the given task data
+		 * to the initial data of an existing task resource.
+		 * The returned data corresponds to the given data extended by
+		 * an empty pitch if missing.
+		 */
 		function cloneExistingData(task) {
 			var data = _.cloneDeep(task);
 			if (!data.pitch)
@@ -67,10 +89,10 @@ define([
 			return $q.when(data);
 		};
 		
+		/** Returns a promise that transforms the given task data to the initial data of a new resource. */
 		function initializeData(task) {
 			return $q.when({
 				type: null,
-				//durationType: 'AUTO',
 				pitch: {
 					crewSize: 1,
 					crewCount: 1,
@@ -81,20 +103,28 @@ define([
 			});
 		};
 		
+		/** Returns a promise of a new resource that does not exist on the server. */
 		function newResource(model, task) {
 			return resource(model, task, false);
 		}
 		
+		/** Returns a promise of a resource that already exists on the server. */
 		function existingResource(model, task) {
 			return resource(model, task, true);
 		}
 		
+		/** Returns a promise of a task resource. */
 		function resource(model, task, exists) {
 			return getData(task, exists).then(function (data) {
 				return new TaskResource(model, data, exists);
 			});
 		}
 		
+		/**
+		 * Represents a task resource.
+		 * @constructor
+		 * @extends module:"api/Resources.service"#Base
+		 */
 		function TaskResource(model, data, exists) {
 			Resources.Base.call(this, data, exists);
 			this.model = model;
@@ -111,55 +141,27 @@ define([
 			
 			defaultProjection: 'expandedTask',
 			
+			/**
+			 * Asks the server to compute missing pitch parameters
+			 * and returns a promise to the result.
+			 * If all parameters are specified but inconsistent,
+			 * the promise is rejected with a corresponding error.
+			 */
 			computePitches: function () {
 				var self = this,
 					pitchData = self.getPitchRequestData();
-				return !pitchData ? $q.when() : this.model.computePitches(pitchData)
-					.then(function (result) {
-						_.assign(self.data, result);
-						return self;
-					});
+				return !pitchData ? $q.when() 
+					: this.model.computePitches(pitchData)
+						.then(function (result) {
+							_.assign(self.data, result);
+							return self;
+						});
 			},
 			
-			showExclusiveness: function () {
-				if (!this.data)
-					return undefined;
-				if (!this.exclParts)
-					this.exclParts = [];
-				util.mapInto(this.exclParts, this.data.exclusiveness, getAttrName);
-				return !this.exclParts.length ? null : this.exclParts.join(', ');
-			},
-			
-			showOrderPart: function (order) {
-				var attrName = order.attribute.name;
-				switch (order.orderType) {
-				case 'PARALLEL':
-					return '|' + attrName + '|';
-				case 'ASCENDING':
-					return attrName + '\u2191'; 	// ↑
-				case 'DESCENDING':
-					return attrName + '\u2193'; 	// ↓
-				default:
-					return null;
-				}
-			},
-			
-			showOrder: function () {
-				if (!this.data)
-					return undefined;
-				if (!this.orderParts)
-					this.orderParts = [];
-				var count = 0;
-				this.data.orderSpecifications.forEach(function (order) {
-					var str = this.showOrderPart(order);
-					if (str != null)
-						this.orderParts[count++] = str;
-				}, this);
-				util.limitArray(this.orderParts, count);
-				return !this.orderParts.length ? null : this.orderParts.join(', ');
-			},
-			
-
+			/**
+			 * Asks the server to adjust the given pattern in terms of allowed values
+			 * and returns a promise to the result.
+			 */
 			checkPattern: function (pattern) {
 				return PreciseApi.from(PreciseApi.hrefTo(this.data, 'checkedPattern'))
 					.traverse(function (builder) {
@@ -167,23 +169,32 @@ define([
 					});
 			},
 			
+			/** Returns a promise to a global pattern. */
 			globalPattern: function () {
 				return this.checkPattern({});
 			},
 			
+			/**
+			 * Updates the given attribute to the given value in the given pattern
+			 * and returns a promise to the result, which is checked by the server.
+			 */
 			updatePattern: function (pattern, attr, newValue) {
-				var newPattern = _.clone(pattern);
+				// Clone so the original value stays if an error occurs
+				var newPattern = _.clone(pattern);	
 				newPattern[attr.name].value = newValue;
 				return this.checkPattern(newPattern);
 			},
 			
+			/** Returns the data to be sent in a request for the pitch of this task. */
 			getPitchRequestData: function () {
 				return this.data.pitch && _.pick(this.data.pitch, Boolean);
 			},
 			
 			getRequestData: function () {
+				// omit special fields
 				var processed = _.omit(this.data, dontSendDirectly),
 					pitchData = this.getPitchRequestData();
+				// use links for associations to existing resources
 				if (pitchData && _.some(pitchData))
 					processed.pitch = pitchData;
 				if (this.data.exclusiveness)
@@ -192,6 +203,7 @@ define([
 					processed.orderSpecifications = OrderSpecifications.toRequestRepresentation(this.data.orderSpecifications);
 				if (this.data.type)
 					processed.type = HAL.resolve(HAL.hrefTo(this.data.type));
+				// set model link for new resources
 				if (!this.exists)
 					processed.model = HAL.resolve(HAL.hrefTo(this.model.data));
 				return processed;
