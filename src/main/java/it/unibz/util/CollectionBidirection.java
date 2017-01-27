@@ -5,6 +5,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+/**
+ * A {@link OneToManyBidirection} where the many side is a collection.
+ * 
+ * @author MatthiasP
+ *
+ */
 public class CollectionBidirection<One, OneOfMany, Many extends Collection<OneOfMany>> extends OneToManyBidirection<One, OneOfMany, Many> {
 	
 	public CollectionBidirection(
@@ -20,19 +26,19 @@ public class CollectionBidirection<One, OneOfMany, Many extends Collection<OneOf
 		return many.stream();
 	}
 	
-	protected void addImpl(Many many, OneOfMany oneOfMany) {
+	protected void add(Many many, OneOfMany oneOfMany) {
 		if (many != null)
 			many.add(oneOfMany);
 	}
 	
 	@Override
-	protected void removeImpl(Many many, OneOfMany oneOfMany) {
+	protected void remove(Many many, OneOfMany oneOfMany) {
 		if (many != null)
 			many.remove(oneOfMany);
 	}
 
 	@Override
-	protected boolean containsImpl(Many many, OneOfMany oneOfMany) {
+	protected boolean contains(Many many, OneOfMany oneOfMany) {
 		return many != null && many.contains(oneOfMany);
 	}
 	
