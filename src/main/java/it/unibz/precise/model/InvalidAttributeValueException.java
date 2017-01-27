@@ -6,7 +6,7 @@ package it.unibz.precise.model;
  * @author MatthiasP
  *
  */
-public class InvalidAttributeValueException extends RuntimeException {
+public class InvalidAttributeValueException extends PreciseException {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -16,7 +16,7 @@ public class InvalidAttributeValueException extends RuntimeException {
 
 	public InvalidAttributeValueException(String attrName, String value) {
 		super(String.format(
-			"The value '%s'' is not in the range of the attribute '%s'",
+			"The value '%s' is not in the range of the attribute '%s'",
 			value,
 			attrName
 		));

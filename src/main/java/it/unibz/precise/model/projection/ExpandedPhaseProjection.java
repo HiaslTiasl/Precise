@@ -6,10 +6,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
+import it.unibz.precise.model.Attribute;
 import it.unibz.precise.model.Phase;
 
 /**
- * Phase with attributes and building tree.
+ * Phase with attributes including ranges and building tree.
  * 
  * @author MatthiasP
  *
@@ -22,7 +23,7 @@ public interface ExpandedPhaseProjection {
 	Color getColor();
 	
 	@Value("#{target.attributeHierarchyLevels.![attribute]}")
-	List<AttributeSummaryProjection> getAttributes();
+	List<Attribute> getAttributes();
 	
 	Object getBuildingTree();
 

@@ -31,11 +31,7 @@ public abstract class AbstractTaskResourceProcessor<T extends HasLongId> impleme
 			service.underBasePath(
 				linkTo(methodOn(CheckedPatternController.class).checkedPatternForTask(id, new HashMap<>()))
 			)
-			.withRel("checkedPattern"),
-			service.underBasePath(
-				linkTo(methodOn(PitchComputationController.class).computePitches(id, null))
-			)
-			.withRel("pitches")
+			.withRel("checkedPattern")
 		);
 		return resource;
 	}

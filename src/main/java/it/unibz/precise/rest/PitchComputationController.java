@@ -32,28 +32,43 @@ public class PitchComputationController {
 	@Autowired
 	private ProjectionFactory projectionFactory;
 	
+	/**
+	 * Attempts to compute missing parameters of the given pitch data and
+	 * checks them regarding consistency.
+	 * <p>
+	 * N.B: The method is exposed on the model instead of tasks to allow
+	 * computing pitch data of tasks that only exist on the client, i.e.
+	 * which do not have an ID, while still having access to the model and
+	 * the configured working hours per day.
+	 * 
+	 * @throws InconsistentPitchException if the check fails.
+	 * @return A task containing he given pitch data extended by computable
+	 *         missing parameters and the resulting man-hours.
+	 */
 	@RequestMapping(
-		path="/tasks/{id}/pitches",
+		path="/models/{id}/pitches",
 		method={RequestMethod.PUT, RequestMethod.PATCH}
 	)
 	public ResponseEntity<?> computePitches(
 		@PathVariable("id") long id,
 		@RequestBody Pitch pitch
 	) {
-		
 		Model model = repository.findOne(id);
+		if (model == null)
+			return ResponseEntity.notFound().build();
+		
 		if (!pitch.update()) {
 			// The pitch is inconsistent -> throw exception
 			throw new InconsistentPitchException();
 		}
 		// Here we know the pitch is consistent
 		// -> send it back together with the resulting man-hours,
-		Task task = new Task();
-		task.setModel(model);
-		task.setPitch(pitch);
+		Task pitchContainer = new Task();
+		pitchContainer.setModel(model);
+		pitchContainer.setPitch(pitch);
 		
 		// Project the task to a PitchProjection such that only the pitch and the man-hours are included
-		return ResponseEntity.ok(projectionFactory.createProjection(PitchProjection.class, task));
+		return ResponseEntity.ok(projectionFactory.createProjection(PitchProjection.class, pitchContainer));
 	}
 	
 }

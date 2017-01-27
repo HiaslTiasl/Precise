@@ -35,7 +35,7 @@ public class CheckedPatternController {
 		path="/tasks/{id}/checkedPattern",
 		method=RequestMethod.PUT			// To indicate that the operation is idempotent since nothing is persisted
 	)
-	public ResponseEntity<Map<String, PatternEntry>> checkedPatternForTask(
+	public ResponseEntity<?> checkedPatternForTask(
 		@PathVariable("id") long id,
 		@RequestBody Map<String, PatternEntry> pattern)
 	{

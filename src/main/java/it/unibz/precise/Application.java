@@ -33,6 +33,11 @@ public class Application extends SpringBootServletInitializer {
 	
 	/** Entry point. */
 	public static void main(String[] args) {
+		// Disable auto-restart on file changes, which is disturbing for small changes,
+		// in particular for changes in static web content (HTML, CSS, JS), which actually
+		// should not trigger a restart, but it does, at least when running in an external
+		// Tomcat.
+		System.setProperty("spring.devtools.restart.enabled", "false");
 		SpringApplication.run(Application.class, args);
 	}
 	
