@@ -94,8 +94,6 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 		// We can ignore simple edges because they never introduce cycles
 		// and thus do not change the existence of an acyclic orientation
 		DisjunctiveGraph<TaskUnitNode> disjGraph = translator.translate(nodesByTask, EdgeMode.IGNORE_SIMPLE);
-		System.out.println("Translated to graph:");
-		disjGraph.print();
 		Result<TaskUnitNode> result = new AcyclicOrientationFinder<>(disjGraph).search();
 		return warnings(result);
 	}

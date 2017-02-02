@@ -113,11 +113,11 @@ public class AcyclicOrientationFinder<T> {
 	private Result<T> findDirection(DisjunctiveEdge<T> e) {
 		// TODO: Think of a better heuristic for choosing which direction to try out first
 		Set<T> left = e.getLeft(), right = e.getRight();
-		System.out.println("Try direction, left to right");
+		//System.out.println("Try direction, left to right");
 		Result<T> rs = tryDirection(e, left, right);
 		if (rs.isSuccess())
 			return rs;
-		System.out.println("Try direction, right to left");
+		//System.out.println("Try direction, right to left");
 		rs = tryDirection(e, right, left);
 		if (rs.isSuccess())
 			return rs;
@@ -169,7 +169,7 @@ public class AcyclicOrientationFinder<T> {
 					}
 				}
 			}
-			System.out.println("Edges: " + graph.edges().size());
+			//System.out.println("Edges: " + graph.edges().size());
 			// Detect cycles
 			nonTrivialSCCs = sccFinder.findSCCs(graph).stream()
 				.filter(SCCFinder::isNonTrivialComponent)
