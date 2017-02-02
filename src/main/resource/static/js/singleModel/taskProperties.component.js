@@ -139,7 +139,7 @@ define([
 				// Call outer change handler
 				$ctrl.taskDefinitionChanged({ $result: result });
 				return loadTaskTypes();
-			})['catch'](errorHandler.handle);
+			});
 		}
 		
 		/** 
