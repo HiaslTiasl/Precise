@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
  */
 public class Util {
 	
+	private Util() {
+	}
+	
 	/** Maps the given collection to a list using the given mapper function, or to null if the colleciton is null. */
 	public static <T, R> List<R> mapToList(Collection<T> coll, Function<T, R> mapper) {
 		return coll == null ? null

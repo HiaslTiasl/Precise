@@ -2,6 +2,8 @@ package it.unibz.precise.model;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.persistence.Embeddable;
 import javax.persistence.ManyToMany;
@@ -85,6 +87,16 @@ public class Scope {
 			updateType(allowedAttributes);
 			break;
 		}
+	}
+	
+	/**
+	 * Projects the given {@link AttributeHierarchyNode} to this scope, returning a
+	 * map of attributes to values for the attributes contained in this scope.
+	 */
+	public Map<Attribute, String> project(AttributeHierarchyNode node) {
+		return node.ancestorStream()
+			.filter(n -> attributes.contains(n.getLevel().getAttribute()))
+			.collect(Collectors.toMap(n -> n.getLevel().getAttribute(), AttributeHierarchyNode::getValue));
 	}
 
 	@Override

@@ -111,6 +111,13 @@ public class AttributeHierarchyNode extends BaseEntity {
 		);
 	}
 	
+	/** Returns a stream of leaf nodes, i.e. units, under this node. */
+	public Stream<AttributeHierarchyNode> unitsStream() {
+		return level.isUnit() ? Stream.of(this)
+			: level.hasOnlyUnits() ? children.values().stream()
+			: children.values().stream().flatMap(AttributeHierarchyNode::unitsStream);
+	}
+	
 	public Map<String, AttributeHierarchyNode> getChildren() {
 		return children;
 	}

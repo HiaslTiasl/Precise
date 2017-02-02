@@ -29,7 +29,6 @@ import it.unibz.precise.check.SCCFinder;
  * @see <a href="https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java">
  * 	https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java
  * </a>
- * @see TopologicalSort
  */
 public class SCCTarjan implements SCCFinder {
 

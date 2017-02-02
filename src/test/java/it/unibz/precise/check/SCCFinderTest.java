@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -60,10 +61,15 @@ public class SCCFinderTest {
 	
 	@Test
 	public void testFindSCCs() {
-		Graph<Integer> graph = new Graph<>(
-			IntStream.range(0, adj.size()).boxed().collect(Collectors.toList()),
-			i -> adj.get(i).stream()
-		);
+		List<Integer> nodes = IntStream.range(0, adj.size()).boxed().collect(Collectors.toList());
+		Graph<Integer> graph = new Graph<Integer>() {
+			public Collection<Integer> nodes() {
+				return nodes;
+			}
+			public Stream<Integer> successors(Integer node) {
+				return adj.get(node).stream();
+			}
+		};
 		List<List<Integer>> foundSCCs = sccFinder.findSCCs(graph);
 		
 		Set<Set<Integer>> sccSets = foundSCCs.stream()

@@ -1,9 +1,7 @@
 package it.unibz.precise.check;
 
 import java.text.MessageFormat;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import it.unibz.precise.model.BaseEntity;
-import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.Task;
 
@@ -48,7 +45,7 @@ public class DiagramCycleChecker implements ConsistencyChecker {
 	 */
 	@Override
 	public Stream<ConsistencyWarning> check(Model model) {
-		List<List<Task>> sccs = sccFinder.findSCCs(DiagramGraph.of(model));
+		List<List<Task>> sccs = sccFinder.findSCCs(DiagramGraph.directed(model));
 		return sccs.stream()
 			.filter(SCCFinder::isNonTrivialComponent)
 			.map(this::warning);
@@ -56,17 +53,8 @@ public class DiagramCycleChecker implements ConsistencyChecker {
 	
 	/** Produce a warning about the given SCC. */
 	private ConsistencyWarning warning(List<Task> scc) {
-		// Put tasks into a set for fast lookup
-		Set<Task> taskSet = new HashSet<>(scc);
-		
-		// Project dependencies to the tasks in scc
-		Stream<Dependency> dependencies = scc.stream()
-			.map(Task::getOut)
-			.flatMap(List::stream)
-			.filter(d -> taskSet.contains(d.getTarget()));
-		
-		// Collect tasks and dependencies in a single list
-		List<BaseEntity> entities = Stream.concat(scc.stream(), dependencies).collect(Collectors.toList());
+		// Tasks and dependencies in the given strongly connected component
+		List<BaseEntity> entities = CheckerUtil.restrictDiagramByTasks(scc).collect(Collectors.toList());
 		
 		// Create message
 		String msg = MessageFormat.format(WARNING_MESSAGE, 

@@ -1,11 +1,10 @@
 package it.unibz.precise.check;
 
-import it.unibz.precise.model.BaseEntity;
+import java.util.Collection;
 
+import it.unibz.precise.model.BaseEntity;
 import it.unibz.precise.model.Location;
 import it.unibz.precise.model.Task;
-
-import java.util.List;
 
 /**
  * Represents an (immutable) consistency problem in a model.
@@ -23,11 +22,11 @@ public class ConsistencyWarning implements ConsistencyClassification {
 
 	// Info
 	private String message;
-	private List<? extends BaseEntity> entities;
-	private List<TaskLocation> locations;
+	private Collection<? extends BaseEntity> entities;
+	private Collection<TaskLocation> locations;
 	
 	/** Create a ConsistencyWarning. */
-	protected ConsistencyWarning(Category category, String type, String message, List<? extends BaseEntity> entities, List<TaskLocation> locations) {
+	protected ConsistencyWarning(Category category, String type, String message, Collection<? extends BaseEntity> entities, Collection<TaskLocation> locations) {
 		this.category = category;
 		this.type = type;
 		this.message = message;
@@ -50,13 +49,13 @@ public class ConsistencyWarning implements ConsistencyClassification {
 		return message;
 	}
 
-	/** Presistent entities involved in the problem. */
-	public List<? extends BaseEntity> getEntities() {
+	/** Persistent entities involved in the problem. */
+	public Collection<? extends BaseEntity> getEntities() {
 		return entities;
 	}
 	
 	/** Locations involved in the problem. */
-	public List<TaskLocation> getLocations() {
+	public Collection<TaskLocation> getLocations() {
 		return locations;
 	}
 	

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -155,6 +156,13 @@ public class Phase extends BaseEntity {
 			.peek(AttributeHierarchyNode::countUnits)		// count units of all top-level CA nodes (which initiates recursion lower-level nodes),
 			.mapToInt(AttributeHierarchyNode::getUnits)		// and sum them up
 			.sum();
+	}
+	
+	/** Returns a stream of all leaf nodes, i.e. units, in this phase. */
+	public Stream<AttributeHierarchyNode> unitsStream() {
+		AttributeHierarchyLevel firstLevel = firstLevel();
+		return firstLevel == null ? Stream.empty()
+			: firstLevel.getNodes().values().stream().flatMap(AttributeHierarchyNode::unitsStream);
 	}
 	
 	/**

@@ -1,13 +1,14 @@
 package it.unibz.precise.check;
 
-import it.unibz.precise.check.ConsistencyWarning.TaskLocation;
-import it.unibz.precise.model.BaseEntity;
-import it.unibz.precise.model.Model;
-
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
+
+import it.unibz.precise.check.ConsistencyWarning.TaskLocation;
+import it.unibz.precise.model.BaseEntity;
+import it.unibz.precise.model.Model;
 
 /**
  * Checks a process model for consistency based on criteria described
@@ -33,7 +34,7 @@ public interface ConsistencyChecker extends ConsistencyClassification {
 	Stream<ConsistencyWarning> check(Model model);
 	
 	/** Create a {@link ConsistencyWarning} of this checker's category and type. */
-	default <E extends BaseEntity> ConsistencyWarning warning(String msg, List<E> entities, List<TaskLocation> locations) {
+	default <E extends BaseEntity> ConsistencyWarning warning(String msg, Collection<E> entities, Collection<TaskLocation> locations) {
 		return new ConsistencyWarning(getCategory(), getType(), msg, entities, locations);
 	}
 
