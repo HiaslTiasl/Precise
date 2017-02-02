@@ -163,13 +163,13 @@ define([
 			},
 			
 			/** Updates the set of attributes in use. */
-			check: function (order) {
+			check: function () {
 				// Reset attributes map
-				_.forEach(order.attrs, function (value, key, attrs) {
+				_.forEach(this.attrs, function (value, key, attrs) {
 					attrs[key] = false;
 				});
 				// Set attributes contained in specs
-				collectAttrs(order.specs, order.attrs);
+				collectAttrs(this.specs, this.attrs);
 			}
 		});
 		
