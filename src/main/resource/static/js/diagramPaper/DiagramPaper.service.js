@@ -6,6 +6,7 @@ define([
 	'lib/lodash',
 	'lib/angular',
 	'lib/joint',
+	'api/hal',
 	'shapes/TaskShape',
 	'shapes/DependencyShape',
 	'util/util'
@@ -13,6 +14,7 @@ define([
 	_,
 	angular,
 	joint,
+	HAL,
 	TaskShape,
 	DependencyShape,
 	util
@@ -48,22 +50,77 @@ define([
 					task.position = randomPosition(randomBBox);
 				return task;
 			}
-		
+			
 			// Fetch tasks and dependencies, then merge them into one cell array.
-			// TODO: consider fetching task types and phases separately and use a
-			// task projection that does not include them for reducing duplicate objects
-			// that have to be sent and allocated and thus reducing needed traffic, memory and time.
-			// The resources have then to be merged into tasks before being returned.
+			// TODO: Decide whether to join remotely or locally.
+			// Joining remotely is easier and requires less processing on the client,
+			// while joining locally likely leads to less data transmissions and heap allocations.
+			// Experiments:
+			// 
+			//   remotely: ~400 ms, 198.45 KB
+			//   locally:  ~350 ms, 143.73 KB
+			
 			return $q.all({
-				tasks: modelResource.getTasks({ projection: 'expandedTask' })
+				tasks: fetchTasksJoinRemotely(modelResource)
 					.then(mapArrUsing(_.flow(taskToCell, checkPosition))),
-				dependencies: modelResource.getDependencies({ projection: 'dependencySummary' })
+				dependencies: fetchDependencies(modelResource)
 					.then(mapArrUsing(dependencyToCell))
 			}).then(function (cells) {
 				return {
 					cells: [].concat(cells.tasks, cells.dependencies)
 				};
 			});
+		}
+		
+		/** Fetches tasks using a predefined projection containing all the necessary data. */
+		function fetchTasksJoinRemotely(modelResource) {
+			return modelResource.getTasks({ projection: 'expandedTask' })
+		}
+		
+		/**
+		 * Fetches tasks using projections with minimal data for tasks, task types, and phases,
+		 * and join them locally using self links.
+		 */
+		function fetchTasksJoinLocally(modelResource) {
+			// Fetch types and phases, and index them independently
+			var indexedTypesPromise = $q.all({
+				indexedPhases: modelResource.getPhases({ projection: 'phaseSummary' })
+					.then(indexBySelfLink),
+				indexedTypes: modelResource.getTaskTypes({ projection: 'taskTypeSummary' })
+					.then(indexBySelfLink)
+			}).then(function (results) {
+				// join
+				_.forEach(results.indexedTypes, function (type) {
+					type.phase = results.indexedPhases[getSelfLink(type.phase)];
+				});
+				return results.indexedTypes;
+			});
+			
+			// Fetch tasks themselves and join them to types
+			return $q.all({
+				indexedTypes: indexedTypesPromise,
+				tasks: modelResource.getTasks({ projection: 'taskSummary' })
+			}).then(function (results) {
+				_.forEach(results.tasks, function (task) {
+					task.type = results.indexedTypes[getSelfLink(task.type)];
+				});
+				return results.tasks;
+			});
+		}
+		
+		/** Fetches dependencies. */
+		function fetchDependencies(modelResource) {
+			return modelResource.getDependencies({ projection: 'dependencySummary' });
+		}
+		
+		/** Returns the self link of the given resource. */
+		function getSelfLink(resource) {
+			return HAL.resolve(HAL.hrefTo(resource));
+		}
+		
+		/** Returns the given resources as a map where self links are used as keys. */
+		function indexBySelfLink(resources) {
+			return _.indexBy(resources, getSelfLink);
 		}
 		
 		/** Transform the given task to JSON cell data. */
