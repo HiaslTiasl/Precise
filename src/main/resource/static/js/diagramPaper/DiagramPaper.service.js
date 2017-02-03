@@ -55,7 +55,8 @@ define([
 			// TODO: Decide whether to join remotely or locally.
 			// Joining remotely is easier and requires less processing on the client,
 			// while joining locally likely leads to less data transmissions and heap allocations.
-			// Experiments:
+			//
+			// Experiments on thesis-examples.mdl (measuring transmission only!):
 			// 
 			//   remotely: ~400 ms, 198.45 KB
 			//   locally:  ~350 ms, 143.73 KB
