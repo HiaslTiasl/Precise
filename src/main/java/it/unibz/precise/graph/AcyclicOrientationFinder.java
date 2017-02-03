@@ -70,17 +70,22 @@ public class AcyclicOrientationFinder<T> {
 		
 	}
 	
-//	private Set<T> discovered;
-//	private Set<T> entered;
-//	private Set<T> exited;
-	private DisjunctiveGraph<T> graph;					// The graph to be resolved
+	private DisjunctiveGraph<T> initialGraph;			// The graph to be resolved
 	private SCCTarjan sccFinder;
 
+	private ArrayList<DisjunctiveEdge<T>> safeEdges;	// List of disjunctive edges, allows to iterate over them without ConcurrentModificationException
+	private ArrayDeque<T> queue;						// Queue of discovered nodes to visit next
 	private Map<T, T> discoveredStartingFrom;			// Maps nodes discovered during resolving an edge to the corresponding start node
+	
 	private DisjunctiveEdge<T> firstUnresolvedEdge;		// Kept to exit early when considering the same edge twice without resolving any edges in between
 	
-	public AcyclicOrientationFinder(DisjunctiveGraph<T> graph) {
-		this.graph = graph;
+	/** Creates a new {@code AcyclicOrientationFinder} and initializes it with the given graph. */
+	public AcyclicOrientationFinder(DisjunctiveGraph<T> initialGraph) {
+		this.initialGraph = initialGraph;
+		this.safeEdges = new ArrayList<>(initialGraph.edges());
+		this.sccFinder = new SCCTarjan();
+		this.queue = new ArrayDeque<>();
+		this.discoveredStartingFrom = new HashMap<>();			// capacity / load factor
 	}
 	
 	/**
@@ -93,53 +98,56 @@ public class AcyclicOrientationFinder<T> {
 	 * Otherwise, some edge is chosen and both directions are tried out.
 	 */
 	public Result<T> search() {
-		int nodeCount = graph.nodes().size();
-//		discovered = new HashSet<>(nodeCount);
-//		entered = new HashSet<>(nodeCount);
-//		exited = new HashSet<>(nodeCount);
-		discoveredStartingFrom = new HashMap<>(nodeCount);
-		sccFinder = new SCCTarjan();
-		
-		List<List<T>> nonTrivialSCCs = tryResolvingAllEdges();
-		
-		// TODO: Think of a better heuristic for choosing an edge
+		return search(initialGraph);
+	}
+	
+	/** Recursive implementation of {@link #search()}. */
+	private Result<T> search(DisjunctiveGraph<T> graph) {
+		List<List<T>> nonTrivialSCCs = tryResolvingAllEdges(graph);
+		// TODO: Think of better heuristic for choosing an edge here,
+		//       and also for deciding which direction to try out first,
+		//       both for finding a direction here and resolving edges in
+		//       the call above.
 		return !nonTrivialSCCs.isEmpty() ? Result.error(graph, nonTrivialSCCs)
 			: firstUnresolvedEdge == null 					// Equivalent to graph.edges().isEmpty() 
-				? Result.success(graph)
-				: findDirection(firstUnresolvedEdge);		// Recursion (indirect)
+			? Result.success(graph)
+				: findDirection(graph, firstUnresolvedEdge);		// Recursion (indirect)
 	}
 	
 	/** Attempts to find an acyclic orientation by trying out both directions of the given edge. */
-	private Result<T> findDirection(DisjunctiveEdge<T> e) {
-		// TODO: Think of a better heuristic for choosing which direction to try out first
+	private Result<T> findDirection(DisjunctiveGraph<T> graph, DisjunctiveEdge<T> e) {
 		Set<T> left = e.getLeft(), right = e.getRight();
-		//System.out.println("Try direction, left to right");
-		Result<T> rs = tryDirection(e, left, right);
+		
+		Result<T> rs = tryDirection(graph, e, left, right);
 		if (rs.isSuccess())
 			return rs;
-		//System.out.println("Try direction, right to left");
-		rs = tryDirection(e, right, left);
+		
+		// N.B: We probably resolved some edges, but it did not work.
+		// Before trying the other direction, we need to reset the list of edges.
+		safeEdges.clear();
+		safeEdges.addAll(graph.edges());
+		
+		rs = tryDirection(graph, e, right, left);
 		if (rs.isSuccess())
 			return rs;
+		
 		return Result.error(graph, e);
 	}
 	
 	/** Returns the result of searching an acyclic orientation of the graph where the given direction of the given edge. */
-	private Result<T> tryDirection(DisjunctiveEdge<T> e, Set<T> from, Set<T> to) {
+	private Result<T> tryDirection(DisjunctiveGraph<T> graph, DisjunctiveEdge<T> e, Set<T> from, Set<T> to) {
 		DisjunctiveGraph<T> copy = new DisjunctiveGraph<>(graph);
 		copy.orient(e, from, to);
-		return new AcyclicOrientationFinder<>(copy).search();			// Recursion
+		return search(copy);												// Recursion
 	}
 	
 	/**
 	 * Attempts to resolve edges until either no more edges can be resolved or a cycle is introduced.
 	 * Returns a list of the resulting non-trivial strongly connected components.
 	 */
-	private List<List<T>> tryResolvingAllEdges() {
+	private List<List<T>> tryResolvingAllEdges(DisjunctiveGraph<T> graph) {
 		List<List<T>> nonTrivialSCCs;
 		boolean resolvedAny;
-		// Copy edges into a new list to avoid ConcurrentModificationException
-		ArrayList<DisjunctiveEdge<T>> safeEdges = new ArrayList<>(graph.edges());
 		do {
 			resolvedAny = false;
 			// Iterating in reverse order to simplify removing elements on the way
@@ -149,7 +157,7 @@ public class AcyclicOrientationFinder<T> {
 				if (!graph.edges().contains(e))
 					safeEdges.remove(i);
 				else {
-					ResolveType result = tryResolving(e);
+					ResolveType result = tryResolving(graph, e);
 					if (result.isSuccess()) {
 						resolvedAny = true;
 						firstUnresolvedEdge = null;
@@ -169,7 +177,6 @@ public class AcyclicOrientationFinder<T> {
 					}
 				}
 			}
-			//System.out.println("Edges: " + graph.edges().size());
 			// Detect cycles
 			nonTrivialSCCs = sccFinder.findSCCs(graph).stream()
 				.filter(SCCFinder::isNonTrivialComponent)
@@ -179,27 +186,14 @@ public class AcyclicOrientationFinder<T> {
 		return nonTrivialSCCs;
 	}
 	
-	/** Attempts to resolve the given edge,  */
-	private ResolveType tryResolving(DisjunctiveEdge<T> e) {
-		// TODO: Think of a better heuristic for what direction to try out first
-		ResolveType leftToRight = iterativeBFS(e.getLeft(), e.getRight());
+	/** Attempts to resolve the given edge. */
+	private ResolveType tryResolving(DisjunctiveGraph<T> graph, DisjunctiveEdge<T> e) {
+		ResolveType leftToRight = iterativeBFS(graph, e.getLeft(), e.getRight());
 		if (leftToRight.isExitEarly())
 			return leftToRight;
-		ResolveType rightToLeft = iterativeBFS(e.getRight(), e.getLeft());
+		ResolveType rightToLeft = iterativeBFS(graph, e.getRight(), e.getLeft());
 		return leftToRight.merge(rightToLeft);
 	}
-	
-//	private ResolveType tryResolving(Set<T> from, Set<T> to) {
-//		ResolveType resolved = ResolveType.NONE;
-//		discovered.clear();
-//		for (T n : from) {
-//			ResolveType rt = iterativeDFS(n, to);
-//			resolved = resolved.merge(rt);
-//			if (resolved.isExitEarly())
-//				break;
-//		}
-//		return resolved;
-//	}
 	
 	/**
 	 * Attempts to resolve a disjunctive edge in the given direction in a breadth first manner.
@@ -210,14 +204,16 @@ public class AcyclicOrientationFinder<T> {
 	 * <li>{@link ResolveType#TARGET} if the target edge was resolved
 	 * </ul> 
 	 */
-	private ResolveType iterativeBFS(Set<T> startNodes, Set<T> targets) {
+	private ResolveType iterativeBFS(DisjunctiveGraph<T> graph, Set<T> startNodes, Set<T> targets) {
 		ResolveType resolved = ResolveType.NONE;
-		ArrayDeque<T> queue = new ArrayDeque<>(startNodes);
-		discoveredStartingFrom.clear();							// Reuse map for multiple calls for saving memory
+		// Reset queue and map, put startNodes into queue
+		queue.clear();
+		queue.addAll(startNodes);
+		discoveredStartingFrom.clear();
 		while (!queue.isEmpty()) {
 			T current = queue.poll();
 			T start = discoveredStartingFrom.get(current);
-			if (start == null) {								// Starting node -> put it into the map
+			if (start == null) {								// Starting node -> put it into the map on the fly
 				start = current;
 				discoveredStartingFrom.put(current, start);
 			}
@@ -234,72 +230,6 @@ public class AcyclicOrientationFinder<T> {
 		}
 		return resolved;
 	}
-	
-	// Old implementations using other traversal strategies
-	
-//	private ResolveType iterativeDFS(T start, Set<T> targets) {
-//		if (discovered.contains(start))
-//			return ResolveType.NONE;
-//		ResolveType resolved = ResolveType.NONE;
-//		ArrayDeque<T> stack = new ArrayDeque<>();
-//		stack.add(start);
-//		discovered.add(start);
-//		while (!stack.isEmpty()) {
-//			T current = stack.pop();
-//			if (graph.orient(start, current))
-//				resolved = ResolveType.SOME;
-//			if (targets.contains(current))
-//				return ResolveType.TARGET;
-//			for (T succ : graph.successorSet(current)) {
-//				if (!discovered.contains(succ)) {
-//					discovered.add(succ);
-//					stack.push(succ);
-//				}
-//			}
-//		}
-//		return resolved;
-//	}
-//	
-//	private ResolveType recursiveDFS(T start, Set<T> targets) {
-//		if (discovered.contains(start))
-//			return ResolveType.NONE;
-//		entered.clear();
-//		exited = discovered;
-//		return recursiveDFS(start, start, targets);
-//	}
-//	
-//	private ResolveType recursiveDFS(T start, T current, Set<T> targets) {
-//		if (targets.contains(current))
-//			return ResolveType.TARGET;
-//		if (entered.contains(current))
-//			return ResolveType.PROBLEM;
-//		ResolveType resolved = ResolveType.NONE;
-//		enter(current);
-//		for (T succ : safeSuccessors(current)) {
-//			if (graph.orient(start, succ))
-//				resolved = ResolveType.SOME;
-//			if (!exited.contains(succ)) {
-//				resolved = resolved.merge(recursiveDFS(start, succ, targets));
-//				if (resolved.isExitEarly())
-//					break;
-//			}
-//		}
-//		exit(current);
-//		return resolved;
-//	}
-//	
-//	private void enter(T n) {
-//		entered.add(n);
-//	}
-//	
-//	private void exit(T n) {
-//		entered.remove(n);
-//		exited.add(n);
-//	}
-	
-//	private List<T> safeSuccessors(T n) {
-//		return new ArrayList<>(graph.successorSet(n));
-//	}
 	
 	/**
 	 * Represents the result of searching an acyclic orientation.
