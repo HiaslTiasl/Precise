@@ -110,7 +110,7 @@ public class AcyclicOrientationFinder<T> {
 		//       the call above.
 		return !nonTrivialSCCs.isEmpty() ? Result.error(graph, nonTrivialSCCs)
 			: firstUnresolvedEdge == null 					// Equivalent to graph.edges().isEmpty() 
-			? Result.success(graph)
+				? Result.success(graph)
 				: findDirection(graph, firstUnresolvedEdge);		// Recursion (indirect)
 	}
 	
@@ -126,7 +126,7 @@ public class AcyclicOrientationFinder<T> {
 		// Before trying the other direction, we need to reset the list of edges.
 		safeEdges.clear();
 		safeEdges.addAll(graph.edges());
-		
+
 		rs = tryDirection(graph, e, right, left);
 		if (rs.isSuccess())
 			return rs;
@@ -146,9 +146,10 @@ public class AcyclicOrientationFinder<T> {
 	 * Returns a list of the resulting non-trivial strongly connected components.
 	 */
 	private List<List<T>> tryResolvingAllEdges(DisjunctiveGraph<T> graph) {
-		List<List<T>> nonTrivialSCCs;
-		boolean resolvedAny;
-		do {
+		List<List<T>> nonTrivialSCCs = detectCycles(graph);
+		firstUnresolvedEdge = null;
+		boolean resolvedAny = true;
+		while (resolvedAny && nonTrivialSCCs.isEmpty()) {
 			resolvedAny = false;
 			// Iterating in reverse order to simplify removing elements on the way
 			for (int i = safeEdges.size() - 1; i >= 0; i--) {
@@ -177,13 +178,19 @@ public class AcyclicOrientationFinder<T> {
 					}
 				}
 			}
-			// Detect cycles
-			nonTrivialSCCs = sccFinder.findSCCs(graph).stream()
-				.filter(SCCFinder::isNonTrivialComponent)
-				.collect(Collectors.toList());
-		} while (resolvedAny && nonTrivialSCCs.isEmpty());
+			
+			if (resolvedAny)
+				nonTrivialSCCs = detectCycles(graph);
+		}
 		
 		return nonTrivialSCCs;
+	}
+	
+	/** Returns non-trivial strongly connected components in the given disjunctive graph. */
+	private List<List<T>> detectCycles(DisjunctiveGraph<T> graph) {
+		return sccFinder.findSCCs(graph).stream()
+			.filter(SCCFinder::isNonTrivialComponent)
+			.collect(Collectors.toList());
 	}
 	
 	/** Attempts to resolve the given edge. */

@@ -1,5 +1,7 @@
 package it.unibz.precise.graph.disj;
 
+import it.unibz.precise.graph.Graph;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,8 +10,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import it.unibz.precise.graph.Graph;
 
 /**
  * A disjunctive graph representation.
@@ -195,23 +195,6 @@ public class DisjunctiveGraph<T> implements Cloneable, Graph<T> {
 		return removed;
 	}
 	
-	/**
-	 * Returns a new graph of the same nodes and arcs, but where arcs are interpreted as
-	 * undirected edges, i.e. where predecessors are also interpreted as successors
-	 * (neighbours).
-	 */
-	public Graph<T> asUndirectedGraph() {
-		return new Graph<T>() {
-			@Override
-			public Collection<T> nodes() {
-				return nodes;
-			}
-			@Override
-			public Stream<T> successors(T node) {
-				return Stream.concat(DisjunctiveGraph.this.successors(node), predecessorSet(node).stream());
-			}
-		};
-	}
 	
 	@Override
 	public Object clone() {

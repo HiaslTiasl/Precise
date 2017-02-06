@@ -29,6 +29,16 @@ public class DisjunctiveEdge<T> {
 		return right;
 	}
 	
+	/** 
+	 * Returns either {@code left} or {@code right}, depending on which of the two contains {@code node},
+	 * or null.
+	 */
+	public Set<T> getSide(T node) {
+		return left.contains(node) ? left
+			: right.contains(node) ? right
+			: null;
+	}
+	
 	/** Indicates whether the two given nodes are excluded in the specified direction. */
 	public boolean excludes(T l, T r) {
 		return left.contains(l) && right.contains(r);

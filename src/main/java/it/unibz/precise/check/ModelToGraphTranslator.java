@@ -1,5 +1,19 @@
 package it.unibz.precise.check;
 
+import it.unibz.precise.graph.disj.DisjunctiveEdge;
+import it.unibz.precise.graph.disj.DisjunctiveGraph;
+import it.unibz.precise.model.Attribute;
+import it.unibz.precise.model.AttributeHierarchyNode;
+import it.unibz.precise.model.Dependency;
+import it.unibz.precise.model.Location;
+import it.unibz.precise.model.Model;
+import it.unibz.precise.model.OrderSpecification;
+import it.unibz.precise.model.OrderType;
+import it.unibz.precise.model.Phase;
+import it.unibz.precise.model.Scope;
+import it.unibz.precise.model.Task;
+import it.unibz.precise.model.TaskType;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,20 +28,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
-
-import it.unibz.precise.graph.disj.DisjunctiveEdge;
-import it.unibz.precise.graph.disj.DisjunctiveGraph;
-import it.unibz.precise.model.Attribute;
-import it.unibz.precise.model.AttributeHierarchyNode;
-import it.unibz.precise.model.Dependency;
-import it.unibz.precise.model.Location;
-import it.unibz.precise.model.Model;
-import it.unibz.precise.model.OrderSpecification;
-import it.unibz.precise.model.OrderType;
-import it.unibz.precise.model.Phase;
-import it.unibz.precise.model.Scope;
-import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
 
 /**
  * Translates a {@link Model} to a {@link DisjunctiveGraph} of {@link TaskUnitNode}s.
@@ -54,30 +54,30 @@ public class ModelToGraphTranslator {
 	
 	/** Translates the given tasks to a {@link DisjunctiveGraph} . */
 	public DisjunctiveGraph<TaskUnitNode> translate(List<Task> tasks) {
-		return translate(nodesByTask(tasks), EdgeMode.CONSIDER_ALL);
+		return translate(nodesByLocationByTask(tasks), EdgeMode.CONSIDER_ALL);
 	}
 
 	/** Translates the given tasks to a {@link DisjunctiveGraph}, using the specified {@link EdgeMode}. */
 	public DisjunctiveGraph<TaskUnitNode> translate(List<Task> tasks, EdgeMode edgeMode) {
-		return translate(nodesByTask(tasks), edgeMode);
+		return translate(nodesByLocationByTask(tasks), edgeMode);
 	}
 	
 	/** Processes the map of tasks to nodes and creates a corresponding {@link DisjunctiveGraph}. */
-	public DisjunctiveGraph<TaskUnitNode> translate(Map<Task, List<TaskUnitNode>> nodesByTask, EdgeMode edgeMode) {
+	public DisjunctiveGraph<TaskUnitNode> translate(Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask, EdgeMode edgeMode) {
 		DisjunctiveGraph<TaskUnitNode> graph = new DisjunctiveGraph<>();
 		
-		Set<Task> tasks = nodesByTask.keySet();
+		Set<Task> tasks = nodesByLocationByTask.keySet();
 		
 		for (Task t : tasks) {
-			List<TaskUnitNode> nodes = nodesByTask.get(t);
+			List<List<TaskUnitNode>> locations = nodesByLocationByTask.get(t);
 			// Do not consider task without nodes
-			if (nodes != null && !nodes.isEmpty()) {
-				processTask(graph, t, nodesByTask, nodes, edgeMode);
+			if (locations != null && !locations.isEmpty()) {
+				processTask(graph, t, nodesByLocationByTask, locations, edgeMode);
 				for (Dependency dep : t.getOut()) {
 					Task target = dep.getTarget();
-					List<TaskUnitNode> targetNodes = target == null ? null : nodesByTask.get(target);
-					if (targetNodes != null && !targetNodes.isEmpty())
-						processDependency(graph, dep, nodesByTask, nodes, targetNodes, edgeMode);
+					List<List<TaskUnitNode>> targetLocations = target == null ? null : nodesByLocationByTask.get(target);
+					if (targetLocations != null && !targetLocations.isEmpty())
+						processDependency(graph, dep, nodesByLocationByTask, locations, targetLocations, edgeMode);
 				}
 			}
 		}
@@ -93,28 +93,31 @@ public class ModelToGraphTranslator {
 	private void processTask(
 		DisjunctiveGraph<TaskUnitNode> graph,
 		Task task,
-		Map<Task, List<TaskUnitNode>> nodesByTask,
-		List<TaskUnitNode> nodes,
+		Map<Task, List<List<TaskUnitNode>>> nodesByLocationTask,
+		List<List<TaskUnitNode>> locations,
 		EdgeMode edgeMode
 	) {
-		graph.addAllNodes(nodes);
-		processOrdering(graph, task.getOrderSpecifications(), 0, nodes);
+		List<TaskUnitNode> allNodes = locations.stream()
+			.flatMap(List::stream)
+			.collect(Collectors.toList());
+		graph.addAllNodes(allNodes);
+		processOrdering(graph, task.getOrderSpecifications(), 0, allNodes);
 		if (edgeMode != EdgeMode.IGNORE_ALL)
-			processExclusiveness(graph, nodesByTask, task, edgeMode);
+			processExclusiveness(graph, nodesByLocationTask, task, edgeMode);
 	}
 	
 	/** Processes the given dependency. */
 	private void processDependency(
 		DisjunctiveGraph<TaskUnitNode> graph,
 		Dependency dep,
-		Map<Task, List<TaskUnitNode>> nodesByTask,
-		List<TaskUnitNode> sourceNodes,
-		List<TaskUnitNode> targetNodes,
+		Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask,
+		List<List<TaskUnitNode>> sourceLocations,
+		List<List<TaskUnitNode>> targetLocations,
 		EdgeMode edgeMode
 	) {
 		Scope scope = dep.getScope();
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> sourceGroups = groupNodesBy(sourceNodes, scope);
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> targetGroups = groupNodesBy(targetNodes, scope);
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> sourceGroups = groupNodesBy(sourceLocations, scope);
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> targetGroups = groupNodesBy(targetLocations, scope);
 		if (sourceGroups != null && targetGroups != null) {
 			processBasicPrecedence(graph, sourceGroups, targetGroups);
 			boolean alt = dep.isAlternate();
@@ -126,7 +129,7 @@ public class ModelToGraphTranslator {
 				if (alt)
 					processAlternatePrecedence(graph, exclusiveGroups);
 				if (chain)
-					processChainPrecedence(graph, dep, nodesByTask, exclusiveGroups);
+					processChainPrecedence(graph, dep, nodesByLocationByTask, exclusiveGroups);
 			}
 		}
 	}
@@ -171,14 +174,15 @@ public class ModelToGraphTranslator {
 	}
 	
 	/** Processes the exclusiveness of task {@code t}. */
-	private void processExclusiveness(DisjunctiveGraph<TaskUnitNode> graph, Map<Task, List<TaskUnitNode>> nodesByTask, Task t, EdgeMode edgeMode) {
+	private void processExclusiveness(DisjunctiveGraph<TaskUnitNode> graph, Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask, Task t, EdgeMode edgeMode) {
 		Scope exclusiveness = t.getExclusiveness();
 		// Partition the nodes of the task by the projection to the scope of its exclusiveness
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = groupNodesBy(nodesByTask.get(t), exclusiveness);
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = groupNodesBy(nodesByLocationByTask.get(t), exclusiveness);
 		// Add a disjunctive edge from exclusive groups to nodes of other tasks and the same projection
-		nodesByTask.entrySet().stream()
+		nodesByLocationByTask.entrySet().stream()
 			.filter(e -> !t.equals(e.getKey()))
 			.map(Map.Entry::getValue)
+			.flatMap(List::stream)
 			.flatMap(List::stream)
 			.map(n -> {
 				// Lookup projection in exclusive groups
@@ -223,16 +227,17 @@ public class ModelToGraphTranslator {
 	private void processChainPrecedence(
 		DisjunctiveGraph<TaskUnitNode> graph,
 		Dependency dep,
-		Map<Task, List<TaskUnitNode>> nodesByTask,
+		Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask,
 		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups
 	) {
 		Task source = dep.getSource();
 		Task target = dep.getTarget();
 		Scope scope = dep.getScope();
 		// Add a disjunctive edge from every node of other tasks to exclusive groups of matching projections to given scope
-		nodesByTask.entrySet().stream()
+		nodesByLocationByTask.entrySet().stream()
 			.filter(e -> !source.equals(e.getKey()) && !target.equals(e.getKey()))
 			.map(Entry::getValue)
+			.flatMap(List::stream)
 			.flatMap(List::stream)
 			.map(n -> {
 				// Match to exclusive group by projection
@@ -271,16 +276,24 @@ public class ModelToGraphTranslator {
 		return exclusiveGroups;
 	}
 	
-	/** Returns a map of the given tasks to the corresponding {@link TaskUnitNode}s. */
-	private Map<Task, List<TaskUnitNode>> nodesByTask(List<Task> tasks) {
+	/** Returns a map of the given tasks to the corresponding {@link TaskUnitNode}s, grouped by location. */
+	public Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask(List<Task> tasks) {
 		return tasks.stream()
 			.collect(Collectors.toMap(
 				Function.identity(),
-				t -> t.getLocations().stream()
-					.flatMap(l -> units(t, l))
-					.map(ahn -> new TaskUnitNode(t, ahn))
-					.collect(Collectors.toList())
-				)
+				t -> {
+					List<Location> locs = t.getLocations();
+					int locCount = locs.size();
+					List<List<TaskUnitNode>> nodeLists = new ArrayList<>(locCount);
+					for (int i = 0; i < locCount; i++) {
+						Location l = locs.get(i);
+						List<TaskUnitNode> nodes = units(t, l)
+							.map(ahn -> new TaskUnitNode(t.getType(), ahn))
+							.collect(Collectors.toList());
+						nodeLists.add(nodes);
+					}
+					return nodeLists;
+				})
 			);
 	}
 	
@@ -300,9 +313,10 @@ public class ModelToGraphTranslator {
 	}
 	
 	/** Groups the given nodes by projecting them to the given scope. */
-	private Map<Map<Attribute, String>, Set<TaskUnitNode>> groupNodesBy(Collection<TaskUnitNode> nodes, Scope scope) {
-		return nodes == null ? null 
-			: nodes.stream()
+	private Map<Map<Attribute, String>, Set<TaskUnitNode>> groupNodesBy(List<List<TaskUnitNode>> locations, Scope scope) {
+		return locations == null ? null 
+			: locations.stream()
+				.flatMap(List::stream)
 				.collect(Collectors.groupingBy(n -> scope.project(n.getUnit()), Collectors.toSet()));
 	}
 	

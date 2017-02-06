@@ -67,6 +67,11 @@ public class ConsistencyWarning implements ConsistencyClassification {
 		private int index;
 		
 		/** Create a TaskLocation. */
+		public TaskLocation(Task task, int index) {
+			this(task, task.getLocations().get(index), index);
+		}
+		
+		/** Create a TaskLocation. */
 		public TaskLocation(Task task, Location location, int index) {
 			this.task = task;
 			this.location = location;
