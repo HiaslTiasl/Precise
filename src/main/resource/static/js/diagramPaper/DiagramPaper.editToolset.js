@@ -27,9 +27,9 @@ define([
 					 * the click position.
 					 */
 					'blank:pointerdown': function (event, x, y) {
-						this.trigger('task:new', {
+						this.triggerNS('new', 'task', [{
 							position: { x: x, y: y }
-						});
+						}]);
 					}
 				}
 			},
@@ -44,7 +44,7 @@ define([
 			 */
 			action: function () {
 				if (this.selectedView)
-					this.trigger('cell:delete', this.selectedNS, this.selectedView.model.get('data'));
+					this.triggerNS('delete', this.selectedNS, [this.selectedView.model.get('data')]);
 			}
 		},
 		// Add a new dependency from the currently selected task to the one which is selected next
@@ -79,7 +79,7 @@ define([
 							if (source === target)
 								changedData.vertices = DependencyShapeView.computeLoopVertices(sourceView);
 							this.resetEditMode();
-							this.trigger('dependency:new', changedData);
+							this.triggerNS('new', 'dependency', [changedData]);
 						}
 					},
 					/**
@@ -91,18 +91,30 @@ define([
 						var sourceView = this.selectedView;
 						if (sourceView && this.selectedNS === 'task') {
 							this.resetEditMode();
-							this.trigger('dependency:new', {
+							this.triggerNS('new', 'dependency', [{
 								source: sourceView.model.get('data'),
 								targetVertex: { x: x, y: y }
-							});
+							}]);
 						}
 					}
 				}
 			}
-	//	}, {
-	//		title: 'Duplicate selected task',
-	//		requiresSelected: 'task(TODO)',
-	//		action: null	// TODO
+		},
+		// Duplicate the currently selected task
+		{
+			title: 'Duplicate task',
+			requiresSelected: 'task',
+			action: function () {
+				// Use data of selected task and translate by (10,10)
+				var oldData = this.selectedView.model.get('data'),
+					newData = _.defaults({
+						position: {
+							x: oldData.position.x + 50,
+							y: oldData.position.y + 50
+						}
+					}, oldData);
+				this.triggerNS('new', 'task', [newData]);
+			}
 		}
 	];
 

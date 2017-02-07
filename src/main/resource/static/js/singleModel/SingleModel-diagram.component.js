@@ -3,9 +3,11 @@
  * @module "singleModel/SingleModel-diagram.component"
  */
 define([
-	'lib/lodash'
+	'lib/lodash',
+	'api/hal'
 ], function (
-	_
+	_,
+	HAL
 ) {
 	'use strict';
 	
@@ -50,14 +52,22 @@ define([
 			}
 		};
 		
-		/** Resource wrappers by resource type. */
-		var resourceWrappers = {
-			task: Tasks.existingResource,
-			dependency: Dependencies.existingResource
+		/**
+		 * Resource wrappers by resource type.
+		 * Positions are ignored so if the shapes are moved in the diagram while properties are
+		 * edited, committing the properties does not reset the positions.
+		 */
+		var propertyViewResourceWrappers = {
+			task: function (data) {
+				return Tasks.existingResource($ctrl.model, _.omit(data, 'position'));
+			},
+			dependency: function (data) {
+				return Dependencies.existingResource($ctrl.model, _.omit(data, 'vertices'));
+			}
 		};
 		
 		// Listen on DiagramPaper events
-		$scope.$on('cell:delete', deleteCell);
+		$scope.$on('diagram:delete', deleteCell);
 		$scope.$on('task:new', newTaskHandler);
 		$scope.$on('dependency:new', newDependencyHandler);
 		$scope.$on('diagram:select', selectHandler);
@@ -147,9 +157,23 @@ define([
 		 * Creation of a task on the server was requested, so open a modal dialog for
 		 * entering (at least) mandatory fields, and create it when the dialog could
 		 * be closed successfully.
+		 * Directly send the data without opening a dialog if all mandatory data
+		 * is already available
 		 */
 		function newTaskHandler(event, data) {
-			$uibModal.open({
+			// Type is mandatory
+			var taskPromise = HAL.linkTo(data, 'type')
+				? sendNewTask(data)
+				: openNewTaskDialog(data);
+				
+			taskPromise.then(function (result) {
+				$scope.$broadcast('properties:created', 'task', result);
+			});
+		}
+		
+		/** Opens a dialog for creating a new task with the given initial data. */
+		function openNewTaskDialog(data) {
+			return $uibModal.open({
 				component: 'preciseCreateTask',
 				resolve: {
 					resource: _.constant(Tasks.newResource($ctrl.model, data)),
@@ -157,9 +181,16 @@ define([
 						return $ctrl.model.getPhases(Phases.Resource.prototype.defaultProjection)
 					}
 				}
-			}).result.then(function (result) {
-				$scope.$broadcast('properties:created', 'task', result);
-			});
+			}).result;
+		}
+		
+		/** Sends a new task represented by the given data to the server. */
+		function sendNewTask(data) {
+			return Tasks
+				.newResource($ctrl.model, data)
+				.then(function (resource) {
+					return resource.send('expandedTask');
+				}, PreciseApi.mapReason(errorHandler.handle));
 		}
 		
 		/**
@@ -189,7 +220,7 @@ define([
 				resetResource();	// Close resource view if no data (e.g. a cell was unselected)
 			else {
 				// Wrap it in a resource to be shown
-				resourceWrappers[resourceType]($ctrl.model, data).then(function (res) {
+				propertyViewResourceWrappers[resourceType](data).then(function (res) {
 					$ctrl.resourceType = resourceType;
 					$ctrl.resource = res;
 				});
