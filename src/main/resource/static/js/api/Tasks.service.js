@@ -31,7 +31,7 @@ define([
 		Tasks.Resource = TaskResource;
 		
 		var getAttrName = _.property('name'),
-			dontSendDirectly = ['pitch', 'exclusiveness', 'orderSpecifications', 'type', 'model', '_links'];
+			dontSendDirectly = ['id', 'pitch', 'exclusiveness', 'orderSpecifications', 'type', 'model', '_links'];
 		
 		/**
 		 * Sends the given text as a simple search query to the server
@@ -39,15 +39,15 @@ define([
 		 */
 		function searchSimple(model, text) {
 			return PreciseApi.fromBase()
-			.traverse(function (builder) {
-				return builder
-					.follow('tasks', 'search', 'simple')
-					.withTemplateParameters({
-						model: PreciseApi.hrefTo(model),
-						q: text
-					})
-					.get();
-			}).then(Pages.wrapper('tasks'));
+				.traverse(function (builder) {
+					return builder
+						.follow('tasks', 'search', 'simple')
+						.withTemplateParameters({
+							model: PreciseApi.hrefTo(model),
+							q: text
+						})
+						.get();
+				}).then(Pages.wrapper('tasks'));
 		}
 
 		/**
@@ -91,7 +91,7 @@ define([
 		
 		/** Returns a promise that transforms the given task data to the initial data of a new resource. */
 		function initializeData(task) {
-			return $q.when({
+			return $q.when(_.assign({
 				type: null,
 				pitch: {
 					crewSize: 1,
@@ -99,8 +99,7 @@ define([
 				},
 				exclusiveness: null,
 				orderSpecifications: [],
-				position: task.position
-			});
+			}, task));
 		};
 		
 		/** Returns a promise of a new resource that does not exist on the server. */
@@ -201,8 +200,13 @@ define([
 					processed.exclusiveness = Scopes.toRequestRepresentation(this.data.exclusiveness);
 				if (this.data.orderSpecifications)
 					processed.orderSpecifications = OrderSpecifications.toRequestRepresentation(this.data.orderSpecifications);
-				if (this.data.type)
-					processed.type = HAL.resolve(HAL.hrefTo(this.data.type));
+				if (this.data.type) {
+					// Make sure type is the first property, because the server processes them in order,
+					// and locations depend on type.
+					processed = _.defaults({
+						type: HAL.resolve(HAL.hrefTo(this.data.type))
+					}, processed);
+				}
 				// set model link for new resources
 				if (!this.exists)
 					processed.model = HAL.resolve(HAL.hrefTo(this.model.data));
