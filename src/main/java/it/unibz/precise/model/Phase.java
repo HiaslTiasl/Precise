@@ -22,6 +22,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -45,6 +46,7 @@ public class Phase extends BaseEntity {
 	public static final String UC_NAME = "UC_PHASE_NAME";
 	
 	@Column(nullable=false)
+	@NotNull(message="{phase.name.required}")
 	private String name;
 	
 	private String description;

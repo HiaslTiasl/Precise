@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 /**
  * Represents a type of workers.
@@ -23,6 +24,7 @@ public class Craft extends BaseEntity implements ShortNameProvider {
 	public static final String UC_SHORTNAME = "UC_CRAFT_SHORTNAME";
 	
 	@Column(nullable=false)
+	@NotNull(message="{craft.name.required}")
 	private String name;
 	private String shortName;
 	

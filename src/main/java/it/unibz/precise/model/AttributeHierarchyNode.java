@@ -18,6 +18,7 @@ import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 /**
  * Represents a node in the CA hierarchy, i.e. a CA.
@@ -39,6 +40,7 @@ public class AttributeHierarchyNode extends BaseEntity {
 	//public static final String UC_LEVEL_VALUE = "UC_NODE_LEVEL_VALUE";
 	
 	@Column(nullable=false)
+	@NotNull(message="{attributeHierarchyNode.value.required}")
 	private String value;						// The particular value of this node
 
 	@ManyToOne

@@ -27,6 +27,10 @@ figure {
 	margin-bottom: 2em;
 }
 
+.mandatory label::after {
+	content: "*";
+}
+
 precise-error-dialog table {
 	width: 100%;
 }

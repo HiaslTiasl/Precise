@@ -41,7 +41,7 @@
 		<a href
 			class="list-group-item"
 			ng-class="{'list-group-item-danger': w === $ctrl.currentWarning}"
-			ng-repeat="w in $ctrl.warnings"
+			ng-repeat="w in $ctrl.warnings track by $index"
 			ng-click="$ctrl.showWarning(w)">
 			{{w.message}}
 		</a>

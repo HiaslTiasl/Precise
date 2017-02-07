@@ -1,10 +1,10 @@
 <div class="modal-header">
 	<!-- Indicate whether model is created or edited, and show name if available. -->
-	<h3 class="modal-title">{{$ctrl.resource.exists ? 'Edit Model ' + $ctrl.resource.data.name : 'New Model'}}</h3>
+	<h3 class="modal-title">{{::$ctrl.resource.exists ? 'Edit Model ' + $ctrl.resource.data.name : 'New Model'}}</h3>
 </div>
 <div class="modal-body">
 	<form id="model-form" class="form">
-		<div class="form-group">
+		<div class="form-group mandatory">
 			<label for="model-name">Name</label>
 			<input id="model-name" type="text" class="form-control" ng-model="$ctrl.resource.data.name"/>
 		</div>

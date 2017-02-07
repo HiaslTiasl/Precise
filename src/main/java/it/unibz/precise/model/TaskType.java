@@ -11,6 +11,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 /**
  * Represents a task definition.
@@ -31,7 +32,9 @@ public class TaskType extends BaseEntity implements ShortNameProvider {
 	public static final String UC_SHORTNAME = "UC_TASKTYPE_SHORTNAME";
 	
 	@Column(nullable=false)
+	@NotNull(message="{taskType.name.required}")
 	private String name;
+	@NotNull(message="{taskType.shortName.required}")
 	@Column(nullable=false)
 	private String shortName;
 	private String description;

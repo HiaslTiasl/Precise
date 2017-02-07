@@ -231,6 +231,10 @@ define([
 		function loadWarnings() {
 			$ctrl.model.getWarnings().then(function (warnings) {
 				$ctrl.warnings = warnings;
+				if ($ctrl.currentWarning) {
+					// Check if current warning still exists
+					showWarning(_.find(warnings, $ctrl.currentWarning));
+				}
 			}, errorHandler.handle);
 		}
 		

@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 /**
  * A named range of possibly ordered values.
@@ -26,6 +27,7 @@ public class Attribute extends BaseEntity implements ShortNameProvider {
 	public static final String UC_NAME = "UC_ATTRIBUTE_NAME";
 
 	@Column(nullable=false)
+	@NotNull(message="{attribute.name.required}")
 	private String name;
 	
 	private String shortName;
