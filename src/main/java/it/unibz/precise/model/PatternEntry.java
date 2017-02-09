@@ -86,13 +86,21 @@ public class PatternEntry {
 	
 	/**
 	 * Returns a textual representation of the given pattern that only contains values
-	 * but not attribute names, e.g. {@code "A-1"}
+	 * but not attribute names, separated by "-".
 	 */
 	public static String toValueString(Map<String, PatternEntry> pattern) {
+		return toValueString(pattern, "-");
+	}
+
+	/**
+	 * Returns a textual representation of the given pattern that only contains values
+	 * but not attribute names, separated by the given separator.
+	 */
+	public static String toValueString(Map<String, PatternEntry> pattern, String separator) {
 		return pattern == null ? WILDCARD_VALUE
 			: pattern.values().stream()
 				.map(PatternEntry::getValue)
-				.collect(Collectors.joining("-"));
+				.collect(Collectors.joining(separator));
 	}
 
 	@Override

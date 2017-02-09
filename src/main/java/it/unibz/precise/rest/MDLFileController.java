@@ -55,7 +55,7 @@ public class MDLFileController {
 	
 	/** Returns the model of the specified name as a {@link MDLFileAST}. */
 	@RequestMapping(
-		path=PATH_TO_FILE,
+		path=PATH_TO_FILE + FILE_EXT,
 		method=RequestMethod.GET,
 		produces=MediaType.APPLICATION_JSON_VALUE
 	)

@@ -86,7 +86,7 @@ public class MDLDiagramController {
 	
 	/** Exports the model of the given name as an {@link MDLFileAST} that only contains the configuration part. */
 	@RequestMapping(
-		path=PATH_TO_FILE,
+		path=PATH_TO_FILE + MDLFileController.FILE_EXT,
 		method=RequestMethod.GET
 	)
 	public ResponseEntity<?> get(@PathVariable String name) {

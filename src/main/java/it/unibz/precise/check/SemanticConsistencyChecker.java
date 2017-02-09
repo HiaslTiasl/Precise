@@ -1,17 +1,5 @@
 package it.unibz.precise.check;
 
-import it.unibz.precise.check.ConsistencyWarning.TaskLocation;
-import it.unibz.precise.check.ModelToGraphTranslator.EdgeMode;
-import it.unibz.precise.graph.AcyclicOrientationFinder;
-import it.unibz.precise.graph.AcyclicOrientationFinder.Result;
-import it.unibz.precise.graph.Graph;
-import it.unibz.precise.graph.disj.DisjunctiveEdge;
-import it.unibz.precise.graph.disj.DisjunctiveGraph;
-import it.unibz.precise.model.Dependency;
-import it.unibz.precise.model.Location;
-import it.unibz.precise.model.Model;
-import it.unibz.precise.model.Task;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,6 +13,18 @@ import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import it.unibz.precise.check.ConsistencyWarning.TaskLocation;
+import it.unibz.precise.check.ModelToGraphTranslator.EdgeMode;
+import it.unibz.precise.graph.AcyclicOrientationFinder;
+import it.unibz.precise.graph.AcyclicOrientationFinder.Result;
+import it.unibz.precise.graph.Graph;
+import it.unibz.precise.graph.disj.DisjunctiveEdge;
+import it.unibz.precise.graph.disj.DisjunctiveGraph;
+import it.unibz.precise.model.Dependency;
+import it.unibz.precise.model.Location;
+import it.unibz.precise.model.Model;
+import it.unibz.precise.model.Task;
 
 /**
  * Checks consistency of a process model at the task-unit level.
@@ -67,12 +67,14 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 	public Stream<ConsistencyWarning> check(Model model) {
 		Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask = translator.nodesByLocationByTask(model.getTasks());
 		Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode = taskLocationByNode(nodesByLocationByTask);
-		// N.B. we need to disjunctive edges also for whole graph to make sure that each set of nodes connected
+		// N.B. we need disjunctive edges also for whole graph to make sure that each set of nodes connected
 		// by disjunctive edges is contained in one single SCC
 		DisjunctiveGraph<TaskUnitNode> wholeGraph = translator.translate(nodesByLocationByTask, EdgeMode.IGNORE_SIMPLE);
 		
-		return sccFinder.findSCCs(asUndirectedGraph(wholeGraph)).stream()				// Divide the graph into independent sub-graphs
-			.filter(SCCFinder::isNonTrivialComponent)
+		// TODO: decide what to do with the following
+		//removeSimpleBridges(wholeGraph);
+		
+		return sccFinder.findNonTrivialSCCs(asUndirectedGraph(wholeGraph))				// Divide the graph into independent sub-graphs
 			.map(nodes -> nodesByLocationByTask(nodes, taskLocationByNode))				// Compute nodes of those sub-graphs
 			.map(nodeMap -> translator.translate(nodeMap, EdgeMode.IGNORE_SIMPLE))		// Compute graphs, ignoring simple edges which never introduce cycles
 			.map(AcyclicOrientationFinder<TaskUnitNode>::new)
@@ -80,6 +82,22 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 			.flatMap(result -> warnings(result, taskLocationByNode));
 	}
 	
+//	/**
+//	 * Removes bridges that do not introduce problems in the given graph.
+//	 * The two nodes connected by such bridges must not be contained in the same exclusive group
+//	 * of a disjunctive edge.
+//	 */
+//	private void removeSimpleBridges(DisjunctiveGraph<TaskUnitNode> wholeGraph) {
+//		Map<TaskUnitNode, List<TaskUnitNode>> bridges = new BridgeFinder<>(asUndirectedGraph(wholeGraph)).search();
+//		bridges.forEach((node, neighbors) -> {
+//			Set<TaskUnitNode> succs = wholeGraph.successorSet(node);
+//			Set<DisjunctiveEdge<TaskUnitNode>> disj = wholeGraph.disjunctions(node);
+//			neighbors.stream()
+//				.filter(n -> disj.stream().anyMatch(edge -> edge.getSide(node).contains(n)))
+//				.map(n -> succs.contains(n) ? new Arc<>(node, n) : new Arc<>(n, node))
+//				.forEach(wholeGraph::removeArc);
+//		});
+//	}
 	
 	/** Produces warnings for the given result if it represents an error. */
 	private Stream<ConsistencyWarning> warnings(Result<TaskUnitNode> result, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode) {

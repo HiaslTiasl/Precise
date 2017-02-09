@@ -45,10 +45,7 @@ public class DiagramCycleChecker implements ConsistencyChecker {
 	 */
 	@Override
 	public Stream<ConsistencyWarning> check(Model model) {
-		List<List<Task>> sccs = sccFinder.findSCCs(DiagramGraph.directed(model));
-		return sccs.stream()
-			.filter(SCCFinder::isNonTrivialComponent)
-			.map(this::warning);
+		return sccFinder.findNonTrivialSCCs(DiagramGraph.directed(model)).map(this::warning);
 	}
 	
 	/** Produce a warning about the given SCC. */

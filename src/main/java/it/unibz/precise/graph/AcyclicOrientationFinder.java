@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import it.unibz.precise.check.SCCFinder;
 import it.unibz.precise.graph.disj.DisjunctiveEdge;
 import it.unibz.precise.graph.disj.DisjunctiveGraph;
 
@@ -188,9 +187,7 @@ public class AcyclicOrientationFinder<T> {
 	
 	/** Returns non-trivial strongly connected components in the given disjunctive graph. */
 	private List<List<T>> detectCycles(DisjunctiveGraph<T> graph) {
-		return sccFinder.findSCCs(graph).stream()
-			.filter(SCCFinder::isNonTrivialComponent)
-			.collect(Collectors.toList());
+		return sccFinder.findNonTrivialSCCs(graph).collect(Collectors.toList());
 	}
 	
 	/** Attempts to resolve the given edge. */

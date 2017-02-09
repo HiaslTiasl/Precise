@@ -115,6 +115,12 @@ public class DisjunctiveGraph<T> implements Cloneable, Graph<T> {
 			&& arcs.add(arc);
 	}
 	
+	public boolean removeArc(Arc<T> arc) {
+		return arcs.remove(arc)
+			&& removeFrom(succ, arc.getSource(), arc.getTarget())
+			&& removeFrom(pred, arc.getTarget(), arc.getSource());
+	}
+	
 	public boolean addAllEdges(Collection<DisjunctiveEdge<T>> edges) {
 		boolean added = false;
 		for (DisjunctiveEdge<T> e : edges)
@@ -187,6 +193,13 @@ public class DisjunctiveGraph<T> implements Cloneable, Graph<T> {
 		return added;
 	}
 	
+	
+	/** Remove {@code value} from the set of values stored in {@code map} under {@code key}. */
+	private <K, V> boolean removeFrom(Map<K, Set<V>> map, K key, V value) {
+		Set<V> values = map.get(key);
+		return values != null && values.remove(value);
+	}
+
 	/** Remove {@code value} from all sets of values stored in {@code map} under {@code keys}. */
 	private <K, V> boolean removeFromAll(Map<K, Set<V>> map, Set<K> keys, V value) {
 		boolean removed = false;
