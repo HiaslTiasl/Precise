@@ -183,7 +183,7 @@ precise-diagram-paper {
 }
 
 #warnings article {
-	height: 100px;
+	height: 200px;
 	min-width: 400px;
 	overflow: scroll;
 }

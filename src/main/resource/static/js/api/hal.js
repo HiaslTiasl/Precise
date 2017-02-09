@@ -39,7 +39,7 @@ define([
 	
 	/** Returns the array embedded under the specified relation. */
 	function embeddedArray(obj, rel) {
-		return _.get(obj, ['_embedded', rel]);
+		return _.get(obj, ['_embedded', rel]) || [];
 	}
 	
 	/** Returns the links of the given object. */

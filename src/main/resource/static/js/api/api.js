@@ -6,6 +6,7 @@ define([
 	'lib/angular',
 	'./PreciseApi.service',
 	'./Files.service',
+	'./RemoteFiles.service',
 	'./MDLFiles.service',
 	'./Scopes.service',
 	'./OrderSpecifications.service',
@@ -27,6 +28,7 @@ define([
 	angular,
 	ApiService,
 	FilesService,
+	RemoteFilesService,
 	MDLFilesService,
 	ScopesService,
 	OrderSpecificationsService,
@@ -49,6 +51,7 @@ define([
 	return angular.module('precise.api', ['traverson'])
 		.service('PreciseApi', ApiService)
 		.service('Files', FilesService)
+		.service('RemoteFiles', RemoteFilesService)
 		.service('MDLFiles', MDLFilesService)
 		.service('Scopes', ScopesService)
 		.service('OrderSpecifications', OrderSpecificationsService)

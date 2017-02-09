@@ -34,3 +34,10 @@ figure {
 precise-error-dialog table {
 	width: 100%;
 }
+
+.warnings-loader {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	background-image: url(../img/warnings-loader.gif);
+}

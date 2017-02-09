@@ -9,49 +9,18 @@ define([
 ) {
 	'use strict';
 	
-	/** Represents MDL files under a given base path. */
-	var MDLContext = util.defineClass({
-		
-		/**
-		 * Creates a new MDLContext under the given base path.
-		 * @constructor
-		 */
-		constructor: function (basePath) {
-			this.basePath = basePath;
-		},
-		
-		/** Returns the URL for the given model or model name. */
-		getModelUrl: function (model) {
-			return this.getFileUrl(this.getFileName(model));
-		},
-		
-		/** Returns the URL for the given file name. */
-		getFileUrl: function (fileName) {
-			return this.basePath + fileName;
-		},
-		
-		/** Returns the file name of the given model or model name. */
-		getFileName: function (model) {
-			var name = typeof model === 'object' ? model.name : model;
-			return name + '.mdl';
-		}
-	
-	});
-	
-	MDLFilesService.$inject = ['$http', 'Upload', 'PreciseApi'];
+	MDLFilesService.$inject = ['$http', 'Upload', 'PreciseApi', 'RemoteFiles'];
 	
 	/** Service factory. */
-	function MDLFilesService($http, Upload, PreciseApi) {
+	function MDLFilesService($http, Upload, PreciseApi, RemoteFiles) {
 		
 		var svc = this;
 		
-		var basePath = 'files/',						// Base path of MDL files
-			configPath = basePath + 'config/',			// Base path of MDL config files
-			diagramPath = basePath + 'diagram/';		// Base path of MDL diagram files
+		var extension = '.mdl';
 		
-		svc.base = new MDLContext(basePath);			// Base context for MDL files
-		svc.config = new MDLContext(configPath);		// Context for MDL config files
-		svc.diagram = new MDLContext(diagramPath);		// Context for MDL diagram files
+		svc.base    = RemoteFiles.context({ extension: extension });						// Base context for MDL files
+		svc.config  = RemoteFiles.context({ extension: extension, path: 'config/' });		// Context for MDL config files
+		svc.diagram = RemoteFiles.context({ extension: extension, path: 'diagram/' });		// Context for MDL diagram files
 
 		svc.importJSON = importJSON;
 		svc.duplicate = duplicate;

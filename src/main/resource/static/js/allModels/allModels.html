@@ -34,8 +34,12 @@
 					<div class="btn-group" uib-dropdown>
 						<button class="btn btn-default" uib-dropdown-toggle>Export</button>
 						<ul class="dropdown-menu" uib-dropdown-menu>
-							<li><a ng-href="{{$ctrl.getMDLFileURI(m)}}">As MDL file (JSON)</a></li>
-							<li><a ng-href="{{$ctrl.getCSVFileURI(m)}}">As CSV file</a></li>
+							<li><a ng-href="{{$ctrl.remoteFiles.mdl.base.getModelUrl(m)}}">As MDL file (JSON)</a></li>
+							<li><a ng-href="{{$ctrl.remoteFiles.csv.getModelUrl(m)}}">As CSV file</a></li>
+							<li role="separator" class="divider"></li>
+							<li class="dropdown-header">Advanced</li>
+							<li><a ng-href="{{$ctrl.remoteFiles.smv.getModelUrl(m)}}">As NuSMV file</a></li>
+							<li><a ng-href="{{$ctrl.remoteFiles.graph.getModelUrl(m)}}">As graph file</a></li>
 						</ul>
 					</div>
 					<!-- <a class="btn btn-default" ng-href="{{$ctrl.getFileURI(m)}}" target="_blank" download="{{$ctrl.getFileName(m)}}">Export</a> -->

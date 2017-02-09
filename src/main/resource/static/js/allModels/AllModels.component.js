@@ -20,8 +20,7 @@ define([
 		var $ctrl = this;
 		
 		$ctrl.refreshModels = refreshModels;
-		$ctrl.getMDLFileURI = getMDLFileURI;
-		$ctrl.getCSVFileURI = AllModels.getCSVFileURI;
+		$ctrl.remoteFiles = AllModels.remoteFiles;
 		$ctrl.createModel = createModel;
 		$ctrl.editModel = editModel;
 		$ctrl.importFile = importFile;

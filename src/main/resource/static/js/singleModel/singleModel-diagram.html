@@ -35,18 +35,19 @@
 		<a href>
 			Warnings
 			<span class="badge" ng-show="$ctrl.warnings.length">{{$ctrl.warnings.length}}</span>
+			<span class="warnings-loader" ng-if="!$ctrl.warnings"></span>
 		</a>
 	</header>
-	<article uib-collapse="!$ctrl.warningsOpen" ng-if="$ctrl.warnings.length" class="list-group">
+	<article uib-collapse="!$ctrl.warningsOpen" class="{{$ctrl.warnings.length ? 'list-group' : 'panel-body'}}">
 		<a href
 			class="list-group-item"
+			ng-if="$ctrl.warnings.length > 0"
 			ng-class="{'list-group-item-danger': w === $ctrl.currentWarning}"
 			ng-repeat="w in $ctrl.warnings track by $index"
 			ng-click="$ctrl.showWarning(w)">
 			{{w.message}}
 		</a>
-	</article>
-	<article uib-collapse="!$ctrl.warningsOpen" ng-if="!$ctrl.warnings.length" class="panel-body">
-		<p class="text-muted">No warnings</p> 
+		<p class="text-muted" ng-if="$ctrl.warnings.length === 0">No warnings</p> 
+		<p class="text-muted" ng-if="!$ctrl.warnings">Loading...</p>
 	</article>
 </div>

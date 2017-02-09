@@ -229,6 +229,8 @@ define([
 		
 		/** Load the warnings of the model. */
 		function loadWarnings() {
+			// Reset list to show that warnings are being reloaded
+			$ctrl.warnings = null;
 			$ctrl.model.getWarnings().then(function (warnings) {
 				$ctrl.warnings = warnings;
 				if ($ctrl.currentWarning) {

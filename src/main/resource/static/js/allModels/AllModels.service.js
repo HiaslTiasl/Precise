@@ -9,10 +9,10 @@ define([
 ) {
 	'use strict';
 	
-	AllModelsService.$inject = ['$q', 'Files', 'MDLFiles', 'PreciseApi', 'Models'];
+	AllModelsService.$inject = ['$q', 'Files', 'RemoteFiles', 'MDLFiles', 'PreciseApi', 'Models'];
 	
 	/** @constructor */
-	function AllModelsService($q, Files, MDLFiles, PreciseApi, Models) {
+	function AllModelsService($q, Files, RemoteFiles, MDLFiles, PreciseApi, Models) {
 		
 		var svc = this;
 		
@@ -20,9 +20,15 @@ define([
 		svc.importFile = importFile;
 		svc.deleteModel = deleteModel;
 		svc.duplicateModel = duplicateModel;
-		svc.getCSVFileURI = getCSVFileURI;
 		svc.cachedModels = null;
 		svc.clearCache = clearCache;
+		
+		svc.remoteFiles = {
+			mdl: MDLFiles,
+			csv: RemoteFiles.context({ extension: '.csv' }),
+			smv: RemoteFiles.context({ extension: '.smv' }),
+			graph: RemoteFiles.context({ extension: '.graph' })
+		};
 		
 		/** Clears cache of models. */
 		function clearCache() {
@@ -61,11 +67,7 @@ define([
 		function duplicateModel(model) {
 			return MDLFiles.duplicate(MDLFiles.base.getModelUrl(model.name + ' - copy'), model.name)
 		}
-		
-		/** Returns the URI for the CSV export of the given model. */
-		function getCSVFileURI(model) {
-			return "files/" + model.name + ".csv";
-		}
+
 	}
 	
 	return AllModelsService;
