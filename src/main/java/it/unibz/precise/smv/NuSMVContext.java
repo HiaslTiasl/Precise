@@ -207,7 +207,7 @@ public class NuSMVContext {
 	 */
 	private String precedeAll(Set<TaskUnitNode> sources, Set<TaskUnitNode> targets) {
 		return sources.stream()
-			.flatMap(s -> targets.stream().map(t -> precedes(s, t)))
+			.flatMap(s -> (Stream<String>)targets.stream().map(t -> precedes(s, t)))	// TODO: Delete cast once Eclipse understands
 			.map(NuSMVContext::parenthesis)
 			.collect(Collectors.joining(" & "));
 	}

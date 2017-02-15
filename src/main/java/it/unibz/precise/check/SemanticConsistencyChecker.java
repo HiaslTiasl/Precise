@@ -71,33 +71,13 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 		// by disjunctive edges is contained in one single SCC
 		DisjunctiveGraph<TaskUnitNode> wholeGraph = translator.translate(nodesByLocationByTask, EdgeMode.IGNORE_SIMPLE);
 		
-		// TODO: decide what to do with the following
-		//removeSimpleBridges(wholeGraph);
-		
-		return sccFinder.findNonTrivialSCCs(asUndirectedGraph(wholeGraph))				// Divide the graph into independent sub-graphs
+		return sccFinder.findNonTrivialSCCs(asClusteredGraph(wholeGraph))				// Divide the graph into independent sub-graphs
 			.map(nodes -> nodesByLocationByTask(nodes, taskLocationByNode))				// Compute nodes of those sub-graphs
 			.map(nodeMap -> translator.translate(nodeMap, EdgeMode.IGNORE_SIMPLE))		// Compute graphs, ignoring simple edges which never introduce cycles
 			.map(AcyclicOrientationFinder<TaskUnitNode>::new)
 			.map(AcyclicOrientationFinder::search)										
 			.flatMap(result -> warnings(result, taskLocationByNode));
 	}
-	
-//	/**
-//	 * Removes bridges that do not introduce problems in the given graph.
-//	 * The two nodes connected by such bridges must not be contained in the same exclusive group
-//	 * of a disjunctive edge.
-//	 */
-//	private void removeSimpleBridges(DisjunctiveGraph<TaskUnitNode> wholeGraph) {
-//		Map<TaskUnitNode, List<TaskUnitNode>> bridges = new BridgeFinder<>(asUndirectedGraph(wholeGraph)).search();
-//		bridges.forEach((node, neighbors) -> {
-//			Set<TaskUnitNode> succs = wholeGraph.successorSet(node);
-//			Set<DisjunctiveEdge<TaskUnitNode>> disj = wholeGraph.disjunctions(node);
-//			neighbors.stream()
-//				.filter(n -> disj.stream().anyMatch(edge -> edge.getSide(node).contains(n)))
-//				.map(n -> succs.contains(n) ? new Arc<>(node, n) : new Arc<>(n, node))
-//				.forEach(wholeGraph::removeArc);
-//		});
-//	}
 	
 	/** Produces warnings for the given result if it represents an error. */
 	private Stream<ConsistencyWarning> warnings(Result<TaskUnitNode> result, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode) {
@@ -182,33 +162,36 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 	}
 	
 	/**
-	 * Returns a view of the given graph that considers arcs to be undirected,
-	 * and where each side of a {@link DisjunctiveEdge} represents a clique.
-	 * Then, for each {@link DisjunctiveEdge} in the original graph, its two
-	 * sets of nodes are either contained all within the same or in two separate
-	 * strongly connected components.
+	 * Returns a graph where each node {@code n} has a successor {@code s} iff
+	 * {@code disjGraph} has an arc from {@code n} to {@code s} or if it has a
+	 * disjunctive edge between two sets of nodes such that both {@code n} and
+	 * {@code s} are contained in the same set.
+	 * It is guaranteed that {@code disjGraph} has an acyclic orientation iff
+	 * for each subgraph induced by a SCC of the returned graph has an acyclic
+	 * orientation.
+	 * <p>
+	 * Note that the returned Graph is a view on {@code disjGraph}.
+	 * If {@code disjGraph} is modified while traversing {@link Graph#nodes()}
+	 * or {@link Graph#successors(Object)}, the behavior is undefined.
 	 */
-	private <T> Graph<T> asUndirectedGraph(DisjunctiveGraph<T> disjunctiveGraph) {
+	private <T> Graph<T> asClusteredGraph(DisjunctiveGraph<T> disjGraph) {
 		return new Graph<T>() {
 			@Override
 			public Collection<T> nodes() {
-				return disjunctiveGraph.nodes();
+				return disjGraph.nodes();
 			}
 			@Override
 			public Stream<T> successors(T node) {
 				// Groups of nodes corresponding to the side of disjunctive edges that contain
 				// the given node.
-				Stream<Set<T>> exclusiveGroups = disjunctiveGraph.disjunctions(node).stream()
+				Stream<Set<T>> exclusiveGroups = disjGraph.disjunctions(node).stream()
 					.map(e -> e.getSide(node))
 					.filter(Objects::nonNull);		// Should not be necessary
 				
 				return Stream.concat(
-					Stream.of(
-						disjunctiveGraph.successorSet(node),
-						disjunctiveGraph.predecessorSet(node)
-					),
-					exclusiveGroups
-				).flatMap(Set::stream);
+					disjGraph.successors(node),
+					exclusiveGroups.flatMap(Set::stream)
+				);
 			}
 		};
 	}
