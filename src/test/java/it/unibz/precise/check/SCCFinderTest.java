@@ -2,12 +2,9 @@ package it.unibz.precise.check;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -24,7 +21,8 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import it.unibz.precise.Application;
-import it.unibz.precise.graph.Graph;
+import it.unibz.precise.graph.MaterializedGraph;
+import it.unibz.util.Util;
 
 @RunWith(Parameterized.class)
 @SpringBootTest(classes=Application.class, webEnvironment=WebEnvironment.RANDOM_PORT)
@@ -44,7 +42,7 @@ public class SCCFinderTest {
 	public String name;
 	
 	@Parameter(1)
-	public List<List<Integer>> adj;
+	public Map<Integer, Set<Integer>> adj;
 
 	@Parameter(2)
 	public Set<Set<Integer>> expectedSCCs;
@@ -61,22 +59,8 @@ public class SCCFinderTest {
 	
 	@Test
 	public void testFindSCCs() {
-		List<Integer> nodes = IntStream.range(0, adj.size()).boxed().collect(Collectors.toList());
-		Graph<Integer> graph = new Graph<Integer>() {
-			public Collection<Integer> nodes() {
-				return nodes;
-			}
-			public Stream<Integer> successors(Integer node) {
-				return adj.get(node).stream();
-			}
-		};
-		List<List<Integer>> foundSCCs = sccFinder.findSCCs(graph);
-		
-		Set<Set<Integer>> sccSets = foundSCCs.stream()
-			.map(HashSet<Integer>::new)
-			.collect(Collectors.toSet());
-		
-		Assert.assertEquals(expectedSCCs, sccSets);
+		List<? extends List<Integer>> foundSCCs = sccFinder.findSCCs(MaterializedGraph.of(adj.keySet(), adj));
+		Assert.assertEquals(expectedSCCs, Util.asSet(foundSCCs));
 	}
 	
 }

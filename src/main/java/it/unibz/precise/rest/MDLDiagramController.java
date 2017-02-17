@@ -52,14 +52,14 @@ import it.unibz.precise.rest.mdl.conversion.MDLContext;
  */
 @RestController
 @RequestMapping(
-	path=MDLDiagramController.RESOURCE_NAME,
+	path=MDLDiagramController.CTRL_PATH,
 	produces={MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE}
 )
 public class MDLDiagramController {
 	
-	public static final String RESOURCE_NAME = MDLFileController.RESOURCE_NAME + "/diagram";
-	
-	public static final String PATH_TO_FILE = MDLFileController.PATH_TO_FILE;
+	public static final String CTRL_PATH = MDLFileController.CTRL_PATH + "/diagram";
+	public static final String FILE_PATH = MDLFileController.FILE_PATH;
+	public static final String FILE_EXT  = MDLFileController.FILE_EXT;
 	
 	public static final String FILE_SUFFIX = " (diagram)";
 	
@@ -86,7 +86,7 @@ public class MDLDiagramController {
 	
 	/** Exports the model of the given name as an {@link MDLFileAST} that only contains the configuration part. */
 	@RequestMapping(
-		path=PATH_TO_FILE + MDLFileController.FILE_EXT,
+		path=FILE_PATH + FILE_EXT,
 		method=RequestMethod.GET
 	)
 	public ResponseEntity<?> get(@PathVariable String name) {
@@ -111,7 +111,7 @@ public class MDLDiagramController {
 	 * @throws IllegalStateException if the configuration of the model is not editable (because a diagram exists)
 	 */
 	@RequestMapping(
-		path=PATH_TO_FILE,
+		path=FILE_PATH,
 		method=RequestMethod.PUT
 	)
 	@Transactional
@@ -243,7 +243,7 @@ public class MDLDiagramController {
 	
 	/** Clear the diagram of the model of the given name. */
 	@RequestMapping(
-		path=PATH_TO_FILE,
+		path=FILE_PATH,
 		method=RequestMethod.DELETE
 	)
 	@Transactional

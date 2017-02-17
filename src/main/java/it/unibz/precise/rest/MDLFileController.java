@@ -32,7 +32,7 @@ import it.unibz.precise.rest.mdl.conversion.MDLContext;
  */
 @RestController
 @RequestMapping(
-	path=MDLFileController.RESOURCE_NAME,
+	path=MDLFileController.CTRL_PATH,
 	produces={MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE}
 )
 public class MDLFileController {
@@ -43,19 +43,19 @@ public class MDLFileController {
 	@Autowired
 	private ValidationAdapter validator;
 	
-	public static final String RESOURCE_NAME = "/files";
-	
+	public static final String CTRL_PATH = FileControllers.ROOT_PATH;
+	public static final String FILE_PATH = FileControllers.NAME_PATTERN;		// Extension is optional and arbitrary (Spring exposes the same method with ".*" appended to the path).
 	public static final String FILE_EXT = ".mdl";				// Used for exporting only; imports work with any extension, only the syntax counts.
-	public static final String PATH_TO_FILE = "/{name}";		// Extension is optional and arbitrary (Spring exposes the same method with ".*" appended to the path).
+	
 	
 	/** Returns the "Content-Disposition" HTTP Header value with a filename corresponding to the given model name. */
 	static String getContentDisposition(String name) {
-		return FileDownload.getContentDisposition(name + MDLFileController.FILE_EXT);
+		return FileControllers.getContentDisposition(name, MDLFileController.FILE_EXT);
 	}
 	
 	/** Returns the model of the specified name as a {@link MDLFileAST}. */
 	@RequestMapping(
-		path=PATH_TO_FILE + FILE_EXT,
+		path=FILE_PATH + FILE_EXT,
 		method=RequestMethod.GET,
 		produces=MediaType.APPLICATION_JSON_VALUE
 	)
@@ -77,7 +77,7 @@ public class MDLFileController {
 	 */
 	@Transactional
 	@RequestMapping(
-		path=PATH_TO_FILE,
+		path=FILE_PATH,
 		method=RequestMethod.PUT
 	)
 	public ResponseEntity<?> save(

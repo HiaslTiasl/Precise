@@ -20,7 +20,7 @@ import it.unibz.precise.smv.ModelToNuSMVTranslator;
  */
 @RestController
 @RequestMapping(
-	path=NuSMVController.RESOURCE_NAME,
+	path=NuSMVController.CTRL_PATH,
 	produces="text/smv"
 )
 public class NuSMVController {
@@ -31,19 +31,13 @@ public class NuSMVController {
 	@Autowired
 	private ModelToNuSMVTranslator translator;
 	
-	public static final String RESOURCE_NAME = "/files";
-	
+	public static final String CTRL_PATH = FileControllers.ROOT_PATH;
+	public static final String FILE_PATH = FileControllers.NAME_PATTERN;	
 	public static final String FILE_EXT = ".smv";				// Used for exporting only; imports work with any extension, only the syntax counts.
-	public static final String PATH_TO_FILE = "/{name}";		// Extension is optional and arbitrary for imports (Spring exposes the same method with ".*" appended to the path).
-	
-	/** Returns the "Content-Disposition" HTTP Header value with a filename corresponding to the given model name. */
-	static String getContentDisposition(String name) {
-		return FileDownload.getContentDisposition(name + FILE_EXT);
-	}
 	
 	/** Exports the NuSMV file. */
 	@RequestMapping(
-		path=PATH_TO_FILE + FILE_EXT,
+		path=FILE_PATH + FILE_EXT,
 		method=RequestMethod.GET,
 		produces="text/smv"
 	)
@@ -52,7 +46,7 @@ public class NuSMVController {
 		return model == null
 			? ResponseEntity.notFound().build()
 			: ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, getContentDisposition(name))
+				.header(HttpHeaders.CONTENT_DISPOSITION, FileControllers.getContentDisposition(name, FILE_EXT))
 				.body(translator.translate(model));
 	}
 

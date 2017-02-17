@@ -1,7 +1,5 @@
 package it.unibz.precise.graph.disj;
 
-import it.unibz.precise.graph.Graph;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,7 +7,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
+
+import it.unibz.precise.graph.MaterializedGraph;
 
 /**
  * A disjunctive graph representation.
@@ -22,7 +21,7 @@ import java.util.stream.Stream;
  *
  * @param <T> The type of the nodes.
  */
-public class DisjunctiveGraph<T> implements Cloneable, Graph<T> {
+public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
 	
 	private Set<T> nodes;
 	private Set<Arc<T>> arcs;
@@ -31,33 +30,63 @@ public class DisjunctiveGraph<T> implements Cloneable, Graph<T> {
 	private Map<T, Set<T>> succ = new HashMap<>();		// Map from node to successors
 	private Map<T, Set<T>> pred = new HashMap<>();		// Map from node to predecessors
 	
-	// disjunctive edges
 	private Map<T, Set<DisjunctiveEdge<T>>> disj = new HashMap<>();		// Map from nodes to disjunctive edges that contains them
 	
 	public DisjunctiveGraph() {
-		this.nodes = new HashSet<>();
+		this(new HashSet<>());
+	}
+	
+	/** Creates a new graph with the given nodes only. */
+	private DisjunctiveGraph(Set<T> nodes) {
+		this.nodes = nodes;
 		this.arcs = new HashSet<>();
 		this.edges = new HashSet<>();
 	}
 	
-	public DisjunctiveGraph(DisjunctiveGraph<T> other) {
-		this(other.nodes, other.arcs, other.edges);
-	}
-	
-	public DisjunctiveGraph(Collection<T> nodes, Collection<Arc<T>> arcs, Collection<DisjunctiveEdge<T>> edges) {
-		this.nodes = new HashSet<>(nodes);
-		this.arcs = new HashSet<>(arcs.size());
-		this.edges = new HashSet<>(edges.size());
+	/**
+	 * Creates a graph with the given nodes and adds all given arcs and edges.
+	 * The set of nodes is used as is, whereas arcs and edges are copied into new collections.
+	 */
+	private DisjunctiveGraph(Set<T> nodes, Collection<Arc<T>> arcs, Collection<DisjunctiveEdge<T>> edges) {
+		this.nodes = nodes;
+		this.arcs = new HashSet<>(arcs.size() * 4 / 3);
+		this.edges = new HashSet<>(edges.size() * 4 / 3);
 		addAllArcs(arcs);
 		addAllEdges(edges);
 	}
 	
-	public Set<T> nodes() {
-		return nodes;
+	/** Copy the given graph. */
+	public static <T> DisjunctiveGraph<T> copy(DisjunctiveGraph<T> other) {
+		return new DisjunctiveGraph<>(new HashSet<>(other.nodes), other.arcs, other.edges);
 	}
 	
-	public Stream<T> successors(T n) {
-		return successorSet(n).stream();
+	/**
+	 * Copy the given graph with sealed nodes.
+	 * This prevents to add further nodes afterwards and avoids copying nodes.
+	 */
+	public static <T> DisjunctiveGraph<T> copySealedNodes(DisjunctiveGraph<T> other) {
+		return new DisjunctiveGraph<>(Collections.unmodifiableSet(other.nodes), other.arcs, other.edges);
+	}
+	
+	/**
+	 * Create a graph with the given sealed nodes.
+	 * This prevents to add further nodes afterwards and avoids copying nodes.
+	 */
+	public static <T> DisjunctiveGraph<T> sealedNodes(Set<T> nodes) {
+		return new DisjunctiveGraph<>(Collections.unmodifiableSet(nodes));
+	}
+	
+	/**
+	 * Creates a subgraph of this graph consisting only of the given nodes.
+	 * This implementation assumes that the given nodes are all contained in this graph.
+	 * If this is not the case, the behavior is unspecified.
+	 */
+	public DisjunctiveGraph<T> restrictedTo(Set<T> nodes) {
+		return new DisjunctiveGraph<>(Collections.unmodifiableSet(nodes), arcs, edges);
+	}
+	
+	public Set<T> nodes() {
+		return nodes;
 	}
 	
 	public Set<T> successorSet(T n) {
@@ -68,7 +97,7 @@ public class DisjunctiveGraph<T> implements Cloneable, Graph<T> {
 		return checkSet(pred.get(n));
 	}
 	
-	private <E> Set<E> checkSet(Set<E> set) {
+	private static <E> Set<E> checkSet(Set<E> set) {
 		return set != null ? set : Collections.emptySet();
 	}
 	
@@ -109,10 +138,13 @@ public class DisjunctiveGraph<T> implements Cloneable, Graph<T> {
 	}
 
 	public boolean addArc(Arc<T> arc) {
-		// Only add arc if there is no arc with same source and target
-		return addToMultimap(succ, arc.getSource(), arc.getTarget())
-			&& addToMultimap(pred, arc.getTarget(), arc.getSource())
-			&& arcs.add(arc);
+		T source = arc.getSource(), target = arc.getTarget();
+		// N.B: arcs is a set, and can only contain an arc once.
+		// Also, only add arc if both source and target are already nodes in this graph
+		return nodes.contains(source) && nodes.contains(target)
+			&& arcs.add(arc)
+			&& addToMultimap(succ, arc.getSource(), arc.getTarget())
+			&& addToMultimap(pred, arc.getTarget(), arc.getSource());
 	}
 	
 	public boolean removeArc(Arc<T> arc) {
@@ -129,8 +161,11 @@ public class DisjunctiveGraph<T> implements Cloneable, Graph<T> {
 	}
 	
 	public boolean addEdge(DisjunctiveEdge<T> edge) {
-		// Only add edge if it is not already contained
-		return addAllToMultimap(disj, edge.getLeft(), edge)
+		Set<T> left = edge.getLeft(), right = edge.getRight();
+		// N.B: edges is a set, and can only contain an arc once.
+		// Also, only add edge if all connected nodes are already nodes in this graph
+		return nodes.containsAll(left) && nodes.containsAll(right)
+			&& addAllToMultimap(disj, edge.getLeft(), edge)
 			&& addAllToMultimap(disj, edge.getRight(), edge)
 			&& edges.add(edge);
 	}
@@ -208,30 +243,10 @@ public class DisjunctiveGraph<T> implements Cloneable, Graph<T> {
 		return removed;
 	}
 	
-	
 	@Override
 	public Object clone() {
 		// N.B: Does not clone nodes, arcs, or edges!
-		return new DisjunctiveGraph<T>(nodes, arcs, edges);
-	}
-	
-	/** Prints the given graph for debugging. */
-	public void print() {
-		System.out.println("ARCS:");
-		printLinesIndented(arcs);
-		System.out.println("EDGES:");
-		printLinesIndented(edges);
-	}
-	
-	/** Helper method for printing all the given lines with one tab for indentation, or (none) if elements is empty. */
-	private <E> void printLinesIndented(Collection<E> elements) {
-		if (elements.isEmpty())
-			System.out.println("\t(none)");
-		else {
-			elements.stream()
-			.map(a -> "\t" + a)
-			.forEach(System.out::println);
-		}
+		return copy(this);
 	}
 
 }

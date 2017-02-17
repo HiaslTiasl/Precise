@@ -27,7 +27,8 @@ define([
 			mdl: MDLFiles,
 			csv: RemoteFiles.context({ extension: '.csv' }),
 			smv: RemoteFiles.context({ extension: '.smv' }),
-			graph: RemoteFiles.context({ extension: '.graph' })
+			graph: RemoteFiles.context({ path: 'graph/', extension: '.json' }),
+			orientation: RemoteFiles.context({ path: 'graph/orientation/', extension: '.json' })
 		};
 		
 		/** Clears cache of models. */

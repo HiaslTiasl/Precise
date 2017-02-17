@@ -40,13 +40,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class ModelToGraphTranslator {
 	
-	/** Specifies how to handle {@link DisjunctiveEdge}. */
-	public enum EdgeMode {
-		IGNORE_ALL,
-		IGNORE_SIMPLE,
-		CONSIDER_ALL
-	}
-	
 	/** Translates the given model to a {@link DisjunctiveGraph} considering all tasks. */
 	public DisjunctiveGraph<TaskUnitNode> translate(Model model) {
 		return translate(model.getTasks());
@@ -54,66 +47,91 @@ public class ModelToGraphTranslator {
 	
 	/** Translates the given tasks to a {@link DisjunctiveGraph} . */
 	public DisjunctiveGraph<TaskUnitNode> translate(List<Task> tasks) {
-		return translate(nodesByLocationByTask(tasks), EdgeMode.CONSIDER_ALL);
+		return translate(nodesByLocationByTask(tasks), false);
 	}
 
-	/** Translates the given tasks to a {@link DisjunctiveGraph}, using the specified {@link EdgeMode}. */
-	public DisjunctiveGraph<TaskUnitNode> translate(List<Task> tasks, EdgeMode edgeMode) {
-		return translate(nodesByLocationByTask(tasks), edgeMode);
+	/** Translates the given tasks to a {@link DisjunctiveGraph}, ignoring simple edges if requested. */
+	public DisjunctiveGraph<TaskUnitNode> translate(List<Task> tasks, boolean ignoreSimpleEdges) {
+		return translate(nodesByLocationByTask(tasks), ignoreSimpleEdges);
 	}
 	
-	/** Processes the map of tasks to nodes and creates a corresponding {@link DisjunctiveGraph}. */
-	public DisjunctiveGraph<TaskUnitNode> translate(Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask, EdgeMode edgeMode) {
+	/**
+	 * Processes the map of tasks to nodes and creates a corresponding {@link DisjunctiveGraph},
+	 * ignoring simple edges if requested.
+	 */
+	public DisjunctiveGraph<TaskUnitNode> translate(Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask, boolean ignoreSimpleEdges) {
 		DisjunctiveGraph<TaskUnitNode> graph = new DisjunctiveGraph<>();
 		
-		Set<Task> tasks = nodesByLocationByTask.keySet();
+		// N.B: we can only add arcs and edges between existing nodes,
+		// so we need to add all nodes first.
+		addNodes(graph, nodesByLocationByTask);
+		addArcsAndEdges(graph, nodesByLocationByTask, ignoreSimpleEdges);
 		
+		return graph;
+	}
+	
+	/** Adds all nodes in the given map to the given graph. */
+	public void addNodes(DisjunctiveGraph<TaskUnitNode> graph, Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask) {
+		nodesByLocationByTask.values().stream()
+			.flatMap(List::stream)
+			.forEach(graph::addAllNodes);
+	}
+	
+	/**
+	 * Processes the map of tasks to nodes and adds corresponding arcs and edges to the given task,
+	 * ignoring simple edges if requested.
+	 * A simple edge is an edge between two singletons.
+	 */
+	public void addArcsAndEdges(DisjunctiveGraph<TaskUnitNode> graph, Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask, boolean ignoreSimpleEdges) {
+		Set<Task> tasks = nodesByLocationByTask.keySet();
 		for (Task t : tasks) {
 			List<List<TaskUnitNode>> locations = nodesByLocationByTask.get(t);
 			// Do not consider task without nodes
 			if (locations != null && !locations.isEmpty()) {
-				processTask(graph, t, nodesByLocationByTask, locations, edgeMode);
+				addTaskArcsAndEdges(graph, t, nodesByLocationByTask, locations, ignoreSimpleEdges);
 				for (Dependency dep : t.getOut()) {
 					Task target = dep.getTarget();
 					List<List<TaskUnitNode>> targetLocations = target == null ? null : nodesByLocationByTask.get(target);
 					if (targetLocations != null && !targetLocations.isEmpty())
-						processDependency(graph, dep, nodesByLocationByTask, locations, targetLocations, edgeMode);
+						addDependencyArcsAndEdges(graph, dep, nodesByLocationByTask, locations, targetLocations);
 				}
 			}
 		}
-		
-		return graph;
 	}
 	
 	//-------------------------------------------
 	// Methods for processing diagram elements
 	//-------------------------------------------
 	
-	/** Processes the given task. */
-	private void processTask(
+	/**
+	 * Processes the given task and adds corresponding arcs and edges to the given graph,
+	 * ignoring simple edges if requested.
+	 */
+	private void addTaskArcsAndEdges(
 		DisjunctiveGraph<TaskUnitNode> graph,
 		Task task,
 		Map<Task, List<List<TaskUnitNode>>> nodesByLocationTask,
 		List<List<TaskUnitNode>> locations,
-		EdgeMode edgeMode
+		boolean ignoreSimpleEdges
 	) {
 		List<TaskUnitNode> allNodes = locations.stream()
 			.flatMap(List::stream)
 			.collect(Collectors.toList());
-		graph.addAllNodes(allNodes);
+		
 		processOrdering(graph, task.getOrderSpecifications(), 0, allNodes);
-		if (edgeMode != EdgeMode.IGNORE_ALL)
-			processExclusiveness(graph, nodesByLocationTask, task, edgeMode);
+		processExclusiveness(graph, nodesByLocationTask, task, ignoreSimpleEdges);
 	}
 	
-	/** Processes the given dependency. */
-	private void processDependency(
+	/**
+	 * Processes the given dependency and adds corresponding arcs and edges to the given graph.
+	 * Dependencies never introduce singleton edges, so all edges are considered.
+	 */
+	private void addDependencyArcsAndEdges(
 		DisjunctiveGraph<TaskUnitNode> graph,
 		Dependency dep,
 		Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask,
 		List<List<TaskUnitNode>> sourceLocations,
-		List<List<TaskUnitNode>> targetLocations,
-		EdgeMode edgeMode
+		List<List<TaskUnitNode>> targetLocations
 	) {
 		Scope scope = dep.getScope();
 		Map<Map<Attribute, String>, Set<TaskUnitNode>> sourceGroups = groupNodesBy(sourceLocations, scope);
@@ -122,9 +140,7 @@ public class ModelToGraphTranslator {
 			processBasicPrecedence(graph, sourceGroups, targetGroups);
 			boolean alt = dep.isAlternate();
 			boolean chain = dep.isChain();
-			if (edgeMode != EdgeMode.IGNORE_ALL && (alt || chain)) {
-				// N.B. exclusive groups for dependencies always contain at least 2 nodes,
-				// so no need to consider IGNORE_SINGLE here.
+			if (alt || chain) {
 				Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = exclusiveGroups(sourceGroups, targetGroups);
 				if (alt)
 					processAlternatePrecedence(graph, exclusiveGroups);
@@ -174,7 +190,7 @@ public class ModelToGraphTranslator {
 	}
 	
 	/** Processes the exclusiveness of task {@code t}. */
-	private void processExclusiveness(DisjunctiveGraph<TaskUnitNode> graph, Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask, Task t, EdgeMode edgeMode) {
+	private void processExclusiveness(DisjunctiveGraph<TaskUnitNode> graph, Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask, Task t, boolean ignoreSimpleEdges) {
 		Scope exclusiveness = t.getExclusiveness();
 		// Partition the nodes of the task by the projection to the scope of its exclusiveness
 		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = groupNodesBy(nodesByLocationByTask.get(t), exclusiveness);
@@ -188,7 +204,7 @@ public class ModelToGraphTranslator {
 				// Lookup projection in exclusive groups
 				// Return resulting disjunctive edge or null
 				Set<TaskUnitNode> matchRes = exclusiveGroups.get(exclusiveness.project(n.getUnit()));
-				return matchRes == null || (edgeMode == EdgeMode.IGNORE_SIMPLE && matchRes.size() == 1) ? null
+				return matchRes == null || (ignoreSimpleEdges && matchRes.size() == 1) ? null
 					: new DisjunctiveEdge<>(Collections.singleton(n), matchRes);
 			})
 			.filter(Objects::nonNull)
