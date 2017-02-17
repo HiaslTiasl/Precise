@@ -1,4 +1,4 @@
-package it.unibz.precise.graph;
+package it.unibz.precise.graph.disj;
 
 
 /**

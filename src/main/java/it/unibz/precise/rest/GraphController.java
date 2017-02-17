@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.unibz.precise.check.ModelToGraphTranslator;
 import it.unibz.precise.check.TaskUnitNode;
-import it.unibz.precise.graph.AcyclicOrientationFinder;
+import it.unibz.precise.graph.disj.AcyclicOrientationFinder;
 import it.unibz.precise.graph.disj.DisjunctiveGraph;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.rep.ModelRepository;

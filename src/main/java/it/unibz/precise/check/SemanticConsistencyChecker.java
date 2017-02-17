@@ -13,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import it.unibz.precise.check.ConsistencyWarning.TaskLocation;
-import it.unibz.precise.graph.AcyclicOrientationFinder;
-import it.unibz.precise.graph.OrientationResult;
+import it.unibz.precise.graph.disj.AcyclicOrientationFinder;
 import it.unibz.precise.graph.disj.DisjunctiveEdge;
 import it.unibz.precise.graph.disj.DisjunctiveGraph;
+import it.unibz.precise.graph.disj.OrientationResult;
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.Task;

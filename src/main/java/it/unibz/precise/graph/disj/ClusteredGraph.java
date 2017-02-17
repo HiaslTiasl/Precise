@@ -1,11 +1,11 @@
-package it.unibz.precise.graph;
+package it.unibz.precise.graph.disj;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import it.unibz.precise.graph.disj.DisjunctiveGraph;
+import it.unibz.precise.graph.Graph;
 
 /**
  * View on a {@link DisjunctiveGraph} that groups nodes into clusters.

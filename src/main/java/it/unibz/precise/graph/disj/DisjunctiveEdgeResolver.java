@@ -1,4 +1,4 @@
-package it.unibz.precise.graph;
+package it.unibz.precise.graph.disj;
 
 import java.util.List;
 
@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import it.unibz.precise.check.SCCFinder;
-import it.unibz.precise.graph.disj.DisjunctiveEdge;
-import it.unibz.precise.graph.disj.DisjunctiveGraph;
 
 /**
  * Resolves as many {@link DisjunctiveEdge} as possible in a given {@link DisjunctiveGraph}. 

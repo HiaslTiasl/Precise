@@ -1,4 +1,4 @@
-package it.unibz.precise.graph;
+package it.unibz.precise.graph.disj;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import it.unibz.precise.check.SCCFinder;
-import it.unibz.precise.graph.disj.DisjunctiveEdge;
-import it.unibz.precise.graph.disj.DisjunctiveGraph;
 
 /**
  * Implementation of {@link DisjunctiveEdgeResolver}, encapsulating the needed data structures

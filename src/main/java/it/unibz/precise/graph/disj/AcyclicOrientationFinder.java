@@ -1,4 +1,4 @@
-package it.unibz.precise.graph;
+package it.unibz.precise.graph.disj;
 
 import java.util.HashSet;
 import java.util.List;
@@ -9,8 +9,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.unibz.precise.graph.disj.DisjunctiveEdge;
-import it.unibz.precise.graph.disj.DisjunctiveGraph;
+import it.unibz.precise.graph.SCCTarjan;
 
 /**
  * Searches an acyclic orientation of a given {@link DisjunctiveGraph}.

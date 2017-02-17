@@ -1,4 +1,4 @@
-package it.unibz.precise.graph;
+package it.unibz.precise.graph.disj;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,9 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import it.unibz.precise.graph.disj.DisjunctiveEdge;
-import it.unibz.precise.graph.disj.DisjunctiveGraph;
 
 /**
  * Represents the result of searching an acyclic orientation, which can be successful or not.
@@ -45,7 +42,7 @@ public abstract class OrientationResult<T> {
 		return successful;
 	}
 
-	/** Returns the immediate children */
+	/** Returns the immediate children in topological order. */
 	public abstract List<OrientationResult<T>> children();
 	
 	/** Returns a stream of all nodes in the result tree. */
@@ -129,7 +126,7 @@ public abstract class OrientationResult<T> {
 	 */
 	public static final class Complex<T> extends OrientationResult<T> {
 		
-		private List<OrientationResult<T>> children;
+		private List<OrientationResult<T>> children;	// The children in topological order
 		
 		private Complex(DisjunctiveGraph<T> resolved, List<OrientationResult<T>> children) {
 			super(resolved, children.stream().allMatch(OrientationResult::isSuccessful));
@@ -209,7 +206,10 @@ public abstract class OrientationResult<T> {
 		}
 	}
 	
-	/** Creates a result composed of the given clusters and children results. */
+	/**
+	 * Creates a result composed of the given children results.
+	 * The children results must be in topological order.
+	 */
 	public static <T> OrientationResult<T> compose(DisjunctiveGraph<T> graph, List<OrientationResult<T>> children) {
 		return children.size() <= 1 
 			? children.stream().findAny().orElseGet(() -> success(graph))
