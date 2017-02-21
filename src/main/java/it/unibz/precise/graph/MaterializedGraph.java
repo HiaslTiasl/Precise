@@ -36,7 +36,7 @@ public interface MaterializedGraph<T> extends Graph<T> {
 			nodes,
 			nodes.stream().collect(Collectors.toMap(
 				Function.identity(),
-				n -> g.successors(n).collect(Collectors.toSet())
+				(T n) -> g.successors(n).collect(Collectors.toSet())
 			)
 		));
 	}
