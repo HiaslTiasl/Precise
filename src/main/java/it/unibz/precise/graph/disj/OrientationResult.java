@@ -83,8 +83,6 @@ public abstract class OrientationResult<T> {
 		// Map each node in to the cluster in which it is contained
 		Map<T, Integer> leafClusterIndexMap = new HashMap<>();
 		for (int i = 0; i < count; i++) {
-			DisjunctiveGraph<T> g = leaves.get(i).getGraph();
-			orientation.addAllArcs(g.arcs());
 			for (T n : leaves.get(i).getGraph().nodes())
 				leafClusterIndexMap.put(n, i);
 		}
@@ -93,28 +91,28 @@ public abstract class OrientationResult<T> {
 			Set<T> left = e.getLeft(), right = e.getRight();
 			// It is guaranteed that the two sides of an edge are each contained in a cluster
 			// at the same level in the result tree, respectively.
-			// For a level higher than leaves, the nodes might be contained in different leaf
-			// graphs. However, this is not a problem, because the topological order still
-			// applies.
-			int iLeft = anyValue(leafClusterIndexMap, left);
-			int iRight = anyValue(leafClusterIndexMap, right);
-			if (iLeft < iRight)
+			// For a level higher than leaves, the nodes of one side might be contained in
+			// different leaf graphs. However, this is not a problem, because the topological
+			// order still applies.
+			T anyLeft = findAny(left);
+			T anyRight = findAny(right);
+			int iLeft = leafClusterIndexMap.get(anyLeft);
+			int iRight = leafClusterIndexMap.get(anyRight);
+			boolean l2r = iLeft < iRight
+				|| iLeft == iRight && graph.successorSet(anyLeft).contains(anyRight);
+			if (l2r)
 				orientation.addAllArcs(left, right);
 			else if (iRight < iLeft)
 				orientation.addAllArcs(right, left);
-			//else {
-				// The edge is contained in the graph of a leaf result.
-				// But then it already has been resolved to arcs, we already added all arcs above.
-				// So nothing to do here in that case
-			//}
 		}
 		
 		return orientation;
 	}
 	
-	private static <K,V> V anyValue(Map<K, V> map, Set<K> keys) {
-		return map.get(keys.stream().findAny().orElse(null));
+	private static <K> K findAny(Set<K> set) {
+		return set.stream().findAny().orElse(null);
 	}
+	
 	
 	/**
 	 * Represents a complex {@code OrientationResult} composed of several {@link #children() children} results.
