@@ -14,7 +14,7 @@ import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Scope;
 import it.unibz.precise.model.Scope.Type;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
+import it.unibz.precise.model.Activity;
 import it.unibz.precise.rest.mdl.ast.MDLOrderSpecificationAST;
 import it.unibz.precise.rest.mdl.ast.MDLScopeAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
@@ -34,7 +34,7 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 
 	@Override
 	protected void updateMDLImpl(Task task, MDLTaskAST mdlTask) {
-		mdlTask.setDefinition(context().taskTypes().toMDL(task.getType()));
+		mdlTask.setActivity(context().activities().toMDL(task.getActivity()));
 		mdlTask.setPosition(task.getPosition());
 		mdlTask.setPitch(task.getPitch());
 		mdlTask.setExclusiveness(context().scopes().toMDL(task.getExclusiveness()));
@@ -44,19 +44,20 @@ class TaskTranslator extends AbstractMDLTranslator<Task, MDLTaskAST> {
 	
 	@Override
 	protected void updateEntityImpl(MDLTaskAST mdlTask, Task task) {
-		TaskType taskType = context().taskTypes().toEntity(mdlTask.getDefinition());
-		task.setType(taskType);
+		Activity activity = context().activities().toEntity(mdlTask.getActivity());
+		task.setActivity(activity);
 		task.setPosition(mdlTask.getPosition());
 		task.setPitch(mdlTask.getPitch());
 		
-		Phase phase = taskType.getPhase();
+		Phase phase = activity.getPhase();
 		boolean strict = context().isStrictMode();
 		MDLScopeAST exclusiveness = mdlTask.getExclusiveness();
 		List<MDLOrderSpecificationAST> mdlOrder = mdlTask.getOrder();
 		if (phase != null) {
-			// The task has a phase and therefore a chance to have valid locations, exclusiveness and order specifications.
+			// The task's activity has a phase and therefore a chance to have
+			// valid locations, exclusiveness and order specifications.
 			task.setLocationPatterns(
-				Util.mapToList(mdlTask.getLocations(), p -> toPattern(p, taskType.getPhase().getAttributeHierarchyLevels())),
+				Util.mapToList(mdlTask.getLocations(), p -> toPattern(p, activity.getPhase().getAttributeHierarchyLevels())),
 				strict
 			);
 			task.setExclusiveness(context().scopes().toEntity(exclusiveness));

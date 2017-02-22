@@ -2,7 +2,11 @@
  * Angular service for reading files.
  * @module "api/Files.service"
  */
-define([], function () {
+define([
+	'util/util'
+], function (
+	util
+) {
 	'use strict';
 	
 	FilesService.$inject = ['$q']
@@ -22,17 +26,18 @@ define([], function () {
 		}
 		
 		/**
-		 * A reader that wraps a FileReader whose methods return
+		 * A reader that wraps a FileReader whose methods return promises.
 		 * @constructor
 		 */
-		function Reader() {
-			this.fileReader = new FileReader();
-		}
-		
-		Reader.prototype.readAsArrayBuffer  = promisify(FileReader.prototype.readAsArrayBuffer);
-		Reader.prototype.readAsBinaryString = promisify(FileReader.prototype.readAsBinaryString);
-		Reader.prototype.readAsDataURL      = promisify(FileReader.prototype.readAsDataURL);
-		Reader.prototype.readAsText         = promisify(FileReader.prototype.readAsText);
+		var Reader = util.defineClass({
+			constructor: function Reader() {
+				this.fileReader = new FileReader();
+			},
+			readAsArrayBuffer  : promisify(FileReader.prototype.readAsArrayBuffer),
+			readAsBinaryString : promisify(FileReader.prototype.readAsBinaryString),
+		    readAsDataURL      : promisify(FileReader.prototype.readAsDataURL),
+			readAsText         : promisify(FileReader.prototype.readAsText)
+		}); 
 		
 		/**
 		 * Wrap the given FileReader method in a promise-based method.

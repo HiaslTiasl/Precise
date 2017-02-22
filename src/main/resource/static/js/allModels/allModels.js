@@ -8,7 +8,7 @@ define([
 	'singleModel/singleModel',
 	'./AllModels.service',
 	'./AllModels.component',
-	'./allModels.create-dialog.component',
+	'./ModelsDialog.component',
 	'lib/smart-table',
 	'lib/ng-file-upload'
 ], function (
@@ -17,13 +17,13 @@ define([
 	singleModel,
 	AllModelsService,
 	allModelsComponent,
-	allModelsCreateDialogComponent
+	ModelsDialogComponent
 ) {
 	'use strict';
 	
 	return angular.module('precise.allModels', ['smart-table', 'ngFileUpload', api.name, singleModel.name])
 		.service('AllModels', AllModelsService)
-		.component('preciseAllModels', allModelsComponent)
-		.component('preciseCreateModel', allModelsCreateDialogComponent);
+		.component('allModels', allModelsComponent)
+		.component('modelsDialog', ModelsDialogComponent);
 	
 });

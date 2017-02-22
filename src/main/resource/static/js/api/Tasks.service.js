@@ -31,7 +31,7 @@ define([
 		Tasks.Resource = TaskResource;
 		
 		var getAttrName = _.property('name'),
-			dontSendDirectly = ['id', 'pitch', 'exclusiveness', 'orderSpecifications', 'type', 'model', '_links'];
+			dontSendDirectly = ['id', 'pitch', 'exclusiveness', 'orderSpecifications', 'activity', 'model', '_links'];
 		
 		/**
 		 * Sends the given text as a simple search query to the server
@@ -62,7 +62,7 @@ define([
 						.withTemplateParameters(_.defaults({
 							model: PreciseApi.hrefTo(model),
 							phase: PreciseApi.hrefTo(params.phase),
-							type: PreciseApi.hrefTo(params.type),
+							activity: PreciseApi.hrefTo(params.activity),
 							craft: PreciseApi.hrefTo(params.craft)
 						}, params))
 						.get();
@@ -84,15 +84,15 @@ define([
 			var data = _.cloneDeep(task);
 			if (!data.pitch)
 				data.pitch = {};
-			if (data.type && data.type.phase)
-				Scopes.rereferenceAttributes(data.exclusiveness, data.type.phase.attributes);
+			if (data.activity && data.activity.phase)
+				Scopes.rereferenceAttributes(data.exclusiveness, data.activity.phase.attributes);
 			return $q.when(data);
 		};
 		
 		/** Returns a promise that transforms the given task data to the initial data of a new resource. */
 		function initializeData(task) {
 			return $q.when(_.assign({
-				type: null,
+				activity: null,
 				pitch: {
 					crewSize: 1,
 					crewCount: 1,
@@ -200,11 +200,11 @@ define([
 					processed.exclusiveness = Scopes.toRequestRepresentation(this.data.exclusiveness);
 				if (this.data.orderSpecifications)
 					processed.orderSpecifications = OrderSpecifications.toRequestRepresentation(this.data.orderSpecifications);
-				if (this.data.type) {
-					// Make sure type is the first property, because the server processes them in order,
-					// and locations depend on type.
+				if (this.data.activity) {
+					// Make sure activity is the first property, because the server processes them in order,
+					// and locations depend on activity.
 					processed = _.defaults({
-						type: HAL.resolve(HAL.hrefTo(this.data.type))
+						activity: HAL.resolve(HAL.hrefTo(this.data.activity))
 					}, processed);
 				}
 				// set model link for new resources

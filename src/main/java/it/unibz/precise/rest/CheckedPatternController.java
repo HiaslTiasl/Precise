@@ -39,7 +39,7 @@ public class CheckedPatternController {
 		@PathVariable("id") long id,
 		@RequestBody Map<String, PatternEntry> pattern)
 	{
-		Phase phase = taskRepository.findOne(id).getType().getPhase();
+		Phase phase = taskRepository.findOne(id).getActivity().getPhase();
 		return phase == null
 			? ResponseEntity.notFound().build()
 			: ResponseEntity.ok(LocationPatterns.checkPattern(pattern, phase));

@@ -21,6 +21,7 @@ public class MDLAttributeAST implements ShortNameProvider {
 	private String description;
 	private Object range;
 	private boolean ordered;
+	private boolean perPhase;
 	
 	public String getName() {
 		return name;
@@ -60,6 +61,14 @@ public class MDLAttributeAST implements ShortNameProvider {
 
 	public void setOrdered(boolean ordered) {
 		this.ordered = ordered;
+	}
+
+	public boolean isPerPhase() {
+		return perPhase;
+	}
+
+	public void setPerPhase(boolean perPhase) {
+		this.perPhase = perPhase;
 	}
 
 }

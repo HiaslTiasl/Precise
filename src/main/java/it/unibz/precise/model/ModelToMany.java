@@ -36,12 +36,12 @@ class ModelToMany {
 			Phase::internalSetModel
 		);
 
-	static final CollectionBidirection<Model, TaskType, List<TaskType>> TYPES =
+	static final CollectionBidirection<Model, Activity, List<Activity>> Activities =
 		new CollectionBidirection<>(
-			Model::getTaskTypes,
-			Model::internalSetTaskTypes,
-			TaskType::getModel,
-			TaskType::internalSetModel
+			Model::getActivities,
+			Model::internalSetActivities,
+			Activity::getModel,
+			Activity::internalSetModel
 		);
 
 	static final CollectionBidirection<Model, Task, List<Task>> TASKS =

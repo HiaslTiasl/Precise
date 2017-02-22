@@ -26,18 +26,18 @@ import it.unibz.precise.model.Craft;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
+import it.unibz.precise.model.Activity;
 import it.unibz.precise.model.validation.ValidationAdapter;
 import it.unibz.precise.rep.DependencyRepository;
 import it.unibz.precise.rep.ModelRepository;
 import it.unibz.precise.rep.TaskRepository;
-import it.unibz.precise.rep.TaskTypeRepository;
+import it.unibz.precise.rep.ActivityRepository;
 import it.unibz.precise.rest.mdl.ast.MDLAttributeAST;
 import it.unibz.precise.rest.mdl.ast.MDLCraftAST;
 import it.unibz.precise.rest.mdl.ast.MDLDiagramAST;
 import it.unibz.precise.rest.mdl.ast.MDLFileAST;
 import it.unibz.precise.rest.mdl.ast.MDLPhaseAST;
-import it.unibz.precise.rest.mdl.ast.MDLTaskTypeAST;
+import it.unibz.precise.rest.mdl.ast.MDLActivityAST;
 import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
 /**
@@ -67,7 +67,7 @@ public class MDLDiagramController {
 	private ModelRepository repository;
 	
 	@Autowired
-	private TaskTypeRepository taskTypeRepository;
+	private ActivityRepository activityRepository;
 
 	@Autowired
 	private TaskRepository taskRepository;
@@ -143,27 +143,27 @@ public class MDLDiagramController {
 		// Update the diagram part
 		context.diagrams().updateEntity(diaSrc, dstModel);
 
-		// The diagram part now possibly references task types not contained in the configuration part
+		// The diagram part now possibly references activities not contained in the configuration part
 		// -> fix this now
-		// Before adding the new task types to the configuration, make sure their acronyms (shortNames)
+		// Before adding the new activities to the configuration, make sure their acronyms (shortNames)
 		// do not clash with existing ones.
 		
-		Set<TaskType> oldTaskTypes = new HashSet<>(dstModel.getTaskTypes());
-		Set<TaskType> newTaskTypes = dstModel.getTasks().stream()
-			.map(Task::getType)
-			.filter(tt -> !oldTaskTypes.contains(tt))
+		Set<Activity> oldActivities = new HashSet<>(dstModel.getActivities());
+		Set<Activity> newActivities = dstModel.getTasks().stream()
+			.map(Task::getActivity)
+			.filter(a -> !oldActivities.contains(a))
 			.collect(Collectors.toSet());
 		
-		setNewTaskTypeAcronyms(newTaskTypes, oldTaskTypes);
-		// Now acronyms are unique -> add task types to the configuration
-		newTaskTypes.forEach(dstModel::addTaskType);
+		setNewActivityAcronyms(newActivities, oldActivities);
+		// Now acronyms are unique -> add activity to the configuration
+		newActivities.forEach(dstModel::addActivity);
 		
 		Errors errors = validator.validate(dstModel);
 		if (errors.hasErrors())
 			throw new RepositoryConstraintViolationException(errors);
 		else {
 			// We need to save the newly entities manually.
-			taskTypeRepository.save(dstModel.getTaskTypes());
+			activityRepository.save(dstModel.getActivities());
 			taskRepository.save(dstModel.getTasks());
 			dependencyRepository.save(dstModel.getDependencies());
 			// If the model already existed, changes will be saved automatically.
@@ -176,38 +176,38 @@ public class MDLDiagramController {
 	}
 
 	/**
-	 * Check if acronyms of {@code newTaskTypes} clash with those of {@code oldTaskTypes} and attempt
+	 * Check if acronyms of {@code newActivities} clash with those of {@code oldActivities} and attempt
 	 * to assign new ones (adding numbers) if needed.
 	 * @throws IllegalStateException if too many attempts in assigning a new number failed.
 	 */
-	private void setNewTaskTypeAcronyms(Set<TaskType> newTaskTypes, Set<TaskType> oldTaskTypes) {
-		Set<String> existingAcronyms = oldTaskTypes.stream()
-			.map(TaskType::getShortName)
+	private void setNewActivityAcronyms(Set<Activity> newActivities, Set<Activity> oldActivities) {
+		Set<String> existingAcronyms = oldActivities.stream()
+			.map(Activity::getShortName)
 			.collect(Collectors.toSet());
-		for (TaskType tt : newTaskTypes) {
-			String acr = tt.getShortName();
+		for (Activity a : newActivities) {
+			String acr = a.getShortName();
 			String originalAcr = acr;
 			int max = 10;
 			for (int i = 1; existingAcronyms.contains(acr); i++) {
 				if (i >= max) {
 					throw new IllegalStateException(
-						"Cannot find unique acronym for task type " + tt + ". Tried "
+						"Cannot find unique acronym for activity " + a + ". Tried "
 						+ originalAcr + '-' + 1 + " until " + originalAcr + '-' + max + '.'
 					);
 				}
 				acr = originalAcr + '-' + i;
 			}
-			tt.setShortName(acr);
-			existingAcronyms.add(acr);		// cannot reuse new acronyms for multiple task types
+			a.setShortName(acr);
+			existingAcronyms.add(acr);		// cannot reuse new acronyms for multiple activities
 		}
 	}
 	
 	/**
 	 * Create a {@link MDLContext} for updating the diagram of {@code dstModel} such that:
 	 * <ul>
-	 * <li> attributes, phases, crafts, and task types are cached and matched by name
+	 * <li> attributes, phases, crafts, and activities are cached and matched by name
 	 * <li> only existing attributes, phases, and crafts can be used (other references set to null)
-	 * <li> new task types may be created
+	 * <li> new activities may be created
 	 * <li> conversion results are cached in both directions (MDL <--> entities)
 	 * </ul>
 	 */
@@ -225,8 +225,8 @@ public class MDLDiagramController {
 				.usingKeys(Craft::getName, MDLCraftAST::getName)
 				.cacheInverseDirection(true)
 				.context()
-			.taskTypes()
-				.usingKeys(TaskType::getName, MDLTaskTypeAST::getName)
+			.activities()
+				.usingKeys(Activity::getName, MDLActivityAST::getName)
 				.cacheInverseDirection(true)
 				.context();
 		

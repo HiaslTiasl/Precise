@@ -4,16 +4,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
 import it.unibz.precise.model.Craft;
-import it.unibz.precise.model.TaskType;
+import it.unibz.precise.model.Activity;
 
 /**
- * Task definition with {@link PhaseSummaryProjection} and number of tasks
+ * {@link Activity} with {@link PhaseSummaryProjection} and number of tasks
  * 
  * @author MatthiasP
  *
  */
-@Projection(name="taskTypeSummary", types=TaskType.class)
-public interface TaskTypeSummaryProjection {
+@Projection(name="activitySummary", types=Activity.class)
+public interface ActivitySummaryProjection {
 
 	String getName();
 	

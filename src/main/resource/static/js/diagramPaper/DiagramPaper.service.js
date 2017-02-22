@@ -79,31 +79,31 @@ define([
 		}
 		
 		/**
-		 * Fetches tasks using projections with minimal data for tasks, task types, and phases,
+		 * Fetches tasks using projections with minimal data for tasks, activities, and phases,
 		 * and join them locally using self links.
 		 */
 		function fetchTasksJoinLocally(modelResource) {
-			// Fetch types and phases, and index them independently
-			var indexedTypesPromise = $q.all({
+			// Fetch activities and phases, and index them independently
+			var indexedActivitiesPromise = $q.all({
 				indexedPhases: modelResource.getPhases({ projection: 'phaseSummary' })
 					.then(indexBySelfLink),
-				indexedTypes: modelResource.getTaskTypes({ projection: 'taskTypeSummary' })
+					indexedActivities: modelResource.getActivities({ projection: 'activitySummary' })
 					.then(indexBySelfLink)
 			}).then(function (results) {
 				// join
-				_.forEach(results.indexedTypes, function (type) {
-					type.phase = results.indexedPhases[getSelfLink(type.phase)];
+				_.forEach(results.indexedActivities, function (activity) {
+					activity.phase = results.indexedPhases[getSelfLink(activity.phase)];
 				});
-				return results.indexedTypes;
+				return results.indexedActivities;
 			});
 			
 			// Fetch tasks themselves and join them to types
 			return $q.all({
-				indexedTypes: indexedTypesPromise,
+				indexedActivities: indexedActivitiesPromise,
 				tasks: modelResource.getTasks({ projection: 'taskSummary' })
 			}).then(function (results) {
 				_.forEach(results.tasks, function (task) {
-					task.type = results.indexedTypes[getSelfLink(task.type)];
+					task.activity = results.indexedActivities[getSelfLink(task.activity)];
 				});
 				return results.tasks;
 			});

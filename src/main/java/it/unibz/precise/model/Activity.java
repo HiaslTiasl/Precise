@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -14,7 +15,7 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 /**
- * Represents a task definition.
+ * Represents an activity.
  * Belongs to a {@link Phase} and must be executed by a certain {@link Craft}.
  * May be used for several task boxes in a diagram.
  * 
@@ -23,27 +24,28 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @Table(uniqueConstraints={
-	@UniqueConstraint(name=TaskType.UC_NAME, columnNames={"model_id", "name"}),
-	@UniqueConstraint(name=TaskType.UC_SHORTNAME, columnNames={"model_id", "shortName"})
+	@UniqueConstraint(name=Activity.UC_NAME, columnNames={"model_id", "name"}),
+	@UniqueConstraint(name=Activity.UC_SHORTNAME, columnNames={"model_id", "shortName"})
 })
-public class TaskType extends BaseEntity implements ShortNameProvider {
+public class Activity extends BaseEntity implements ShortNameProvider {
 	
 	public static final String UC_NAME = "UC_TASKTYPE_NAME";
 	public static final String UC_SHORTNAME = "UC_TASKTYPE_SHORTNAME";
 	
 	@Column(nullable=false)
-	@NotNull(message="{taskType.name.required}")
+	@NotNull(message="{activity.name.required}")
 	private String name;
-	@NotNull(message="{taskType.shortName.required}")
+	@NotNull(message="{activity.shortName.required}")
 	@Column(nullable=false)
 	private String shortName;
 	private String description;
 	private String unitOfMeasure;
 	
 	@ManyToOne
+	@JoinColumn(nullable=true)
 	private Craft craft;
 	
-	@OneToMany(mappedBy="type", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="activity", cascade=CascadeType.REMOVE)
 	private List<Task> tasks = new ArrayList<>();
 	
 	@ManyToOne
@@ -99,7 +101,7 @@ public class TaskType extends BaseEntity implements ShortNameProvider {
 	}
 
 	public void setTasks(List<Task> tasks) {
-		TaskTypeToMany.TASKS.setMany(this, tasks);
+		ActivityToMany.TASKS.setMany(this, tasks);
 	}
 
 	void internalSetTasks(List<Task> tasks) {
@@ -124,7 +126,7 @@ public class TaskType extends BaseEntity implements ShortNameProvider {
 	}
 
 	public void setModel(Model model) {
-		ModelToMany.TYPES.setOne(this, model);
+		ModelToMany.Activities.setOne(this, model);
 	}
 	
 	void internalSetModel(Model model) {
@@ -133,7 +135,7 @@ public class TaskType extends BaseEntity implements ShortNameProvider {
 
 	@Override
 	public String toString() {
-		return "TaskType [id=" + getId() + ", name=" + name + "]";
+		return "Activity [id=" + getId() + ", name=" + name + "]";
 	}
 	
 }

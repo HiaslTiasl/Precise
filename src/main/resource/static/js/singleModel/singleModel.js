@@ -7,51 +7,51 @@ define([
 	'diagramPaper/diagramPaper',
 	'api/api',
 	'./SingleModel.component',
-	'./SingleModel-diagram.component',
-	'./singleModel-diagram.create-task-dialog.component',
-	'./SingleModel-config.component',
-	'./SingleModel-building.component',
-	'./SingleModel-crafts.component',
-	'./singleModel-crafts.create-dialog.component',
-	'./SingleModel-taskTypes.component',
-	'./singleModel-taskTypes.create-dialog.component',
-	'./taskProperties.component',
-	'./dependencyProperties.component',
-	'./import-model-dialog.component',
+	'./Diagram.component',
+	'./DiagramTaskDialog.component',
+	'./Config.component',
+	'./Building.component',
+	'./Crafts.component',
+	'./CraftsDialog.component',
+	'./Activities.component',
+	'./ActivitiesDialog.component',
+	'./TaskProperties.component',
+	'./DependencyProperties.component',
+	'./ImportModelDialog.component',
 	'lib/ui-bootstrap',
 	'lib/json-formatter',
 	'lib/angularjs-color-picker'
 ], function (
 	angular,
 	preciseApi,
-	preciseDiagramPaper,
-	singleModelComponent,
-	singleModelDiagramComponent,
-	singleModelDiagramCreateTaskDialogComponent,
-	singleModelConfigComponent,
-	singleModelBuildingComponent,
-	singleModelCraftsComponent,
-	singleModelCraftsCreateDialogComponent,
-	singleModelTaskTypesComponent,
-	singleModelTaskTypesCreateDialogComponent,
-	taskPropertiesComponent,
-	dependencyPropertiesComponent,
-	importModelDialogComponent
+	diagramPaper,
+	SingleModelComponent,
+	DiagramComponent,
+	DiagramTaskDialogComponent,
+	ConfigComponent,
+	BuildingComponent,
+	CraftsComponent,
+	CraftsDialogComponent,
+	ActivitiesComponent,
+	ActivitiesDialogComponent,
+	TaskPropertiesComponent,
+	DependencyPropertiesComponent,
+	ImportModelDialogComponent
 ) {
 	'use strict';
 	
-	return angular.module('precise.singleModel', ['ui.bootstrap', 'jsonFormatter', 'color.picker', preciseApi.name, preciseDiagramPaper.name])
-		.component('preciseSingleModel', singleModelComponent)
-		.component('preciseDiagram', singleModelDiagramComponent)
-		.component('preciseCreateTask', singleModelDiagramCreateTaskDialogComponent)
-		.component('preciseConfig', singleModelConfigComponent)
-		.component('preciseBuilding', singleModelBuildingComponent)
-		.component('preciseCrafts', singleModelCraftsComponent)
-		.component('preciseCreateCraft', singleModelCraftsCreateDialogComponent)
-		.component('preciseTaskTypes', singleModelTaskTypesComponent)
-		.component('preciseCreateTaskType', singleModelTaskTypesCreateDialogComponent)
-		.component('taskProperties', taskPropertiesComponent)
-		.component('dependencyProperties', dependencyPropertiesComponent)
-		.component('preciseImportModel', importModelDialogComponent);
+	return angular.module('precise.singleModel', ['ui.bootstrap', 'jsonFormatter', 'color.picker', preciseApi.name, diagramPaper.name])
+		.component('singleModel', SingleModelComponent)
+		.component('diagram', DiagramComponent)
+		.component('diagramTaskDialog', DiagramTaskDialogComponent)
+		.component('config', ConfigComponent)
+		.component('building', BuildingComponent)
+		.component('crafts', CraftsComponent)
+		.component('craftsDialog', CraftsDialogComponent)
+		.component('activities', ActivitiesComponent)
+		.component('activitiesDialog', ActivitiesDialogComponent)
+		.component('taskProperties', TaskPropertiesComponent)
+		.component('dependencyProperties', DependencyPropertiesComponent)
+		.component('importModelDialog', ImportModelDialogComponent);
 	
 });

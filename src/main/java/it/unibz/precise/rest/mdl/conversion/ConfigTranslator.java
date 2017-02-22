@@ -22,7 +22,7 @@ class ConfigTranslator extends AbstractMDLTranslator<Model, MDLConfigAST> {
 		mdlConfig.setAttributes(Util.mapToList(model.getAttributes(), context().attributes()::toMDL));
 		mdlConfig.setPhases(Util.mapToList(model.getPhases(), context().phases()::toMDL));
 		mdlConfig.setCrafts(Util.mapToList(model.getCrafts(), context().crafts()::toMDL));
-		mdlConfig.setTaskDefinitions(Util.mapToList(model.getTaskTypes(), context().taskTypes()::toMDL));
+		mdlConfig.setActivities(Util.mapToList(model.getActivities(), context().activities()::toMDL));
 	}
 	
 	@Override
@@ -31,7 +31,7 @@ class ConfigTranslator extends AbstractMDLTranslator<Model, MDLConfigAST> {
 		model.setAttributes(Util.mapToList(mdlConfig.getAttributes(), context().attributes()::toEntity));
 		model.setPhases(Util.mapToList(mdlConfig.getPhases(), context().phases()::toEntity));
 		model.setCrafts(Util.mapToList(mdlConfig.getCrafts(), context().crafts()::toEntity));
-		model.setTaskTypes(Util.mapToList(mdlConfig.getTaskDefinitions(), context().taskTypes()::toEntity));
+		model.setActivities(Util.mapToList(mdlConfig.getActivities(), context().activities()::toEntity));
 	}
 
 	@Override

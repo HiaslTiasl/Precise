@@ -21,12 +21,12 @@
 
 <uib-tabset ng-if="$ctrl.phases && $ctrl.phases.length">
 	<uib-tab heading="Building">
-		<precise-building model="$ctrl.model" phases="$ctrl.phases" reload="$ctrl.reload()"></precise-building>
+		<building model="$ctrl.model" phases="$ctrl.phases" reload="$ctrl.reload()"></building>
 	</uib-tab>
 	<uib-tab heading="Crafts">
-		<precise-crafts model="$ctrl.model" phases="$ctrl.phases" reload="$ctrl.reload()"></precise-crafts>
+		<crafts model="$ctrl.model" phases="$ctrl.phases" reload="$ctrl.reload()"></crafts>
 	</uib-tab>
-	<uib-tab heading="Task Definitions">
-		<precise-task-types model="$ctrl.model" phases="$ctrl.phases" reload="$ctrl.reload()"></precise-task-types>
+	<uib-tab heading="Activities">
+		<activities model="$ctrl.model" phases="$ctrl.phases" reload="$ctrl.reload()"></activities>
 	</uib-tab>
 </uib-tabset>

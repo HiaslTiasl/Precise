@@ -25,7 +25,7 @@ import it.unibz.util.Util;
 /**
  * Represents an activity to be executed in a set of locations.
  * Corresponds to a box in the diagram.
- * The activity is determined by the {@link TaskType}, together with the
+ * The activity is determined by the {@link Activity}, together with the
  * corresponding {@link Phase} and the required {@link Craft}.
  * 
  * Further contains {@link Pitch} parameters, a {@link Position} in the diagram,
@@ -35,19 +35,19 @@ import it.unibz.util.Util;
  *
  */
 @Entity
-@JsonPropertyOrder(value={"type"})
+@JsonPropertyOrder(value={"activity"})
 @JsonIgnoreProperties(value={"manHours", "durationHours"}, allowGetters=true)
 public class Task extends BaseEntity {
 
 	public static final int DEFAULT_CREW_COUNT = 1;
 	
 	private static Comparator<Task> shortNameAndIDComparator = Comparator.comparing(
-		(Task t) -> t.getType().getShortName()
+		(Task t) -> t.getActivity().getShortName()
 	).thenComparing(Task::getId);
 	
-	@NotNull(message="{task.type.required}")
+	@NotNull(message="{task.activity.required}")
 	@ManyToOne
-	private TaskType type;
+	private Activity activity;
 	
 	@Embedded
 	private Position position;
@@ -80,16 +80,16 @@ public class Task extends BaseEntity {
 	@ManyToOne
 	private Model model;
 
-	public TaskType getType() {
-		return type;
+	public Activity getActivity() {
+		return activity;
 	}
 
-	public void setType(TaskType type) {
-		TaskTypeToMany.TASKS.setOne(this, type);
+	public void setActivity(Activity activity) {
+		ActivityToMany.TASKS.setOne(this, activity);
 	}
 	
-	void internalSetType(TaskType type) {
-		this.type = type;
+	void internalSetActivity(Activity activity) {
+		this.activity = activity;
 	}
 	
 	public Position getPosition() {
@@ -140,7 +140,7 @@ public class Task extends BaseEntity {
 	
 	/** Convert the given location to a pattern representation using this task's phase. */
 	private Map<String, PatternEntry> locationToPattern(Location location) {
-		return LocationPatterns.locationToPattern(location, type.getPhase());
+		return LocationPatterns.locationToPattern(location, activity.getPhase());
 	}
 	
 	public List<Map<String, PatternEntry>> getLocationPatterns() {
@@ -161,8 +161,8 @@ public class Task extends BaseEntity {
 	 *         is invalid.
 	 */
 	public void setLocationPatterns(List<Map<String, PatternEntry>> patterns, boolean strict) {
-		if (type != null && type.getPhase() != null) {
-			List<AttributeHierarchyLevel> levels = type.getPhase().getAttributeHierarchyLevels();
+		if (activity != null && activity.getPhase() != null) {
+			List<AttributeHierarchyLevel> levels = activity.getPhase().getAttributeHierarchyLevels();
 			this.locations = patterns.stream()
 				.collect(ArrayList::new, (list, p) -> {
 					try {
@@ -200,11 +200,11 @@ public class Task extends BaseEntity {
 	
 	/** Update the scope of exclusiveness */
 	public void updateExclusiveness() {
-		if (exclusiveness == null || type.getPhase() == null)
+		if (exclusiveness == null || activity.getPhase() == null)
 			exclusiveness = new Scope(Scope.Type.UNIT);
 		else {
 			exclusiveness.update(Util.mapToList(
-				type.getPhase().getAttributeHierarchyLevels(),
+				activity.getPhase().getAttributeHierarchyLevels(),
 				AttributeHierarchyLevel::getAttribute
 			));
 		}
@@ -252,7 +252,7 @@ public class Task extends BaseEntity {
 	
 	/** Returns a textual identification consisting of the definitinon's short name and the ID. */
 	public String getShortIdentification() {
-		return type.getShortName() + '#' + getId();
+		return activity.getShortName() + '#' + getId();
 	}
 	
 	/** Compares two tasks by shortName first and then by ID. */
@@ -262,7 +262,7 @@ public class Task extends BaseEntity {
 	
 	/** Updates the number of units contained in locations of the task. */
 	public void countUnits() {
-		Phase phase = type.getPhase();
+		Phase phase = activity.getPhase();
 		// N.B. We assume that the number of units in CAs does not change,
 		// so no need to recompute those.
 		// Also, we assume that locations are non-overlapping here.
@@ -291,7 +291,7 @@ public class Task extends BaseEntity {
 
 	@Override
 	public String toString() {
-		return "Task [id=" + getId() + ", type=" + type + "]";
+		return "Task [id=" + getId() + ", activity=" + activity + "]";
 	}
 	
 }

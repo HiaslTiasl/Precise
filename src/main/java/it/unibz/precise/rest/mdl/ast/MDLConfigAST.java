@@ -12,7 +12,7 @@ import it.unibz.precise.model.Model;
  * @author MatthiasP
  *
  */
-@JsonPropertyOrder({"hoursPerDay", "attributes", "phases", "crafts", "taskDefinitions"})
+@JsonPropertyOrder({"hoursPerDay", "attributes", "phases", "crafts", "activities"})
 public class MDLConfigAST {
 	
 	public static final MDLConfigAST EMPTY_CONFIG = new MDLConfigAST();
@@ -21,7 +21,7 @@ public class MDLConfigAST {
 	private List<MDLAttributeAST> attributes;
 	private List<MDLPhaseAST> phases;
 	private List<MDLCraftAST> crafts;
-	private List<MDLTaskTypeAST> taskDefinitions;
+	private List<MDLActivityAST> activities;
 	
 	public int getHoursPerDay() {
 		return hoursPerDay;
@@ -55,12 +55,12 @@ public class MDLConfigAST {
 		this.phases = phases;
 	}
 
-	public List<MDLTaskTypeAST> getTaskDefinitions() {
-		return taskDefinitions;
+	public List<MDLActivityAST> getActivities() {
+		return activities;
 	}
 
-	public void setTaskDefinitions(List<MDLTaskTypeAST> taskDefinitions) {
-		this.taskDefinitions = taskDefinitions;
+	public void setActivities(List<MDLActivityAST> activities) {
+		this.activities = activities;
 	}
 	
 }

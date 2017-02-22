@@ -34,7 +34,7 @@ define([
 		];
 		
 		/** Returns the phase name of a given task. */
-		var getTaskPhaseName = _.property(['type', 'phase', 'name']);
+		var getTaskPhaseName = _.property(['activity', 'phase', 'name']);
 		
 		/** Indicates which of the fieldsets are collapsed. */
 		$ctrl.collapsed = {
@@ -93,7 +93,7 @@ define([
 	}
 	
 	return {
-		templateUrl: 'js/singleModel/dependencyProperties.html',
+		templateUrl: 'js/singleModel/DependencyProperties.html',
 		controller: DependencyPropertiesController,
 		controllerAs: '$ctrl',
 		bindings: {

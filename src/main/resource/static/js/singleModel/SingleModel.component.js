@@ -34,7 +34,7 @@ define([
 	}
 	
 	return {
-		templateUrl: 'js/singleModel/singleModel.html',
+		templateUrl: 'js/singleModel/SingleModel.html',
 		controller: SingleModelController,
 		controllerAs: '$ctrl',
 		bindings: {

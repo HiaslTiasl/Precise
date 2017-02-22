@@ -11,7 +11,7 @@ import it.unibz.precise.model.Craft;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
+import it.unibz.precise.model.Activity;
 
 /**
  * Repository for {@link Task}s.
@@ -26,7 +26,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 	
 	/**
 	 * Find tasks of the given model that match the given query text.
-	 * The text is matched against the ID, the task definition name, the phase name,
+	 * The text is matched against the ID, the task's activity name, the phase name,
 	 * and the craft name. If at least one of this matches succeeds, the task is returned.
 	 * 
 	 * Note: This is not a full text search.
@@ -34,33 +34,33 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 	 * It is, however, matched case insensitive.
 	 */
 	@RestResource(path = "simple", rel = "simple")
-	@Query("SELECT t FROM Task t"
-			+ " where t.model = :model"
-			+ " AND ("
-				+ " CAST(t.id as string) = :q"							// In case of ID, only show exact matches
-				+ " OR t.type.phase.name LIKE CONCAT('%', :q, '%')"
-				+ " OR t.type.name LIKE CONCAT('%', :q, '%')"
-				+ " OR t.type.craft.name LIKE CONCAT('%', :q, '%')"
-			+ ")")
+	@Query("SELECT t FROM Task t LEFT JOIN t.activity.phase p LEFT JOIN t.activity.craft c"		// Left outer join needed to also consider tasks without craft or phase
+		+ " WHERE t.model = :model"
+		+ " AND ("
+			+ " CAST(t.id as string) = :q"														// In case of ID, only show exact matches
+			+ " OR (t.activity.name LIKE CONCAT('%', :q, '%'))"
+			+ " OR (p IS NOT NULL AND p.name LIKE CONCAT('%', :q, '%'))"						// Must still explicitly handle NULL, otherwise whole WHERE clause 
+			+ " OR (c IS NOT NULL AND c.name LIKE CONCAT('%', :q, '%'))"						// evaluates to NULL, and the task is ignored
+		+ ")")
 	Page<Task> searchSimple(
 		@Param("model") Model model,
-		@Param("q") String text,
+		@Param("q") String q,
 		Pageable pageable
 	);
 	
 	/** Find tasks that match all specified (non-null) criteria. */
 	@RestResource(path = "advanced", rel = "advanced")
 	@Query("SELECT t FROM Task t"
-		+ " where t.model = :model"
+		+ " WHERE t.model = :model"
 		+ " AND (:id IS NULL OR t.id = :id)"
-		+ " AND (:phase IS NULL OR t.type.phase = :phase)"
-		+ " AND (:type IS NULL OR t.type = :type)"
-		+ " AND (:craft IS NULL OR t.type.craft = :craft)")
+		+ " AND (:phase IS NULL OR t.activity.phase = :phase)"
+		+ " AND (:activity IS NULL OR t.activity = :activity)"
+		+ " AND (:craft IS NULL OR t.activity.craft = :craft)")
 	Page<Task> searchAdvanced(
 		@Param("model") Model model,
 		@Param("id") Long id,
 		@Param("phase") Phase phase,
-		@Param("type") TaskType type,
+		@Param("activity") Activity activity,
 		@Param("craft") Craft craft,
 		Pageable pageable
 	);

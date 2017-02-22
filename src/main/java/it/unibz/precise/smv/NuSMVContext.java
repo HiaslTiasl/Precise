@@ -74,7 +74,7 @@ public class NuSMVContext {
 
 	/** Returns a name of the given node. */
 	private String nodeName(TaskUnitNode node) {
-		return node.getTaskType().getShortName()
+		return node.getActivity().getShortName()
 			+ NuSMVContext.VAR_SEPARATOR
 			+ PatternEntry.toValueString(node.getUnit().getPattern(), NuSMVContext.VAR_SEPARATOR);
 	}

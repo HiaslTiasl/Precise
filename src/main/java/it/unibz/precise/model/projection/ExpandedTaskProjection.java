@@ -26,7 +26,7 @@ public interface ExpandedTaskProjection extends HasLongId {
 
 	List<Map<String, PatternEntry>> getLocationPatterns();
 	
-	ExpandedTaskTypeProjection getType();
+	ExpandedActivityProjection getActivity();
 	
 	Position getPosition();
 }

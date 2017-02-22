@@ -27,6 +27,7 @@ public class Craft extends BaseEntity implements ShortNameProvider {
 	@NotNull(message="{craft.name.required}")
 	private String name;
 	private String shortName;
+	private String description;
 	
 	@ManyToOne
 	private Model model;
@@ -57,6 +58,14 @@ public class Craft extends BaseEntity implements ShortNameProvider {
 
 	void internalSetModel(Model model) {
 		this.model = model;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	
 }

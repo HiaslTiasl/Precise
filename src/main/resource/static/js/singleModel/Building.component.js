@@ -11,13 +11,13 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelBuildingController.$inject = ['Phases'];
+	BuildingController.$inject = ['Phases'];
 	
 	/**
 	 * Controller constructor
 	 * @constructor
 	 */
-	function SingleModelBuildingController(Phases) {
+	function BuildingController(Phases) {
 		
 		var $ctrl = this;
 		
@@ -92,8 +92,8 @@ define([
 	}
 	
 	return {
-		templateUrl: 'js/singleModel/singleModel-building.html',
-		controller: SingleModelBuildingController,
+		templateUrl: 'js/singleModel/Building.html',
+		controller: BuildingController,
 		controllerAs: '$ctrl',
 		bindings: {
 			model: '<',

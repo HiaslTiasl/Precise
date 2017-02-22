@@ -2,6 +2,7 @@ package it.unibz.precise.rest.mdl.conversion;
 
 import static it.unibz.precise.rest.mdl.conversion.CachingTranslator.cache;
 
+import it.unibz.precise.model.Activity;
 import it.unibz.precise.model.Attribute;
 import it.unibz.precise.model.Craft;
 import it.unibz.precise.model.Dependency;
@@ -10,7 +11,7 @@ import it.unibz.precise.model.OrderSpecification;
 import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Scope;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
+import it.unibz.precise.rest.mdl.ast.MDLActivityAST;
 import it.unibz.precise.rest.mdl.ast.MDLAttributeAST;
 import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
 import it.unibz.precise.rest.mdl.ast.MDLCraftAST;
@@ -22,7 +23,6 @@ import it.unibz.precise.rest.mdl.ast.MDLOrderSpecificationAST;
 import it.unibz.precise.rest.mdl.ast.MDLPhaseAST;
 import it.unibz.precise.rest.mdl.ast.MDLScopeAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
-import it.unibz.precise.rest.mdl.ast.MDLTaskTypeAST;
 
 /**
  * Context for {@link MDLTranslator}s.
@@ -45,7 +45,7 @@ public class MDLContext {
 	private final CachingTranslator<Craft, MDLCraftAST> craftTranslator;
 	private final CachingTranslator<Attribute, MDLAttributeAST> attributeTranslator;
 	private final CachingTranslator<Phase, MDLPhaseAST> phaseTranslator;
-	private final CachingTranslator<TaskType, MDLTaskTypeAST> taskTypeTranslator;
+	private final CachingTranslator<Activity, MDLActivityAST> activityTranslator;
 	private final CachingTranslator<Task, MDLTaskAST> taskTranslator;
 	private final CachingTranslator<Dependency, MDLDependencyAST> dependencyTranslator;
 	private final CachingTranslator<Scope, MDLScopeAST> scopeTranslator;
@@ -65,7 +65,7 @@ public class MDLContext {
 		craftTranslator      = cache(new CraftTranslator(this));
 		attributeTranslator  = cache(new AttributeTranslator(this));
 		phaseTranslator      = cache(new PhaseTranslator(this));
-		taskTypeTranslator   = cache(new TaskTypeTranslator(this));
+		activityTranslator   = cache(new ActivityTranslator(this));
 		taskTranslator       = cache(new TaskTranslator(this));
 		dependencyTranslator = cache(new DependencyTranslator(this));
 		scopeTranslator      = cache(new ScopeTranslator(this));
@@ -114,8 +114,8 @@ public class MDLContext {
 		return phaseTranslator;
 	}
 	
-	public CachingTranslator<TaskType, MDLTaskTypeAST> taskTypes() {
-		return taskTypeTranslator;
+	public CachingTranslator<Activity, MDLActivityAST> activities() {
+		return activityTranslator;
 	}
 	
 	public CachingTranslator<Task, MDLTaskAST> tasks() {

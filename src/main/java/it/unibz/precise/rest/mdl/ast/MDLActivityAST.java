@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator;
 
 /**
- * Represents a task type in an MDL file.
+ * Represents an activity in an MDL file.
  * 
  * @author MatthiasP
  *
  */
-@JsonIdentityInfo(generator=PropertyGenerator.class, property="name", scope=MDLTaskTypeAST.class)
+@JsonIdentityInfo(generator=PropertyGenerator.class, property="name", scope=MDLActivityAST.class)
 @JsonIdentityReference(alwaysAsId=false)
-public class MDLTaskTypeAST {
+public class MDLActivityAST {
 	
 	private String name;
 	private String shortName;

@@ -12,20 +12,20 @@
 			<label for="phase" class="col-sm-4 control-label">Phase</label>
 			<div class="col-sm-8">
 				<p id="phase" class="form-control-static">
-					{{$ctrl.resource.data.type.phase.name}}
+					{{$ctrl.resource.data.activity.phase.name}}
 				</p>
 			</div>
 		</div>
 		<div class="form-group">
-			<label for="type" class="col-sm-4 control-label">Definition</label>
+			<label for="activity" class="col-sm-4 control-label">Activity</label>
 			<div class="col-sm-8">
 				<select
-					id="type"
+					id="activity"
 					class="form-control"
-					ng-model="$ctrl.resource.data.type"
-					ng-options="tt as (tt.shortName + ' - ' + tt.name) for tt in $ctrl.taskTypes track by tt.name">
+					ng-model="$ctrl.resource.data.activity"
+					ng-options="a as (a.shortName + ' - ' + a.name) for a in $ctrl.activities track by a.name">
 				</select>
-				<button class="btn btn-default" ng-click="$ctrl.editTaskDefinition()">Edit</button>
+				<button class="btn btn-default" ng-click="$ctrl.editActivity()">Edit</button>
 				<!-- <button class="btn btn-default"></button> -->
 			</div>
 		</div>
@@ -33,7 +33,7 @@
 			<label for="craft" class="col-sm-4 control-label">Craft</label>
 			<div class="col-sm-8">
 				<p id="craft" class="form-control field-craft">
-					{{$ctrl.resource.data.type.craft | withShortName }}
+					{{$ctrl.resource.data.activity.craft | withShortName }}
 				</p>
 			</div>
 		</div>
@@ -97,7 +97,7 @@
 							ng-model="$ctrl.resource.data.pitch.crewCount"/>
 					</div>
 				</div>
-				<div ng-if="$ctrl.resource.data.type.unitOfMeasure">
+				<div ng-if="$ctrl.resource.data.activity.unitOfMeasure">
 					<div class="form-group" ng-class="{'has-warning': $ctrl.pitchError}">
 						<label for="quantity-per-day" class="col-sm-4 control-label">(P) Crew Productivity</label>
 						<div class="col-sm-8">
@@ -108,7 +108,7 @@
 									class="form-control field-quantity-per-day"
 									placeholder="P = Q / (C * D)"
 									ng-model="$ctrl.resource.data.pitch.quantityPerDay"/>
-								<span class="input-group-addon">{{$ctrl.resource.data.type.unitOfMeasure}}/day</span>
+								<span class="input-group-addon">{{$ctrl.resource.data.activity.unitOfMeasure}}/day</span>
 							</div>
 						</div>
 					</div>
@@ -121,14 +121,14 @@
 									class="form-control field-total-quantity"
 									placeholder="Q = C * D * P"
 									ng-model="$ctrl.resource.data.pitch.totalQuantity"/>
-								<span class="input-group-addon">{{$ctrl.resource.data.type.unitOfMeasure}}</span>
+								<span class="input-group-addon">{{$ctrl.resource.data.activity.unitOfMeasure}}</span>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</fieldset>
-		<fieldset ng-if="$ctrl.resource.data.type.phase">
+		<fieldset ng-if="$ctrl.resource.data.activity.phase">
 			<legend ng-click="$ctrl.toggleCollapsed('exclusiveness')">
 				<span class="glyphicon glyphicon-chevron-{{$ctrl.collapsed.exclusiveness ? 'right' : 'down'}}"></span>
 				Exclusiveness
@@ -141,7 +141,7 @@
 							<label>
 								<input
 									type="radio"
-									ng-model="$ctrl.exclusiveness.type"
+									ng-model="$ctrl.exclusiveness.activity"
 									ng-value="st"
 									ng-change="$ctrl.updateExclusivenessAttributes()"/>
 								{{st.displayName}}
@@ -152,7 +152,7 @@
 				<div class="form-group">
 					<label for="exclusiveness-attributes" class="col-sm-4 control-label">Attributes</label>
 					<div class="col-sm-8">
-						<div class="checkbox" ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">
+						<div class="checkbox" ng-repeat="attr in $ctrl.resource.data.activity.phase.attributes">
 							<label>
 								<input type="checkbox"
 									ng-model="$ctrl.exclusiveness.attributes[attr.name]"
@@ -164,7 +164,7 @@
 				</div>
 			</div>
 		</fieldset>
-		<fieldset ng-if="$ctrl.resource.data.type.phase">
+		<fieldset ng-if="$ctrl.resource.data.activity.phase">
 			<legend ng-click="$ctrl.toggleCollapsed('order')">
 				<span class="glyphicon glyphicon-chevron-{{$ctrl.collapsed.order ? 'right' : 'down'}}"></span>
 				Order
@@ -191,7 +191,7 @@
 							<td>
 								<select
 									ng-model="o.attribute"
-									ng-options="a as (a | withShortName) for a in $ctrl.resource.data.type.phase.attributes | filter:$ctrl.attrFilterForOrderSpec(o):true track by a.name"
+									ng-options="a as (a | withShortName) for a in $ctrl.resource.data.activity.phase.attributes | filter:$ctrl.attrFilterForOrderSpec(o):true track by a.name"
 									ng-change="$ctrl.changedOrderEntryAttribute()">
 									<option value="">----</option>
 								</select>
@@ -227,7 +227,7 @@
 				</table>
 			</div>
 		</fieldset>
-		<fieldset ng-if="$ctrl.resource.data.type.phase">
+		<fieldset ng-if="$ctrl.resource.data.activity.phase">
 			<legend ng-click="$ctrl.toggleCollapsed('locations')">
 				<span class="glyphicon glyphicon-chevron-{{$ctrl.collapsed.locations ? 'right' : 'down'}}"></span>
 				Locations
@@ -251,13 +251,13 @@
 				<table id="location-table" class="table table-striped" st-table="locs" st-safe-src="$ctrl.resource.data.locationPatterns">
 					<thead>
 						<tr>
-							<th ng-repeat="attr in $ctrl.resource.data.type.phase.attributes">{{::(attr | withShortName)}}</th>
+							<th ng-repeat="attr in $ctrl.resource.data.activity.phase.attributes">{{::(attr | withShortName)}}</th>
 							<th class="btn-column"></th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr id="location-{{$index}}" ng-repeat="pattern in locs track by $index" ng-init="patternNum = $index">
-							<td ng-repeat="attr in $ctrl.resource.data.type.phase.attributes track by $index">
+							<td ng-repeat="attr in $ctrl.resource.data.activity.phase.attributes track by $index">
 								<select
 									ng-model="pattern[attr.name].value"
 									ng-options="value for value in pattern[attr.name].allowedValues"
@@ -284,7 +284,7 @@
 	<div class="text-right">
 		<button class="btn btn-primary"
 			ng-click="$ctrl.sendTask()"
-			ng-disabled="!$ctrl.resource.data.type">
+			ng-disabled="!$ctrl.resource.data.activity">
 			Done
 		</button>
 		<button class="btn btn-default" ng-click="$ctrl.cancelled()">Cancel</button>

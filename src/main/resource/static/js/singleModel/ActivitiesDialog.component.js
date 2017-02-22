@@ -1,6 +1,6 @@
 /**
- * Angular component for viewing and setting task definition properties in a dialog.
- * @module "singleModel/singleModel-taskTypes.create-dialog.component"
+ * Angular component for viewing and setting activity properties in a dialog.
+ * @module "singleModel/singleModel-activitiess.create-dialog.component"
  */
 define([
 	'lib/lodash'
@@ -9,13 +9,13 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelTaskTypeCreateDialogController.$inject = ['TaskTypes', 'errorHandler'];
+	ActivitiesDialogController.$inject = ['errorHandler'];
 	
 	/**
 	 * Controller constructor.
 	 * @constructor
 	 */
-	function SingleModelTaskTypeCreateDialogController(TaskTypes, errorHandler) {
+	function ActivitiesDialogController(errorHandler) {
 		
 		var $ctrl = this;
 		
@@ -46,8 +46,8 @@ define([
 	}
 	
 	return {
-		templateUrl: 'js/singleModel/singleModel-taskTypes.create-dialog.html',
-		controller: SingleModelTaskTypeCreateDialogController,
+		templateUrl: 'js/singleModel/ActivitiesDialog.html',
+		controller: ActivitiesDialogController,
 		controllerAs: '$ctrl',
 		bindings: {
 			resolve: '<',

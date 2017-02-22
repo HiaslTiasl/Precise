@@ -19,12 +19,14 @@ public class CraftTranslator extends AbstractMDLTranslator<Craft, MDLCraftAST> {
 	protected void updateEntityImpl(MDLCraftAST mdlCraft, Craft craft) {
 		craft.setName(mdlCraft.getName());
 		craft.setShortName(mdlCraft.getShortName());
+		craft.setDescription(mdlCraft.getDescription());
 	}
 
 	@Override
 	protected void updateMDLImpl(Craft craft, MDLCraftAST mdlCraft) {
 		mdlCraft.setName(craft.getName());
 		mdlCraft.setShortName(craft.getShortName());
+		mdlCraft.setDescription(craft.getDescription());
 	}
 	
 	@Override

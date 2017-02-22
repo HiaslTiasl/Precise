@@ -15,7 +15,7 @@ define([
 	'./Models.service',
 	'./Phases.service',
 	'./Crafts.service',
-	'./TaskTypes.service',
+	'./Activities.service',
 	'./Tasks.service',
 	'./Dependencies.service',
 	'./errorHandler.factory',
@@ -37,7 +37,7 @@ define([
 	ModelsService,
 	PhasesService,
 	CraftsService,
-	TaskTypesService,
+	ActivitiesService,
 	TasksService,
 	DependenciesService,
 	errorHandlerFactory,
@@ -60,7 +60,7 @@ define([
 		.service('Models', ModelsService)
 		.service('Phases', PhasesService)
 		.service('Crafts', CraftsService)
-		.service('TaskTypes', TaskTypesService)
+		.service('Activities', ActivitiesService)
 		.service('Tasks', TasksService)
 		.service('Dependencies', DependenciesService)
 		.factory('errorHandler', errorHandlerFactory)

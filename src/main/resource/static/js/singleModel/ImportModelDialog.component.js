@@ -5,13 +5,13 @@
 define(function () {
 	'use strict';
 	
-	SingleModelConfigImportDialogController.$inject = ['$http', 'errorHandler', 'PreciseApi', 'Files', 'MDLFiles', 'AllModels']
+	ImportModelDialogController.$inject = ['$http', 'errorHandler', 'PreciseApi', 'Files', 'MDLFiles', 'AllModels']
 	
 	/**
 	 * Controller constructor.
 	 * qconstructor
 	 */
-	function SingleModelConfigImportDialogController($http, errorHandler, PreciseApi, Files, MDLFiles, AllModels) {
+	function ImportModelDialogController($http, errorHandler, PreciseApi, Files, MDLFiles, AllModels) {
 		
 		var $ctrl = this;
 		
@@ -116,8 +116,8 @@ define(function () {
 	}
 	
 	return {
-		templateUrl: 'js/singleModel/import-model-dialog.html',
-		controller: SingleModelConfigImportDialogController,
+		templateUrl: 'js/singleModel/ImportModelDialog.html',
+		controller: ImportModelDialogController,
 		controllerAs: '$ctrl',
 		bindings: {
 			resolve: '<',

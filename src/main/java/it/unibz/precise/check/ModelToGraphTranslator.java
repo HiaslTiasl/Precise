@@ -12,7 +12,7 @@ import it.unibz.precise.model.OrderType;
 import it.unibz.precise.model.Phase;
 import it.unibz.precise.model.Scope;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
+import it.unibz.precise.model.Activity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -304,7 +304,7 @@ public class ModelToGraphTranslator {
 					for (int i = 0; i < locCount; i++) {
 						Location l = locs.get(i);
 						List<TaskUnitNode> nodes = units(t, l)
-							.map(ahn -> new TaskUnitNode(t.getType(), ahn))
+							.map(ahn -> new TaskUnitNode(t.getActivity(), ahn))
 							.collect(Collectors.toList());
 						nodeLists.add(nodes);
 					}
@@ -321,8 +321,8 @@ public class ModelToGraphTranslator {
 			res = ahn.unitsStream();
 		else {
 			// A global location -> return all units contained in the phase, if any
-			TaskType type = t.getType();
-			Phase phase = type == null ? null : type.getPhase();
+			Activity activity = t.getActivity();
+			Phase phase = activity == null ? null : activity.getPhase();
 			res = phase == null ? Stream.empty() : phase.unitsStream();
 		}
 		return res; 

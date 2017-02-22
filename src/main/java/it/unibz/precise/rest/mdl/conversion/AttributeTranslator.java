@@ -28,6 +28,7 @@ class AttributeTranslator extends AbstractMDLTranslator<Attribute, MDLAttributeA
 		mdlAttribute.setDescription(attribute.getDescription());
 		mdlAttribute.setRange(attribute.isValuesMatchPositions() ? range.size() : range);
 		mdlAttribute.setOrdered(attribute.isOrdered());
+		mdlAttribute.setPerPhase(attribute.isPerPhase());
 	}
 	
 	@Override
@@ -37,6 +38,7 @@ class AttributeTranslator extends AbstractMDLTranslator<Attribute, MDLAttributeA
 		attribute.setDescription(mdlAttribute.getDescription());
 		setRange(attribute, mdlAttribute.getRange());
 		attribute.setOrdered(mdlAttribute.isOrdered());
+		attribute.setPerPhase(mdlAttribute.isPerPhase());
 	}
 	
 	@Override

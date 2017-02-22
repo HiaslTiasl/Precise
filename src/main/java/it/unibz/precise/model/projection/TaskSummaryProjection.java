@@ -12,7 +12,7 @@ import it.unibz.precise.model.Position;
 import it.unibz.precise.model.Task;
 
 /**
- * Task with definition as {@link EmptyProjection} only to provide just enough
+ * Task with activity as {@link EmptyProjection} only to provide just enough
  * information for joining on the client.
  * 
  * TODO: Consider using this instead of {@link ExpandedTaskProjection} for initializing
@@ -36,7 +36,7 @@ public interface TaskSummaryProjection extends HasLongId {
 
 	List<Map<String, PatternEntry>> getLocationPatterns();
 	
-	EmptyProjection getType();
+	EmptyProjection getActivity();
 	
 	Position getPosition();
 }

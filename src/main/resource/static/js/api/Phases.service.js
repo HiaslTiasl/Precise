@@ -60,17 +60,17 @@ define([
 			
 			defaultProjection: 'phaseSummary',
 		
-			getTaskTypes: function (params) {
+			getActivities: function (params) {
 				var self = this;
 				return PreciseApi.fromBase()
 					.traverse(function (builder) {
 						return builder
-							.follow('taskTypes', 'search', 'findByPhase')
+							.follow('activities', 'search', 'findByPhase')
 							.withTemplateParameters(_.assign({
 								phase: HAL.resolve(HAL.hrefTo(self.data)),
 							}, params))
 							.get();
-					}).then(Pages.wrapper('taskTypes'));
+					}).then(Pages.wrapper('activities'));
 			}
 		
 		});

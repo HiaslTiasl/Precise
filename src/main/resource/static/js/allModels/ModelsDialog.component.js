@@ -3,7 +3,7 @@
  * @module "allModels/allModels.create-dialog.component"
  */
 define({
-	templateUrl: 'js/allModels/allModels.create-dialog.html',
+	templateUrl: 'js/allModels/ModelsDialog.html',
 	controller: 'DefaultResourceDialog',
 	controllerAs: '$ctrl',
 	bindings: {

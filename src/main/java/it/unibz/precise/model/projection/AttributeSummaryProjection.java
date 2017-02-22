@@ -19,6 +19,6 @@ public interface AttributeSummaryProjection {
 	
 	boolean isOrdered();
 	
-	boolean isValuesMatchPositions();
+	boolean isPerPhase();
 	
 }

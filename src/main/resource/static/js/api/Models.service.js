@@ -135,8 +135,8 @@ define([
 				return this.getList('crafts', params);
 			},
 			
-			getTaskTypes: function (params) {
-				return this.getList('taskTypes', params);
+			getActivities: function (params) {
+				return this.getList('activities', params);
 			},
 			
 			getWarnings: function () {

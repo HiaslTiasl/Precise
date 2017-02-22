@@ -9,19 +9,19 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelDiagramCreateTaskDialogController.$inject = ['$uibModal', 'errorHandler', 'PreciseApi', 'Pages', 'Tasks', 'TaskTypes', 'Phases'];
+	DiagramTaskDialogController.$inject = ['$uibModal', 'errorHandler', 'PreciseApi', 'Pages', 'Tasks', 'Activities', 'Phases'];
 	
 	/**
 	 * Controller constructor.
 	 * @constructor
 	 */
-	function SingleModelDiagramCreateTaskDialogController($uibModal, errorHandler, PreciseApi, Pages, Tasks, TaskTypes, Phases) {
+	function DiagramTaskDialogController($uibModal, errorHandler, PreciseApi, Pages, Tasks, Activities, Phases) {
 		
 		var $ctrl = this;
 		
 		$ctrl.phaseChanged = phaseChanged;
-		$ctrl.taskDefinitionChanged = taskDefinitionChanged;
-		$ctrl.createTaskDefinition = createTaskDefinition;
+		$ctrl.activityChanged = activityChanged;
+		$ctrl.createActivity = createActivity;
 		$ctrl.computePitches = computePitches;
 		$ctrl.send = send;
 		$ctrl.cancel = cancel;
@@ -49,12 +49,12 @@ define([
 				.then(setPitchError);
 		}
 		
-		/** Restrict the available task definitions to the given list. */
-		function setTaskDefinitions(taskTypes) {
-			$ctrl.taskTypes = taskTypes;
+		/** Restrict the available activities to the given list. */
+		function setActivities(activities) {
+			$ctrl.activities = activities;
 		}
 		
-		/** The current phase changed, so update the available task definitions. */
+		/** The current phase changed, so update the available activities. */
 		function phaseChanged() {
 			if ($ctrl.phase)
 				setPhase();
@@ -62,35 +62,35 @@ define([
 				resetPhase();
 		}
 		
-		/** The phase was reset, so let the user select all task definitions of the model. */
+		/** The phase was reset, so let the user select all activities of the model. */
 		function resetPhase() {
-			loadTaskTypesFrom($ctrl.resource.model);
+			loadActivitiesFrom($ctrl.resource.model);
 		}
 		
-		/** A phase was set, so restrict the available task definitions to those of that phase. */
+		/** A phase was set, so restrict the available activities to those of that phase. */
 		function setPhase() {
 			Phases.existingResource($ctrl.resource.model, $ctrl.phase)
-				.then(loadTaskTypesFrom);			
+				.then(loadActivitiesFrom);			
 		}
 		
 		/**
-		 * Loads the list of task types associated to the given resource,
+		 * Loads the list of activities associated to the given resource,
 		 * which can be either a model or a phase.
 		 */
-		function loadTaskTypesFrom(resource) {
-			// Reset old list of task types first so they cannot be selected.
-			setTaskDefinitions(null);
-			resource.getTaskTypes({
-				projection: TaskTypes.Resource.prototype.defaultProjection
+		function loadActivitiesFrom(resource) {
+			// Reset old list of activities first so they cannot be selected.
+			setActivities(null);
+			resource.getActivities({
+				projection: Activities.Resource.prototype.defaultProjection
 			})
 			.then(Pages.collectRemaining)
-			.then(setTaskDefinitions);			
+			.then(setActivities);			
 		}
 
-		/** The task definition changed, so update the phase accordingly. */
-		function taskDefinitionChanged() {
-			if ($ctrl.phase != $ctrl.resource.data.type.phase) 
-				$ctrl.phase = $ctrl.resource.data.type.phase;
+		/** The activity changed, so update the phase accordingly. */
+		function activityChanged() {
+			if ($ctrl.phase != $ctrl.resource.data.activity.phase) 
+				$ctrl.phase = $ctrl.resource.data.activity.phase;
 		}
 		
 		/** Returns a promise of the crafts of the model, and caches the result. */
@@ -98,13 +98,13 @@ define([
 			return $ctrl.resource.model.getCrafts();
 		});
 		
-		/** Opens a dialog for creating a task definition that is to be used in this task. */
-		function createTaskDefinition() {
+		/** Opens a dialog for creating an activity that is to be used in this task. */
+		function createActivity() {
 			$uibModal.open({
-				component: 'preciseCreateTaskType',
+				component: 'ActivityDialog',
 				resolve: {
 					resource: function () {
-						return TaskTypes.newResource($ctrl.resource.model, {
+						return Activities.newResource($ctrl.resource.model, {
 							phase: $ctrl.phase
 						});
 					},
@@ -112,9 +112,9 @@ define([
 					crafts: getCrafts
 				}
 			}).result.then(function (result) {
-				$ctrl.taskTypes.push(result);
-				$ctrl.resource.data.type = result;
-				taskDefinitionChanged();
+				$ctrl.activities.push(result);
+				$ctrl.resource.data.activity = result;
+				activityChanged();
 			}, errorHandler.handle);
 		}
 		
@@ -132,8 +132,8 @@ define([
 	}
 	
 	return {
-		templateUrl: 'js/singleModel/singleModel-diagram.create-task-dialog.html',
-		controller: SingleModelDiagramCreateTaskDialogController,
+		templateUrl: 'js/singleModel/DiagramTaskDialog.html',
+		controller: DiagramTaskDialogController,
 		controllerAs: '$ctrl',
 		bindings: {
 			resolve: '<',

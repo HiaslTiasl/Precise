@@ -9,13 +9,13 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelConfigController.$inject = ['$http', '$state', '$uibModal', 'errorHandler', 'Pages', 'Files', 'MDLFiles', 'AllModels'];
+	ConfigController.$inject = ['$http', '$state', '$uibModal', 'errorHandler', 'Pages', 'Files', 'MDLFiles', 'AllModels'];
 	
 	/**
 	 * Controller constructor.
 	 * @controller
 	 */
-	function SingleModelConfigController($http, $state, $uibModal, errorHandler, Pages, Files, MDLFiles, AllModels) {
+	function ConfigController($http, $state, $uibModal, errorHandler, Pages, Files, MDLFiles, AllModels) {
 		
 		var $ctrl = this;
 		
@@ -49,7 +49,7 @@ define([
 		/** Opens a dialog for importing the configuration of a model into this one. */
 		function importConfig() {
 			$uibModal.open({
-				component: 'preciseImportModel',
+				component: 'ImportModelDialog',
 				resolve: {
 					model: _.constant($ctrl.model),
 					title: _.constant('Configuration'),
@@ -68,8 +68,8 @@ define([
 	
 	
 	return {
-		templateUrl: 'js/singleModel/singleModel-config.html',
-		controller: SingleModelConfigController,
+		templateUrl: 'js/singleModel/Config.html',
+		controller: ConfigController,
 		controllerAs: '$ctrl',
 		bindings: {
 			model: '<',

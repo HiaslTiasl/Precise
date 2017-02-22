@@ -47,6 +47,16 @@ public class Attribute extends BaseEntity implements ShortNameProvider {
 	private boolean ordered;
 	
 	/**
+	 * Indicates whether the attribute may have a different meaning per phase.
+	 * If two phases share an attribute where this flag is set, the attributes
+	 * are considered different.
+	 * This is useful e.g. to distinguish the "unit" attribute in the exterior
+	 * phase, which refers to parts of outside walls, from the one in the interior
+	 * phase, which enumerates rooms of the same type (section).
+	 */
+	private boolean perPhase;
+	
+	/**
 	 * Indicates whether the values range from 1 to range.size().
 	 * Typically the case for "unit"-like attributes. 
 	 */
@@ -95,6 +105,14 @@ public class Attribute extends BaseEntity implements ShortNameProvider {
 
 	public void setOrdered(boolean ordered) {
 		this.ordered = ordered;
+	}
+
+	public boolean isPerPhase() {
+		return perPhase;
+	}
+
+	public void setPerPhase(boolean perPhase) {
+		this.perPhase = perPhase;
 	}
 
 	public boolean isValuesMatchPositions() {

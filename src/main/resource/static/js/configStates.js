@@ -48,11 +48,11 @@ define([
 		$stateProvider
 			.state('allModels', {
 				url: '/models',
-				component: 'preciseAllModels'
+				component: 'allModels'
 			})
 			.state('singleModel', {
 				url: '/models/:name',
-				component: 'preciseSingleModel',
+				component: 'singleModel',
 				abstract: true,
 				resolve: [{
 					token: 'model',
@@ -67,14 +67,14 @@ define([
 			})
 			.state('singleModel.config', {
 				url: '/config',
-				template: '<precise-config model="$ctrl.model" reload="$ctrl.reload()"></precise-config',
+				template: '<config model="$ctrl.model" reload="$ctrl.reload()"></config',
 				data: {
 					title: 'Configuration'
 				}
 			})
 			.state('singleModel.diagram', {
 				url: '/diagram',
-				template: '<precise-diagram model="$ctrl.model" reload="$ctrl.reload()"></precise-diagram>',
+				template: '<diagram model="$ctrl.model" reload="$ctrl.reload()"></diagram>',
 				onEnter: checkDiagramEditable,
 				data: {
 					title: 'Diagram'

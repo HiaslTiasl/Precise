@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
-import it.unibz.precise.model.TaskType;
+import it.unibz.precise.model.Activity;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=Application.class, webEnvironment=WebEnvironment.RANDOM_PORT)
@@ -57,7 +57,7 @@ public class ModelsClientTest {
 	 * <li> curl -i -v -X POST -H "Content-Type: application/json" -d @nestedModel.json localhost:8080/fullModels
 	 * <li> curl {_links: model}
 	 * <li> curl {_links: config}
-	 * <li> curl {_links: taskTypes}
+	 * <li> curl {_links: activities}
 	 */
 	@Test
 	public void postNestedModel() throws IOException, Exception {
@@ -71,11 +71,11 @@ public class ModelsClientTest {
 		.andExpect(status().isCreated())
 		.andReturn();
 		
-		Resources<TaskType> taskTypes = TraversonUtil.continueFrom(result)
-			.follow("model", "taskTypes")
-			.toObject(new ParameterizedTypeReference<Resources<TaskType>>(){});
+		Resources<Activity> activities = TraversonUtil.continueFrom(result)
+			.follow("model", "activities")
+			.toObject(new ParameterizedTypeReference<Resources<Activity>>(){});
 	
-		assertThat(taskTypes.getContent(), hasSize(2));
+		assertThat(activities.getContent(), hasSize(2));
 	}
 
 }

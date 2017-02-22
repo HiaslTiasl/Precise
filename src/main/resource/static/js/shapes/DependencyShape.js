@@ -15,7 +15,7 @@ define([
 ) {
 	'use strict';
 	
-	var MODEL_CLASSPATH = 'precise.DependencyShape',	// Path of the class under joint.shapes unless and type attribute, so JointJS can find the class
+	var MODEL_CLASSPATH = 'precise.DependencyShape',	// Path of the class under joint.shapes and type attribute, so JointJS can find the class
 		VIEW_CLASSPATH = MODEL_CLASSPATH + 'View';		// As expected by JointJS to find the view implementation of a model class
 	
 	var ARROW_MARKER = 'm 0 10 l -24 10 l 24 10 z',

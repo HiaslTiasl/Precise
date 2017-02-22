@@ -216,8 +216,8 @@ public class Dependency extends BaseEntity {
 	 * TODO: Shouldn't this only be restricted when the leaf attribute is "unit"?
 	 */
 	public boolean canHaveUnitScope() {
-		Phase sourcePhase = source == null ? null : source.getType().getPhase();
-		Phase targetPhase = target == null ? null : target.getType().getPhase();
+		Phase sourcePhase = phaseOf(source);
+		Phase targetPhase = phaseOf(target);
 		return sourcePhase == null || targetPhase == null
 			|| sourcePhase.equals(targetPhase);
 	}
@@ -245,39 +245,60 @@ public class Dependency extends BaseEntity {
 		this.model = model;
 	}
 	
-	/** Returns a stream of attributes in the phase of the given task, or null if the task has no phase. */
-	private static Stream<Attribute> attributesOf(Task task) {
-		Phase phase = task == null ? null : task.getType().getPhase();
+	/** Returns the phase of the given task, or null if the task is null. */
+	private static Phase phaseOf(Task task) {
+		return task == null ? null : task.getActivity().getPhase();
+	}
+	
+	/** Returns a stream of attributes in the given phase. */
+	private static Stream<Attribute> attributesOf(Phase phase) {
 		return phase == null ? Stream.empty()
 			: phase.getAttributeHierarchyLevels().stream()
 				.map(AttributeHierarchyLevel::getAttribute);
 	}
 	
+	/** Returns a stream of allowed attributes. */
+	private Stream<Attribute> allowedAttributes() {
+		Phase sourcePhase = phaseOf(source);
+		Phase targetPhase = phaseOf(target);
+		Stream<Attribute> sourceAttrs = attributesOf(sourcePhase);
+		Stream<Attribute> targetAttrs = attributesOf(targetPhase);
+		
+		if (sourcePhase != targetPhase) {
+			sourceAttrs = sourceAttrs.filter(a -> !a.isPerPhase());
+			targetAttrs = targetAttrs.filter(a -> !a.isPerPhase());
+		}
+		
+		Set<Attribute> targetSet = targetAttrs.collect(Collectors.toSet());
+		
+		return sourceAttrs.filter(targetSet::contains);
+	}
+	
 	/**
 	 * Returns the set of allowed attributes in the scope of this dependency,
 	 * which is defined as the intersection of the attributes of the phases
-	 * of the two associated tasks.
+	 * of the two associated tasks minus those considered separate
+	 * {@link Attribute#isPerPhase() per phase}.
 	 */
 	@Transient
 	@JsonIgnore
 	public List<Attribute> getAllowedAttributes() {
-		Stream<Attribute> sourceAttrs = attributesOf(source);
-		Stream<Attribute> targetAttrs = attributesOf(target);
-		
-		return sourceAttrs.filter(targetAttrs.collect(Collectors.toSet())::contains)
-			.collect(Collectors.toList());
+		return allowedAttributes().collect(Collectors.toList());
 	}
 	
-	/** Returns the attributes in the scope that are actually not allowed. */
+	/**
+	 * Returns the attributes in the scope that are actually not
+	 * {@link #getAllowedAttributes() allowed}.
+	 */
 	@Transient
 	@JsonIgnore
 	public Stream<Attribute> getNotAllowedScopeAttributes() {
 		if (scope == null || scope.getAttributes() == null)
 			return Stream.empty();
-		Set<Attribute> sourceAttrs = attributesOf(source).collect(Collectors.toSet());
-		Set<Attribute> targetAttrs = attributesOf(target).collect(Collectors.toSet());
-		return scope.getAttributes().stream()
-			.filter(a -> !sourceAttrs.contains(a) || !targetAttrs.contains(a));
+		
+		Set<Attribute> allowed = allowedAttributes().collect(Collectors.toSet());
+		
+		return scope.getAttributes().stream().filter(a -> !allowed.contains(a));
 	}
 	
 	/** Removes all not allowed attributes from the scope. */

@@ -1,6 +1,6 @@
 /**
- * Angular service for task type resources.
- * @module "api/TaskTypes.service"
+ * Angular service for activity resources.
+ * @module "api/Activities.service"
  */
 define([
 	'lib/lodash',
@@ -11,58 +11,58 @@ define([
 ) {
 	'use strict';
 	
-	TaskTypesService.$inject = ['$q', 'PreciseApi', 'Resources', 'Pages'];
+	ActivitiesService.$inject = ['$q', 'PreciseApi', 'Resources', 'Pages'];
 	
 	/**
 	 * Service constructor.
 	 * @constructor
 	 */
-	function TaskTypesService($q, PreciseApi, Resources, Pages) {
+	function ActivitiesService($q, PreciseApi, Resources, Pages) {
 		
-		var TaskTypes = this;
+		var Activities = this;
 		
-		TaskTypes.newResource = newResource;
-		TaskTypes.existingResource = existingResource;
-		TaskTypes.resource = resource;
-		TaskTypes.Resource = TaskTypeResource;
+		Activities.newResource = newResource;
+		Activities.existingResource = existingResource;
+		Activities.resource = resource;
+		Activities.Resource = ActivityResource;
 		
 		var dontSendDirectly = ['craft', 'phase', 'model', '_links'];
 		
 		/** Returns a promise of a new resource that does not exist on the server. */
-		function newResource(model, taskType) {
-			return resource(model, taskType, false);
+		function newResource(model, activity) {
+			return resource(model, activity, false);
 		}
 		
 		/** Returns a promise of a resource that already exists on the server. */
-		function existingResource(model, taskType) {
-			return resource(model, taskType, true);
+		function existingResource(model, activity) {
+			return resource(model, activity, true);
 		}
 		
-		/** Returns a promise of a task type resource. */
-		function resource(model, taskType, existing) {
-			return $q.when(new TaskTypeResource(model, taskType, existing));
+		/** Returns a promise of an activity resource. */
+		function resource(model, activity, existing) {
+			return $q.when(new ActivityResource(model, activity, existing));
 		}
 		
 		/**
-		 * Represents a task type resource
+		 * Represents an activity resource
 		 * @constructor
 		 * @extends module:"api/Resources.service"#Base
 		 */
-		function TaskTypeResource(model, data, existing) {
+		function ActivityResource(model, data, existing) {
 			Resources.Base.call(this, data, existing);
 			this.model = model;
 		}
 		
 		util.defineClass(Resources.Base, {
 			
-			constructor: TaskTypeResource,
+			constructor: ActivityResource,
 
 			rels: {
-				singular: 'taskType',
-				plural: 'taskTypes'
+				singular: 'activity',
+				plural: 'activities'
 			},
 			
-			defaultProjection: 'expandedTaskType',
+			defaultProjection: 'expandedActivity',
 			
 			getTasks: function (params) {
 				return this.getList('tasks', params);
@@ -86,6 +86,6 @@ define([
 
 	}
 	
-	return TaskTypesService;
+	return ActivitiesService;
 	
 });

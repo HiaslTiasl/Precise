@@ -52,9 +52,9 @@ define([
 		$ctrl.showLabels = true;
 		
 		// Map query keys as expected by backend to keys to be displayed
-		// in the query preview
+		// in the query preview, if different from default
 		var searchParamKeyMappings = {
-			type: 'def'
+			activity: 'act'
 		};
 		
 		function $onChanges(changes) {
@@ -91,8 +91,8 @@ define([
 			$ctrl.model.getPhases().then(function (phases) {
 				$ctrl.phases = phases;
 			});
-			$ctrl.model.getTaskTypes().then(function (taskTypes) {
-				$ctrl.taskTypes = taskTypes;
+			$ctrl.model.getActivities().then(function (activities) {
+				$ctrl.activities = activities;
 			});
 			$ctrl.model.getCrafts().then(function (crafts) {
 				$ctrl.crafts = crafts;

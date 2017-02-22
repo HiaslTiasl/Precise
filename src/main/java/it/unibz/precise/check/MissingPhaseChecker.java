@@ -2,7 +2,7 @@ package it.unibz.precise.check;
 
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
+import it.unibz.precise.model.Activity;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 
 /**
- * Checks if all task definitions in a model have a phase associated.
+ * Checks if all activities in a model have a phase associated.
  * 
  * @author MatthiasP
  *
@@ -22,7 +22,7 @@ public class MissingPhaseChecker implements ConsistencyChecker {
 	
 	public static final String WARNING_TYPE = "missingPhase";
 
-	public static final String WARNING_MESSAGE = "Task definition {0} has no phase.";
+	public static final String WARNING_MESSAGE = "Activity {0} has no phase.";
 
 	@Override
 	public Category getCategory() {
@@ -36,20 +36,20 @@ public class MissingPhaseChecker implements ConsistencyChecker {
 	
 	@Override
 	public Stream<ConsistencyWarning> check(Model model) {
-		return model.getTaskTypes().stream()
+		return model.getActivities().stream()
 			.map(this::check)
 			.filter(Objects::nonNull);
 	}
 	
 	/**
-	 * Returns a {@link ConsistencyWarning} if {@code taskDef} is used in the diagram but has no phase,
+	 * Returns a {@link ConsistencyWarning} if {@code activity} is used in the diagram but has no phase,
 	 * otherwise returns null.
 	 */
-	private ConsistencyWarning check(TaskType taskDef) {
-		List<Task> tasks = taskDef.getTasks();
-		// If there are no task boxes, then the task definition is not used in the diagram.
-		return taskDef.getPhase() != null || tasks.isEmpty() ? null
-			: warning(MessageFormat.format(WARNING_MESSAGE, taskDef.getName()), tasks, null);
+	private ConsistencyWarning check(Activity activity) {
+		List<Task> tasks = activity.getTasks();
+		// If there are no tasks, then the activity is not used in the diagram.
+		return activity.getPhase() != null || tasks.isEmpty() ? null
+			: warning(MessageFormat.format(WARNING_MESSAGE, activity.getName()), tasks, null);
 	}
 
 }

@@ -21,7 +21,7 @@ import it.unibz.precise.model.Model;
 import it.unibz.precise.model.PatternEntry;
 import it.unibz.precise.model.Pitch;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
+import it.unibz.precise.model.Activity;
 import it.unibz.precise.rep.ModelRepository;
 
 /**
@@ -146,16 +146,16 @@ public class CSVFileController {
 	
 	/** Returns a data row corresponding to the given task. */
 	private String dataRow(Task task, String sep, String locSep, String taskSep) {
-		TaskType type = task.getType();
+		Activity activity = task.getActivity();
 		Pitch pitch = task.getPitch();
 		return Stream.of(
-			type.getName(),
-			type.getShortName(),
+			activity.getName(),
+			activity.getShortName(),
 			task.getId(),
 			pitch.getCrewSize(),
 			pitch.getCrewCount(),
 			pitch.getDurationDays(),
-			type.getUnitOfMeasure(),
+			activity.getUnitOfMeasure(),
 			pitch.getTotalQuantity(),
 			pitch.getQuantityPerDay(),
 			task.getManHours(),

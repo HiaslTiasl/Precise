@@ -11,12 +11,12 @@ define([
 ) {
 	'use strict';
 	
-	TaskPropertiesController.$inject = ['$q', '$uibModal', '$anchorScroll', '$timeout', 'errorHandler', 'PreciseApi', 'Tasks', 'TaskTypes', 'Scopes', 'OrderSpecifications', 'Phases', 'Pages'];
+	TaskPropertiesController.$inject = ['$q', '$uibModal', '$anchorScroll', '$timeout', 'errorHandler', 'PreciseApi', 'Tasks', 'Activities', 'Scopes', 'OrderSpecifications', 'Phases', 'Pages'];
 	
-	function TaskPropertiesController($q, $uibModal, $anchorScroll, $timeout, errorHandler, PreciseApi, Tasks, TaskTypes, Scopes, OrderSpecifications, Phases, Pages) {
+	function TaskPropertiesController($q, $uibModal, $anchorScroll, $timeout, errorHandler, PreciseApi, Tasks, Activities, Scopes, OrderSpecifications, Phases, Pages) {
 		var $ctrl = this;
 		
-		$ctrl.editTaskDefinition = editTaskDefinition;
+		$ctrl.editActivity = editActivity;
 		$ctrl.computePitches = computePitches;
 		$ctrl.updateExlusivenessType = updateExlusivenessType;
 		$ctrl.updateExclusivenessAttributes = updateExclusivenessAttributes;
@@ -58,15 +58,15 @@ define([
 		$ctrl.$onChanges = $onChanges;
 		
 		/** Returns all attributes for locations of the given tasks. */
-		var getTaskAttributes = _.property(['type', 'phase', 'attributes']);
+		var getTaskAttributes = _.property(['activity', 'phase', 'attributes']);
 		
 		function $onChanges() {
 			if ($ctrl.resource) {
 				// Use local representations of scope and ordering
 				$ctrl.exclusiveness = Scopes.toLocalRepresentation($ctrl.resource.data.exclusiveness);
 				$ctrl.order = OrderSpecifications.toLocalRepresentation($ctrl.resource.data.orderSpecifications);
-				// Init available task types and validate pitch parameters
-				loadTaskTypes();
+				// Init available activities and validate pitch parameters
+				loadActivities();
 				computePitches();
 			}
 		}
@@ -77,28 +77,28 @@ define([
 		}
 		
 		/**
-		 * Loads the list of task types, either from the phase, if available,
+		 * Loads the list of activities, either from the phase, if available,
 		 * or from the model otherwise.
 		 */
-		function loadTaskTypes() {
-			var resourcePromise = $ctrl.resource.data.type.phase
-				? Phases.existingResource($ctrl.resource.model, $ctrl.resource.data.type.phase)
+		function loadActivities() {
+			var resourcePromise = $ctrl.resource.data.activity.phase
+				? Phases.existingResource($ctrl.resource.model, $ctrl.resource.data.activity.phase)
 				: $q.when($ctrl.resource.model);
-			return resourcePromise.then(loadTaskTypesFrom);
+			return resourcePromise.then(loadActivitiesFrom);
 		}
 		
 		/**
-		 * Loads the list of task types associated to the given resource,
+		 * Loads the list of activities associated to the given resource,
 		 * which can be either a model or a phase.
 		 */
-		function loadTaskTypesFrom(resource) {
-			// Reset old list of task types first so they cannot be selected.
-			resource.getTaskTypes({
-				projection: TaskTypes.Resource.prototype.defaultProjection
+		function loadActivitiesFrom(resource) {
+			// Reset old list of activities first so they cannot be selected.
+			resource.getActivities({
+				projection: Activities.Resource.prototype.defaultProjection
 			})
 			.then(Pages.collectRemaining)
-			.then(function (taskTypes) {
-				$ctrl.taskTypes = taskTypes;
+			.then(function (activities) {
+				$ctrl.activities = activities;
 			}, errorHandler.handle);			
 		}
 		
@@ -107,26 +107,26 @@ define([
 			$ctrl.collapsed[fieldset] = !$ctrl.collapsed[fieldset];
 		}
 		
-		/** Opens a dialog for editing the selected task definition. */
-		function editTaskDefinition() {
-			var type = $ctrl.resource.data.type;
+		/** Opens a dialog for editing the selected activity. */
+		function editActivity() {
+			var activity = $ctrl.resource.data.activity;
 			$uibModal.open({
-				component: 'preciseCreateTaskType',
+				component: 'ActivitiesDialog',
 				resolve: {
 					resource: function () {
-						return TaskTypes.existingResource($ctrl.resource.model, type)
-							.then(function (tt) {
+						return Activities.existingResource($ctrl.resource.model, activity)
+							.then(function (a) {
 								// Reload to ensure that we are dealing with a first-class resource
-								return tt.reload(); 
+								return a.reload(); 
 							})
-							.then(function (tt) {
-								return TaskTypes.existingResource($ctrl.resource.model, tt);
+							.then(function (a) {
+								return Activities.existingResource($ctrl.resource.model, a);
 							});
 					},
 					phases: function () {
 						// Fix phase to the current one if available
-						return type.phase ? null : $ctrl.resource.model.getPhases({
-							projection: TaskTypes.Resource.prototype.defaultProjection
+						return activity.phase ? null : $ctrl.resource.model.getPhases({
+							projection: Activities.Resource.prototype.defaultProjection
 						})
 						.then(Pages.collectRemaining);
 					},
@@ -135,10 +135,10 @@ define([
 					}
 				}
 			}).result.then(function (result) {
-				$ctrl.resource.data.type = result;
+				$ctrl.resource.data.activity = result;
 				// Call outer change handler
-				$ctrl.taskDefinitionChanged({ $result: result });
-				return loadTaskTypes();
+				$ctrl.activityChanged({ $result: result });
+				return loadActivities();
 			});
 		}
 		
@@ -257,14 +257,14 @@ define([
 	}
 	
 	return {
-		templateUrl: 'js/singleModel/taskProperties.html',
+		templateUrl: 'js/singleModel/TaskProperties.html',
 		controller: TaskPropertiesController,
 		controllerAs: '$ctrl',
 		bindings: {
 			resource: '<',
 			done: '&',
 			cancelled: '&',
-			taskDefinitionChanged: '&'
+			activityChanged: '&'
 		}
 	};
 	

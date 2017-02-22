@@ -6,7 +6,7 @@ import it.unibz.precise.model.Location;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.PatternEntry;
 import it.unibz.precise.model.Task;
-import it.unibz.precise.model.TaskType;
+import it.unibz.precise.model.Activity;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 
 /**
- * Checks if the diagram has task definitions with overlapping locations.
+ * Checks if the diagram has activities with overlapping locations.
  * Two locations overlap if they are equal or one is contained in the other.
  * A location {@code l1} is contained in another location {@code l2} if the
  * {@link AttributeHierarchyNode node} of {@code l1} is a descendant of the node
@@ -50,18 +50,18 @@ public class OverlappingLocationsChecker implements ConsistencyChecker {
 	
 	@Override
 	public Stream<ConsistencyWarning> check(Model model) {
-		return model.getTaskTypes().stream()
-			.flatMap(this::checkType);		// Check all types individually
+		return model.getActivities().stream()
+			.flatMap(this::checkActivity);		// Check all activities individually
 	}
 	
 	/**
-	 * Check if {@code taskType} has overlapping locations by iterating
-	 * through all locations of all task boxes referring to {@code taskType}
+	 * Check if {@code activity} has overlapping locations by iterating
+	 * through all locations of all task boxes referring to {@code activity}
 	 * and marking the corresponding nodes in the CA hierarchy.
 	 */
-	public Stream<ConsistencyWarning> checkType(TaskType taskType) {
-		// Collect all locations for the task definitions, keeping a reference to the containing task box.
-		Collection<TaskLocation> taskLocations = taskType.getTasks().stream()
+	public Stream<ConsistencyWarning> checkActivity(Activity activity) {
+		// Collect all locations for the activity, keeping a reference to the containing task.
+		Collection<TaskLocation> taskLocations = activity.getTasks().stream()
 			.flatMap(this::taskLocations)
 			.collect(Collectors.toList());
 		
@@ -153,7 +153,7 @@ public class OverlappingLocationsChecker implements ConsistencyChecker {
 	/** Convert the given {@link TaskLocation}s in the given {@link Task} to a string. */
 	private String locationsInTask(Stream<Location> locations, Task task) {
 		return locations.map(Location::getNode)
-				.map(n -> AttributeHierarchyNode.toPattern(n, task.getType().getPhase().getAttributeHierarchyLevels()))
+				.map(n -> AttributeHierarchyNode.toPattern(n, task.getActivity().getPhase().getAttributeHierarchyLevels()))
 				.map(PatternEntry::toValueString)
 				.collect(Collectors.joining(", "))
 			+ " in task " + task.getShortIdentification();

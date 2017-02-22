@@ -1,8 +1,8 @@
 <div class="toolbar">
-	<button class="btn btn-default" ng-click="$ctrl.createTaskType()" ng-disabled="!$ctrl.phases">Create</button>
+	<button class="btn btn-default" ng-click="$ctrl.createActivity()" ng-disabled="!$ctrl.phases">Create</button>
 	<span class="text-danger">{{$ctrl.fileErrorMsg}}</span>
 </div>
-<table id="phase-table" class="table table-striped" st-table="$ctrl.coll" st-safe-src="$ctrl.taskTypes">
+<table id="phase-table" class="table table-striped" st-table="$ctrl.coll" st-safe-src="$ctrl.activities">
 	<thead>
 		<!-- Column headers with sort functionality -->
 		<tr>
@@ -25,22 +25,22 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr ng-repeat="tt in $ctrl.coll">
-			<td>{{tt.name}}</td>
-			<td>{{tt.shortName}}</td>
-			<td>{{tt.unitOfMeasure}}</td>
-			<td>{{tt.craft | withShortName}}</td>
-			<td>{{tt.phase.name}}</td>
-			<td>{{tt.taskCount}}</td>
+		<tr ng-repeat="a in $ctrl.coll">
+			<td>{{a.name}}</td>
+			<td>{{a.shortName}}</td>
+			<td>{{a.unitOfMeasure}}</td>
+			<td>{{a.craft | withShortName}}</td>
+			<td>{{a.phase.name}}</td>
+			<td>{{a.taskCount}}</td>
 			<td class="btn-column">
 				<button
 					class="btn btn-default"
-					ng-click="$ctrl.editTaskType(tt)">
+					ng-click="$ctrl.editActivity(a)">
 					Edit
 				</button>
 				<button
 					class="btn btn-default"
-					ng-click="$ctrl.deleteTaskType(tt)">
+					ng-click="$ctrl.deleteActivity(a)">
 					Delete
 				</button>
 			</td>

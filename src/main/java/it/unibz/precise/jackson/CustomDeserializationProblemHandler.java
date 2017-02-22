@@ -21,7 +21,7 @@ import it.unibz.precise.rest.mdl.ast.MDLOrderSpecificationAST;
 import it.unibz.precise.rest.mdl.ast.MDLPhaseAST;
 import it.unibz.precise.rest.mdl.ast.MDLScopeAST;
 import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
-import it.unibz.precise.rest.mdl.ast.MDLTaskTypeAST;
+import it.unibz.precise.rest.mdl.ast.MDLActivityAST;
 
 /**
  * Customized Jackson {@link DeserializationProblemHandler}.
@@ -58,7 +58,7 @@ public class CustomDeserializationProblemHandler extends DeserializationProblemH
 		mdlClassNames.put(MDLAttributeAST.class, "attribute");
 		mdlClassNames.put(MDLPhaseAST.class, "phase");
 		mdlClassNames.put(MDLCraftAST.class, "craft");
-		mdlClassNames.put(MDLTaskTypeAST.class, "task definition");
+		mdlClassNames.put(MDLActivityAST.class, "activity");
 		
 		mdlClassNames.put(MDLTaskAST.class, "task");
 		mdlClassNames.put(MDLDependencyAST.class, "dependency");

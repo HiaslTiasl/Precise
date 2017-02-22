@@ -111,14 +111,14 @@
 												</select>
 											</div>
 											<div class="form-group">		
-												<label for="search-def" class="control-label">Definition</label>
+												<label for="search-act" class="control-label">Activity</label>
 												<select
-													id="search-def"
+													id="search-act"
 													class="form-control"
-													ng-model="$ctrl.searchParams.type"
+													ng-model="$ctrl.searchParams.activity"
 													ng-change="$ctrl.searchQueryChanged()"
-													ng-options="t as t.name for t in $ctrl.taskTypes">
-													<option value="">-- Select a definition --</option>
+													ng-options="t as t.name for t in $ctrl.activities">
+													<option value="">-- Select an activity --</option>
 												</select>
 											</div>
 											<div class="form-group">		
@@ -129,7 +129,7 @@
 													ng-model="$ctrl.searchParams.craft"
 													ng-change="$ctrl.searchQueryChanged()"
 													ng-options="c as (c | withShortName) for c in $ctrl.crafts">
-													<option value="">-- Select a definition --</option>
+													<option value="">-- Select an activity --</option>
 												</select>
 											</div>
 										</div>

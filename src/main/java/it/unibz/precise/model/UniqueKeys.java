@@ -38,9 +38,9 @@ public class UniqueKeys {
 		map(mappings, Craft.UC_NAME, "name");
 		map(mappings, Craft.UC_SHORTNAME, "shortName");
 		
-		// TaskType
-		map(mappings, TaskType.UC_NAME, "name");
-		map(mappings, TaskType.UC_SHORTNAME, "shortName");
+		// Activity
+		map(mappings, Activity.UC_NAME, "name");
+		map(mappings, Activity.UC_SHORTNAME, "shortName");
 
 		// Dependency
 		map(mappings, Dependency.UC_SOURCE_TARGET, "source", "target");

@@ -11,13 +11,13 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelDiagramController.$inject = ['$scope', '$uibModal', 'errorHandler', 'PreciseApi', 'TaskTypes', 'Tasks', 'Dependencies', 'Phases'];
+	DiagramController.$inject = ['$scope', '$uibModal', 'errorHandler', 'PreciseApi', 'Activities', 'Tasks', 'Dependencies', 'Phases'];
 	
 	/**
 	 * Controller constructor.
 	 * @constructor
 	 */
-	function SingleModelDiagramController($scope, $uibModal, errorHandler, PreciseApi, TaskTypes, Tasks, Dependencies, Phases) {
+	function DiagramController($scope, $uibModal, errorHandler, PreciseApi, Activities, Tasks, Dependencies, Phases) {
 		
 		var $ctrl = this;
 		
@@ -25,7 +25,7 @@ define([
 
 		$ctrl.done = done;
 		$ctrl.cancelled = cancelled;
-		$ctrl.taskDefinitionChanged = taskDefinitionChanged;
+		$ctrl.activityChanged = activityChanged;
 		$ctrl.loadWarnings = loadWarnings;
 		
 		$ctrl.$onChanges = $onChanges;
@@ -43,7 +43,7 @@ define([
 			},
 			change: {
 				task: errorHandler,
-				taskDefinition: errorHandler,
+				activity: errorHandler,
 				dependency: errorHandler
 			},
 			add: {
@@ -90,7 +90,8 @@ define([
 		
 		/**
 		 * Creates a function that, given an error, returns a new error with
-		 * the original message and the given title*/
+		 * the original message and the given title
+		 */
 		function errorWithTitle(title) {
 			return function (error) {
 				return {
@@ -127,11 +128,11 @@ define([
 		}
 		
 		/**
-		 * A task definition was changed, so notify the diagram about change of all task
-		 * boxes using that definition.
+		 * An activity was changed, so notify the diagram about change of all task
+		 * boxes using that activity.
 		 */
-		function taskDefinitionChanged(data) {
-			TaskTypes
+		function activityChanged(data) {
+			Activities
 				.existingResource($ctrl.model, data)
 				.then(function (resource) {
 					return resource.getTasks({
@@ -142,7 +143,7 @@ define([
 					tasks.forEach(function (t) {
 						$scope.$broadcast('properties:change', 'task', t);
 					});
-				}, errorHandlers.change.taskDefinition.handle);
+				}, errorHandlers.change.activity.handle);
 		}
 		
 		/** Deletion of a cell on the server was requested, so do it and notify diagram. */
@@ -174,7 +175,7 @@ define([
 		/** Opens a dialog for creating a new task with the given initial data. */
 		function openNewTaskDialog(data) {
 			return $uibModal.open({
-				component: 'preciseCreateTask',
+				component: 'DiagramTaskDialog',
 				resolve: {
 					resource: _.constant(Tasks.newResource($ctrl.model, data)),
 					phases: function () {
@@ -261,8 +262,8 @@ define([
 	}
 	
 	return {
-		templateUrl: 'js/singleModel/singleModel-diagram.html',
-		controller: SingleModelDiagramController,
+		templateUrl: 'js/singleModel/Diagram.html',
+		controller: DiagramController,
 		controllerAs: '$ctrl',
 		bindings: {
 			model: '<',

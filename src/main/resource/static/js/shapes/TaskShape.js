@@ -19,7 +19,7 @@ define([
 ) {
 	'use strict';
 	
-	var MODEL_CLASSPATH = 'precise.TaskShape',	// Path of the class under joint.shapes unless and type attribute, so JointJS can find the class
+	var MODEL_CLASSPATH = 'precise.TaskShape',			// Path of the class under joint.shapes unless and type attribute, so JointJS can find the class
 		VIEW_CLASSPATH = MODEL_CLASSPATH + 'View';		// As expected by JointJS to find the view implementation of a model class
 	
 	// Base dimension settings
@@ -31,9 +31,9 @@ define([
 	var WIDTH             = COLS * COL_WIDTH,						// Total task width
 		HEADER_ROW_HEIGHT = ROW_HEIGHT,								// Height of header row (i.e. ID, crew params, duration, craft)
 		HEADER_COL_WIDTH  = 2 * COL_WIDTH,							// Width of columns in header row
-		NAME_POS_Y        = HEADER_ROW_HEIGHT,						// Y-coordinate of top of name field
-		NAME_HEIGHT       = 2.5 * ROW_HEIGHT,						// Height of name field
-		CONSTR_ROW_POS_Y  = NAME_POS_Y + NAME_HEIGHT,				// Y-coordinate of top of constraints row (i.e. ordering and exclusiveness)
+		ACTVITY_POS_Y     = HEADER_ROW_HEIGHT,						// Y-coordinate of top of activity field
+		ACTVITY_HEIGHT    = 2.5 * ROW_HEIGHT,						// Height of activity field
+		CONSTR_ROW_POS_Y  = ACTVITY_POS_Y + ACTVITY_HEIGHT,			// Y-coordinate of top of constraints row (i.e. ordering and exclusiveness)
 		CONSTR_ROW_HEIGHT = ROW_HEIGHT,								// Height of constraints row
 		CONSTR_COL_WIDTH  = 4 * COL_WIDTH,							// Width of columns in constraints row
 		LOC_POS_Y         = CONSTR_ROW_POS_Y + CONSTR_ROW_HEIGHT,	// Y-coordinate of top of locations table
@@ -55,8 +55,8 @@ define([
 		'task-duration',		// duration field
 		'task-order',			// ordering field
 		'task-exclusiveness',	// exclusiveness field
-		'task-type-craft',		// craf field
-		'task-type-name'		// name field
+		'task-craft',			// craft field
+		'task-activity'			// activity field
 	];
 	
 	// Classes that display numbers from 1 to 4 above columns in the header row for being
@@ -102,14 +102,14 @@ define([
 					'follow-scale': true
 				},
 				// Header row fields
-				'rect.task-id, rect.task-crew, rect.task-duration, rect.task-type-craft': {
+				'rect.task-id, rect.task-crew, rect.task-duration, rect.task-craft': {
 					width: HEADER_COL_WIDTH,
 					height: HEADER_ROW_HEIGHT
 				},
 				'rect.task-id':            { x: 0 * HEADER_COL_WIDTH },
 				'rect.task-crew':          { x: 1 * HEADER_COL_WIDTH },
 				'rect.task-duration':      { x: 2 * HEADER_COL_WIDTH },
-				'rect.task-type-craft':    { x: 3 * HEADER_COL_WIDTH },
+				'rect.task-craft':    { x: 3 * HEADER_COL_WIDTH },
 				// Constraints fields
 				'rect.task-order, rect.task-exclusiveness': {
 					y: CONSTR_ROW_POS_Y,
@@ -118,8 +118,8 @@ define([
 				},
 				'rect.task-order':         { x: 0 * CONSTR_COL_WIDTH },
 				'rect.task-exclusiveness': { x: 1 * CONSTR_COL_WIDTH },
-				// Name and locations
-				'rect.task-type-name':     { y: HEADER_ROW_HEIGHT, height: NAME_HEIGHT },
+				// activity and locations
+				'rect.task-activity':      { y: HEADER_ROW_HEIGHT, height: ACTVITY_HEIGHT },
 				'rect.task-locations':     { y: LOC_POS_Y,  height: 0, display: 'none' },
 				'rect.loc-entry': {
 					width: LOC_COL_WIDTH,
@@ -163,7 +163,7 @@ define([
 		 * the given data. If the attributes are not available (i.e. if there is no
 		 * phase), both the count and the height are set to zero. */
 		updateAttrCount: function (data) {
-			this.attrCount = _.size(_.get(data, ['type', 'phase', 'attributes']));
+			this.attrCount = _.size(_.get(data, ['activity', 'phase', 'attributes']));
 			this.locationsHeight = this.attrCount * LOC_ROW_HEIGHT;
 		},
 		
@@ -174,20 +174,20 @@ define([
 				display: hideLocations ? 'none' : 'inline'
 			});
 			// Update the name field to use the gained space
-			model.updateName();
+			model.updateActivity();
 		},
 		
-		/** The data or the available space changed, so update the name field. */
-		updateName: function () {
+		/** The data or the available space changed, so update the activity field. */
+		updateActivity: function () {
 			var hideLocations = this.get('hideLocations'),
-				nameHeight = hideLocations ? this.locationsHeight + CONSTR_ROW_HEIGHT + NAME_HEIGHT : NAME_HEIGHT,
+				nameHeight = hideLocations ? this.locationsHeight + CONSTR_ROW_HEIGHT + ACTVITY_HEIGHT : ACTVITY_HEIGHT,
 				fontSize = hideLocations ? '150%' : '100%',		// Increase font size if more space is available due to hidden locations
 				nameStyle = { 'font-size': fontSize },
-				type = this.get('data').type,
-				nameText = type.shortName + ' - ' + type.name;
+				activity = this.get('data').activity,
+				nameText = activity.shortName + ' - ' + activity.name;
 			this.attr({
-				'rect.task-type-name': { height: nameHeight },
-				'text.task-type-name': {
+				'rect.task-activity': { height: nameHeight },
+				'text.task-activity': {
 					style: nameStyle,
 					// break the text into multiple lines if necessary
 					text: joint.util.breakText(nameText, {
@@ -204,19 +204,19 @@ define([
 		update: function () {
 			var data = this.get('data');
 			this.updateAttrCount(data);
-			var type = data.type,
-				phase = type.phase,
+			var activity = data.activity,
+				phase = activity.phase,
 				attributes = phase && phase.attributes,
 				exclusiveness = data.exclusiveness,
 				orderSpecifications = data.orderSpecifications,
-				exclusive = exclusiveness.type !== 'UNIT',	// UNIT is default, but a type should always be available
+				exclusive = exclusiveness.activity !== 'UNIT',	// UNIT is default, but an activity should always be available
 				locationPatterns = data.locationPatterns,
 				width = WIDTH,
 				height = LOC_POS_Y + this.locationsHeight,	// Total task height depends on location table (i.e. on the number of attributes)
 				pitch = data.pitch,
 				crew = isNaN(pitch.crewSize) || isNaN(pitch.crewCount) ? '' : pitch.crewCount + '\u00d7' + pitch.crewSize,	// count times size
 				duration = isNaN(pitch.durationDays) ? '' : pitch.durationDays + 'd',
-				craft = _.get(data, ['type', 'craft', 'shortName'], '');
+				craft = _.get(activity, ['craft', 'shortName'], '');
 
 			if (exclusive) {
 				width += 10;
@@ -229,12 +229,12 @@ define([
 					height: height,
 					transform: exclusive ? 'translate(-5,-5)' : ''
 				},
-				'rect.task-type-name':     { fill: phase ? colors.toCSS(phase.color) : '#fff' },
+				'rect.task-activity':      { fill: phase ? colors.toCSS(phase.color) : '#fff' },
 				'rect.task-locations':     { height: this.locationsHeight, display: this.locationsHeight > 0 ? 'inline' : 'none' },
 				'text.task-id':            { text: '#' + data.id },
 				'text.task-crew':          { text: crew },
 				'text.task-duration':      { text: duration },
-				'text.task-type-craft':    { text: craft },
+				'text.task-craft':      { text: craft },
 				'text.task-exclusiveness': {
 					text: 'ex: (' + _.chain(exclusiveness).get('attributes').map('shortName').join(',').value() + ')'
 				},
@@ -284,7 +284,7 @@ define([
 			}
 			// N.B. Attributes must be set before size, otherwise the two mismatch
 			this.attr(attrs);
-			this.updateName();
+			this.updateActivity();
 			this.set({
 				'position': data.position,
 				'size': { width: width, height: height }
@@ -295,7 +295,7 @@ define([
 		// Static properties
 		WIDTH: WIDTH,
 		NAME_POS_Y: HEADER_ROW_HEIGHT,
-		NAME_HEIGHT: NAME_HEIGHT,
+		NAME_HEIGHT: ACTVITY_HEIGHT,
 		LOC_POS_Y: LOC_POS_Y,
 		DEFAULT_HEIGHT: DEFAULT_HEIGHT		
 	}));
@@ -422,7 +422,7 @@ define([
 		 */
 		renderLocations: function () {
 			var data = this.model.get('data'),
-				attributes = _.get(data, ['type', 'phase', 'attributes']),
+				attributes = _.get(data, ['activity', 'phase', 'attributes']),
 				locationPatterns = data.locationPatterns,
 				actualLocationCount = locationPatterns ? locationPatterns.length : 0,					// Number of locations in data
 				truncateLocations = actualLocationCount > MAX_LOC_COL_COUNT,							// Must truncate some locations?

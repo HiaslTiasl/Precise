@@ -18,6 +18,7 @@ public class MDLCraftAST implements ShortNameProvider {
 
 	private String name;
 	private String shortName;
+	private String description;
 	
 	public String getName() {
 		return name;
@@ -33,6 +34,14 @@ public class MDLCraftAST implements ShortNameProvider {
 	
 	public void setShortName(String shortName) {
 		this.shortName = shortName;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	
 }

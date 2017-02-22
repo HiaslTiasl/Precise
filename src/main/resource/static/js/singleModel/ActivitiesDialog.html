@@ -1,27 +1,27 @@
 <div class="modal-header">
 	<h3 class="modal-title">
-		{{::$ctrl.resource.exists ? 'Edit Task Definition ' + $ctrl.resource.data.name : 'New Task Definition'}}
+		{{::$ctrl.resource.exists ? 'Edit Activity ' + $ctrl.resource.data.name : 'New Activity'}}
 	</h3>
 </div>
 <div class="modal-body">
-	<form id="task-type-form" class="form">
+	<form id="activity-form" class="form">
 		<div class="form-group mandatory">
-			<label for="taskType-name">Name</label>
+			<label for="activity-name">Name</label>
 			<input id="model-name" type="text" class="form-control" ng-model="$ctrl.resource.data.name"/>
 		</div>
 		<div class="form-group mandatory">
-			<label for="taskType-short-name">Short Name</label>
+			<label for="activity-short-name">Short Name</label>
 			<input id="model-short-name" type="text" class="form-control" ng-model="$ctrl.resource.data.shortName"/>
 		</div>
 		<div class="form-group">
-			<label for="taskType-descr">Description</label>
-			<textarea id="taskType-descr" class="form-control" ng-model="$ctrl.resource.data.description" rows="10">
+			<label for="activity-descr">Description</label>
+			<textarea id="activity-descr" class="form-control" ng-model="$ctrl.resource.data.description" rows="10">
 			</textarea>
 		</div>
 		<div class="form-group">
-			<label for="taskType-phase">Phase</label>
+			<label for="activity-phase">Phase</label>
 			<select
-				id="taskType-phase"
+				id="activity-phase"
 				class="form-control"
 				ng-model="$ctrl.resource.data.phase"
 				ng-options="p as p.name for p in $ctrl.phases track by p.name"
@@ -38,8 +38,8 @@
 			<input id="unit-of-measure" type="text" class="form-control" ng-model="$ctrl.resource.data.unitOfMeasure"/>
 		</div>
 		<div class="form-group">
-			<label for="taskType-craft">Craft</label>
-			<select id="taskType-craft"
+			<label for="activity-craft">Craft</label>
+			<select id="activity-craft"
 				class="form-control"
 				ng-model="$ctrl.resource.data.craft"
 				ng-options="c as (c | withShortName) for c in $ctrl.crafts track by c.name">
@@ -49,6 +49,6 @@
 	</form>
 </div>
 <div class="modal-footer">
-	<button class="btn btn-primary" type="submit" form="task-type-form" ng-click="$ctrl.send()">OK</button>
-	<button class="btn btn-cancel" type="button" form="task-type-form" ng-click="$ctrl.cancel()">Cancel</button>
+	<button class="btn btn-primary" type="submit" form="activity-form" ng-click="$ctrl.send()">OK</button>
+	<button class="btn btn-cancel" type="button" form="activity-form" ng-click="$ctrl.cancel()">Cancel</button>
 </div>

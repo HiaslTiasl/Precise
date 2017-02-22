@@ -60,7 +60,7 @@ public class Model extends BaseEntity {
 
 	@OneToMany(mappedBy="model", cascade=CascadeType.ALL, orphanRemoval=true)
 	@Valid
-	private List<TaskType> taskTypes = new ArrayList<>();
+	private List<Activity> activities = new ArrayList<>();
 	
 	// Flow (Diagram)
 	//---------------------------------------------------
@@ -96,7 +96,7 @@ public class Model extends BaseEntity {
 	
 	/** Indicates whether the configuration part is empty. */
 	private boolean isConfigEmpty() {
-		return phases.isEmpty() && attributes.isEmpty() && taskTypes.isEmpty();
+		return phases.isEmpty() && attributes.isEmpty() && activities.isEmpty();
 	}
 	
 	/** Returns a {@link State} describing the current configuration and diagram parts. */
@@ -158,20 +158,20 @@ public class Model extends BaseEntity {
 		this.crafts = crafts;
 	}
 
-	public List<TaskType> getTaskTypes() {
-		return taskTypes;
+	public List<Activity> getActivities() {
+		return activities;
 	}
 
-	public void setTaskTypes(List<TaskType> taskTypes) {
-		ModelToMany.TYPES.setMany(this, taskTypes);
+	public void setActivities(List<Activity> activity) {
+		ModelToMany.Activities.setMany(this, activity);
 	}
 	
-	void internalSetTaskTypes(List<TaskType> taskTypes) {
-		this.taskTypes = taskTypes;
+	void internalSetActivities(List<Activity> activity) {
+		this.activities = activity;
 	}
 	
-	public void addTaskType(TaskType taskType) {
-		ModelToMany.TYPES.addOneOfMany(this, taskType);
+	public void addActivity(Activity activity) {
+		ModelToMany.Activities.addOneOfMany(this, activity);
 	}
 	
 	public List<Task> getTasks() {

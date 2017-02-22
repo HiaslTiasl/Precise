@@ -9,13 +9,13 @@ define([
 ) {
 	'use strict';
 	
-	SingleModelCraftsController.$inject = ['$uibModal', 'errorHandler', 'PreciseApi', 'Pages', 'Crafts'];
+	CraftsController.$inject = ['$uibModal', 'errorHandler', 'PreciseApi', 'Pages', 'Crafts'];
 	
 	/**
 	 * Controller constructor.
 	 * @controller
 	 */
-	function SingleModelCraftsController($uibModal, errorHandler, PreciseApi, Pages, Crafts) {
+	function CraftsController($uibModal, errorHandler, PreciseApi, Pages, Crafts) {
 		var $ctrl = this;
 		
 		$ctrl.createCraft = createCraft;
@@ -27,7 +27,7 @@ define([
 		/** Specialized error handler for conflicts on deletion. */
 		var deleteErrorHandler = errorHandler.wrapIf(PreciseApi.isHttpConflict, {
 			title: 'Cannot delete craft',
-			message: 'There are task definitions referencing this craft'
+			message: 'There are activities referencing this craft'
 		});
 		
 		function $onChanges(changes) {
@@ -50,7 +50,7 @@ define([
 		/** Opens the given craft resource in a modal dialog. */
 		function openModal(resource) {
 			$uibModal.open({
-				component: 'preciseCreateCraft',
+				component: 'CraftsDialog',
 				resolve: { resource: resource }
 			}).result.then(loadCrafts);
 		}
@@ -82,8 +82,8 @@ define([
 	}
 	
 	return {
-		templateUrl: 'js/singleModel/singleModel-crafts.html',
-		controller: SingleModelCraftsController,
+		templateUrl: 'js/singleModel/Crafts.html',
+		controller: CraftsController,
 		controllerAs: '$ctrl',
 		bindings: {
 			model: '<',

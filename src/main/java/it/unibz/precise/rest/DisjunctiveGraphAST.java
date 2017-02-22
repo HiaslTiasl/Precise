@@ -37,7 +37,7 @@ public class DisjunctiveGraphAST {
 	
 	
 	private String serializeNode(TaskUnitNode node) {
-		return node.getTaskType().getShortName() + ":" + PatternEntry.toValueString(node.getUnit().getPattern());
+		return node.getActivity().getShortName() + ":" + PatternEntry.toValueString(node.getUnit().getPattern());
 	}
 	
 	private Set<String> serializeNodes(Collection<TaskUnitNode> nodes) {
