@@ -14,7 +14,7 @@ public class FileControllers {
 	
 	/** Returns the "Content-Disposition" HTTP Header value for the given filename. */
 	public static String getContentDisposition(String filename, String ext) {
-		return "attachment; filename=\"" + filename + "\"";
+		return "attachment; filename=\"" + filename + ext + "\"";
 	}
 
 }
