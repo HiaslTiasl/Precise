@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +44,8 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 	public static final String WARNING_MESSAGE_CYCLE = "There is a cycle at the task-unit-level";
 	public static final String WARNING_MESSAGE_DEADLOCK = "There is a deadlock at the task-unit-level.";
 	
+	private final Log logger = LogFactory.getLog(SemanticConsistencyChecker.class);
+	
 	@Autowired
 	private ModelToGraphTranslator translator;
 	
@@ -60,11 +64,26 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 
 	@Override
 	public Stream<ConsistencyWarning> check(Model model) {
+		long t0 = System.nanoTime();
+		
 		Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask = translator.nodesByLocationByTask(model.getTasks());
 		Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode = taskLocationByNode(nodesByLocationByTask);
 		DisjunctiveGraph<TaskUnitNode> graph = translator.translate(nodesByLocationByTask, true);
-
-		return orientationFinderFactory.search(graph).failureReasons()
+		
+		long t1 = System.nanoTime();
+		
+		OrientationResult<TaskUnitNode> res = orientationFinderFactory.search(graph);
+		
+		long t2 = System.nanoTime();
+		
+		long translationTime = (t1 - t0) / 1000000;
+		long algorithmTime = (t2 - t1) / 1000000;
+		long totalTime = translationTime + algorithmTime;
+		
+        if (logger.isInfoEnabled())
+        	logger.info("Checks completed in " + totalTime + " ms (Graph construction: " + translationTime + " ms; Algorithm: " + algorithmTime + " ms)");
+		
+		return res.failureReasons()
 			.flatMap(result -> warnings(result, taskLocationByNode));
 		
 	}
