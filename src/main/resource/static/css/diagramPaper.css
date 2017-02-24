@@ -1,9 +1,3 @@
-precise-diagram-paper > .panels {
-	position: relative;
-	width: 100%;
-	height: 100%;
-}
-
 precise-diagram-paper .toolbar {
 	position: absolute;
 	top: 0;
@@ -75,8 +69,9 @@ precise-diagram-paper .other-tools .divider::after {
 precise-diagram-paper .joint-paper {
 	position: absolute;
 	top: 3em;
+	right: 0;
 	bottom: 0;
-	width: 100%;
+	left: 0;
 	border: thin solid #aaa;
 	background-color: white;
 	box-shadow: 1px 1px 4px 1px #888;

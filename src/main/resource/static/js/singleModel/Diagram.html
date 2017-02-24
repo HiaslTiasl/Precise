@@ -8,8 +8,7 @@
 		on-structure-changed="$ctrl.reload()"		
 		on-diagram-changed="$ctrl.loadWarnings()">
 	</precise-diagram-paper>
-	<div id="properties-wrapper" ng-switch on="$ctrl.resourceType">
-		<header>Properties</header>
+	<div id="properties-wrapper" ng-show="$ctrl.resource" ng-switch on="$ctrl.resourceType">
 		<task-properties
 			class="properties"
 			ng-switch-when="task"

@@ -23,55 +23,60 @@ precise-diagram > .panels {
 precise-diagram-paper {
 	position: absolute;
 	top: 0;
-	right: 400px;
+	right: 0;
 	bottom: 0;
 	left: 0;
-}
-
-#properties-wrapper {
-	position: absolute;
-	right: 0;
-	top: 0;
-	width: 390px;
-	margin-left: 10px;
-	min-width: 200px;
-	vertical-align: top;
-}
-
-#properties-wrapper > header {
-	height: 40px;
-	font-size: 20px;
+	/* right: 400px; */
 }
 
 .properties {
-	position: absolute;
-	top: 45px;		/* Header + gap */
+	position: fixed;
+	top: 0;
 	right: 0;
 	bottom: 0;
-	left: 0;
+	width: 390px;
+	/* margin-left: 10px; */
+	min-width: 200px;
+	max-width: 50%;
+	vertical-align: top;
+	background-color: #fff;
+	z-index: 999;
+	box-shadow: 1px 1px 4px 1px #444;
+}
+
+.properties > header,
+.properties > article,
+.properties > footer {
 	padding: 5px;
 }
 
+.properties > header {
+	height: 50px;
+	background-color: #000;
+	color: #fff;
+	font-size: 20px;
+	box-shadow: 0px 1px 4px 0px #444;
+}
+
 /** Allow vertical scrolling in properties. */
-.properties .scroll-pane {
+.properties > article {
 	position: absolute;
-	top: 0;
+	top: 55px;		/* Header + gap */
 	right: 0;
-	bottom: 3em;
+	bottom: 3.5em;
 	left: 0;
 	overflow-x: hidden;
 	overflow-y: scroll;
-	border-width: 1px 0 1px 0;
-	border-style: solid;
-	border-color: #eee;
 }
 
 /** Fix footer to the bottom. */
-.properties footer {
+.properties > footer {
 	position: absolute;
 	bottom: 0;
 	left: 0;
 	right: 0;
+	height: 3.5em;
+	border-top: 1px solid #eee;
 }
 
 /** Reduce vertical gaps. */
@@ -101,6 +106,10 @@ precise-diagram-paper {
 #id {
 	background-color: black;
 	color: white;
+}
+
+#id::before {
+	content: "#";
 }
 
 #crew-size,

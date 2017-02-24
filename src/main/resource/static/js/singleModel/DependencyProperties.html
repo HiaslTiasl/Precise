@@ -1,69 +1,65 @@
-<div class="form-horizontal">
-	<div class="form-group">
-		<label for="source" class="col-sm-4 control-label">Source</label>
-		<div class="col-sm-8">
-			<p id="source" class="form-control-static">{{$ctrl.resource.data.source.id}}</p>
-		</div>
-	</div>
-	<div class="form-group">
-		<label for="target" class="col-sm-4 control-label">Target</label>
-		<div class="col-sm-8">
-			<p id="target" class="form-control-static">{{$ctrl.resource.data.target.id}}</p>
-		</div>
-	</div>
-	<div class="form-group">
-		<label for="kind" class="col-sm-4 control-label">Kind</label>
-		<div id="kind" class="col-sm-8">
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" ng-model="$ctrl.resource.data.alternate"> Alternate
-				</label>
-			</div>
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" ng-model="$ctrl.resource.data.chain"> Chain
-				</label>
-			</div>
-		</div>
-	</div>
-	<fieldset ng-if="$ctrl.resource.data.attributes.length">
-		<legend ng-click="$ctrl.toggleCollapsed('scope')">
-			<span class="glyphicon glyphicon-chevron-{{$ctrl.collapsed.scope ? 'right' : 'down'}}"></span>
-			Scope
-		</legend>
-		<div uib-collapse="$ctrl.collapsed.pitches">
-			<div class="form-group">
-				<label for="scope-type" class="col-sm-4 control-label">Type</label>
-				<div id="scope-type" class="col-sm-8">
-					<div class="radio" ng-repeat="st in $ctrl.scopeTypes">
-						<label>
-							<input
-							type="radio"
-							ng-model="$ctrl.scope.type"
-							ng-value="st"
-							ng-change="$ctrl.updateScopeAttributes()"
-							ng-disabled="$ctrl.isDisabledScopeType(st)"/>
-							{{st.displayName}}
-						</label>
-					</div>
+<header>
+	Dependency
+	#{{$ctrl.resource.data.source.id}}
+	&#8594;
+	#{{$ctrl.resource.data.target.id}}
+</header>
+<article>
+	<div class="form-horizontal">
+		<div class="form-group">
+			<label for="kind" class="col-sm-4 control-label">Kind</label>
+			<div id="kind" class="col-sm-8">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" ng-model="$ctrl.resource.data.alternate"> Alternate
+					</label>
 				</div>
-			</div>
-			<div class="form-group">
-				<label for="exclusiveness-attributes" class="col-sm-4 control-label">Attributes</label>
-				<div class="col-sm-8">
-					<div class="checkbox" ng-repeat="attr in $ctrl.resource.data.attributes">
-						<label>
-							<input type="checkbox"
-								ng-model="$ctrl.scope.attributes[attr.name]"
-								ng-change="$ctrl.updateScopeType()">
-								{{attr | withShortName}}
-						</label>
-					</div>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" ng-model="$ctrl.resource.data.chain"> Chain
+					</label>
 				</div>
 			</div>
 		</div>
-	</fieldset>
-</div>
+		<fieldset ng-if="$ctrl.resource.data.attributes.length">
+			<legend ng-click="$ctrl.toggleCollapsed('scope')">
+				<span class="glyphicon glyphicon-chevron-{{$ctrl.collapsed.scope ? 'right' : 'down'}}"></span>
+				Scope
+			</legend>
+			<div uib-collapse="$ctrl.collapsed.scope">
+				<div class="form-group">
+					<label for="scope-type" class="col-sm-4 control-label">Type</label>
+					<div id="scope-type" class="col-sm-8">
+						<div class="radio" ng-repeat="st in $ctrl.scopeTypes">
+							<label>
+								<input
+								type="radio"
+								ng-model="$ctrl.scope.type"
+								ng-value="st"
+								ng-change="$ctrl.updateScopeAttributes()"
+								ng-disabled="$ctrl.isDisabledScopeType(st)"/>
+								{{st.displayName}}
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="exclusiveness-attributes" class="col-sm-4 control-label">Attributes</label>
+					<div class="col-sm-8">
+						<div class="checkbox" ng-repeat="attr in $ctrl.resource.data.attributes">
+							<label>
+								<input type="checkbox"
+									ng-model="$ctrl.scope.attributes[attr.name]"
+									ng-change="$ctrl.updateScopeType()">
+									{{attr | withShortName}}
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</fieldset>
+	</div>
+</article>
 <footer>
 	<div class="text-right">
 		<button class="btn btn-primary" ng-click="$ctrl.sendDependency()">Done</button>
