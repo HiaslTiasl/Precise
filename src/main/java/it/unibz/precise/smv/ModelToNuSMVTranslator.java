@@ -20,10 +20,16 @@ public class ModelToNuSMVTranslator {
 	@Autowired
 	private ModelToGraphTranslator translator;
 	
-	/** Returns the file content of a NuSMV module of the given model. */
-	public String translate(Model model) {
+	/** Returns the file content of a NuSMV module of the given {@link Model}. */
+	public String translate(Model model, boolean ignoreSimpleEdges) {
 		// Translate the model into a graph, and the graph into NuSMV
-		DisjunctiveGraph<TaskUnitNode> disjunctiveGraph = translator.translate(model);
+		DisjunctiveGraph<TaskUnitNode> disjunctiveGraph = translator.translate(model.getTasks(), ignoreSimpleEdges);
+		NuSMVContext context = new NuSMVContext(disjunctiveGraph);
+		return context.toNuSMV();
+	}
+	
+	/** Returns the file content of a NuSMV module of the given {@link DisjunctiveGraph}. */
+	public String translate(DisjunctiveGraph<TaskUnitNode> disjunctiveGraph) {
 		NuSMVContext context = new NuSMVContext(disjunctiveGraph);
 		return context.toNuSMV();
 	}

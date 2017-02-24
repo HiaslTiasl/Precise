@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.unibz.precise.model.Model;
@@ -41,13 +42,16 @@ public class NuSMVController {
 		method=RequestMethod.GET,
 		produces="text/smv"
 	)
-	public ResponseEntity<?> getAsSMV(@PathVariable("name") String name) {
+	public ResponseEntity<?> getAsSMV(
+		@PathVariable("name") String name,
+		@RequestParam(name="ignoreSimple", defaultValue="false") boolean ignoreSimple
+	) {
 		Model model = repository.findByName(name);
 		return model == null
 			? ResponseEntity.notFound().build()
 			: ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, FileControllers.getContentDisposition(name, FILE_EXT))
-				.body(translator.translate(model));
+				.body(translator.translate(model, ignoreSimple));
 	}
 
 }
