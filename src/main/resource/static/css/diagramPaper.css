@@ -15,12 +15,6 @@ precise-diagram-paper .toolset-chooser [uib-dropdown-toggle] {
 	padding-top: 17px;
 }
 
-precise-diagram-paper .toolset-chooser [uib-dropdown-toggle],
-precise-diagram-paper .toolset-chooser [uib-dropdown-toggle]:hover,
-precise-diagram-paper .toolset-chooser [uib-dropdown-toggle]:focus {
-	z-index: 200;	
-}
-
 precise-diagram-paper .toolset {
 	display: inline-block;
 }
@@ -42,8 +36,20 @@ precise-diagram-paper .other-tools {
 	float: right;
 }
 
+precise-diagram-paper .other-tools > *{
+	vertical-align: middle;
+}
+
+precise-diagram-paper .other-tools .input-group {
+	display: inline-table;
+}
+
 precise-diagram-paper .other-tools .input-group > input.zoom-scale {
 	width: 6em;
+}
+
+precise-diagram-paper .other-tools .input-group > .input-group-addon {
+	width: auto;
 }
 
 precise-diagram-paper .has-feedback .form-control-feedback {

@@ -9,13 +9,28 @@ html {
 }
 
 .navbar-fixed-top {
-	height: 50px;
+	min-height: 50px;	/* Allow it to expand when menu is opened on mobiles */
 	margin-bottom: 0;
 	z-index: 100;
 }
 
 .navbar-fixed-top + .content {
 	margin-top: 50px;
+}
+
+.navbar-divider {
+	float: left;
+	margin-top: 15px;
+	margin-bottom: 15px;
+	color: #777;
+}
+
+.navbar-divider::after {
+	content: "|";
+}
+
+.dropdown > a {
+	cursor: pointer;
 }
 
 figure {

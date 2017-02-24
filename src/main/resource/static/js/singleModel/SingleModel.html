@@ -16,19 +16,17 @@
 			<a class="navbar-brand" ui-sref="allModels">
 				Process Modelling
 			</a>
-			<p class="navbar-text">|</p>
-			<p class="navbar-text">{{::$ctrl.model.data.name}}</p>
-			<p class="navbar-text">|</p>
+<!-- 			<span class="navbar-divider"></span>
+			<span class="navbar-divider"></span> -->
 		</div>
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<div class="collapse navbar-collapse" uib-collapse="!$ctrl.menuOpen">
+			<p class="navbar-text">{{::$ctrl.model.data.name}}</p>
 			<ul class="nav navbar-nav">
-				<li>
-					<div class="btn-group navbar-btn" uib-dropdown>
-						<button class="btn btn-default">
-							{{$ctrl.$state.$current.data.title}}
-						</button>
-						<button class="btn btn-default" uib-dropdown-toggle><span class="caret"></span></button>
+				<li uib-dropdown>
+						<a uib-dropdown-toggle>
+							{{$ctrl.$state.$current.data.title}} <span class="caret"></span>
+						</a>
 						<ul class="dropdown-menu" uib-dropdown-menu>
 							<li ng-class="{active: $ctrl.$state.is('singleModel.config')}">
 								<a ui-sref="singleModel.config({name: $ctrl.model.data.name})">
@@ -41,7 +39,6 @@
 								</a>
 							</li>
 						</ul>
-				   </div>
 				</li>
 			</ul>
 		</div>
