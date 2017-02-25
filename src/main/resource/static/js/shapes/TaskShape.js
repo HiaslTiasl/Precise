@@ -28,19 +28,19 @@ define([
 		COLS       = 8;		// Maximum number of columns of minimal width,
 	
 	// Derived dimensions
-	var WIDTH             = COLS * COL_WIDTH,						// Total task width
-		HEADER_ROW_HEIGHT = ROW_HEIGHT,								// Height of header row (i.e. ID, crew params, duration, craft)
-		HEADER_COL_WIDTH  = 2 * COL_WIDTH,							// Width of columns in header row
-		ACTVITY_POS_Y     = HEADER_ROW_HEIGHT,						// Y-coordinate of top of activity field
-		ACTVITY_HEIGHT    = 2.5 * ROW_HEIGHT,						// Height of activity field
-		CONSTR_ROW_POS_Y  = ACTVITY_POS_Y + ACTVITY_HEIGHT,			// Y-coordinate of top of constraints row (i.e. ordering and exclusiveness)
-		CONSTR_ROW_HEIGHT = ROW_HEIGHT,								// Height of constraints row
-		CONSTR_COL_WIDTH  = 4 * COL_WIDTH,							// Width of columns in constraints row
-		LOC_POS_Y         = CONSTR_ROW_POS_Y + CONSTR_ROW_HEIGHT,	// Y-coordinate of top of locations table
-		LOC_ROW_HEIGHT    = ROW_HEIGHT,								// Height of rows in location table
-		LOC_COL_WIDTH     = COL_WIDTH,								// Width of columns in location table
-		MAX_LOC_COL_COUNT = COLS,									// Maximum visible columns in location table
-		DEFAULT_HEIGHT    = LOC_POS_Y;								// Default total task height if height of location is not known yet
+	var WIDTH                = COLS * COL_WIDTH,						// Total task width
+		HEADER_ROW_HEIGHT    = ROW_HEIGHT,								// Height of header row (i.e. ID, crew params, duration, craft)
+		HEADER_COL_WIDTH     = 2 * COL_WIDTH,							// Width of columns in header row
+		ACTVITY_POS_Y        = HEADER_ROW_HEIGHT,						// Y-coordinate of top of activity field
+		ACTVITY_HEIGHT       = 2.5 * ROW_HEIGHT,						// Height of activity field
+		CONSTR_ROW_POS_Y     = ACTVITY_POS_Y + ACTVITY_HEIGHT,			// Y-coordinate of top of constraints row (i.e. ordering and exclusiveness)
+		CONSTR_ROW_HEIGHT    = ROW_HEIGHT,								// Height of constraints row
+		CONSTR_COL_WIDTH     = 4 * COL_WIDTH,							// Total width of fields in constraint row (symbol + value) 
+		LOC_POS_Y            = CONSTR_ROW_POS_Y + CONSTR_ROW_HEIGHT,	// Y-coordinate of top of locations table
+		LOC_ROW_HEIGHT       = ROW_HEIGHT,								// Height of rows in location table
+		LOC_COL_WIDTH        = COL_WIDTH,								// Width of columns in location table
+		MAX_LOC_COL_COUNT    = COLS,									// Maximum visible columns in location table
+		DEFAULT_HEIGHT       = LOC_POS_Y;								// Default total task height if height of location is not known yet
 	
 	// Minimum space between name and border
 	var NAME_PADDING = {
@@ -50,13 +50,11 @@ define([
 	
 	// CSS classes for shapes that have both a <rect> and a <text> element
 	var sharedClasses = [
-		'task-id',				// ID field
-		'task-crew',			// crew count and size filed
-		'task-duration',		// duration field
-		'task-order',			// ordering field
-		'task-exclusiveness',	// exclusiveness field
-		'task-craft',			// craft field
-		'task-activity'			// activity field
+		'task-id',						// ID field
+		'task-crew',					// crew count and size field
+		'task-duration',				// duration field
+		'task-craft',					// craft field
+		'task-activity'					// activity field
 	];
 	
 	// Classes that display numbers from 1 to 4 above columns in the header row for being
@@ -65,11 +63,18 @@ define([
 	var indexClasses = ['task-id-index', 'task-workers-index', 'task-units-index', 'task-craft-index'];
 	
 	// CSS classes for <text> elements
-	var textClasses = sharedClasses.slice()
+	var textClasses = sharedClasses.concat([
+		'task-order-symbol',			// symbol part of ordering field
+		'task-order-separator',			// symbol part of ordering field
+		'task-order-value',				// value part of ordering field
+		'task-exclusiveness-symbol',	// symbol part of exclusiveness field
+		'task-exclusiveness-separator',	// symbol part of exclusiveness field
+		'task-exclusiveness-value',		// value part of exclusiveness field
+	]);
 	
 	// CSS classes for <rect> elements,
-	// i.e. classes for <text> + outline of the task + outline of the location table
-	var rectClasses = ['outline', 'task-locations'].concat(sharedClasses);
+	// i.e. classes for <text> + outline of the task + outline of the location table + outline of constraints fields
+	var rectClasses = ['outline', 'task-locations', 'task-order', 'task-exclusiveness'].concat(sharedClasses);
 	
 	/**
 	 * JointJS cell model for tasks.
@@ -89,14 +94,14 @@ define([
 		].join(''),
 		
 		/** Overrides default properties. */
-		defaults: joint.util.deepSupplement({
+		defaults: _.defaultsDeep({
 			type: MODEL_CLASSPATH,
 			size: {
 				width: WIDTH,
 				height: DEFAULT_HEIGHT,
 			},
 			cusWidth: 0,
-			attrs: _.assign({
+			attrs: _.defaultsDeep({
 				rect: {
 					width: WIDTH,
 					'follow-scale': true
@@ -106,21 +111,33 @@ define([
 					width: HEADER_COL_WIDTH,
 					height: HEADER_ROW_HEIGHT
 				},
-				'rect.task-id':            { x: 0 * HEADER_COL_WIDTH },
-				'rect.task-crew':          { x: 1 * HEADER_COL_WIDTH },
-				'rect.task-duration':      { x: 2 * HEADER_COL_WIDTH },
+				'rect.task-id':       { x: 0 * HEADER_COL_WIDTH },
+				'rect.task-crew':     { x: 1 * HEADER_COL_WIDTH },
+				'rect.task-duration': { x: 2 * HEADER_COL_WIDTH },
 				'rect.task-craft':    { x: 3 * HEADER_COL_WIDTH },
 				// Constraints fields
 				'rect.task-order, rect.task-exclusiveness': {
 					y: CONSTR_ROW_POS_Y,
 					width: CONSTR_COL_WIDTH,
-					height: CONSTR_ROW_HEIGHT
+					height: CONSTR_ROW_HEIGHT	
 				},
-				'rect.task-order':         { x: 0 * CONSTR_COL_WIDTH },
-				'rect.task-exclusiveness': { x: 1 * CONSTR_COL_WIDTH },
+				'rect.task-exclusiveness': {
+					x: CONSTR_COL_WIDTH
+				},
+				'text.task-order-symbol, text.task-order-separator, text.task-order-value, text.task-exclusiveness-symbol, text.task-exclusiveness-separator, text.task-exclusiveness-value': {
+					y: CONSTR_ROW_POS_Y + 0.5 * ROW_HEIGHT,
+					'text-anchor': 'middle',
+					'dominant-baseline': 'middle'
+				},
+				'text.task-order-symbol':            { x: 0.5 * COL_WIDTH, text: '<' },
+				'text.task-order-separator':         { x:   1 * COL_WIDTH, text: ':' },
+				'text.task-order-value':             { x: 2.5 * COL_WIDTH },
+				'text.task-exclusiveness-symbol':    { x: 4.5 * COL_WIDTH, text: '\u25A3' },
+				'text.task-exclusiveness-separator': { x:   5 * COL_WIDTH, text: ':' },
+				'text.task-exclusiveness-value':     { x: 6.5 * COL_WIDTH },
 				// activity and locations
-				'rect.task-activity':      { y: HEADER_ROW_HEIGHT, height: ACTVITY_HEIGHT },
-				'rect.task-locations':     { y: LOC_POS_Y,  height: 0, display: 'none' },
+				'rect.task-activity':  { y: HEADER_ROW_HEIGHT, height: ACTVITY_HEIGHT },
+				'rect.task-locations': { y: LOC_POS_Y,  height: 0, display: 'none' },
 				'rect.loc-entry': {
 					width: LOC_COL_WIDTH,
 					height: LOC_ROW_HEIGHT
@@ -130,7 +147,7 @@ define([
 					'text-anchor': 'middle',
 					//'y-alignment': 'middle'
 				}
-			},
+			}, 
 			// For all fields, put the <text> at the center of the <rect>
 			TemplateUtil.withRefsToSameClass('text', 'rect', sharedClasses, {
 				 'ref-y': .5,
@@ -208,15 +225,15 @@ define([
 				phase = activity.phase,
 				attributes = phase && phase.attributes,
 				exclusiveness = data.exclusiveness,
-				orderSpecifications = data.orderSpecifications,
-				exclusive = exclusiveness.activity !== 'UNIT',	// UNIT is default, but an activity should always be available
+				exclusive = exclusiveness.type !== 'UNIT',	// UNIT is default, but an activity should always be available
+				orderSpecs = data.orderSpecifications,
 				locationPatterns = data.locationPatterns,
 				width = WIDTH,
 				height = LOC_POS_Y + this.locationsHeight,	// Total task height depends on location table (i.e. on the number of attributes)
 				pitch = data.pitch,
-				crew = isNaN(pitch.crewSize) || isNaN(pitch.crewCount) ? '' : pitch.crewCount + '\u00d7' + pitch.crewSize,	// count times size
-				duration = isNaN(pitch.durationDays) ? '' : pitch.durationDays + 'd',
-				craft = _.get(activity, ['craft', 'shortName'], '');
+				crewLabel = isNaN(pitch.crewSize) || isNaN(pitch.crewCount) ? '' : pitch.crewCount + '\u00d7' + pitch.crewSize,	// count times size
+				durationLabel = isNaN(pitch.durationDays) ? '' : pitch.durationDays + 'd',
+				craftLabel = _.get(activity, ['craft', 'shortName'], '');
 
 			if (exclusive) {
 				width += 10;
@@ -229,29 +246,14 @@ define([
 					height: height,
 					transform: exclusive ? 'translate(-5,-5)' : ''
 				},
-				'rect.task-activity':      { fill: phase ? colors.toCSS(phase.color) : '#fff' },
-				'rect.task-locations':     { height: this.locationsHeight, display: this.locationsHeight > 0 ? 'inline' : 'none' },
-				'text.task-id':            { text: '#' + data.id },
-				'text.task-crew':          { text: crew },
-				'text.task-duration':      { text: duration },
-				'text.task-craft':      { text: craft },
-				'text.task-exclusiveness': {
-					text: 'ex: (' + _.chain(exclusiveness).get('attributes').map('shortName').join(',').value() + ')'
-				},
-				'text.task-order': {
-					text: 'or: (' + _.chain(orderSpecifications)
-						.filter(function (os) {
-							// Only show attributes that matter
-							return os.orderType !== 'NONE';
-						}).map(function (os) {
-							// Show short attribute names and symbols indicating ordering type
-							var label = os.attribute.shortName;
-							switch (os.orderType) {
-							case 'PARALLEL'  : return '|' + label + '|';		// e.g. |sr|
-							case 'ASCENDING' : return       label + '\u2191';	// e.g.  sr↑
-							case 'DESCENDING': return       label + '\u2193';	// e.g.  sr↓
-							}
-						}).join(',').value() + ')' },
+				'rect.task-activity':            { fill: phase ? colors.toCSS(phase.color) : '#fff' },
+				'rect.task-locations':           { height: this.locationsHeight, display: this.locationsHeight > 0 ? 'inline' : 'none' },
+				'text.task-id':                  { text: '#' + data.id },
+				'text.task-crew':                { text: crewLabel },
+				'text.task-duration':            { text: durationLabel },
+				'text.task-craft':               { text: craftLabel },
+				'text.task-order-value':         { text: this.orderingLabel(orderSpecs) },
+				'text.task-exclusiveness-value': { text: this.exclusivenessLabel(exclusiveness) }
 			};
 			if (locationPatterns) {
 				attrs['text.trunc'] = {
@@ -289,6 +291,30 @@ define([
 				'position': data.position,
 				'size': { width: width, height: height }
 			});
+		},
+		
+		exclusivenessLabel: function (exclusiveness) {
+			return exclusiveness.type !== 'ATTRIBUTES'
+				? exclusiveness.type
+				: _.chain(exclusiveness).get('attributes').map('shortName').join(',').value();
+		},
+		
+		orderingLabel: function (orderSpecs) {
+			var res = _.chain(orderSpecs)
+				.filter(function (os) {
+					// Only show attributes that matter
+					return os.orderType !== 'NONE';
+				}).map(function (os) {
+					// Show short attribute names and symbols indicating ordering type
+					var label = os.attribute.shortName;
+					switch (os.orderType) {
+					case 'PARALLEL'  : return '|' + label + '|';		// e.g. |sr|
+					case 'ASCENDING' : return       label + '\u2191';	// e.g.  sr↑
+					case 'DESCENDING': return       label + '\u2193';	// e.g.  sr↓
+					}
+				}).join(',').value();
+			
+			return res || 'NONE';
 		}
 		
 	}, {

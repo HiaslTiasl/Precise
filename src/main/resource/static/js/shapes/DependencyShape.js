@@ -88,7 +88,7 @@ define([
 		].join(''),
 		
 		/** Overrides default properties. */
-		defaults: joint.util.deepSupplement({
+		defaults: _.defaultsDeep({
 			type: MODEL_CLASSPATH 
 		}, joint.dia.Link.prototype.defaults),
 		
