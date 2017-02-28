@@ -1,6 +1,7 @@
 package it.unibz.precise.check;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import it.unibz.precise.graph.Graph;
@@ -35,7 +36,8 @@ public class DiagramGraph implements Graph<Task> {
 	@Override
 	public Stream<Task> successors(Task node) {
 		return node.getOut().stream()
-			.map(d -> d.isPrecedence() ? null : d.getTarget());
+			.map(d -> d.isPrecedence() ? d.getTarget() : null)
+			.filter(Objects::nonNull);
 	}
 
 	/** Creates a directed graph with the given tasks as nodes. */

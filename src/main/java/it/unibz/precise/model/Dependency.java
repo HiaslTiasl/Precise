@@ -214,7 +214,7 @@ public class Dependency extends BaseEntity {
 	public boolean isPrecedence() {
 		// N.B: for an alternate self-loop, the basic precedence does not apply, only the alternation constraint
 		return source != null && target != null
-			&& (!source.equals(target) || (alternate && !chain));
+			&& (!source.equals(target) || !alternate || chain);
 	}
 	
 	/** Indicates whether both source and target are the same, non-null task. */

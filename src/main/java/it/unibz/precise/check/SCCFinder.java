@@ -66,7 +66,7 @@ public interface SCCFinder {
 			return true;
 		else {
 			T node = Util.findAny(scc);
-			return graph.successors(node).anyMatch(Predicate.isEqual(node));
+			return node != null && graph.successors(node).anyMatch(Predicate.isEqual(node));
 		}
 	}
 

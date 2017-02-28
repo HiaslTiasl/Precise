@@ -76,7 +76,7 @@ public class DiagramCycleChecker implements ProblemChecker {
 	private ModelProblem selfLoopWarning(Dependency dependency) {
 		Task task = dependency.getSource();
 		return warning(
-			MessageFormat.format(PROBLEM_SELFLOOP_MESSAGE, task),
+			MessageFormat.format(PROBLEM_SELFLOOP_MESSAGE, task.getShortIdentification()),
 			Arrays.asList(task, dependency),
 			null
 		);
