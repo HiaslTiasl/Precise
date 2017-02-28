@@ -18,38 +18,38 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class MissingPhaseChecker implements ConsistencyChecker {
+public class MissingPhaseChecker implements ProblemChecker {
 	
-	public static final String WARNING_TYPE = "missingPhase";
+	public static final String PROBLEM_TYPE = "missingPhase";
 
-	public static final String WARNING_MESSAGE = "Activity {0} has no phase.";
+	public static final String PROBLEM_MESSAGE = "Activity {0} has no phase.";
 
 	@Override
 	public Category getCategory() {
-		return Category.COMPLETENESS;
+		return Category.STRUCTURE_ERROR;
 	}
 	
 	@Override
 	public String getType() {
-		return WARNING_TYPE;
+		return PROBLEM_TYPE;
 	}
 	
 	@Override
-	public Stream<ConsistencyWarning> check(Model model) {
+	public Stream<ModelProblem> check(Model model) {
 		return model.getActivities().stream()
 			.map(this::check)
 			.filter(Objects::nonNull);
 	}
 	
 	/**
-	 * Returns a {@link ConsistencyWarning} if {@code activity} is used in the diagram but has no phase,
+	 * Returns a {@link ModelProblem} if {@code activity} is used in the diagram but has no phase,
 	 * otherwise returns null.
 	 */
-	private ConsistencyWarning check(Activity activity) {
+	private ModelProblem check(Activity activity) {
 		List<Task> tasks = activity.getTasks();
 		// If there are no tasks, then the activity is not used in the diagram.
 		return activity.getPhase() != null || tasks.isEmpty() ? null
-			: warning(MessageFormat.format(WARNING_MESSAGE, activity.getName()), tasks, null);
+			: warning(MessageFormat.format(PROBLEM_MESSAGE, activity.getName()), tasks, null);
 	}
 
 }

@@ -37,12 +37,28 @@ public class Util {
 		return coll == null ? 0 : coll.size();
 	}
 	
+	/** Returns whether the given collection is neither null nor empty. */
+	public static <T> boolean hasElements(Collection<T> coll) {
+		return coll != null && !coll.isEmpty();
+	}
+	
 	/** Indicates whether the two given collections contain the same elements. */
 	public static <T> boolean containSameElements(Collection<T> coll1, Collection<T> coll2) {
 		int size1 = size(coll1);
 		int size2 = size(coll2);
 		return size1 == size2
 			&& (size1 == 0 || asSet(coll1).equals(asSet(coll2)));
+	}
+
+	/** Returns some arbitrary value contained in the given collection, or null if there is none. */
+	public static <K> K findAny(Collection<K> set) {
+		return findAny(set, null);
+	}
+	
+	/** Returns some arbitrary value contained in the given collection, or {@code defaultVal} if there is none. */
+	public static <K> K findAny(Collection<K> set, K defaultVal) {
+		return set == null ? defaultVal
+			: set.stream().findAny().orElse(defaultVal);
 	}
 	
 }

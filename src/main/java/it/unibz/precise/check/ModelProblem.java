@@ -7,26 +7,26 @@ import it.unibz.precise.model.Location;
 import it.unibz.precise.model.Task;
 
 /**
- * Represents an (immutable) consistency problem in a model.
+ * Represents an (immutable) problem in a model.
  * Holds a textual description of the problem as well as information needed to highlight the
  * problematic parts in the diagram.
  * 
  * @author MatthiasP
  *
  */
-public class ConsistencyWarning implements ConsistencyClassification {
+public class ModelProblem implements ProblemClassification {
 	
 	// Classification
 	private Category category;
 	private String type;
 
-	// Info
+	// Problem info
 	private String message;
 	private Collection<? extends BaseEntity> entities;
 	private Collection<TaskLocation> locations;
 	
 	/** Create a ConsistencyWarning. */
-	protected ConsistencyWarning(Category category, String type, String message, Collection<? extends BaseEntity> entities, Collection<TaskLocation> locations) {
+	protected ModelProblem(Category category, String type, String message, Collection<? extends BaseEntity> entities, Collection<TaskLocation> locations) {
 		this.category = category;
 		this.type = type;
 		this.message = message;

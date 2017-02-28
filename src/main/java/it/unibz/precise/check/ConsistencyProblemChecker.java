@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.unibz.precise.check.ConsistencyWarning.TaskLocation;
+import it.unibz.precise.check.ModelProblem.TaskLocation;
 import it.unibz.precise.graph.disj.AcyclicOrientationFinder;
 import it.unibz.precise.graph.disj.DisjunctiveEdge;
 import it.unibz.precise.graph.disj.DisjunctiveGraph;
@@ -37,14 +37,14 @@ import it.unibz.precise.model.Task;
  *
  */
 @Service
-public class SemanticConsistencyChecker implements ConsistencyChecker {
+public class ConsistencyProblemChecker implements ProblemChecker {
 	
-	public static final String WARNING_TYPE = "semantic";
+	public static final String PROBLEM_TYPE = "consistency";
 	
-	public static final String WARNING_MESSAGE_CYCLE = "There is a cycle at the task-unit-level";
-	public static final String WARNING_MESSAGE_DEADLOCK = "There is a deadlock at the task-unit-level.";
+	public static final String PROBLEM_MESSAGE_CYCLE = "There is a cycle at the task-unit-level";
+	public static final String PROBLEM_MESSAGE_DEADLOCK = "There is a deadlock at the task-unit-level.";
 	
-	private final Log logger = LogFactory.getLog(SemanticConsistencyChecker.class);
+	private final Log logger = LogFactory.getLog(ConsistencyProblemChecker.class);
 	
 	@Autowired
 	private ModelToGraphTranslator translator;
@@ -54,16 +54,16 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 
 	@Override
 	public Category getCategory() {
-		return Category.SATISFIABILITY;
+		return Category.CONSISTENCY_ERROR;
 	}
 
 	@Override
 	public String getType() {
-		return WARNING_TYPE;
+		return PROBLEM_TYPE;
 	}
 
 	@Override
-	public Stream<ConsistencyWarning> check(Model model) {
+	public Stream<ModelProblem> check(Model model) {
 		long t0 = System.nanoTime();
 		
 		Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask = translator.nodesByLocationByTask(model.getTasks());
@@ -89,7 +89,7 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 	}
 	
 	/** Produces warnings for the given result if it represents an error. */
-	private Stream<ConsistencyWarning> warnings(OrientationResult.Leaf<TaskUnitNode> result, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode) {
+	private Stream<ModelProblem> warnings(OrientationResult.Leaf<TaskUnitNode> result, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode) {
 		List<List<TaskUnitNode>> sccs = result.getSccs();
 		if (sccs != null)
 			return sccs.stream().map(nodes -> cycleWarning(nodes, taskLocationByNode));
@@ -100,7 +100,7 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 	}
 	
 	/** Produces a warning describing a cycle among the given nodes. */
-	private ConsistencyWarning cycleWarning(List<TaskUnitNode> cycleNodes, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode) {
+	private ModelProblem cycleWarning(List<TaskUnitNode> cycleNodes, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode) {
 		List<TaskLocation> taskLocations = cycleNodes.stream()
 			.map(taskLocationByNode::get)
 			.flatMap(List::stream)
@@ -110,11 +110,11 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 			.collect(Collectors.toSet());
 		List<Dependency> dependencies = CheckerUtil.restrictDependenciesByTasks(involvedTasks).collect(Collectors.toList());
 			
-		return warning(WARNING_MESSAGE_CYCLE, dependencies, taskLocations);
+		return warning(PROBLEM_MESSAGE_CYCLE, dependencies, taskLocations);
 	}
 	
 	/** Produces a warning describing that the given edge cannot be resolved in any direction. */
-	private ConsistencyWarning deadlockWarning(DisjunctiveEdge<TaskUnitNode> deadlockEdge, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode) {
+	private ModelProblem deadlockWarning(DisjunctiveEdge<TaskUnitNode> deadlockEdge, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode) {
 		List<TaskLocation> taskLocations = Stream.of(
 			deadlockEdge.getLeft(),
 			deadlockEdge.getRight()
@@ -124,7 +124,7 @@ public class SemanticConsistencyChecker implements ConsistencyChecker {
 		.flatMap(List::stream)
 		.collect(Collectors.toList());
 		
-		return warning(WARNING_MESSAGE_DEADLOCK, null, taskLocations);
+		return warning(PROBLEM_MESSAGE_DEADLOCK, null, taskLocations);
 	}
 	
 	/**

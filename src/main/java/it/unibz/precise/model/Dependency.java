@@ -210,6 +210,18 @@ public class Dependency extends BaseEntity {
 		this.scope = scope;
 	}
 	
+	/** Indicates whether basic precedence semantics apply for this dependency. */
+	public boolean isPrecedence() {
+		// N.B: for an alternate self-loop, the basic precedence does not apply, only the alternation constraint
+		return source != null && target != null
+			&& (!source.equals(target) || (alternate && !chain));
+	}
+	
+	/** Indicates whether both source and target are the same, non-null task. */
+	public boolean isSelfLoop() {
+		return source != null && source.equals(target);
+	}
+	
 	/**
 	 * Indicates whether the dependency can have unit scope, i.e. whether source
 	 * and target are of the same phase.
@@ -322,5 +334,5 @@ public class Dependency extends BaseEntity {
 		return "Dependency [id=" + getId() + ", source=" + source + ", target=" + target
 				+ ", alternate=" + alternate + ", chain=" + chain + ", scope=" + scope + "]";
 	}
-	
+
 }

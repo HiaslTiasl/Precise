@@ -1,19 +1,5 @@
 package it.unibz.precise.check;
 
-import it.unibz.precise.graph.disj.DisjunctiveEdge;
-import it.unibz.precise.graph.disj.DisjunctiveGraph;
-import it.unibz.precise.model.Attribute;
-import it.unibz.precise.model.AttributeHierarchyNode;
-import it.unibz.precise.model.Dependency;
-import it.unibz.precise.model.Location;
-import it.unibz.precise.model.Model;
-import it.unibz.precise.model.OrderSpecification;
-import it.unibz.precise.model.OrderType;
-import it.unibz.precise.model.Phase;
-import it.unibz.precise.model.Scope;
-import it.unibz.precise.model.Task;
-import it.unibz.precise.model.Activity;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,10 +10,27 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
+
+import it.unibz.precise.graph.disj.DisjunctiveEdge;
+import it.unibz.precise.graph.disj.DisjunctiveGraph;
+import it.unibz.precise.model.Activity;
+import it.unibz.precise.model.Attribute;
+import it.unibz.precise.model.AttributeHierarchyNode;
+import it.unibz.precise.model.Dependency;
+import it.unibz.precise.model.Location;
+import it.unibz.precise.model.Model;
+import it.unibz.precise.model.OrderSpecification;
+import it.unibz.precise.model.OrderType;
+import it.unibz.precise.model.Phase;
+import it.unibz.precise.model.Scope;
+import it.unibz.precise.model.Scope.Type;
+import it.unibz.precise.model.Task;
+import it.unibz.util.Util;
 
 /**
  * Translates a {@link Model} to a {@link DisjunctiveGraph} of {@link TaskUnitNode}s.
@@ -93,7 +96,7 @@ public class ModelToGraphTranslator {
 					Task target = dep.getTarget();
 					List<List<TaskUnitNode>> targetLocations = target == null ? null : nodesByLocationByTask.get(target);
 					if (targetLocations != null && !targetLocations.isEmpty())
-						addDependencyArcsAndEdges(graph, dep, nodesByLocationByTask, locations, targetLocations);
+						addDependencyArcsAndEdges(graph, dep, nodesByLocationByTask, locations, targetLocations, ignoreSimpleEdges);
 				}
 			}
 		}
@@ -131,21 +134,23 @@ public class ModelToGraphTranslator {
 		Dependency dep,
 		Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask,
 		List<List<TaskUnitNode>> sourceLocations,
-		List<List<TaskUnitNode>> targetLocations
+		List<List<TaskUnitNode>> targetLocations,
+		boolean ignoreSimpleEdges
 	) {
 		Scope scope = dep.getScope();
 		Map<Map<Attribute, String>, Set<TaskUnitNode>> sourceGroups = groupNodesBy(sourceLocations, scope);
 		Map<Map<Attribute, String>, Set<TaskUnitNode>> targetGroups = groupNodesBy(targetLocations, scope);
 		if (sourceGroups != null && targetGroups != null) {
-			processBasicPrecedence(graph, sourceGroups, targetGroups);
+			if (dep.isPrecedence())
+				processBasicPrecedence(graph, sourceGroups, targetGroups);
 			boolean alt = dep.isAlternate();
 			boolean chain = dep.isChain();
 			if (alt || chain) {
 				Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = exclusiveGroups(sourceGroups, targetGroups);
 				if (alt)
-					processAlternatePrecedence(graph, exclusiveGroups);
+					processAlternatePrecedence(graph, sourceGroups, targetGroups, exclusiveGroups);
 				if (chain)
-					processChainPrecedence(graph, dep, nodesByLocationByTask, exclusiveGroups);
+					processChainPrecedence(graph, dep, nodesByLocationByTask, exclusiveGroups, ignoreSimpleEdges);
 			}
 		}
 	}
@@ -192,23 +197,13 @@ public class ModelToGraphTranslator {
 	/** Processes the exclusiveness of task {@code t}. */
 	private void processExclusiveness(DisjunctiveGraph<TaskUnitNode> graph, Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask, Task t, boolean ignoreSimpleEdges) {
 		Scope exclusiveness = t.getExclusiveness();
-		// Partition the nodes of the task by the projection to the scope of its exclusiveness
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = groupNodesBy(nodesByLocationByTask.get(t), exclusiveness);
-		// Add a disjunctive edge from exclusive groups to nodes of other tasks and the same projection
-		nodesByLocationByTask.entrySet().stream()
-			.filter(e -> !t.equals(e.getKey()))
-			.map(Map.Entry::getValue)
-			.flatMap(List::stream)
-			.flatMap(List::stream)
-			.map(n -> {
-				// Lookup projection in exclusive groups
-				// Return resulting disjunctive edge or null
-				Set<TaskUnitNode> matchRes = exclusiveGroups.get(exclusiveness.project(n.getUnit()));
-				return matchRes == null || (ignoreSimpleEdges && matchRes.size() == 1) ? null
-					: new DisjunctiveEdge<>(Collections.singleton(n), matchRes);
-			})
-			.filter(Objects::nonNull)
-			.forEach(graph::addEdge);
+		// Only consider exclusiveness if also unit edges are needed, or the task is actually exclusive.
+		if (!ignoreSimpleEdges && exclusiveness.getType() == Type.UNIT) {
+			// Partition the nodes of the task by the projection to the scope of its exclusiveness
+			Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = groupNodesBy(nodesByLocationByTask.get(t), exclusiveness);
+			// Add a disjunctive edge from exclusive groups to nodes of other tasks and the same projection
+			addExclusiveAcces(graph, nodesByLocationByTask, exclusiveGroups, exclusiveness, ignoreSimpleEdges, t);
+		}
 	}
 	
 	/** Processes the given dependency as a basic precedence. */
@@ -227,10 +222,20 @@ public class ModelToGraphTranslator {
 	}
 	
 	/** Processes an alternate precedence that has the given exclusive groups*/
-	private void processAlternatePrecedence(DisjunctiveGraph<TaskUnitNode> graph, Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups) {
+	private void processAlternatePrecedence(
+		DisjunctiveGraph<TaskUnitNode> graph,
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> sourceGroups,
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> targetGroups,
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups
+	) {
 		// Alternate precedences have disjunctive edges among pairs of their own exclusive groups.
 		// Using an auxiliary list for index-based iteration, which is useful to avoid looking twice at the same combination.
-		List<Set<TaskUnitNode>> valueList = new ArrayList<>(exclusiveGroups.values());
+		// Also, alternate precedence only applies to shared construction areas, so filter shared first
+		List<Set<TaskUnitNode>> valueList = exclusiveGroups.entrySet().stream()
+			.filter(e -> Util.hasElements(sourceGroups.get(e.getKey())) && Util.hasElements(targetGroups.get(e.getKey())))
+			.map(Map.Entry::getValue)
+			.collect(Collectors.toList());
+		
 		int len = valueList.size();
 		for (int i = 0; i < len - 1; i++) {
 			Set<TaskUnitNode> left = valueList.get(i);
@@ -244,31 +249,49 @@ public class ModelToGraphTranslator {
 		DisjunctiveGraph<TaskUnitNode> graph,
 		Dependency dep,
 		Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups,
+		boolean ignoreSimpleEdges
 	) {
 		Task source = dep.getSource();
 		Task target = dep.getTarget();
 		Scope scope = dep.getScope();
 		// Add a disjunctive edge from every node of other tasks to exclusive groups of matching projections to given scope
-		nodesByLocationByTask.entrySet().stream()
-			.filter(e -> !source.equals(e.getKey()) && !target.equals(e.getKey()))
-			.map(Entry::getValue)
-			.flatMap(List::stream)
-			.flatMap(List::stream)
-			.map(n -> {
-				// Match to exclusive group by projection
-				Map<Attribute, String> p = scope.project(n.getUnit());
-				Set<TaskUnitNode> nodes = exclusiveGroups.get(p);
-				return nodes == null ? null
-					: new DisjunctiveEdge<TaskUnitNode>(Collections.singleton(n), nodes);
-			})
-			.filter(Objects::nonNull)
-			.forEach(graph::addEdge);
+		addExclusiveAcces(graph, nodesByLocationByTask, exclusiveGroups, scope, ignoreSimpleEdges, source, target);
 	}
 	
 	//-------------------------------------------
 	// Helper methods
 	//-------------------------------------------
+	
+	/**
+	 * Give several tasks exclusive access to construction areas of the given scope
+	 * by adding the corresponding {@link DisjunctiveEdge}s.
+	 * If requested by means of {@code ignoreSimpleEdges}, simple edges are not added.
+	 * A simple edge is an edge between two singletons.
+	 */
+	private void addExclusiveAcces(
+		DisjunctiveGraph<TaskUnitNode> graph,
+		Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask,
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups,
+		Scope scope,
+		boolean ignoreSimpleEdges,
+		Task... tasks
+	) {
+		nodesByLocationByTask.entrySet().stream()
+			.filter(e -> Stream.of(tasks).noneMatch(Predicate.isEqual(e.getKey())))
+			.map(Entry::getValue)
+			.flatMap(List::stream)
+			.flatMap(List::stream)
+			.map(n -> {
+				// Match exclusive group by projection
+				Map<Attribute, String> p = scope.project(n.getUnit());
+				Set<TaskUnitNode> nodes = exclusiveGroups.get(p);
+				return nodes == null || (ignoreSimpleEdges && nodes.size() == 1) || nodes.contains(n) ? null
+					: new DisjunctiveEdge<TaskUnitNode>(Collections.singleton(n), nodes);
+			})
+			.filter(Objects::nonNull)
+			.forEach(graph::addEdge);
+	}
 	
 	/** Returns the exclusive groups of a dependency with the given source and target groups. */
 	private Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups(

@@ -3,10 +3,12 @@ package it.unibz.precise.check;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import it.unibz.precise.graph.Graph;
+import it.unibz.util.Util;
 
 /**
  * Finds Strongly Connected Components (SCC) in a graph.
@@ -41,7 +43,7 @@ public interface SCCFinder {
 	/**
 	 * Returns a stream of non-trivial strongly connected components.
 	 * @see SCCFinder#findSCCs(Graph)
-	 * @see #isNonTrivialComponent(List)
+	 * @see #isNonTrivialComponent(Graph, Collection)
 	 */
 	default <T> Stream<List<T>> findNonTrivialSCCs(Graph<T> graph) {
 		return findNonTrivialSCCs(graph, ArrayList::new);
@@ -50,14 +52,22 @@ public interface SCCFinder {
 	/**
 	 * Returns a stream of non-trivial strongly connected components.
 	 * @see SCCFinder#findSCCs(Graph)
-	 * @see #isNonTrivialComponent(List)
+	 * @see #isNonTrivialComponent(Graph, Collection)
 	 */
 	default <T, SCC extends Collection<T>> Stream<SCC> findNonTrivialSCCs(Graph<T> graph, Supplier<SCC> sccSupplier) {
-		return findSCCs(graph, sccSupplier).stream().filter(SCCFinder::isNonTrivialComponent);
+		return findSCCs(graph, sccSupplier).stream()
+			.filter(scc -> isNonTrivialComponent(graph, scc));
+	}
+	
+	/** Indicates whether the given SCC is non-trivial, i.e. whether it actually contains any arcs. */
+	static <T, SCC extends Collection<T>> boolean isNonTrivialComponent(Graph<T> graph, SCC scc) {
+		int size = Util.size(scc);
+		if (size > 1)
+			return true;
+		else {
+			T node = Util.findAny(scc);
+			return graph.successors(node).anyMatch(Predicate.isEqual(node));
+		}
 	}
 
-	/** Indicates whether the given SCC is trivial, i.e. whether it contains a single element only. */
-	static <T, SCC extends Collection<T>> boolean isNonTrivialComponent(SCC scc) {
-		return scc.size() > 1;
-	}
 }

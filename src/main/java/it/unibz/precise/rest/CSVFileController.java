@@ -112,7 +112,7 @@ public class CSVFileController {
 		
 		// List tasks in topological order.
 		// Tasks in a SCCs are sorted lexicographically by short identification.
-		DiagramGraph graph = DiagramGraph.directed(model);
+		DiagramGraph graph = DiagramGraph.of(model);
 		List<Task> orderedTasks = sccTarjan.findSCCs(graph).stream()
 			.flatMap(l -> l.stream().sorted(Task.shortIdentificationComparator()))
 			.collect(Collectors.toList());

@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import it.unibz.util.Util;
+
 /**
  * Represents the result of searching an acyclic orientation, which can be successful or not.
  * A {@code OrientationResult} is structured in a tree corresponding to the recursive graph
@@ -94,8 +96,8 @@ public abstract class OrientationResult<T> {
 			// For a level higher than leaves, the nodes of one side might be contained in
 			// different leaf graphs. However, this is not a problem, because the topological
 			// order still applies.
-			T anyLeft = findAny(left);
-			T anyRight = findAny(right);
+			T anyLeft = Util.findAny(left);
+			T anyRight = Util.findAny(right);
 			int iLeft = leafClusterIndexMap.get(anyLeft);
 			int iRight = leafClusterIndexMap.get(anyRight);
 			boolean l2r = iLeft < iRight
@@ -108,11 +110,6 @@ public abstract class OrientationResult<T> {
 		
 		return orientation;
 	}
-	
-	private static <K> K findAny(Set<K> set) {
-		return set.stream().findAny().orElse(null);
-	}
-	
 	
 	/**
 	 * Represents a complex {@code OrientationResult} composed of several {@link #children() children} results.
@@ -220,12 +217,12 @@ public abstract class OrientationResult<T> {
 	}
 	
 	/** Creates a failure because of the given strongly connected components. */
-	public static <T> OrientationResult.Leaf<T> error(DisjunctiveGraph<T> graph, List<List<T>> sccs) {
+	public static <T> OrientationResult.Leaf<T> cycles(DisjunctiveGraph<T> graph, List<List<T>> sccs) {
 		return new Leaf<>(graph, false, sccs, null);
 	}
 	
 	/** Creates a failure because of a deadlock represented by the given edge. */
-	public static <T> OrientationResult.Leaf<T> error(DisjunctiveGraph<T> graph, DisjunctiveEdge<T> deadlockEdge) {
+	public static <T> OrientationResult.Leaf<T> deadlock(DisjunctiveGraph<T> graph, DisjunctiveEdge<T> deadlockEdge) {
 		return new Leaf<>(graph, false, null, deadlockEdge);
 	}
 	

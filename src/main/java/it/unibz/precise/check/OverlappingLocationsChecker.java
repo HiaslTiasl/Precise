@@ -1,6 +1,6 @@
 package it.unibz.precise.check;
 
-import it.unibz.precise.check.ConsistencyWarning.TaskLocation;
+import it.unibz.precise.check.ModelProblem.TaskLocation;
 import it.unibz.precise.model.AttributeHierarchyNode;
 import it.unibz.precise.model.Location;
 import it.unibz.precise.model.Model;
@@ -30,26 +30,26 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class OverlappingLocationsChecker implements ConsistencyChecker {
+public class OverlappingLocationsChecker implements ProblemChecker {
 	
-	public static final String WARNING_TYPE = "overlap";
+	public static final String PROBLEM_TYPE = "overlap";
 	
-	public static final String WARNING_MESSAGE_OVERLAP   = "Location {0} overlaps with: {2}.";
-	public static final String WARNING_MESSAGE_DUPLICATE = "Duplicate locations: {0}.";
-	public static final String WARNING_MESSAGE_GLOBAL    = "The global locations {0} overlap all other locations.";
+	public static final String PROBLEM_MESSAGE_OVERLAP   = "Location {0} overlaps with: {2}.";
+	public static final String PROBLEM_MESSAGE_DUPLICATE = "Duplicate locations: {0}.";
+	public static final String PROBLEM_MESSAGE_GLOBAL    = "The global locations {0} overlap all other locations.";
 	
 	@Override
 	public Category getCategory() {
-		return Category.COMPLETENESS;
+		return Category.STRUCTURE_WARNING;
 	}
 	
 	@Override
 	public String getType() {
-		return WARNING_TYPE;
+		return PROBLEM_TYPE;
 	}
 	
 	@Override
-	public Stream<ConsistencyWarning> check(Model model) {
+	public Stream<ModelProblem> check(Model model) {
 		return model.getActivities().stream()
 			.flatMap(this::checkActivity);		// Check all activities individually
 	}
@@ -59,7 +59,7 @@ public class OverlappingLocationsChecker implements ConsistencyChecker {
 	 * through all locations of all task boxes referring to {@code activity}
 	 * and marking the corresponding nodes in the CA hierarchy.
 	 */
-	public Stream<ConsistencyWarning> checkActivity(Activity activity) {
+	public Stream<ModelProblem> checkActivity(Activity activity) {
 		// Collect all locations for the activity, keeping a reference to the containing task.
 		Collection<TaskLocation> taskLocations = activity.getTasks().stream()
 			.flatMap(this::taskLocations)
@@ -113,20 +113,20 @@ public class OverlappingLocationsChecker implements ConsistencyChecker {
 	}
 	
 	/** Produce a warning for the given gloval locations. */
-	private ConsistencyWarning warnGlobalLocations(List<TaskLocation> globalLocations) {
-		String msg = MessageFormat.format(WARNING_MESSAGE_GLOBAL, locationsInTasks(globalLocations));
+	private ModelProblem warnGlobalLocations(List<TaskLocation> globalLocations) {
+		String msg = MessageFormat.format(PROBLEM_MESSAGE_GLOBAL, locationsInTasks(globalLocations));
 		return warning(msg, null, globalLocations);
 	}
 	
 	/** Produce a warning for the given duplicate locations. */
-	private ConsistencyWarning warnDuplicateLocations(List<TaskLocation> duplicates) {
-		String msg = MessageFormat.format(WARNING_MESSAGE_DUPLICATE, locationsInTasks(duplicates));
+	private ModelProblem warnDuplicateLocations(List<TaskLocation> duplicates) {
+		String msg = MessageFormat.format(PROBLEM_MESSAGE_DUPLICATE, locationsInTasks(duplicates));
 		return warning(msg, null, duplicates);
 	}
 	
 	/** Produce a warning for the given overlapping locations. */
-	private ConsistencyWarning warnOverlappingLocations(List<TaskLocation> overlappingLocations) {
-		String msg = MessageFormat.format(WARNING_MESSAGE_OVERLAP,
+	private ModelProblem warnOverlappingLocations(List<TaskLocation> overlappingLocations) {
+		String msg = MessageFormat.format(PROBLEM_MESSAGE_OVERLAP,
 			overlappingLocations.get(0),
 			locationsInTasks(overlappingLocations.subList(1, overlappingLocations.size()))
 		);

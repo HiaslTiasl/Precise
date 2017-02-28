@@ -1,5 +1,6 @@
 package it.unibz.precise.graph.disj;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,13 +53,21 @@ public class AcyclicOrientationFinder {
 	
 	/** Searches an acyclic orientation an a given partition. */
 	private <T> OrientationResult<T> searchInPartition(DisjunctiveGraph<T> graph) {
-		if (graph.nodes().size() <= 1)
-			return OrientationResult.success(graph);
+		if (graph.nodes().size() <= 1) {
+			// Graph has only a single node.
+			// If there is a self-loop on that node, we found a cycle.
+			// Otherwise, it is already an acyclic orientation.
+			return graph.nodes().stream()
+				.findAny()
+				.filter(n -> graph.successorSet(n).contains(n))
+				.map(n -> OrientationResult.cycles(graph, Arrays.asList(Arrays.asList(n))))
+				.orElseGet(() -> OrientationResult.success(graph));
+		}
 		
 		List<List<T>> nonTrivialSCCs = resolver.resolve(graph);
 		
 		return !nonTrivialSCCs.isEmpty()
-			? OrientationResult.error(graph, nonTrivialSCCs)
+			? OrientationResult.cycles(graph, nonTrivialSCCs)
 			: processUnresolvedEdges(graph);
 	}
 	
@@ -104,7 +113,7 @@ public class AcyclicOrientationFinder {
 		if (rs.isSuccessful())
 			return rs;
 		
-		return OrientationResult.error(graph, e);
+		return OrientationResult.deadlock(graph, e);
 	}
 	
 	/** Returns the result of searching an acyclic orientation of the graph with the given direction of the given edge. */

@@ -17,47 +17,47 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class MissingDependencyEndpointsChecker implements ConsistencyChecker {
+public class MissingDependencyEndpointsChecker implements ProblemChecker {
 
-	public static final String WARNING_TYPE = "missingDepencyEndpoints";
+	public static final String PROBLEM_TYPE = "missingDepencyEndpoints";
 
-	public static final String WARNING_MESSAGE_NO_SOURCE   = "Missing source task for dependency.";
-	public static final String WARNING_MESSAGE_NO_TARGET   = "Missing target task for dependency.";
-	public static final String WARNING_MESSAGE_NO_ENDPOINT = "Missing source and target tasks for dependency.";
+	public static final String PROBLEM_MESSAGE_NO_SOURCE   = "Missing source task for dependency.";
+	public static final String PROBLEM_MESSAGE_NO_TARGET   = "Missing target task for dependency.";
+	public static final String PROBLEM_MESSAGE_NO_ENDPOINT = "Missing source and target tasks for dependency.";
 
 	@Override
 	public Category getCategory() {
-		return Category.COMPLETENESS;
+		return Category.STRUCTURE_WARNING;
 	}
 	
 	@Override
 	public String getType() {
-		return WARNING_TYPE;
+		return PROBLEM_TYPE;
 	}
 	
 	@Override
-	public Stream<ConsistencyWarning> check(Model model) {
+	public Stream<ModelProblem> check(Model model) {
 		return model.getDependencies().stream()
 			.map(this::check)				// Check each dependencies
 			.filter(Objects::nonNull);		// filter out empty warnings
 	}
 	
 	/** Return a ConsistencyWarning if {@code d} is missing a source of a target, otherwise return null. */
-	private ConsistencyWarning check(Dependency d) {
+	private ModelProblem check(Dependency d) {
 		boolean missingSource = d.getSource() == null;
 		boolean missingTarget = d.getTarget() == null;
 		
-		return missingSource && missingTarget ? warning(WARNING_MESSAGE_NO_ENDPOINT, d)
-			: missingSource ? warning(WARNING_MESSAGE_NO_SOURCE, d)
-			: missingTarget ? warning(WARNING_MESSAGE_NO_TARGET, d)
+		return missingSource && missingTarget ? warning(PROBLEM_MESSAGE_NO_ENDPOINT, d)
+			: missingSource ? warning(PROBLEM_MESSAGE_NO_SOURCE, d)
+			: missingTarget ? warning(PROBLEM_MESSAGE_NO_TARGET, d)
 			: null;
 	}
 	
 	/**
 	 * Produce a warning for the given template and dependency.
-	 * @see ConsistencyChecker#warning(String, java.util.List, java.util.List)
+	 * @see ProblemChecker#warning(String, java.util.List, java.util.List)
 	 */
-	private ConsistencyWarning warning(String msgTemplate, Dependency d) {
+	private ModelProblem warning(String msgTemplate, Dependency d) {
 		return warning(MessageFormat.format(msgTemplate, d), Arrays.asList(d), null);
 	}
 

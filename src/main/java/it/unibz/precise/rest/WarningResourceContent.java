@@ -8,7 +8,7 @@ import org.springframework.hateoas.core.Relation;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import it.unibz.precise.check.ConsistencyWarning;
+import it.unibz.precise.check.ModelProblem;
 import it.unibz.precise.model.BaseEntity;
 import it.unibz.util.Util;
 
@@ -26,12 +26,12 @@ import it.unibz.util.Util;
 public class WarningResourceContent {
 	
 	@JsonIgnore
-	private ConsistencyWarning warning;
+	private ModelProblem warning;
 	
 	private Function<BaseEntity, ?> entityMapper;
 	
 	/** Create a {@code WarningResourceContent} for the given warning, using the given specified {@code entityMapper}. */
-	public WarningResourceContent(ConsistencyWarning warning, Function<BaseEntity, ?> entityMapper) {
+	public WarningResourceContent(ModelProblem warning, Function<BaseEntity, ?> entityMapper) {
 		this.warning = warning;
 		this.entityMapper = entityMapper;
 	}

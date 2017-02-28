@@ -1,8 +1,8 @@
 package it.unibz.precise.rest;
 
-import it.unibz.precise.check.ConsistencyChecker;
-import it.unibz.precise.check.ConsistencyClassification;
-import it.unibz.precise.check.ConsistencyWarning;
+import it.unibz.precise.check.ProblemChecker;
+import it.unibz.precise.check.ProblemClassification;
+import it.unibz.precise.check.ModelProblem;
 import it.unibz.precise.model.BaseEntity;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.projection.EmptyProjection;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * Exposes a list of {@link ConsistencyWarning}s by invoking all {@link ConsistencyChecker}s.
+ * Exposes a list of {@link ModelProblem}s by invoking all {@link ProblemChecker}s.
  * 
  * @author MatthiasP
  *
@@ -30,17 +30,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RepositoryRestController
 public class WarningsController {
 	
-	private List<ConsistencyChecker> consistencyCheckers;		// All ConsistencyChecker-Beans in the ApplicationContext
+	private List<ProblemChecker> consistencyCheckers;		// All ConsistencyChecker-Beans in the ApplicationContext
 	private ModelRepository modelRepository;
 	private ProjectionFactory projectionFactory;
 	
 	@Autowired
-	public WarningsController(List<ConsistencyChecker> consistencyCheckers, ModelRepository modelRepository, ProjectionFactory projectionFactory) {
+	public WarningsController(List<ProblemChecker> consistencyCheckers, ModelRepository modelRepository, ProjectionFactory projectionFactory) {
 		this.consistencyCheckers = consistencyCheckers;
 		this.modelRepository = modelRepository;
 		this.projectionFactory = projectionFactory;
 		// Sort a static number of few checkers once, instead of sorting potentially many warnings on every request.
-		consistencyCheckers.sort(ConsistencyClassification.BY_CATEGORY_AND_TYPE);
+		consistencyCheckers.sort(ProblemClassification.BY_CATEGORY_AND_TYPE);
 	}
 
 	/** Invokes all checkers for the given model and returns the list of resulting warnings. */
