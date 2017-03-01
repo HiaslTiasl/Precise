@@ -163,7 +163,7 @@ define([
 		 */
 		function newTaskHandler(event, data) {
 			// Type is mandatory
-			var taskPromise = HAL.linkTo(data, 'type')
+			var taskPromise = HAL.linkTo(data, 'activity')
 				? sendNewTask(data)
 				: openNewTaskDialog(data);
 				
@@ -175,7 +175,7 @@ define([
 		/** Opens a dialog for creating a new task with the given initial data. */
 		function openNewTaskDialog(data) {
 			return $uibModal.open({
-				component: 'DiagramTaskDialog',
+				component: 'diagramTaskDialog',
 				resolve: {
 					resource: _.constant(Tasks.newResource($ctrl.model, data)),
 					phases: function () {

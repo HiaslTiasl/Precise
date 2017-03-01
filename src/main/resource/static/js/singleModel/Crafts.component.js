@@ -50,7 +50,7 @@ define([
 		/** Opens the given craft resource in a modal dialog. */
 		function openModal(resource) {
 			$uibModal.open({
-				component: 'CraftsDialog',
+				component: 'craftsDialog',
 				resolve: { resource: resource }
 			}).result.then(loadCrafts);
 		}

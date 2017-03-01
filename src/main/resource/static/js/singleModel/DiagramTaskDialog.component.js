@@ -9,13 +9,13 @@ define([
 ) {
 	'use strict';
 	
-	DiagramTaskDialogController.$inject = ['$uibModal', 'errorHandler', 'PreciseApi', 'Pages', 'Tasks', 'Activities', 'Phases'];
+	DiagramTaskDialogController.$inject = ['$uibModal', 'PreciseApi', 'Pages', 'Tasks', 'Activities', 'Phases'];
 	
 	/**
 	 * Controller constructor.
 	 * @constructor
 	 */
-	function DiagramTaskDialogController($uibModal, errorHandler, PreciseApi, Pages, Tasks, Activities, Phases) {
+	function DiagramTaskDialogController($uibModal, PreciseApi, Pages, Tasks, Activities, Phases) {
 		
 		var $ctrl = this;
 		
@@ -101,7 +101,7 @@ define([
 		/** Opens a dialog for creating an activity that is to be used in this task. */
 		function createActivity() {
 			$uibModal.open({
-				component: 'ActivityDialog',
+				component: 'activitiesDialog',
 				resolve: {
 					resource: function () {
 						return Activities.newResource($ctrl.resource.model, {
@@ -115,7 +115,7 @@ define([
 				$ctrl.activities.push(result);
 				$ctrl.resource.data.activity = result;
 				activityChanged();
-			}, errorHandler.handle);
+			});
 		}
 		
 		/** Send the task resource to apply the changes on the server and close the dialog. */

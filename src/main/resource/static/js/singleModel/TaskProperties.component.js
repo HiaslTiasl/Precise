@@ -111,7 +111,7 @@ define([
 		function editActivity() {
 			var activity = $ctrl.resource.data.activity;
 			$uibModal.open({
-				component: 'ActivitiesDialog',
+				component: 'activitiesDialog',
 				resolve: {
 					resource: function () {
 						return Activities.existingResource($ctrl.resource.model, activity)

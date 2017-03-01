@@ -53,7 +53,7 @@ define([
 		/** Opens the given model resource in a modal dialog. */
 		function openModal(resource) {
 			$uibModal.open({
-				component: 'ModelsDialog',
+				component: 'modelsDialog',
 				resolve: { resource: resource }
 			}).result.then(refreshModels);
 		}

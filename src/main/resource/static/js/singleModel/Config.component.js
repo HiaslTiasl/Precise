@@ -49,7 +49,7 @@ define([
 		/** Opens a dialog for importing the configuration of a model into this one. */
 		function importConfig() {
 			$uibModal.open({
-				component: 'ImportModelDialog',
+				component: 'importModelDialog',
 				resolve: {
 					model: _.constant($ctrl.model),
 					title: _.constant('Configuration'),

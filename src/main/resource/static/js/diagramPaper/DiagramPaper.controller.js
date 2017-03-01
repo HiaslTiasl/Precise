@@ -69,7 +69,7 @@ define([
 		/** Opens a dialog for importing the diagram part of a model. */
 		function importDiagram() {
 			$uibModal.open({
-				component: 'preciseImportModel',
+				component: 'importModelDialog',
 				resolve: {
 					model: _.constant($ctrl.model),
 					title: _.constant('Diagram'),

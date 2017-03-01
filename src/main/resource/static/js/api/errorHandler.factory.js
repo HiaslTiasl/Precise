@@ -63,7 +63,7 @@ define([
 		function openDialog(error) {
 			$log.error(error);
 			return $uibModal.open({
-				component: 'preciseErrorDialog',
+				component: 'errorDialog',
 				resolve: { error: error }
 			});
 		}

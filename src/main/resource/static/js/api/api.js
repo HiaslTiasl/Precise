@@ -65,7 +65,7 @@ define([
 		.service('Dependencies', DependenciesService)
 		.factory('errorHandler', errorHandlerFactory)
 		.controller('DefaultResourceDialog', DefaultResourceDialogController)
-		.component('preciseErrorDialog', errorDialogComponent)
+		.component('errorDialog', errorDialogComponent)
 		.filter('withShortName', withShortNameFilterFactory)
 		.filter('join', joinFilterFactory);
 	
