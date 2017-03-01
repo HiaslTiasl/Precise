@@ -5,21 +5,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import it.unibz.precise.check.SCCFinder;
 
 /**
- * Implementation of {@link DisjunctiveEdgeResolver}, encapsulating the needed data structures
+ * Implementation of {@link DisjunctiveGraphResolver}, encapsulating the needed data structures
  * for one search operation.
  * 
  * @author MatthiasP
  *
  * @param <T> The type of the nodes in the graph
  */
-public class DisjunctiveEdgeResolverOperation<T> {
+public class DisjunctiveGraphResolverOperation<T> {
 	
-	private SCCFinder sccFinder;
+	private SimpleDisjunctiveGraphCycleDetector simpleCycleDetector;
 
 	private DisjunctiveGraph<T> graph;			// The graph to be resolved
 
@@ -27,9 +24,9 @@ public class DisjunctiveEdgeResolverOperation<T> {
 	private ArrayDeque<T> queue;						// Queue of discovered nodes to visit next
 	private HashMap<T, T> discoveredStartingFrom;		// Maps nodes discovered during resolving an edge to the corresponding start node
 	
-	public DisjunctiveEdgeResolverOperation(DisjunctiveGraph<T> graph, SCCFinder sccFinder) {
+	public DisjunctiveGraphResolverOperation(DisjunctiveGraph<T> graph, SimpleDisjunctiveGraphCycleDetector simpleCycleDetector) {
 		this.graph = graph;
-		this.sccFinder = sccFinder;
+		this.simpleCycleDetector = simpleCycleDetector;
 	}
 
 	/**
@@ -37,7 +34,7 @@ public class DisjunctiveEdgeResolverOperation<T> {
 	 * Returns a list of the resulting non-trivial strongly connected components.
 	 */
 	public List<List<T>> resolve() {
-		List<List<T>> nonTrivialSCCs = detectCycles(graph);
+		List<List<T>> nonTrivialSCCs = simpleCycleDetector.detect(graph);
 		// Kept to exit early when considering the same edge twice without resolving any edges in between
 		DisjunctiveEdge<T> firstUnresolvedEdge = null;
 		boolean again = nonTrivialSCCs.isEmpty();
@@ -79,7 +76,7 @@ public class DisjunctiveEdgeResolverOperation<T> {
 			}
 			
 			if (again) {
-				nonTrivialSCCs = detectCycles(graph);
+				nonTrivialSCCs = simpleCycleDetector.detect(graph);
 				again = nonTrivialSCCs.isEmpty();
 			}
 		}
@@ -133,9 +130,4 @@ public class DisjunctiveEdgeResolverOperation<T> {
 		return resolved;
 	}
 	
-	/** Returns non-trivial strongly connected components in the given disjunctive graph. */
-	private List<List<T>> detectCycles(DisjunctiveGraph<T> graph) {
-		return sccFinder.findNonTrivialSCCs(graph).collect(Collectors.toList());
-	}
-
 }

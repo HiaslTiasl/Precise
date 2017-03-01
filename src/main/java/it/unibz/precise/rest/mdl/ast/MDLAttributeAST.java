@@ -2,6 +2,8 @@ package it.unibz.precise.rest.mdl.ast;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator;
 
 import it.unibz.precise.model.ShortNameProvider;
@@ -21,6 +23,8 @@ public class MDLAttributeAST implements ShortNameProvider {
 	private String description;
 	private Object range;
 	private boolean ordered;
+	
+	@JsonInclude(Include.NON_DEFAULT)
 	private boolean perPhase;
 	
 	public String getName() {

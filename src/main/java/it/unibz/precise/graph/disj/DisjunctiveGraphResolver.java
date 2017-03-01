@@ -5,8 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.unibz.precise.check.SCCFinder;
-
 /**
  * Resolves as many {@link DisjunctiveEdge} as possible in a given {@link DisjunctiveGraph}. 
  * 
@@ -14,18 +12,18 @@ import it.unibz.precise.check.SCCFinder;
  *
  */
 @Service
-public class DisjunctiveEdgeResolver {
+public class DisjunctiveGraphResolver implements DisjunctiveGraphCycleDetector {
 	
 	@Autowired
-	private SCCFinder sccFinder;
+	private SimpleDisjunctiveGraphCycleDetector simpleCycleDetector;
 	
 	/** Initializes the operation. */
-	public <T> DisjunctiveEdgeResolverOperation<T> init(DisjunctiveGraph<T> graph) {
-		return new DisjunctiveEdgeResolverOperation<>(graph, sccFinder);
+	public <T> DisjunctiveGraphResolverOperation<T> init(DisjunctiveGraph<T> graph) {
+		return new DisjunctiveGraphResolverOperation<>(graph, simpleCycleDetector);
 	}
 	
 	/** Resolves as many {@link DisjunctiveEdge} as possible in a given {@link DisjunctiveGraph}. */
-	public <T> List<List<T>> resolve(DisjunctiveGraph<T> disjGraph) {
+	public <T> List<List<T>> detect(DisjunctiveGraph<T> disjGraph) {
 		return init(disjGraph).resolve();
 	}
 

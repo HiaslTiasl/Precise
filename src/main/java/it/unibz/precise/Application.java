@@ -20,7 +20,6 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
  * Configures and starts the application.
  * 
  * @author Matthias
- * @see ConsistencyConfig
  * @see RepositoryConfiguration
  * @see WebConfig
  *
@@ -44,7 +43,7 @@ public class Application extends SpringBootServletInitializer {
 	/** Tell Spring about other classes with further configuration. */
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(Application.class, ResourceProcessorConfig.class, ConsistencyConfig.class);
+		return application.sources(Application.class, ResourceProcessorConfig.class);
 	}
 	
 	/**

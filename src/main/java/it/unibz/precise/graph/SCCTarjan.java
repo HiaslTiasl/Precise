@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.springframework.stereotype.Service;
+
 import it.unibz.precise.check.SCCFinder;
 
 /**
@@ -34,6 +36,7 @@ import it.unibz.precise.check.SCCFinder;
  * 	https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java
  * </a>
  */
+@Service
 public class SCCTarjan implements SCCFinder {
 
 
