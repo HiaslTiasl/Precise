@@ -1,0 +1,743 @@
+{
+  "model" : {
+    "description" : "Excerpt of a real process model for the realization of an hotel."
+  },
+  "configuration" : {
+    "hoursPerDay" : 8,
+    "attributes" : [ {
+      "name" : "f-unit",
+      "shortName" : "fu",
+      "range" : 20,
+      "ordered" : true
+    }, {
+      "name" : "level",
+      "shortName" : "l",
+      "range" : [ "u1", "f0", "f1", "f2" ],
+      "ordered" : true
+    }, {
+      "name" : "number",
+      "shortName" : "nr",
+      "range" : 10,
+      "ordered" : true
+    }, {
+      "name" : "orientation",
+      "shortName" : "o",
+      "range" : [ "N", "E", "S", "W" ],
+      "ordered" : true
+    }, {
+      "name" : "section",
+      "shortName" : "sn",
+      "range" : [ "en", "r", "c" ],
+      "ordered" : false
+    }, {
+      "name" : "sector",
+      "shortName" : "sr",
+      "range" : [ "A" ],
+      "ordered" : false
+    } ],
+    "phases" : [ {
+      "name" : "Exterior",
+      "description" : "Advanced phase concerning the exterior of the building.",
+      "color" : {
+        "r" : 206,
+        "g" : 255,
+        "b" : 153
+      },
+      "attributes" : [ "sector", "orientation", "level", "f-unit" ],
+      "valueTree" : {
+        "A" : {
+          "N" : {
+            "u1" : 20,
+            "f0" : 20,
+            "f1" : 20,
+            "f2" : 12
+          },
+          "E" : {
+            "u1" : 16,
+            "f0" : 16,
+            "f1" : 16,
+            "f2" : 12
+          },
+          "S" : {
+            "u1" : 20,
+            "f0" : 20,
+            "f1" : 20,
+            "f2" : 16
+          },
+          "W" : {
+            "u1" : 16,
+            "f0" : 16,
+            "f1" : 16,
+            "f2" : 12
+          }
+        }
+      }
+    }, {
+      "name" : "Interior",
+      "description" : "Advanced phase concerning the interior of the building.",
+      "color" : {
+        "r" : 188,
+        "g" : 210,
+        "b" : 255
+      },
+      "attributes" : [ "sector", "level", "section", "number" ],
+      "valueTree" : {
+        "A" : {
+          "u1" : {
+            "r" : 10,
+            "c" : 2
+          },
+          "f0" : {
+            "en" : 1,
+            "r" : 10,
+            "c" : 2
+          },
+          "f1" : {
+            "r" : 10,
+            "c" : 1
+          },
+          "f2" : {
+            "r" : 10,
+            "c" : 1
+          }
+        }
+      }
+    }, {
+      "name" : "Skeleton",
+      "description" : "Early phase at a coarse level.",
+      "color" : {
+        "r" : 255,
+        "g" : 220,
+        "b" : 200
+      },
+      "attributes" : [ "sector", "level" ],
+      "valueTree" : {
+        "A" : [ "u1", "f0", "f1", "f2" ]
+      }
+    } ],
+    "crafts" : [ {
+      "name" : "Brick Layer",
+      "shortName" : "Br"
+    }, {
+      "name" : "Digger",
+      "shortName" : "Di"
+    }, {
+      "name" : "Electrician",
+      "shortName" : "El"
+    }, {
+      "name" : "Plumber",
+      "shortName" : "Pl"
+    }, {
+      "name" : "Scaffolder",
+      "shortName" : "Sc"
+    }, {
+      "name" : "Site Equipper",
+      "shortName" : "SE"
+    } ],
+    "activities" : [ {
+      "name" : "Concrete Pouring",
+      "shortName" : "C",
+      "unitOfMeasure" : "m²",
+      "phase" : "Skeleton",
+      "craft" : "Brick Layer"
+    }, {
+      "name" : "Construction Site Preparation",
+      "shortName" : "A",
+      "phase" : "Skeleton",
+      "craft" : "Site Equipper"
+    }, {
+      "name" : "Electricity Connection",
+      "shortName" : "D",
+      "unitOfMeasure" : "m",
+      "phase" : "Interior",
+      "craft" : "Electrician"
+    }, {
+      "name" : "Excavation",
+      "shortName" : "B",
+      "unitOfMeasure" : "m³",
+      "phase" : "Skeleton",
+      "craft" : "Digger"
+    }, {
+      "name" : "Fill Excavation",
+      "shortName" : "F",
+      "unitOfMeasure" : "m³",
+      "phase" : "Skeleton",
+      "craft" : "Digger"
+    }, {
+      "name" : "Pipes Installation",
+      "shortName" : "H",
+      "unitOfMeasure" : "m²",
+      "phase" : "Interior",
+      "craft" : "Plumber"
+    }, {
+      "name" : "Scaffolding Installation",
+      "shortName" : "G",
+      "unitOfMeasure" : "m²",
+      "phase" : "Exterior",
+      "craft" : "Scaffolder"
+    }, {
+      "name" : "Task 2",
+      "shortName" : "T2",
+      "phase" : "Interior"
+    }, {
+      "name" : "Task 3",
+      "shortName" : "T3",
+      "phase" : "Interior"
+    }, {
+      "name" : "Task 4",
+      "shortName" : "T4",
+      "phase" : "Interior"
+    }, {
+      "name" : "Test 1",
+      "shortName" : "T1",
+      "phase" : "Interior"
+    }, {
+      "name" : "Water and Gas Connection",
+      "shortName" : "E",
+      "unitOfMeasure" : "m",
+      "phase" : "Interior",
+      "craft" : "Plumber"
+    }, {
+      "name" : "XXXXX",
+      "shortName" : "XA",
+      "phase" : "Interior"
+    } ]
+  },
+  "diagram" : {
+    "tasks" : [ {
+      "id" : 1,
+      "activity" : "Construction Site Preparation",
+      "pitch" : {
+        "crewSize" : 4,
+        "crewCount" : 2,
+        "durationDays" : 5,
+        "manDays" : 40
+      },
+      "exclusiveness" : {
+        "type" : "ATTRIBUTES",
+        "attributes" : [ "sector" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : -220.0,
+        "y" : 210.0
+      },
+      "locations" : [ {
+        "level" : "*",
+        "sector" : "*"
+      } ]
+    }, {
+      "id" : 2,
+      "activity" : "Excavation",
+      "pitch" : {
+        "crewSize" : 3,
+        "crewCount" : 2,
+        "durationDays" : 10,
+        "quantityPerDay" : 50.0,
+        "totalQuantity" : 1000,
+        "manDays" : 60
+      },
+      "exclusiveness" : {
+        "type" : "ATTRIBUTES",
+        "attributes" : [ "sector" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : 0.0,
+        "y" : 210.0
+      },
+      "locations" : [ {
+        "level" : "*",
+        "sector" : "*"
+      } ]
+    }, {
+      "id" : 3,
+      "activity" : "Concrete Pouring",
+      "pitch" : {
+        "crewSize" : 3,
+        "crewCount" : 1,
+        "durationDays" : 40,
+        "quantityPerDay" : 25.0,
+        "totalQuantity" : 1000,
+        "manDays" : 120
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level" ]
+      },
+      "order" : [ {
+        "attribute" : "level",
+        "orderType" : "ASCENDING"
+      } ],
+      "position" : {
+        "x" : 220.0,
+        "y" : 210.0
+      },
+      "locations" : [ {
+        "level" : "*",
+        "sector" : "*"
+      } ]
+    }, {
+      "id" : 4,
+      "activity" : "Electricity Connection",
+      "pitch" : {
+        "crewSize" : 2,
+        "crewCount" : 1,
+        "durationDays" : 2,
+        "quantityPerDay" : 150.0,
+        "totalQuantity" : 200,
+        "manDays" : 3
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : 440.0,
+        "y" : 110.0
+      },
+      "locations" : [ {
+        "number" : "*",
+        "level" : "u1",
+        "section" : "*",
+        "sector" : "A"
+      } ]
+    }, {
+      "id" : 5,
+      "activity" : "Water and Gas Connection",
+      "pitch" : {
+        "crewSize" : 3,
+        "crewCount" : 1,
+        "durationDays" : 5,
+        "quantityPerDay" : 20.0,
+        "totalQuantity" : 100,
+        "manDays" : 15
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : 440.0,
+        "y" : 300.0
+      },
+      "locations" : [ {
+        "number" : "*",
+        "level" : "u1",
+        "section" : "*",
+        "sector" : "A"
+      } ]
+    }, {
+      "id" : 6,
+      "activity" : "Fill Excavation",
+      "pitch" : {
+        "crewSize" : 2,
+        "crewCount" : 1,
+        "durationDays" : 3,
+        "quantityPerDay" : 5000.0,
+        "totalQuantity" : 15000,
+        "manDays" : 6
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : 660.0,
+        "y" : 220.0
+      },
+      "locations" : [ {
+        "level" : "u1",
+        "sector" : "A"
+      } ]
+    }, {
+      "id" : 7,
+      "activity" : "Scaffolding Installation",
+      "pitch" : {
+        "crewSize" : 4,
+        "crewCount" : 1,
+        "durationDays" : 3,
+        "manDays" : 12
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "orientation", "level", "f-unit" ]
+      },
+      "order" : [ {
+        "attribute" : "level",
+        "orderType" : "ASCENDING"
+      } ],
+      "position" : {
+        "x" : 440.0,
+        "y" : -100.0
+      },
+      "locations" : [ {
+        "orientation" : "N",
+        "f-unit" : "*",
+        "level" : "f0",
+        "sector" : "A"
+      }, {
+        "orientation" : "N",
+        "f-unit" : "*",
+        "level" : "f1",
+        "sector" : "A"
+      }, {
+        "orientation" : "N",
+        "f-unit" : "*",
+        "level" : "f2",
+        "sector" : "A"
+      }, {
+        "orientation" : "E",
+        "f-unit" : "*",
+        "level" : "f0",
+        "sector" : "A"
+      }, {
+        "orientation" : "E",
+        "f-unit" : "*",
+        "level" : "f1",
+        "sector" : "A"
+      }, {
+        "orientation" : "E",
+        "f-unit" : "*",
+        "level" : "f2",
+        "sector" : "A"
+      }, {
+        "orientation" : "S",
+        "f-unit" : "*",
+        "level" : "f0",
+        "sector" : "A"
+      }, {
+        "orientation" : "S",
+        "f-unit" : "*",
+        "level" : "f1",
+        "sector" : "A"
+      }, {
+        "orientation" : "S",
+        "f-unit" : "*",
+        "level" : "f2",
+        "sector" : "A"
+      }, {
+        "orientation" : "W",
+        "f-unit" : "*",
+        "level" : "f0",
+        "sector" : "A"
+      }, {
+        "orientation" : "W",
+        "f-unit" : "*",
+        "level" : "f1",
+        "sector" : "A"
+      }, {
+        "orientation" : "W",
+        "f-unit" : "*",
+        "level" : "f2",
+        "sector" : "A"
+      } ]
+    }, {
+      "id" : 8,
+      "activity" : "Pipes Installation",
+      "pitch" : {
+        "crewSize" : 2,
+        "crewCount" : 1,
+        "durationDays" : 20,
+        "quantityPerDay" : 5.0,
+        "totalQuantity" : 100,
+        "manDays" : 40
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : 220.0,
+        "y" : 390.0
+      },
+      "locations" : [ {
+        "number" : "1",
+        "level" : "u1",
+        "section" : "r",
+        "sector" : "A"
+      }, {
+        "number" : "1",
+        "level" : "u1",
+        "section" : "c",
+        "sector" : "A"
+      }, {
+        "number" : "1",
+        "level" : "f0",
+        "section" : "r",
+        "sector" : "A"
+      } ]
+    }, {
+      "id" : 9,
+      "activity" : "Test 1",
+      "pitch" : {
+        "crewSize" : 1,
+        "crewCount" : 1,
+        "durationDays" : 1,
+        "manDays" : 1
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : -210.0,
+        "y" : -300.0
+      },
+      "locations" : [ {
+        "number" : "1",
+        "level" : "f0",
+        "section" : "r",
+        "sector" : "A"
+      }, {
+        "number" : "1",
+        "level" : "f1",
+        "section" : "r",
+        "sector" : "A"
+      } ]
+    }, {
+      "id" : 10,
+      "activity" : "Task 2",
+      "pitch" : {
+        "crewSize" : 1,
+        "crewCount" : 1,
+        "durationDays" : 1,
+        "manDays" : 1
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : 20.0,
+        "y" : -300.0
+      },
+      "locations" : [ {
+        "number" : "1",
+        "level" : "f0",
+        "section" : "r",
+        "sector" : "A"
+      }, {
+        "number" : "1",
+        "level" : "f1",
+        "section" : "r",
+        "sector" : "A"
+      } ]
+    }, {
+      "id" : 11,
+      "activity" : "Task 3",
+      "pitch" : {
+        "crewSize" : 1,
+        "crewCount" : 1,
+        "durationDays" : 1,
+        "manDays" : 1
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : -210.0,
+        "y" : -90.0
+      },
+      "locations" : [ {
+        "number" : "1",
+        "level" : "f0",
+        "section" : "r",
+        "sector" : "A"
+      }, {
+        "number" : "1",
+        "level" : "f1",
+        "section" : "r",
+        "sector" : "A"
+      } ]
+    }, {
+      "id" : 12,
+      "activity" : "Task 4",
+      "pitch" : {
+        "crewSize" : 1,
+        "crewCount" : 1,
+        "durationDays" : 1,
+        "manDays" : 1
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : 20.0,
+        "y" : -90.0
+      },
+      "locations" : [ {
+        "number" : "1",
+        "level" : "f0",
+        "section" : "r",
+        "sector" : "A"
+      }, {
+        "number" : "1",
+        "level" : "f1",
+        "section" : "r",
+        "sector" : "A"
+      } ]
+    } ],
+    "dependencies" : [ {
+      "alternate" : false,
+      "chain" : true,
+      "source" : 1,
+      "target" : 2,
+      "scope" : {
+        "type" : "ATTRIBUTES",
+        "attributes" : [ "sector" ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 2,
+      "target" : 3,
+      "scope" : {
+        "type" : "GLOBAL",
+        "attributes" : [ ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 3,
+      "target" : 4,
+      "scope" : {
+        "type" : "ATTRIBUTES",
+        "attributes" : [ "sector", "level" ]
+      },
+      "vertices" : [ ],
+      "labelPosition" : {
+        "distance" : 0.454545,
+        "offset" : -14.0
+      }
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 3,
+      "target" : 5,
+      "scope" : {
+        "type" : "ATTRIBUTES",
+        "attributes" : [ "sector", "level" ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 4,
+      "target" : 6,
+      "scope" : {
+        "type" : "ATTRIBUTES",
+        "attributes" : [ "sector", "level" ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 5,
+      "target" : 6,
+      "scope" : {
+        "type" : "ATTRIBUTES",
+        "attributes" : [ "sector", "level" ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 6,
+      "target" : 7,
+      "scope" : {
+        "type" : "GLOBAL",
+        "attributes" : [ ]
+      },
+      "vertices" : [ {
+        "x" : 740.0,
+        "y" : -10.0
+      } ]
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 3,
+      "target" : 8,
+      "scope" : {
+        "type" : "GLOBAL",
+        "attributes" : [ ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : true,
+      "chain" : false,
+      "source" : 7,
+      "target" : 3,
+      "scope" : {
+        "type" : "ATTRIBUTES",
+        "attributes" : [ "sector", "level" ]
+      },
+      "vertices" : [ {
+        "x" : 300.0,
+        "y" : -10.0
+      } ]
+    }, {
+      "alternate" : true,
+      "chain" : false,
+      "source" : 9,
+      "target" : 10,
+      "scope" : {
+        "type" : "ATTRIBUTES",
+        "attributes" : [ "level" ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : true,
+      "chain" : false,
+      "source" : 12,
+      "target" : 11,
+      "scope" : {
+        "type" : "ATTRIBUTES",
+        "attributes" : [ "level" ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 12,
+      "target" : 10,
+      "scope" : {
+        "type" : "GLOBAL",
+        "attributes" : [ ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 9,
+      "target" : 11,
+      "scope" : {
+        "type" : "GLOBAL",
+        "attributes" : [ ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 1,
+      "target" : 11,
+      "scope" : {
+        "type" : "GLOBAL",
+        "attributes" : [ ]
+      },
+      "vertices" : [ ]
+    } ]
+  }
+}

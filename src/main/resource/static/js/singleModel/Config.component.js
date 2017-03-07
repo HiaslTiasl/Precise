@@ -55,12 +55,15 @@ define([
 					title: _.constant('Configuration'),
 					mdlContext: _.constant(MDLFiles.config)
 				}
-			}).result.then($ctrl.reload);
+			}).result
+				.then(loadPhases)
+				.then($ctrl.reload);
 		}
 		
 		/** Resets the configuration of this model to an empty one. */
 		function clearConfig() {
 			MDLFiles.clearConfig($ctrl.model.data)
+				.then(loadPhases)
 				.then($ctrl.reload, errorHandler.handle);
 		}
 		

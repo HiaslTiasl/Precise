@@ -1,5 +1,15 @@
 package it.unibz.precise.rest;
 
+import it.unibz.precise.model.Model;
+import it.unibz.precise.model.validation.ValidationAdapter;
+import it.unibz.precise.rep.ActivityRepository;
+import it.unibz.precise.rep.CraftRepository;
+import it.unibz.precise.rep.ModelRepository;
+import it.unibz.precise.rep.PhaseRepository;
+import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
+import it.unibz.precise.rest.mdl.ast.MDLFileAST;
+import it.unibz.precise.rest.mdl.conversion.MDLContext;
+
 import java.net.URI;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,14 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import it.unibz.precise.model.Model;
-import it.unibz.precise.model.validation.ValidationAdapter;
-import it.unibz.precise.rep.ModelRepository;
-import it.unibz.precise.rep.PhaseRepository;
-import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
-import it.unibz.precise.rest.mdl.ast.MDLFileAST;
-import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
 /**
  * Exposes the configuration part in MDL files.
@@ -54,6 +56,12 @@ public class MDLConfigController {
 
 	@Autowired
 	private PhaseRepository phaseRepository;
+	
+	@Autowired
+	private CraftRepository craftRepository;
+	
+	@Autowired
+	private ActivityRepository activityRepository;
 
 	@Autowired
 	private ValidationAdapter validator;
@@ -126,6 +134,8 @@ public class MDLConfigController {
 		else {
 			// We need to save the newly created phases manually.
 			phaseRepository.save(model.getPhases());
+			craftRepository.save(model.getCrafts());
+			activityRepository.save(model.getActivities());
 			// If the model already existed, changes will be saved automatically.
 			if (toBeCreated)
 				repository.save(model);

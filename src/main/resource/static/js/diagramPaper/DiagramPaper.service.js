@@ -34,7 +34,7 @@ define([
 		/**
 		 * Loads the diagram data from the given model resource
 		 * and returns it as a JSON object as expected by JointJS.
-		 * Tasks lacking a position will get a random posiiton within
+		 * Tasks lacking a position will get a random position within
 		 * the given bbox.
 		 */
 		function toRawGraph(modelResource, bbox) {
