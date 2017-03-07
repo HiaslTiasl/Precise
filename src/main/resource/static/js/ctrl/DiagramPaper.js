@@ -31,7 +31,7 @@ define([
 		NS_DEPENDENCY = 'dependency';
 	
 	// CSS classes for switching display mode
-	var CLASS_WARNING = 'warning',
+	var CLASS_WARNING = 'problem',
 		CLASS_SEARCH_RESULTS = 'search-results',
 		CLASS_SEARCH_RESULT = 'search-result';
 	
@@ -75,8 +75,8 @@ define([
 			//this.selectedView;
 			//this.selectedNS;
 			//this.editMode;
-			//this.warningTasks;
-			//this.warningDependencies;
+			//this.problemTasks;
+			//this.problemDependencies;
 			this.attachListeners();
 			this.setEditMode(defaultEditMode);
 		},
@@ -346,22 +346,22 @@ define([
 			});
 		},
 		
-		/** Unhighlights warnings and search results, if any. */
+		/** Unhighlights problems and search results, if any. */
 		resetClasses: function () {
-			this.resetWarnings();
+			this.resetProblems();
 			this.resetSearchResults();
 		},
 		
-		/** Unhighlights warnings, if any. */
-		resetWarnings: function () {
+		/** Unhighlights problems, if any. */
+		resetProblems: function () {
 			var paper = this.paper;
-			if (this.warningEntities) {
-				this.toggleEntityClass(this.warningEntities, CLASS_WARNING, false);
-				this.warningEntities = null;
+			if (this.problemEntities) {
+				this.toggleEntityClass(this.problemEntities, CLASS_WARNING, false);
+				this.problemEntities = null;
 			}
-			if (this.warningLocations) {
-				this.toggleLocationClass(this.warningLocations, CLASS_WARNING, false);
-				this.warningEntities = null;
+			if (this.problemLocations) {
+				this.toggleLocationClass(this.problemLocations, CLASS_WARNING, false);
+				this.problemEntities = null;
 			}
 		},
 		
@@ -374,19 +374,19 @@ define([
 			}
 		},
 		
-		/** Highlights the shapes involved in the given warning. */
-		showWarning: function (warning) {
+		/** Highlights the shapes involved in the given problem. */
+		showProblem: function (problem) {
 			this.resetClasses();
 			var paper = this.paper,
 				graph = paper.model;
 			
 			// Highlight involved entities (tasks and dependencies)
-			this.warningEntities = _.map(warning.entities, idOfEntity);
-			this.toggleEntityClass(this.warningEntities, CLASS_WARNING, true);
+			this.problemEntities = _.map(problem.entities, idOfEntity);
+			this.toggleEntityClass(this.problemEntities, CLASS_WARNING, true);
 			
 			// Highlights involved locations
-			this.warningLocations = warning.locations;
-			this.toggleLocationClass(this.warningLocations, CLASS_WARNING, true);
+			this.problemLocations = problem.locations;
+			this.toggleLocationClass(this.problemLocations, CLASS_WARNING, true);
 		},
 		
 		/** Highlights the given tasks as search result. */

@@ -139,8 +139,8 @@ define([
 				return this.getList('activities', params);
 			},
 			
-			getWarnings: function () {
-				return this.getList('warnings');
+			getProblems: function () {
+				return this.getList('problems');
 			}
 		
 		});

@@ -21,16 +21,16 @@ define([
 		
 		var $ctrl = this;
 		
-		$ctrl.showWarning = showWarning;
+		$ctrl.showProblem = showProblem;
 
 		$ctrl.done = done;
 		$ctrl.cancelled = cancelled;
 		$ctrl.activityChanged = activityChanged;
-		$ctrl.loadWarnings = loadWarnings;
+		$ctrl.loadProblems = loadProblems;
 		
 		$ctrl.$onChanges = $onChanges;
 		
-		var warningsLoaded = false;
+		var problemsLoaded = false;
 		
 		/** Specialized error handlers by operation and resource type. */
 		var errorHandlers = {
@@ -75,10 +75,10 @@ define([
 		$scope.$on('dependency:change', diagramDependencyChangeHandler);
 		
 		function $onChanges(changes) {
-			if (!warningsLoaded && changes.model) {
-				// Initialize the list of warnings
-				warningsLoaded = true;
-				loadWarnings();
+			if (!problemsLoaded && changes.model) {
+				// Initialize the list of problems
+				problemsLoaded = true;
+				loadProblems();
 			}
 		}
 		
@@ -228,22 +228,26 @@ define([
 			}
 		}
 		
-		/** Load the warnings of the model. */
-		function loadWarnings() {
-			// Reset list to show that warnings are being reloaded
-			$ctrl.warnings = null;
-			$ctrl.model.getWarnings().then(function (warnings) {
-				$ctrl.warnings = warnings;
-				if ($ctrl.currentWarning) {
-					// Check if current warning still exists
-					showWarning(_.find(warnings, $ctrl.currentWarning));
+		/** Load the problems of the model. */
+		function loadProblems() {
+			// Reset list to show that problems are being reloaded
+			$ctrl.problems = null;
+			$ctrl.consistent = undefined;
+			$ctrl.model.getProblems().then(function (problems) {
+				$ctrl.problems = problems;
+				// group by categories and determine whether model is consistent
+				$ctrl.problemsByCategory = _.groupBy(problems, 'category');
+				$ctrl.consistent = !$ctrl.problemsByCategory.CONSISTENCY_ERROR;
+				if ($ctrl.currentProblem) {
+					// Check if current problem still exists
+					showProblem(_.find(problems, $ctrl.currentProblem));
 				}
 			}, errorHandler.handle);
 		}
 		
-		/** Highlight the given warning in the diagram. */
-		function showWarning(w) {
-			$ctrl.currentWarning = $ctrl.currentWarning !== w ? w : null;
+		/** Highlight the given problem in the diagram. */
+		function showProblem(w) {
+			$ctrl.currentProblem = $ctrl.currentProblem !== w ? w : null;
 		}
 		
 		/** 

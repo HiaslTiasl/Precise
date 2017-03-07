@@ -4,9 +4,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import javax.transaction.Transactional;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -23,6 +25,7 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import it.unibz.precise.Application;
+import it.unibz.precise.model.Activity;
 import it.unibz.precise.model.BaseEntity;
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Model;
@@ -46,7 +49,7 @@ public class CycleCheckerTest {
 	public String name;
 	
 	@Parameter(1)
-	public List<List<Integer>> adj;
+	public Map<Integer, Set<Integer>> adj;
 
 	@Parameter(2)
 	public Set<Set<Integer>> expectedSCCs;
@@ -61,14 +64,18 @@ public class CycleCheckerTest {
 		});
 	}
 	
-	private List<Task> toTasks(List<List<Integer>> adj) {
-		List<Task> tasks = IntStream.range(0, adj.size()).mapToObj(i -> {
+	private List<Task> toTasks(Map<Integer, Set<Integer>> adj) {
+		List<Task> tasks = adj.keySet().stream().map(i -> {
 			Task t = new Task();
+			Activity a = new Activity();
+			a.setName("Activity " + i);
+			a.setShortName("a" + i);
+			t.setActivity(a);
 			t.setId(i);
 			return t;
 		}).collect(Collectors.toList());
 		
-		IntStream.range(0, adj.size()).forEach(i -> {
+		adj.keySet().forEach(i -> {
 			Task source = tasks.get(i);
 			List<Dependency> out = Util.mapToList(adj.get(i), j -> {
 				Dependency d = new Dependency();

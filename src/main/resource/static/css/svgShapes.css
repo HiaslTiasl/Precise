@@ -146,26 +146,26 @@ rect.task-craft {
  * Warnings
  ******************************************/
  
-.joint-type-precise-taskshape.warning rect,
-.joint-type-precise-taskshape rect.warning,
-.joint-type-precise-dependencyshape.warning .connection,
-.joint-type-precise-dependencyshape.warning .marker-target,
-.joint-type-precise-dependencyshape.warning .alt-cross {
+.joint-type-precise-taskshape.problem rect,
+.joint-type-precise-taskshape rect.problem,
+.joint-type-precise-dependencyshape.problem .connection,
+.joint-type-precise-dependencyshape.problem .marker-target,
+.joint-type-precise-dependencyshape.problem .alt-cross {
 	stroke: red;
 }
 
-.joint-type-precise-taskshape.warning rect,
-.joint-type-precise-dependencyshape.warning .connection,
-.joint-type-precise-dependencyshape.warning .marker-target {
+.joint-type-precise-taskshape.problem rect,
+.joint-type-precise-dependencyshape.problem .connection,
+.joint-type-precise-dependencyshape.problem .marker-target {
 	stroke-width: 3px;	
 }
 
-.joint-type-precise-dependencyshape.warning .alt-cross,
-.joint-type-precise-taskshape.warning rect.loc-entry {
+.joint-type-precise-dependencyshape.problem .alt-cross,
+.joint-type-precise-taskshape.problem rect.loc-entry {
 	stroke-width: 2px;
 }
 
-.joint-type-precise-dependencyshape.warning .marker-target {
+.joint-type-precise-dependencyshape.problem .marker-target {
 	fill: red;
 }
 

@@ -61,12 +61,13 @@ public class ModelsClientTest {
 	 */
 	@Test
 	public void postNestedModel() throws IOException, Exception {
+		String jsonContent = TestUtil.load("userSyntax/valid/user-syntax-example.mdl");
 		Link fullModelsLink = traverson.follow("fullModels").asLink();
 		MvcResult result = mockMvc.perform(
 			post(fullModelsLink.getHref())
 			.accept(MediaTypes.HAL_JSON)
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(TestUtil.load("nestedModel.json"))
+			.content(jsonContent)
 		)
 		.andExpect(status().isCreated())
 		.andReturn();

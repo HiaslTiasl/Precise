@@ -42,7 +42,7 @@ function (
 	            model: '<',
 	            tools: '<',
 	            hideLocations: '<',
-	            currentWarning: '<',
+	            currentProblem: '<',
 				onStructureChanged: '&',
 				onDiagramChanged: '&',
 				onZoom: '&'

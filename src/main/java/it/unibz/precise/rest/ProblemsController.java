@@ -28,14 +28,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
  *
  */
 @RepositoryRestController
-public class WarningsController {
+public class ProblemsController {
 	
 	private List<ProblemChecker> consistencyCheckers;		// All ConsistencyChecker-Beans in the ApplicationContext
 	private ModelRepository modelRepository;
 	private ProjectionFactory projectionFactory;
 	
 	@Autowired
-	public WarningsController(List<ProblemChecker> consistencyCheckers, ModelRepository modelRepository, ProjectionFactory projectionFactory) {
+	public ProblemsController(List<ProblemChecker> consistencyCheckers, ModelRepository modelRepository, ProjectionFactory projectionFactory) {
 		this.consistencyCheckers = consistencyCheckers;
 		this.modelRepository = modelRepository;
 		this.projectionFactory = projectionFactory;
@@ -43,9 +43,9 @@ public class WarningsController {
 		consistencyCheckers.sort(ProblemClassification.BY_CATEGORY_AND_TYPE);
 	}
 
-	/** Invokes all checkers for the given model and returns the list of resulting warnings. */
-	@RequestMapping(path="/models/{id}/warnings", method=RequestMethod.GET)
-	public ResponseEntity<?> getWarnings(@PathVariable("id") long id) {
+	/** Invokes all checkers for the given model and returns the list of resulting {@link ModelProblem}s. */
+	@RequestMapping(path="/models/{id}/problems", method=RequestMethod.GET)
+	public ResponseEntity<?> getProblems(@PathVariable("id") long id) {
 		Model model = modelRepository.findOne(id);
 		
 		if (model == null)
@@ -54,10 +54,10 @@ public class WarningsController {
 		// Logic-wise, the following could be parallelized (using .parallelStream()),
 		// but that results in random errors thrown from Hibernate.
 		// Apparently, the way Hibernate retrieves entities is not thread-safe.
-		List<WarningResourceContent> projected = consistencyCheckers.stream()
+		List<ProblemResourceContent> projected = consistencyCheckers.stream()
 			.flatMap(c -> c.check(model))
 			.filter(Objects::nonNull)		// In case some checker fails to ensure this
-			.map(w -> new WarningResourceContent(w, this::mapEntity))
+			.map(w -> new ProblemResourceContent(w, this::mapEntity))
 			.collect(Collectors.toList());
 		
 		return ResponseEntity.ok(new Resources<>(projected));

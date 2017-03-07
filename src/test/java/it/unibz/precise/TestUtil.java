@@ -10,7 +10,7 @@ import org.springframework.util.StreamUtils;
 public class TestUtil {
 	
 	public static String load(String resource) throws IOException {
-		try (InputStream is = new ClassPathResource("nestedModel.json").getInputStream()) {
+		try (InputStream is = new ClassPathResource(resource).getInputStream()) {
 			return StreamUtils.copyToString(is, StandardCharsets.UTF_8);
 		}
 	}

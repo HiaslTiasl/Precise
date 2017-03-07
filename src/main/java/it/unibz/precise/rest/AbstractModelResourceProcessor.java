@@ -27,9 +27,9 @@ public abstract class AbstractModelResourceProcessor<T extends HasLongId> implem
 		long id = resource.getContent().getId();
 		resource.add(
 			service.underBasePath(
-				linkTo(methodOn(WarningsController.class).getWarnings(id))
+				linkTo(methodOn(ProblemsController.class).getProblems(id))
 			)
-			.withRel("warnings")
+			.withRel("problems")
 		);
 		resource.add(
 			service.underBasePath(

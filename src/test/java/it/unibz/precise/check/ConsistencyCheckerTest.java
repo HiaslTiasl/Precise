@@ -3,29 +3,46 @@ package it.unibz.precise.check;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import javax.transaction.Transactional;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import it.unibz.precise.Application;
+import it.unibz.precise.TestUtil;
 import it.unibz.precise.graph.disj.AcyclicOrientationFinder;
 import it.unibz.precise.graph.disj.DisjunctiveGraph;
-import it.unibz.precise.graph.disj.OrientationResult;
 import it.unibz.precise.model.Model;
-import it.unibz.precise.rep.ModelRepository;
+import it.unibz.precise.rest.mdl.ast.MDLFileAST;
+import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
+@RunWith(Parameterized.class)
 @SpringBootTest(classes=Application.class, webEnvironment=WebEnvironment.RANDOM_PORT)
-@Transactional
 public class ConsistencyCheckerTest {
 	
+	private static final int ITERATIONS = 100;
+	private static final int WARMUP_ITERATIONS = 100;
+	private static final int TIMEOUT_MIN = 60;
+	private static final int TIMEOUT_MS = TIMEOUT_MIN * 60 * 1000;
 	
 	@ClassRule
 	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
@@ -34,7 +51,7 @@ public class ConsistencyCheckerTest {
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
 	
 	@Autowired
-	private ModelRepository repository;
+    private ObjectMapper objectMapper;
 	
 	@Autowired
 	private ModelToGraphTranslator modelToGraphTranslator;
@@ -42,178 +59,128 @@ public class ConsistencyCheckerTest {
 	@Autowired
 	private AcyclicOrientationFinder orientationFinder;
 	
-	private Model consistentModel;
-	private Model cyclicModel;
-	private Model deadlockModel;
+	@Parameter(0)
+	public String modelName;
+	@Parameter(1)
+	public boolean expectSuccess;
+	@Parameter(2)
+	public boolean ignoreSimpleEdges;
+	@Parameter(3)
+	public boolean usePartitioning;
+	@Parameter(4)
+	public boolean useResolving;
 	
-	private boolean modelsInitialized;
-
+	private Model model;
+	private DisjunctiveGraph<TaskUnitNode> graph;
+	
+	private long transTimeNs = 0;
+	private long checkTimeNs = 0;
+	
+	private int completedIterations = 0;
+	
+	private static final List<ConsistencyCheckerTest> allRuns = new ArrayList<>();
+	
+	@AfterClass
+	public static void printRuns() {
+		System.out.println("|             model | tasks | dependencies |   nodes |   arcs |   edges | no simple edges | partitioning | resolving || translation |       check |       total |");
+		System.out.println("+-------------------+-------+--------------+---------+--------+---------+-----------------+--------------+-----------++-------------+-------------+-------------|");
+		for (ConsistencyCheckerTest run : allRuns) {
+			System.out.printf(
+				"| %17s | % 4d | % 12d | % 7d | % 7d | % 7d |               %c |            %c |         %c || %11s | %11s | %11s |\n",
+				run.modelName,
+				run.model.getTasks().size(),
+				run.model.getDependencies().size(),
+				run.graph.nodes().size(),
+				run.graph.arcs().size(),
+				run.graph.edges().size(),
+				run.ignoreSimpleEdges ? 'X' : ' ',
+				run.usePartitioning ? 'X' : ' ',
+				run.useResolving ? 'X' : ' ',
+				run.transTimeCell(),
+				run.checkTimeCell(),
+				run.totalTimeCell()
+			);
+		}
+	}
+	
+	@Parameters(name = "{0} ({2}, {3}, {4})")
+	public static Collection<Object[]> data() {
+		List<Object[]> params = new ArrayList<>();
+		String[] modelNames = { "test - consistent", "test - cyclic", "test - deadlock" };
+		boolean[] expectSuccess = { true, false, false };
+		
+		for (int i = 0; i < modelNames.length; i++) {
+			String m = modelNames[i];
+			boolean e = expectSuccess[i];
+			// Put sophisticated first so the JIT will optimize them less,
+			// thus if they still take less time it is not because of the JIT. 
+			params.add(new Object[] { m, e,  true,  true,  true });
+			params.add(new Object[] { m, e, false,  true,  true });
+			params.add(new Object[] { m, e,  true,  true, false });
+			params.add(new Object[] { m, e, false,  true, false });
+			params.add(new Object[] { m, e,  true, false,  true });
+			params.add(new Object[] { m, e, false, false,  true });
+			params.add(new Object[] { m, e,  true, false, false });
+			params.add(new Object[] { m, e, false, false, false });
+		}
+		return params;
+	}
+	
 	@Before
-	public void checkSetUp() {
-		if (!modelsInitialized) {
-			modelsInitialized = true;
-			consistentModel = repository.findByName("hotel");
-			cyclicModel     = repository.findByName("hotel - cyclic");
-			deadlockModel   = repository.findByName("hotel - deadlock");
+	public void setUp() throws Exception {
+		new TestContextManager(getClass()).prepareTestInstance(this);
+		MDLFileAST mdl = objectMapper.readValue(TestUtil.load("consistency/" + modelName + ".mdl"), MDLFileAST.class);
+		model = MDLContext.create().files().toEntity(mdl);
+		warmUp();
+	}
+	
+	private void warmUp() {
+		for (int i = 0; i < WARMUP_ITERATIONS; i++) {
+			graph = modelToGraphTranslator.translate(model.getTasks(), ignoreSimpleEdges);
+			orientationFinder.init(true, true).search(graph).isSuccessful();
 		}
 	}
 	
-	private String literal(String name, boolean value) {
-		return (value ? ' ' : '!') + name ;
-	}
-	
-	private boolean test(Model model, boolean ignoreSimpleEdges, boolean partitioning, boolean resolving) {
-		int iterations = 1000;
-		boolean success = true;
-		long sumTranslate = 0;
-		long sumCheck = 0;
-		for (int i = 0; i < iterations + 1; i++) {
+	@Test(timeout=TIMEOUT_MS)
+	public void test() throws JsonParseException, IOException {
+		// Add first to also consider timed-out runs
+		allRuns.add(this);
+		for (int i = 0; i < ITERATIONS; i++) {
 			long t0 = System.nanoTime();
-			DisjunctiveGraph<TaskUnitNode> graph = modelToGraphTranslator.translate(model.getTasks(), ignoreSimpleEdges);
+			graph = modelToGraphTranslator.translate(model.getTasks(), ignoreSimpleEdges);
 			long t1 = System.nanoTime();
-			OrientationResult<TaskUnitNode> res =  orientationFinder.init(partitioning, resolving).search(graph);
+			boolean success = orientationFinder.init(usePartitioning, useResolving).search(graph).isSuccessful();
 			long t2 = System.nanoTime();
-			if (i > 0) {
-				// First iteration is warm-up
-				success = success && res.isSuccessful(); 
-				sumTranslate += t1 - t0;
-				sumCheck += t2 - t1;
-			}
+			transTimeNs += t1 - t0;
+			checkTimeNs += t2 - t1;
+			completedIterations++;
+			
+			if (expectSuccess)
+				assertTrue(success);
+			else
+				assertFalse(success);
 		}
-		long avgTranslate = sumTranslate / iterations;
-		long avgCheck = sumCheck / iterations;
-		System.out.printf("test(%s, %s, %s, %s): % ,12d + % ,12d = % ,12d ns\n",
-			model.getName(),
-			literal("ignoreSimpleEdges", ignoreSimpleEdges),
-			literal("partitioning", partitioning),
-			literal("resolving", resolving),
-			avgTranslate, avgCheck, avgTranslate + avgCheck
-		);
-		return success;
-	}
-
-	@Test
-	public void testConsistent() {
-		assertTrue(test(consistentModel, false, false, false));
 	}
 	
-	@Test
-	public void testConsistentIgnoreSimple() {
-		assertTrue(test(consistentModel, true, false, false));
+	private String transTimeCell() {
+		return timeCell(avgTimeMs(transTimeNs));
 	}
 	
-	@Test
-	public void testConsistentPartitioning() {
-		assertTrue(test(consistentModel, false, true, false));
+	private String checkTimeCell() {
+		return timeCell(avgTimeMs(checkTimeNs));
 	}
 	
-	@Test
-	public void testConsistentResolving() {
-		assertTrue(test(consistentModel, false, false, true));
+	private String totalTimeCell() {
+		return timeCell(avgTimeMs(transTimeNs + checkTimeNs));
 	}
 	
-	@Test
-	public void testConsistentIgnoreSimplePartitioning() {
-		assertTrue(test(consistentModel, true, true, false));
+	private long avgTimeMs(long sumNs) {
+		return completedIterations > 0
+			? sumNs / ITERATIONS / 1000000
+			: -1;
 	}
 	
-	@Test
-	public void testConsistentIgnoreSimpleResolving() {
-		assertTrue(test(consistentModel, true, false, true));
+	private String timeCell(long ms) {
+		return ms > 0 ? String.format("%,d", ms) : "> " + TIMEOUT_MIN + " min";
 	}
-	
-	@Test
-	public void testConsistentPartitioningResolving() {
-		assertTrue(test(consistentModel, false, true, true));
-	}
-	
-	@Test
-	public void testConsistentIgnoreSimplePartitioningResolving() {
-		assertTrue(test(consistentModel, true, true, true));
-	}
-	
-	
-	@Test
-	public void testCyclic() {
-		assertFalse(test(cyclicModel, false, false, false));
-	}
-	
-	@Test
-	public void testCyclicIgnoreSimple() {
-		assertFalse(test(cyclicModel, true, false, false));
-	}
-	
-	@Test
-	public void testCyclicPartitioning() {
-		assertFalse(test(cyclicModel, false, true, false));
-	}
-	
-	@Test
-	public void testCyclicResolving() {
-		assertFalse(test(cyclicModel, false, false, true));
-	}
-	
-	@Test
-	public void testCyclicIgnoreSimplePartitioning() {
-		assertFalse(test(cyclicModel, true, true, false));
-	}
-	
-	@Test
-	public void testCyclicIgnoreSimpleResolving() {
-		assertFalse(test(cyclicModel, true, false, true));
-	}
-	
-	@Test
-	public void testCyclicPartitioningResolving() {
-		assertFalse(test(cyclicModel, false, true, true));
-	}
-	
-	@Test
-	public void testCyclicIgnoreSimplePartitioningResolving() {
-		assertFalse(test(cyclicModel, true, true, true));
-	}
-	
-	
-	
-	@Test
-	public void testDeadlock() {
-		assertFalse(test(deadlockModel, false, false, false));
-	}
-	
-	@Test
-	public void testDeadlockIgnoreSimple() {
-		assertFalse(test(deadlockModel, true, false, false));
-	}
-	
-	@Test
-	public void testDeadlockPartitioning() {
-		assertFalse(test(deadlockModel, false, true, false));
-	}
-	
-	@Test
-	public void testDeadlockResolving() {
-		assertFalse(test(deadlockModel, false, false, true));
-	}
-	
-	@Test
-	public void testDeadlockIgnoreSimplePartitioning() {
-		assertFalse(test(deadlockModel, true, true, false));
-	}
-	
-	@Test
-	public void testDeadlockIgnoreSimpleResolving() {
-		assertFalse(test(deadlockModel, true, false, true));
-	}
-	
-	@Test
-	public void testDeadlockPartitioningResolving() {
-		assertFalse(test(deadlockModel, false, true, true));
-	}
-	
-	@Test
-	public void testDeadlockIgnoreSimplePartitioningResolving() {
-		assertFalse(test(deadlockModel, true, true, true));
-	}
-	
-	
 }

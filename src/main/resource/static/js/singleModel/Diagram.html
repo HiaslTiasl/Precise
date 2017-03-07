@@ -1,12 +1,12 @@
 <div class="panels">
 	<!-- The DiagramPaper itself -->
 	<!-- reload the model on structural changes to refresh info about whether config and diagram are empty and editable -->
-	<!-- reload the warnings on all changes to keep them up-to-date -->
+	<!-- reload the problems on all changes to keep them up-to-date -->
 	<precise-diagram-paper
 		model="$ctrl.model"
-		current-warning="$ctrl.currentWarning"
+		current-problem="$ctrl.currentProblem"
 		on-structure-changed="$ctrl.reload()"		
-		on-diagram-changed="$ctrl.loadWarnings()">
+		on-diagram-changed="$ctrl.loadProblems()">
 	</precise-diagram-paper>
 	<div id="properties-wrapper" ng-show="$ctrl.resource" ng-switch on="$ctrl.resourceType">
 		<task-properties
@@ -29,24 +29,43 @@
 		</div>
 	</div>
 </div>
-<div id="warnings" class="panel panel-default">
-	<header class="panel-heading" ng-click="$ctrl.warningsOpen = !$ctrl.warningsOpen">
-		<a href>
-			Warnings
-			<span class="badge" ng-show="$ctrl.warnings.length">{{$ctrl.warnings.length}}</span>
-			<span class="warnings-loader" ng-if="!$ctrl.warnings"></span>
-		</a>
+<div id="problems" class="panel panel-default" ng-class="{open: $ctrl.problemsOpen, consistent: $ctrl.consistent, inconsistent: $ctrl.consistent === false}">
+	<header class="panel-heading" ng-click="$ctrl.problemsOpen = !$ctrl.problemsOpen">
+		<div ng-if="$ctrl.problems" class="heading-section consistency-feedback">
+			{{$ctrl.consistent ? 'Consistent' : 'Inconsistent'}}
+			<span class="glyphicon glyphicon-{{$ctrl.consistent ? 'ok' : 'warning-sign'}}"></span>
+		</div>
+		<div ng-if="$ctrl.problems.length" class="heading-section-divider"></div>
+		<div ng-if="$ctrl.problems && $ctrl.problemsOpen" class="heading-section">
+			<span ng-if="$ctrl.problemsOpen" class="problem-count structure-warning">Structure warnings: {{$ctrl.problemsByCategory.STRUCTURE_WARNING.length || 0}}</span>
+			<span ng-if="$ctrl.problemsOpen" class="problem-count structure-error">Structure errors: {{$ctrl.problemsByCategory.STRUCTURE_ERROR.length || 0}}</span>
+			<span ng-if="$ctrl.problemsOpen" class="problem-count consistency-error">Consistency errors: {{$ctrl.problemsByCategory.CONSISTENCY_ERROR.length || 0}}</span>
+		</div>
+		<div ng-if="!$ctrl.problemsOpen" class="heading-section">
+		 	<span class="problem-count all-problems">Problems: {{$ctrl.problems.length}}</span>
+		 </div>
+		<div ng-if="!$ctrl.problems" class="heading-section loading-indicator">Loading...</div>
 	</header>
-	<article uib-collapse="!$ctrl.warningsOpen" class="{{$ctrl.warnings.length ? 'list-group' : 'panel-body'}}">
-		<a href
-			class="list-group-item"
-			ng-if="$ctrl.warnings.length > 0"
-			ng-class="{'list-group-item-danger': w === $ctrl.currentWarning}"
-			ng-repeat="w in $ctrl.warnings track by $index"
-			ng-click="$ctrl.showWarning(w)">
-			{{w.message}}
-		</a>
-		<p class="text-muted" ng-if="$ctrl.warnings.length === 0">No warnings</p> 
-		<p class="text-muted" ng-if="!$ctrl.warnings">Loading...</p>
+	<article uib-collapse="!$ctrl.problemsOpen" class="{{$ctrl.problems.length ? 'list-group' : 'panel-body'}}">
+		<div
+			class="list-group-item row"
+			data-category="{{p.category}}"
+			ng-if="$ctrl.problems.length > 0"
+			ng-class="{'active': p === $ctrl.currentProblem}"
+			ng-repeat="p in $ctrl.problems track by $index"
+			ng-click="$ctrl.showProblem(p)"
+		>
+			<div class="col-sm-2" ng-switch="p.category">
+				<span ng-switch-when="STRUCTURE_WARNING" class="structure-warning">Structure warning</span>
+				<span ng-switch-when="STRUCTURE_ERROR" class="structure-error">Structure error</span>
+				<span ng-switch-when="CONSISTENCY_ERROR" class="consistency-error">Consistency error</span>
+			</div>	
+			
+			<span class="col-sm-10">
+				{{p.message}}
+			</span>
+		</div>
+		<p class="text-muted" ng-if="$ctrl.problems.length === 0">No problems</p> 
+		<p class="text-muted" ng-if="!$ctrl.problems">Loading...</p>
 	</article>
 </div>

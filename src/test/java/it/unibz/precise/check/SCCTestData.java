@@ -55,6 +55,7 @@ public class SCCTestData {
 		adj.put(0, asSet(1, 2));
 		adj.put(1, asSet(2, 3));
 		adj.put(2, asSet(3));
+		adj.put(3, asSet());
 		
 		return new SCCTestData(
 			"dag",

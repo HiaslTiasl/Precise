@@ -163,53 +163,103 @@ precise-diagram-paper {
  * Warnings
  ******************************************/
 
-#warnings {
+#problems {
 	position: fixed;
 	bottom: 0;
 	left: 0;
 	width: auto;
-	max-width: 100%;
 	margin-bottom: 0;
-	border-color: #a94442;
-	border-width: 2px 2px 0px 0px;
-	border-radius: 0;
-	box-shadow: 1px 1px 4px 1px #a94442;
-	color: red;
+	border: none;
 }
 
-#warnings header.panel-heading {
+#problems.open {
+	width: 100%;
+}
+
+.problem-count,
+.structure-warning,
+.structure-error,
+.consistency-error {
+	font-size: 0.8em;
+	padding: 0.5em;
+	border-radius: 1em;
+	background-color: white;
+	color: #888;
+}
+
+.structure-warning {
+	color: #31708f;
+}
+
+.structure-error {
+	color: #8a6d3b;
+}
+
+.consistency-error {
+	color: #a94442;
+}
+
+#problems header.panel-heading,
+#problems .list-group-item {
+	cursor: pointer;
+}
+
+#problems header.panel-heading {
+	padding: 0;
 	border-bottom: 0;
-}
-
-#warnings header.panel-heading,
-#warnings header.panel-heading a {
-	background-color: #a94442;
+	background-color: #aaa;
 	color: white;
 }
-#warnings header.panel-heading a .badge {
+
+#problems header.panel-heading .heading-section,
+#problems header.panel-heading .heading-section-divider {
+	display: table-cell;
+	padding: 10px 15px;
+}
+
+#problems header.panel-heading .heading-section-divider {
+	padding: 10px 8px;
+}
+
+#problems header.panel-heading .heading-section-divider::after {
+	content: "|";
+}
+
+#problems.consistent header.panel-heading {
+	background-color: #3c763d;
+}
+
+#problems.inconsistent header.panel-heading {
+	background-color: #a94442;
+}
+
+#problems header.panel-heading a .badge {
 	background-color: white;
 	color: #a94442;
 }
 
-#warnings article {
+#problems article {
 	height: 200px;
-	min-width: 400px;
-	overflow: scroll;
+	width: 100%;
+	overflow-y: scroll;
+	overflow-x: hidden;
 }
 
-#warnings.panel,
-#warnings > .panel-heading,
-#warnings > .panel-body,
-#warnings > .list-group,
-#warnings > .list-group > .list-group-item {
+#problems.panel,
+#problems > .panel-heading,
+#problems > .panel-body,
+#problems > .list-group,
+#problems > .list-group > .list-group-item {
 	border-radius: 0;
 }
 
-#warnings ul {
+#problems ul {
 	list-style: none;
 	padding: 0;
 }
 
-#warnings .warning-message {
-	color: red;
+#problems .list-group-item.active {
+	background-color: #aaa;
+	border-color: #888;
+	color: white;
 }

@@ -61,8 +61,8 @@ define([
 			if (changes.model) {
 				initSearch();
 			}
-			if (changes.currentWarning && $ctrl.diaPaper) {
-				warningsChanged();
+			if (changes.currentProblem && $ctrl.diaPaper) {
+				problemsChanged();
 			}
 		}
 		
@@ -209,7 +209,7 @@ define([
 		 * so update the highlighted and hidden shapes.
 		 */
 		function onRenderDone(event) {
-			warningsChanged();
+			problemsChanged();
 			hideLocationsChanged();
 			hideLabelsChanged();
 		}
@@ -248,12 +248,12 @@ define([
 			.then(structuralDiagramChange, errorHandler.handle);	// This is a structural change, because the set of cells changed
 		}
 		
-		/** Updates the currently displayed warning. */
-		function warningsChanged() {
-			if ($ctrl.currentWarning)
-				$ctrl.diaPaper.showWarning($ctrl.currentWarning);
+		/** Updates the currently displayed problem. */
+		function problemsChanged() {
+			if ($ctrl.currentProblem)
+				$ctrl.diaPaper.showProblem($ctrl.currentProblem);
 			else
-				$ctrl.diaPaper.resetWarnings();
+				$ctrl.diaPaper.resetProblems();
 		}
 		
 		/** Toggles visibility of the locations according to the current user input. */
