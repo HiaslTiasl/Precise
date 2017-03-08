@@ -187,7 +187,12 @@ define([
 		/** Property "hideLocations" changed, so update visibility of locations. */
 		updateHideLocations: function (model, hideLocations) {
 			// Hide locations, ordering, and exclusiveness
-			model.attr('.loc-entry, .trunc, .task-order, .task-exclusiveness', {
+			var hidden = [
+				'.loc-entry', '.trunc',
+				'.task-order', '.task-order-symbol', '.task-order-separator', '.task-order-value',
+				'.task-exclusiveness', '.task-exclusiveness-symbol', '.task-exclusiveness-separator', '.task-exclusiveness-value'
+			];
+			model.attr(hidden.join(', '), {
 				display: hideLocations ? 'none' : 'inline'
 			});
 			// Update the name field to use the gained space

@@ -490,15 +490,10 @@
         "y" : -300.0
       },
       "locations" : [ {
-        "number" : "1",
-        "level" : "f0",
-        "section" : "r",
-        "sector" : "A"
-      }, {
-        "number" : "1",
-        "level" : "f1",
-        "section" : "r",
-        "sector" : "A"
+        "number" : "*",
+        "level" : "*",
+        "section" : "*",
+        "sector" : "*"
       } ]
     }, {
       "id" : 10,
@@ -519,15 +514,10 @@
         "y" : -300.0
       },
       "locations" : [ {
-        "number" : "1",
-        "level" : "f0",
-        "section" : "r",
-        "sector" : "A"
-      }, {
-        "number" : "1",
-        "level" : "f1",
-        "section" : "r",
-        "sector" : "A"
+        "number" : "*",
+        "level" : "*",
+        "section" : "*",
+        "sector" : "*"
       } ]
     }, {
       "id" : 11,
@@ -548,15 +538,10 @@
         "y" : -90.0
       },
       "locations" : [ {
-        "number" : "1",
-        "level" : "f0",
-        "section" : "r",
-        "sector" : "A"
-      }, {
-        "number" : "1",
-        "level" : "f1",
-        "section" : "r",
-        "sector" : "A"
+        "number" : "*",
+        "level" : "*",
+        "section" : "*",
+        "sector" : "*"
       } ]
     }, {
       "id" : 12,
@@ -577,15 +562,10 @@
         "y" : -90.0
       },
       "locations" : [ {
-        "number" : "1",
-        "level" : "f0",
-        "section" : "r",
-        "sector" : "A"
-      }, {
-        "number" : "1",
-        "level" : "f1",
-        "section" : "r",
-        "sector" : "A"
+        "number" : "*",
+        "level" : "*",
+        "section" : "*",
+        "sector" : "*"
       } ]
     } ],
     "dependencies" : [ {

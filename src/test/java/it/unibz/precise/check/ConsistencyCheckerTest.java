@@ -82,11 +82,11 @@ public class ConsistencyCheckerTest {
 	
 	@AfterClass
 	public static void printRuns() {
-		System.out.println("|             model | tasks | dependencies |   nodes |   arcs |   edges | no simple edges | partitioning | resolving || translation |       check |       total |");
-		System.out.println("+-------------------+-------+--------------+---------+--------+---------+-----------------+--------------+-----------++-------------+-------------+-------------|");
+		System.out.println("|          model | tasks | dependencies |   nodes |    arcs |   edges | no simple edges | partitioning | resolving || translation |       check |       total |");
+		System.out.println("+----------------+-------+--------------+---------+---------+---------+-----------------+--------------+-----------++-------------+-------------+-------------|");
 		for (ConsistencyCheckerTest run : allRuns) {
 			System.out.printf(
-				"| %17s | % 5d | % 12d | % 7d | % 7d | % 7d |               %c |            %c |         %c || %11s | %11s | %11s |\n",
+				"| %14s | % 5d | % 12d | % 7d | % 7d | % 7d |               %c |            %c |         %c || %11s | %11s | %11s |\n",
 				run.modelName,
 				run.model.getTasks().size(),
 				run.model.getDependencies().size(),
@@ -106,8 +106,8 @@ public class ConsistencyCheckerTest {
 	@Parameters(name = "{0} ({2}, {3}, {4})")
 	public static Collection<Object[]> data() {
 		List<Object[]> params = new ArrayList<>();
-		String[] modelNames = { "test - consistent", "test - cyclic", "test - deadlock", "test - deadlock - complex" };
-		boolean[] expectSuccess = { true, false, false, false };
+		String[] modelNames = { /*"consistent", "cyclic", "deadlock",*/ "complex" };
+		boolean[] expectSuccess = { /*true, false, false,*/ false };
 		
 		for (int i = 0; i < modelNames.length; i++) {
 			String m = modelNames[i];
@@ -181,6 +181,6 @@ public class ConsistencyCheckerTest {
 	}
 	
 	private String timeCell(long ms) {
-		return ms > 0 ? String.format("%,d", ms) : "> " + TIMEOUT_MIN + " min";
+		return ms < 0 ? "> " + TIMEOUT_MIN + " min" : String.format("%,d", ms);
 	}
 }
