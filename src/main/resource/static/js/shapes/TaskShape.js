@@ -132,7 +132,7 @@ define([
 				'text.task-order-symbol':            { x: 0.5 * COL_WIDTH, text: '<' },
 				'text.task-order-separator':         { x:   1 * COL_WIDTH, text: ':' },
 				'text.task-order-value':             { x: 2.5 * COL_WIDTH },
-				'text.task-exclusiveness-symbol':    { x: 4.5 * COL_WIDTH, text: '\u25A3' },
+				'text.task-exclusiveness-symbol':    { x: 4.5 * COL_WIDTH, text: 'ex' },
 				'text.task-exclusiveness-separator': { x:   5 * COL_WIDTH, text: ':' },
 				'text.task-exclusiveness-value':     { x: 6.5 * COL_WIDTH },
 				// activity and locations

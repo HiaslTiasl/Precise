@@ -50,7 +50,7 @@ public class ConsistencyProblemChecker implements ProblemChecker {
 	private ModelToGraphTranslator translator;
 	
 	@Autowired
-	private AcyclicOrientationFinder orientationFinderFactory;
+	private AcyclicOrientationFinder orientationFinder;
 
 	@Override
 	public Category getCategory() {
@@ -72,7 +72,7 @@ public class ConsistencyProblemChecker implements ProblemChecker {
 		
 		long t1 = System.nanoTime();
 		
-		OrientationResult<TaskUnitNode> res = orientationFinderFactory.search(graph);
+		OrientationResult<TaskUnitNode> res = orientationFinder.search(graph);
 		
 		long t2 = System.nanoTime();
 		
