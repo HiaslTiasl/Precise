@@ -76,7 +76,8 @@ public class ConsistencyCheckerTest {
 	private long transTimeNs = 0;
 	private long checkTimeNs = 0;
 	
-	private int completedIterations = 0;
+	private int completedTranslations = 0;
+	private int completedChecks = 0;
 	
 	private static final List<ConsistencyCheckerTest> allRuns = new ArrayList<>();
 	
@@ -106,8 +107,8 @@ public class ConsistencyCheckerTest {
 	@Parameters(name = "{0} ({2}, {3}, {4})")
 	public static Collection<Object[]> data() {
 		List<Object[]> params = new ArrayList<>();
-		String[] modelNames = { /*"consistent", "cyclic", "deadlock",*/ "complex" };
-		boolean[] expectSuccess = { /*true, false, false,*/ false };
+		String[] modelNames = { "consistent", "cyclic", "deadlock", "complex" };
+		boolean[] expectSuccess = { true, false, false, false };
 		
 		for (int i = 0; i < modelNames.length; i++) {
 			String m = modelNames[i];
@@ -149,11 +150,12 @@ public class ConsistencyCheckerTest {
 			long t0 = System.nanoTime();
 			graph = modelToGraphTranslator.translate(model.getTasks(), ignoreSimpleEdges);
 			long t1 = System.nanoTime();
+			transTimeNs += t1 - t0;
+			completedTranslations++;
 			boolean success = orientationFinder.init(usePartitioning, useResolving).search(graph).isSuccessful();
 			long t2 = System.nanoTime();
-			transTimeNs += t1 - t0;
 			checkTimeNs += t2 - t1;
-			completedIterations++;
+			completedChecks++;
 			
 			if (expectSuccess)
 				assertTrue(success);
@@ -163,20 +165,20 @@ public class ConsistencyCheckerTest {
 	}
 	
 	private String transTimeCell() {
-		return timeCell(avgTimeMs(transTimeNs));
+		return timeCell(avgTimeMs(transTimeNs, completedTranslations));
 	}
 	
 	private String checkTimeCell() {
-		return timeCell(avgTimeMs(checkTimeNs));
+		return timeCell(avgTimeMs(checkTimeNs, completedChecks));
 	}
 	
 	private String totalTimeCell() {
-		return timeCell(avgTimeMs(transTimeNs + checkTimeNs));
+		return timeCell(avgTimeMs(transTimeNs + checkTimeNs, completedChecks));
 	}
 	
-	private long avgTimeMs(long sumNs) {
-		return completedIterations > 0
-			? sumNs / ITERATIONS / 1000000
+	private long avgTimeMs(long sumNs, int iterations) {
+		return completedChecks > 0
+			? sumNs / iterations / 1000000
 			: -1;
 	}
 	
