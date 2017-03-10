@@ -1,6 +1,23 @@
 package it.unibz.precise.rest;
 
+import it.unibz.precise.model.Activity;
+import it.unibz.precise.model.Dependency;
+import it.unibz.precise.model.Model;
+import it.unibz.precise.model.Task;
+import it.unibz.precise.model.validation.ValidationAdapter;
+import it.unibz.precise.rep.ModelRepository;
+import it.unibz.precise.rest.mdl.ast.MDLActivityAST;
+import it.unibz.precise.rest.mdl.ast.MDLConfigAST;
+import it.unibz.precise.rest.mdl.ast.MDLDependencyAST;
+import it.unibz.precise.rest.mdl.ast.MDLDiagramAST;
+import it.unibz.precise.rest.mdl.ast.MDLFileAST;
+import it.unibz.precise.rest.mdl.ast.MDLTaskAST;
+import it.unibz.precise.rest.mdl.conversion.MDLContext;
+
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,12 +34,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import it.unibz.precise.model.Model;
-import it.unibz.precise.model.validation.ValidationAdapter;
-import it.unibz.precise.rep.ModelRepository;
-import it.unibz.precise.rest.mdl.ast.MDLFileAST;
-import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
 /**
  * Exposes models as MDL files.
@@ -116,6 +127,84 @@ public class MDLFileController {
 		return toBeCreated
 			? ResponseEntity.created(URI.create(request.getRequestURL().toString())).build()
 			: ResponseEntity.noContent().build();
+	}
+	
+	@RequestMapping(
+		path="/replicated" + FILE_PATH + FILE_EXT,
+		method=RequestMethod.GET,
+		produces=MediaType.APPLICATION_JSON_VALUE
+	)
+	public ResponseEntity<?> replicate(
+		@PathVariable("name") String name,
+		@RequestParam("repeat") int repeat,
+		@RequestParam("depToTaskRatio") double depToTaskRatio
+	) {
+		Model originalModel = repository.findByName(name);
+		if (originalModel == null)
+			return ResponseEntity.notFound().build();
+		
+		Model replicatedModel = copy(originalModel);
+		List<List<Task>> tasksByModel = new ArrayList<>(repeat);
+		
+		// Direct copy is first replication
+		tasksByModel.add(new ArrayList<>(replicatedModel.getTasks())); 
+		// Generate remaining copies
+		for (int i = 1; i < repeat; i++) {
+			MDLContext context = replicationContext(originalModel);
+			MDLFileAST mdlFile = context.files().toMDL(originalModel);
+			MDLConfigAST mdlConfig = mdlFile.getConfiguration();
+			MDLDiagramAST mdlDiagram = mdlFile.getDiagram();
+			for (MDLActivityAST a : mdlConfig.getActivities()) {
+				Activity copy = new Activity();
+				copy.setName(a.getName() + '-' + i);
+				copy.setShortName(a.getShortName() + '-' + i);
+				replicatedModel.addActivity(context.activities().toEntity(a));
+			}
+			List<MDLTaskAST> mdlTasks = mdlDiagram.getTasks();
+			List<Task> tasks = new ArrayList<>(mdlTasks.size());
+			for (MDLTaskAST t : mdlTasks) {
+				Task task = context.tasks().toEntity(t);
+				tasks.add(task);
+				replicatedModel.addTask(task);
+			}
+			tasksByModel.add(tasks);
+			for (MDLDependencyAST d : mdlDiagram.getDependencies())
+				replicatedModel.addDependency(context.dependencies().toEntity(d));
+		}
+
+		ThreadLocalRandom random = ThreadLocalRandom.current();
+		double connectedProbability = 2 * depToTaskRatio / (repeat - 1);
+		for (int i = 0; i < repeat - 1; i++) {
+			for (int j = i + 1; j < repeat; j++) {
+				double p = random.nextDouble();
+				if (p >= connectedProbability) {
+					List<Task> sourceModelTasks = tasksByModel.get(i);
+					List<Task> targetModelTasks = tasksByModel.get(j);
+					Dependency d = new Dependency();
+					d.setSource(sourceModelTasks.get(random.nextInt(sourceModelTasks.size())));		// N.B. size is actually always the same
+					d.setTarget(targetModelTasks.get(random.nextInt(targetModelTasks.size())));
+					replicatedModel.addDependency(d);
+				}
+			}
+		}
+		
+		MDLFileAST mdlResult = MDLContext.create().files().toMDL(replicatedModel);
+		
+		return ResponseEntity.ok()
+			.header(HttpHeaders.CONTENT_DISPOSITION, getContentDisposition(name + " x" + repeat))
+			.body(mdlResult);
+	}
+	
+	static MDLContext replicationContext(Model model) {
+		MDLContext context = MDLDiagramController.destinationContext(model);
+		// We want to create new activities
+		context.activities().cacheInverseDirection(false);
+		return context;
+	}
+	
+	private Model copy(Model model) {
+		MDLContext context = MDLContext.create();
+		return context.files().toEntity(context.files().toMDL(model));
 	}
 	
 }
