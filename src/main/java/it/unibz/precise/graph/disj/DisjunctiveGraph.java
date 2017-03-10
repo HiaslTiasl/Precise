@@ -30,6 +30,9 @@ public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
 	private Map<T, Set<T>> succ = new HashMap<>();		// Map from node to successors
 	private Map<T, Set<T>> pred = new HashMap<>();		// Map from node to predecessors
 	
+	// N.B. this auxiliary data structure is used to speed up the algorithm.
+	// For example, it allows to resolve disjunctive edges found on the way while trying to resolve another disjunctive edge.
+	// However, if many nodes are involved in many disjunctive edges, it requires a lot of memory.
 	private Map<T, Set<DisjunctiveEdge<T>>> disj = new HashMap<>();		// Map from nodes to disjunctive edges that contains them
 	
 	public DisjunctiveGraph() {
