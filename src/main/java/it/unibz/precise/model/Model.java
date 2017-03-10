@@ -36,7 +36,7 @@ public class Model extends BaseEntity {
 	@Column(nullable=false)
 	@NotNull(message="{model.name.notempty}")
 	@Size(min=1, message="{model.name.notempty}")
-	@Pattern(regexp="^[\\.\\w\\-_ ]*$", message="{model.name.pattern}")
+	@Pattern(regexp="^[\\.\\w\\-\\(\\)_ ]*$", message="{model.name.pattern}")
 	private String name;
 	
 	private String description;
