@@ -1,0 +1,221 @@
+{
+  "model" : {
+    "description" : "Excerpt of a real process model for the realization of an hotel."
+  },
+  "configuration" : {
+    "hoursPerDay" : 8,
+    "attributes" : [ {
+      "name" : "level",
+      "shortName" : "l",
+      "range" : [ "0", "1", "2", "3", "4", "5" ],
+      "ordered" : true
+    }, {
+      "name" : "number",
+      "shortName" : "nr",
+      "range" : 100,
+      "ordered" : true
+    }, {
+      "name" : "section",
+      "shortName" : "sn",
+      "range" : [ "en", "r", "c" ],
+      "ordered" : false
+    }, {
+      "name" : "sector",
+      "shortName" : "sr",
+      "range" : [ "A" ],
+      "ordered" : false
+    } ],
+    "phases" : [ {
+      "name" : "Interior",
+      "description" : "Advanced phase concerning the interior of the building.",
+      "color" : {
+        "r" : 188,
+        "g" : 210,
+        "b" : 255
+      },
+      "attributes" : [ "sector", "level", "section", "number" ],
+      "valueTree" : {
+        "A" : {
+          "0" : {
+            "r" : 60,
+            "c" : 60
+          },
+          "1" : {
+            "r" : 60,
+            "c" : 60
+          },
+          "2" : {
+            "r" : 60,
+            "c" : 60
+          },
+          "3" : {
+            "r" : 60,
+            "c" : 60
+          },
+          "4" : {
+            "r" : 60,
+            "c" : 60
+          }
+        }
+      }
+    } ],
+    "crafts" : [ ],
+    "activities" : [ {
+      "name" : "Task 1",
+      "shortName" : "T1",
+      "phase" : "Interior"
+    }, {
+      "name" : "Task 2",
+      "shortName" : "T2",
+      "phase" : "Interior"
+    }, {
+      "name" : "Task 3",
+      "shortName" : "T3",
+      "phase" : "Interior"
+    }, {
+      "name" : "Task 4",
+      "shortName" : "T4",
+      "phase" : "Interior"
+    } ]
+  },
+  "diagram" : {
+    "tasks" : [ {
+      "id" : 1,
+      "activity" : "Task 1",
+      "pitch" : {
+        "crewSize" : 1,
+        "crewCount" : 1,
+        "durationDays" : 1,
+        "manDays" : 1
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : -240.0,
+        "y" : -300.0
+      },
+      "locations" : [ {
+        "number" : "*",
+        "level" : "*",
+        "section" : "*",
+        "sector" : "*"
+      } ]
+    }, {
+      "id" : 2,
+      "activity" : "Task 2",
+      "pitch" : {
+        "crewSize" : 1,
+        "crewCount" : 1,
+        "durationDays" : 1,
+        "manDays" : 1
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : 20.0,
+        "y" : -300.0
+      },
+      "locations" : [ {
+        "number" : "*",
+        "level" : "*",
+        "section" : "*",
+        "sector" : "*"
+      } ]
+    }, {
+      "id" : 3,
+      "activity" : "Task 3",
+      "pitch" : {
+        "crewSize" : 1,
+        "crewCount" : 1,
+        "durationDays" : 1,
+        "manDays" : 1
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : -240.0,
+        "y" : -90.0
+      },
+      "locations" : [ {
+        "number" : "*",
+        "level" : "*",
+        "section" : "*",
+        "sector" : "*"
+      } ]
+    }, {
+      "id" : 4,
+      "activity" : "Task 4",
+      "pitch" : {
+        "crewSize" : 1,
+        "crewCount" : 1,
+        "durationDays" : 1,
+        "manDays" : 1
+      },
+      "exclusiveness" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "order" : [ ],
+      "position" : {
+        "x" : 20.0,
+        "y" : -90.0
+      },
+      "locations" : [ {
+        "number" : "*",
+        "level" : "*",
+        "section" : "*",
+        "sector" : "*"
+      } ]
+    } ],
+    "dependencies" : [ {
+      "alternate" : true,
+      "chain" : false,
+      "source" : 1,
+      "target" : 2,
+      "scope" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : true,
+      "chain" : false,
+      "source" : 4,
+      "target" : 3,
+      "scope" : {
+        "type" : "UNIT",
+        "attributes" : [ "sector", "level", "section", "number" ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 4,
+      "target" : 2,
+      "scope" : {
+        "type" : "GLOBAL",
+        "attributes" : [ ]
+      },
+      "vertices" : [ ]
+    }, {
+      "alternate" : false,
+      "chain" : false,
+      "source" : 1,
+      "target" : 3,
+      "scope" : {
+        "type" : "GLOBAL",
+        "attributes" : [ ]
+      },
+      "vertices" : [ ]
+    } ]
+  }
+}

@@ -44,9 +44,9 @@ import it.unibz.precise.rest.mdl.conversion.MDLContext;
 @SpringBootTest(classes=Application.class, webEnvironment=WebEnvironment.RANDOM_PORT)
 public class ConsistencyCheckerTest {
 	
-	private static final int ITERATIONS = 5;
-	private static final int WARMUP_ITERATIONS = 1;
-	private static final int TIMEOUT_MIN = 30;
+	private static final int ITERATIONS = 1;
+	private static final int WARMUP_ITERATIONS = 0;
+	private static final int TIMEOUT_MIN = 60;
 	private static final int TIMEOUT_MS = TIMEOUT_MIN * 60 * 1000;
 	
 	@ClassRule
@@ -78,11 +78,11 @@ public class ConsistencyCheckerTest {
 	private Model model;
 	private DisjunctiveGraph<TaskUnitNode> graph;
 	
-	private AtomicLong transTimeNs = new AtomicLong();
-	private AtomicLong checkTimeNs = new AtomicLong();
+	private volatile AtomicLong transTimeNs = new AtomicLong();
+	private volatile AtomicLong checkTimeNs = new AtomicLong();
 	
-	private AtomicInteger completedTranslations = new AtomicInteger();
-	private AtomicInteger completedChecks = new AtomicInteger();
+	private volatile AtomicInteger completedTranslations = new AtomicInteger();
+	private volatile AtomicInteger completedChecks = new AtomicInteger();
 	
 	private static final List<ConsistencyCheckerTest> allRuns = new ArrayList<>();
 	
@@ -116,9 +116,11 @@ public class ConsistencyCheckerTest {
 //			"unit-scope-deadlock-50",
 //			"unit-scope-deadlock-100",
 //			"unit-scope-deadlock-150",
-//			"unit-scope-deadlock-200",
-			"unit-scope-deadlock-400",
-			"unit-scope-deadlock-800"
+			"unit-scope-deadlock-200",
+			"unit-scope-deadlock-300",
+			"unit-scope-deadlock-400"//,
+//			"unit-scope-deadlock-600",
+//			"unit-scope-deadlock-800"
 		).map(m -> new Object[] { m, false,  true,  true,  true })
 			.collect(Collectors.toList());
 	}
