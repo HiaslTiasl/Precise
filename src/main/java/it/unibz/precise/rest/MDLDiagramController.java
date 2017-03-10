@@ -1,5 +1,24 @@
 package it.unibz.precise.rest;
 
+import it.unibz.precise.model.Activity;
+import it.unibz.precise.model.Attribute;
+import it.unibz.precise.model.Craft;
+import it.unibz.precise.model.Model;
+import it.unibz.precise.model.Phase;
+import it.unibz.precise.model.Task;
+import it.unibz.precise.model.validation.ValidationAdapter;
+import it.unibz.precise.rep.ActivityRepository;
+import it.unibz.precise.rep.DependencyRepository;
+import it.unibz.precise.rep.ModelRepository;
+import it.unibz.precise.rep.TaskRepository;
+import it.unibz.precise.rest.mdl.ast.MDLActivityAST;
+import it.unibz.precise.rest.mdl.ast.MDLAttributeAST;
+import it.unibz.precise.rest.mdl.ast.MDLCraftAST;
+import it.unibz.precise.rest.mdl.ast.MDLDiagramAST;
+import it.unibz.precise.rest.mdl.ast.MDLFileAST;
+import it.unibz.precise.rest.mdl.ast.MDLPhaseAST;
+import it.unibz.precise.rest.mdl.conversion.MDLContext;
+
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,25 +39,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import it.unibz.precise.model.Attribute;
-import it.unibz.precise.model.Craft;
-import it.unibz.precise.model.Model;
-import it.unibz.precise.model.Phase;
-import it.unibz.precise.model.Task;
-import it.unibz.precise.model.Activity;
-import it.unibz.precise.model.validation.ValidationAdapter;
-import it.unibz.precise.rep.DependencyRepository;
-import it.unibz.precise.rep.ModelRepository;
-import it.unibz.precise.rep.TaskRepository;
-import it.unibz.precise.rep.ActivityRepository;
-import it.unibz.precise.rest.mdl.ast.MDLAttributeAST;
-import it.unibz.precise.rest.mdl.ast.MDLCraftAST;
-import it.unibz.precise.rest.mdl.ast.MDLDiagramAST;
-import it.unibz.precise.rest.mdl.ast.MDLFileAST;
-import it.unibz.precise.rest.mdl.ast.MDLPhaseAST;
-import it.unibz.precise.rest.mdl.ast.MDLActivityAST;
-import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
 /**
  * Exposes the diagram part in MDL files.
@@ -184,6 +184,10 @@ public class MDLDiagramController {
 		Set<String> existingAcronyms = oldActivities.stream()
 			.map(Activity::getShortName)
 			.collect(Collectors.toSet());
+		setNewActivityAcronyms(newActivities, oldActivities, existingAcronyms);
+	}
+	
+	private void setNewActivityAcronyms(Set<Activity> newActivities, Set<Activity> oldActivities, Set<String> existingAcronyms) {
 		for (Activity a : newActivities) {
 			String acr = a.getShortName();
 			String originalAcr = acr;
@@ -211,7 +215,7 @@ public class MDLDiagramController {
 	 * <li> conversion results are cached in both directions (MDL <--> entities)
 	 * </ul>
 	 */
-	private MDLContext destinationContext(Model dstModel) {
+	static MDLContext destinationContext(Model dstModel) {
 		MDLContext context = MDLContext.create().switchStrictMode(false)
 			.attributes()
 				.usingKeys(Attribute::getName, MDLAttributeAST::getName)
