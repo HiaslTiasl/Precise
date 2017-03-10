@@ -7,10 +7,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,9 +44,9 @@ import it.unibz.precise.rest.mdl.conversion.MDLContext;
 @SpringBootTest(classes=Application.class, webEnvironment=WebEnvironment.RANDOM_PORT)
 public class ConsistencyCheckerTest {
 	
-	private static final int ITERATIONS = 100;
-	private static final int WARMUP_ITERATIONS = 100;
-	private static final int TIMEOUT_MIN = 60;
+	private static final int ITERATIONS = 5;
+	private static final int WARMUP_ITERATIONS = 1;
+	private static final int TIMEOUT_MIN = 30;
 	private static final int TIMEOUT_MS = TIMEOUT_MIN * 60 * 1000;
 	
 	@ClassRule
@@ -73,21 +78,21 @@ public class ConsistencyCheckerTest {
 	private Model model;
 	private DisjunctiveGraph<TaskUnitNode> graph;
 	
-	private long transTimeNs = 0;
-	private long checkTimeNs = 0;
+	private AtomicLong transTimeNs = new AtomicLong();
+	private AtomicLong checkTimeNs = new AtomicLong();
 	
-	private int completedTranslations = 0;
-	private int completedChecks = 0;
+	private AtomicInteger completedTranslations = new AtomicInteger();
+	private AtomicInteger completedChecks = new AtomicInteger();
 	
 	private static final List<ConsistencyCheckerTest> allRuns = new ArrayList<>();
 	
 	@AfterClass
 	public static void printRuns() {
-		System.out.println("|          model | tasks | dependencies |   nodes |    arcs |   edges | no simple edges | partitioning | resolving || translation |       check |       total |");
-		System.out.println("+----------------+-------+--------------+---------+---------+---------+-----------------+--------------+-----------++-------------+-------------+-------------|");
+		System.out.println("|                   model | tasks | dependencies |   nodes |    arcs |   edges | ISE | R | P || translation |       check |       total | iterations |");
+		System.out.println("+-------------------------+-------+--------------+---------+---------+---------+-----+---+---++-------------+-------------+-------------+------------+");
 		for (ConsistencyCheckerTest run : allRuns) {
 			System.out.printf(
-				"| %14s | % 5d | % 12d | % 7d | % 7d | % 7d |               %c |            %c |         %c || %11s | %11s | %11s |\n",
+				"| %23s | % 5d | % 12d | % 7d | % 7d | % 7d |  %c  | %c | %c || %11s | %11s | %11s | %10s |\n",
 				run.modelName,
 				run.model.getTasks().size(),
 				run.model.getDependencies().size(),
@@ -95,17 +100,32 @@ public class ConsistencyCheckerTest {
 				run.graph.arcs().size(),
 				run.graph.edges().size(),
 				run.ignoreSimpleEdges ? 'X' : ' ',
-				run.usePartitioning ? 'X' : ' ',
 				run.useResolving ? 'X' : ' ',
+				run.usePartitioning ? 'X' : ' ',
 				run.transTimeCell(),
 				run.checkTimeCell(),
-				run.totalTimeCell()
+				run.totalTimeCell(),
+				run.completedTranslations.get() + ", " + run.completedChecks.get()
 			);
 		}
 	}
 	
 	@Parameters(name = "{0} ({2}, {3}, {4})")
-	public static Collection<Object[]> data() {
+	public static Collection<Object[]> dataUnitScopeDeadlock() {
+		return Stream.of(
+//			"unit-scope-deadlock-50",
+//			"unit-scope-deadlock-100",
+//			"unit-scope-deadlock-150",
+//			"unit-scope-deadlock-200",
+			"unit-scope-deadlock-400",
+			"unit-scope-deadlock-800"
+		).map(m -> new Object[] { m, false,  true,  true,  true })
+			.collect(Collectors.toList());
+	}
+
+	@Ignore
+	@Parameters(name = "{0} ({2}, {3}, {4})")
+	public static Collection<Object[]> dataHotelVariants() {
 		List<Object[]> params = new ArrayList<>();
 		String[] modelNames = { "consistent", "cyclic", "deadlock", "complex" };
 		boolean[] expectSuccess = { true, false, false, false };
@@ -150,12 +170,12 @@ public class ConsistencyCheckerTest {
 			long t0 = System.nanoTime();
 			graph = modelToGraphTranslator.translate(model.getTasks(), ignoreSimpleEdges);
 			long t1 = System.nanoTime();
-			transTimeNs += t1 - t0;
-			completedTranslations++;
+			transTimeNs.addAndGet(t1 - t0);
+			completedTranslations.incrementAndGet();
 			boolean success = orientationFinder.init(usePartitioning, useResolving).search(graph).isSuccessful();
 			long t2 = System.nanoTime();
-			checkTimeNs += t2 - t1;
-			completedChecks++;
+			checkTimeNs.addAndGet(t2 - t1);
+			completedChecks.incrementAndGet();
 			
 			if (expectSuccess)
 				assertTrue(success);
@@ -165,19 +185,19 @@ public class ConsistencyCheckerTest {
 	}
 	
 	private String transTimeCell() {
-		return timeCell(avgTimeMs(transTimeNs, completedTranslations));
+		return timeCell(avgTimeMs(transTimeNs.get(), completedTranslations.get()));
 	}
 	
 	private String checkTimeCell() {
-		return timeCell(avgTimeMs(checkTimeNs, completedChecks));
+		return timeCell(avgTimeMs(checkTimeNs.get(), completedChecks.get()));
 	}
 	
 	private String totalTimeCell() {
-		return timeCell(avgTimeMs(transTimeNs + checkTimeNs, completedChecks));
+		return timeCell(avgTimeMs(transTimeNs.get() + checkTimeNs.get(), completedChecks.get()));
 	}
 	
 	private long avgTimeMs(long sumNs, int iterations) {
-		return completedChecks > 0
+		return completedChecks.get() > 0
 			? sumNs / iterations / 1000000
 			: -1;
 	}

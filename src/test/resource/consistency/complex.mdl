@@ -266,6 +266,9 @@
         "attributes" : [ "sector", "level" ]
       },
       "order" : [ {
+        "attribute" : "sector",
+        "orderType" : "PARALLEL"
+      }, {
         "attribute" : "level",
         "orderType" : "ASCENDING"
       } ],
@@ -367,6 +370,9 @@
         "attributes" : [ "sector", "orientation", "level", "f-unit" ]
       },
       "order" : [ {
+        "attribute" : "sector",
+        "orderType" : "PARALLEL"
+      }, {
         "attribute" : "level",
         "orderType" : "ASCENDING"
       } ],
