@@ -1,5 +1,7 @@
 package it.unibz.precise.model;
 
+import it.unibz.util.Util;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -7,8 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.persistence.Embeddable;
 import javax.persistence.ManyToMany;
-
-import it.unibz.util.Util;
 
 /**
  * Represents a scope in terms of attributes.
@@ -94,9 +94,10 @@ public class Scope {
 	 * map of attributes to values for the attributes contained in this scope.
 	 */
 	public Map<Attribute, String> project(AttributeHierarchyNode node) {
-		return node.ancestorStream()
-			.filter(n -> attributes.contains(n.getLevel().getAttribute()))
-			.collect(Collectors.toMap(n -> n.getLevel().getAttribute(), AttributeHierarchyNode::getValue));
+		return type == Type.GLOBAL || attributes == null ? Collections.emptyMap()
+			: node.ancestorStream()
+				.filter(n -> attributes != null && attributes.contains(n.getLevel().getAttribute()))
+				.collect(Collectors.toMap(n -> n.getLevel().getAttribute(), AttributeHierarchyNode::getValue));
 	}
 
 	@Override
