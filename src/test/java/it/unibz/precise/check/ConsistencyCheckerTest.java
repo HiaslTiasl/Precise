@@ -115,11 +115,11 @@ public class ConsistencyCheckerTest {
 	
 	private static Collection<Object[]> dataBigDiagrams() {
 		return Stream.of(
-			"complex x5",
-			"complex x10",
-			"complex x15",
-			"complex x20",
-			"complex x25",
+//			"complex x5",
+//			"complex x10",
+//			"complex x15",
+//			"complex x20",
+//			"complex x25",
 			"complex x30"//,
 //			"complex x40",
 //			"complex x60",
