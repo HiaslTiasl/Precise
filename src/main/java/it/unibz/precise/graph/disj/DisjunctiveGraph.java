@@ -25,12 +25,22 @@ public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
 	
 	private Set<T> nodes;
 	private Set<Arc<T>> arcs;
+	private Set<Set<T>> exclusiveGroups;
 	private Set<DisjunctiveEdge<T>> edges;
 
 	private Map<T, Set<T>> succ = new HashMap<>();		// Map from node to successors
 	private Map<T, Set<T>> pred = new HashMap<>();		// Map from node to predecessors
 	
-	private Map<T, Set<DisjunctiveEdge<T>>> disj = new HashMap<>();		// Map from nodes to disjunctive edges that contains them
+	// N.B. this auxiliary data structure is used to speed up the algorithm.
+	// For example, it allows to resolve disjunctive edges found on the way while trying to resolve another disjunctive edge.
+	// However, if many nodes are involved in many disjunctive edges, it requires a lot of memory.
+	// N.B. this auxiliary data structure is used to speed up the algorithm.
+	// For example, it allows to resolve disjunctive edges found on the way while trying to resolve another disjunctive edge.
+	// However, if many nodes are involved in many disjunctive edges, it requires a lot of memory.
+	private Map<T, Set<Set<T>>> groupsByNode = new HashMap<>();
+	private Map<Set<T>, Set<DisjunctiveEdge<T>>> edgesByGroup = new HashMap<>();
+	
+	//private Map<T, Set<DisjunctiveEdge<T>>> disj = new HashMap<>();		// Map from nodes to disjunctive edges that contains them
 	
 	public DisjunctiveGraph() {
 		this(new HashSet<>());
@@ -40,6 +50,7 @@ public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
 	private DisjunctiveGraph(Set<T> nodes) {
 		this.nodes = nodes;
 		this.arcs = new HashSet<>();
+		this.exclusiveGroups = new HashSet<>();
 		this.edges = new HashSet<>();
 	}
 	
@@ -47,17 +58,19 @@ public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
 	 * Creates a graph with the given nodes and adds all given arcs and edges.
 	 * The set of nodes is used as is, whereas arcs and edges are copied into new collections.
 	 */
-	private DisjunctiveGraph(Set<T> nodes, Collection<Arc<T>> arcs, Collection<DisjunctiveEdge<T>> edges) {
+	private DisjunctiveGraph(Set<T> nodes, Collection<Arc<T>> arcs, Collection<Set<T>> exclusiveGroups, Collection<DisjunctiveEdge<T>> edges) {
 		this.nodes = nodes;
 		this.arcs = new HashSet<>(arcs.size() * 4 / 3);
+		this.exclusiveGroups = new HashSet<>(exclusiveGroups.size() * 4 / 3);
 		this.edges = new HashSet<>(edges.size() * 4 / 3);
 		addAllArcs(arcs);
+		addAllExclusiveGroups(exclusiveGroups);
 		addAllEdges(edges);
 	}
 	
 	/** Copy the given graph. */
 	public static <T> DisjunctiveGraph<T> copy(DisjunctiveGraph<T> other) {
-		return new DisjunctiveGraph<>(new HashSet<>(other.nodes), other.arcs, other.edges);
+		return new DisjunctiveGraph<>(new HashSet<>(other.nodes), other.arcs, other.exclusiveGroups, other.edges);
 	}
 	
 	/**
@@ -65,7 +78,7 @@ public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
 	 * This prevents to add further nodes afterwards and avoids copying nodes.
 	 */
 	public static <T> DisjunctiveGraph<T> copySealedNodes(DisjunctiveGraph<T> other) {
-		return new DisjunctiveGraph<>(Collections.unmodifiableSet(other.nodes), other.arcs, other.edges);
+		return new DisjunctiveGraph<>(Collections.unmodifiableSet(other.nodes), other.arcs, other.exclusiveGroups, other.edges);
 	}
 	
 	/**
@@ -82,7 +95,7 @@ public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
 	 * If this is not the case, the behavior is unspecified.
 	 */
 	public DisjunctiveGraph<T> restrictedTo(Set<T> nodes) {
-		return new DisjunctiveGraph<>(Collections.unmodifiableSet(nodes), arcs, edges);
+		return new DisjunctiveGraph<>(Collections.unmodifiableSet(nodes), arcs, exclusiveGroups, edges);
 	}
 	
 	public Set<T> nodes() {
@@ -105,12 +118,24 @@ public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
 		return arcs;
 	}
 	
+	public Set<Set<T>> exclusiveGroups() {
+		return exclusiveGroups;
+	}
+	
 	public Set<DisjunctiveEdge<T>> edges() {
 		return edges;
 	}
 	
-	public Set<DisjunctiveEdge<T>> disjunctions(T n) {
-		return checkSet(disj.get(n));
+//	public Set<DisjunctiveEdge<T>> disjunctions(T n) {
+//		return checkSet(disj.get(n));
+//	}
+	
+	public Set<Set<T>> groupsContaining(T node) {
+		return checkSet(groupsByNode.get(node));
+	}
+	
+	public Set<DisjunctiveEdge<T>> edgesOf(Set<T> group) {
+		return checkSet(edgesByGroup.get(group));
 	}
 	
 	public boolean addAllNodes(Collection<T> nodes) {
@@ -153,6 +178,19 @@ public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
 			&& removeFrom(pred, arc.getTarget(), arc.getSource());
 	}
 	
+	public boolean addAllExclusiveGroups(Collection<Set<T>> groups) {
+		boolean added = false;
+		for (Set<T> g : groups)
+			added |= addExclusiveGroup(g);
+		return added;
+	}
+	
+	public boolean addExclusiveGroup(Set<T> group) {
+		return nodes.containsAll(group)
+			&& exclusiveGroups.add(group)
+			&& addAllToMultimap(groupsByNode, group, group);
+	}
+	
 	public boolean addAllEdges(Collection<DisjunctiveEdge<T>> edges) {
 		boolean added = false;
 		for (DisjunctiveEdge<T> e : edges)
@@ -164,16 +202,18 @@ public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
 		Set<T> left = edge.getLeft(), right = edge.getRight();
 		// N.B: edges is a set, and can only contain an arc once.
 		// Also, only add edge if all connected nodes are already nodes in this graph
-		return nodes.containsAll(left) && nodes.containsAll(right)
-			&& addAllToMultimap(disj, edge.getLeft(), edge)
-			&& addAllToMultimap(disj, edge.getRight(), edge)
+		return exclusiveGroups.contains(left) && exclusiveGroups.contains(right)
+			&& addToMultimap(edgesByGroup, left, edge)
+			&& addToMultimap(edgesByGroup, right, edge)
 			&& edges.add(edge);
 	}
 	
 	public boolean removeEdge(DisjunctiveEdge<T> edge) {
 		return edges.remove(edge)
-			&& removeFromAll(disj, edge.getLeft(), edge)
-			&& removeFromAll(disj, edge.getRight(), edge);
+			&& edgesByGroup.get(edge.getLeft()).remove(edge)
+			&& edgesByGroup.get(edge.getRight()).remove(edge);
+//			&& removeFromAll(disj, edge.getLeft(), edge)
+//			&& removeFromAll(disj, edge.getRight(), edge);
 	}
 	
 	/**
@@ -187,24 +227,41 @@ public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
 	public boolean orient(T source, T target) {
 		boolean oriented = false;
 		// Choose smaller set to avoid iterations
-		Set<DisjunctiveEdge<T>> sourceDisj = disjunctions(source);
-		Set<DisjunctiveEdge<T>> targetDisj = disjunctions(target);
-		Set<DisjunctiveEdge<T>> disj = sourceDisj.size() < targetDisj.size() ? sourceDisj : targetDisj;
+//		Set<DisjunctiveEdge<T>> sourceDisj = disjunctions(source);
+//		Set<DisjunctiveEdge<T>> targetDisj = disjunctions(target);
+		Set<Set<T>> sourceGroups = groupsContaining(source);
+		Set<Set<T>> targetGroups = groupsContaining(target);
 		
-		// Add edges to lists, then remove, to avoid ConcurrentModificationException
-		ArrayList<DisjunctiveEdge<T>> leftToRight = new ArrayList<>();
-		ArrayList<DisjunctiveEdge<T>> rightToLeft = new ArrayList<>();
+		ArrayList<DisjunctiveEdge<T>> toBeOriented = new ArrayList<>();
 		
-		for (DisjunctiveEdge<T> e : disj) {
-			if (e.excludes(source, target))
-				leftToRight.add(e);
-			else if (e.excludes(target, source))
-				rightToLeft.add(e);
+		for (Set<T> from : sourceGroups) {
+			toBeOriented.clear();
+			for (DisjunctiveEdge<T> e : edgesOf(from)) {
+				Set<T> to = e.getOther(from);
+				if (targetGroups.contains(to))
+					toBeOriented.add(e);
+			}
+			for (DisjunctiveEdge<T> e : toBeOriented)
+				oriented |= orient(e, from, e.getOther(from));
 		}
-		for (DisjunctiveEdge<T> e : leftToRight)
-			oriented |= orient(e, e.getLeft(), e.getRight());
-		for (DisjunctiveEdge<T> e : rightToLeft)
-			oriented |= orient(e, e.getRight(), e.getLeft());
+		
+		
+//		Set<DisjunctiveEdge<T>> disj = sourceDisj.size() < targetDisj.size() ? sourceDisj : targetDisj;
+//		
+//		// Add edges to lists, then remove, to avoid ConcurrentModificationException
+//		ArrayList<DisjunctiveEdge<T>> leftToRight = new ArrayList<>();
+//		ArrayList<DisjunctiveEdge<T>> rightToLeft = new ArrayList<>();
+//		
+//		for (DisjunctiveEdge<T> e : disj) {
+//			if (e.excludes(source, target))
+//				leftToRight.add(e);
+//			else if (e.excludes(target, source))
+//				rightToLeft.add(e);
+//		}
+//		for (DisjunctiveEdge<T> e : leftToRight)
+//			oriented |= orient(e, e.getLeft(), e.getRight());
+//		for (DisjunctiveEdge<T> e : rightToLeft)
+//			oriented |= orient(e, e.getRight(), e.getLeft());
 			
 		return oriented;
 	}

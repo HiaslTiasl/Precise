@@ -15,9 +15,9 @@ import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
@@ -47,11 +47,13 @@ public class ConsistencyCheckerTest {
 	private static final int ITERATIONS = 1;
 	private static final int WARMUP_ITERATIONS = 0;
 	private static final int TIMEOUT_MIN = 60;
-	private static final int TIMEOUT_MS = TIMEOUT_MIN * 60 * 1000;
 	
 	@ClassRule
 	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
+	@Rule
+    public Timeout globalTimeout = Timeout.seconds(TIMEOUT_MIN * 60);
+    
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
 	
@@ -80,7 +82,6 @@ public class ConsistencyCheckerTest {
 	
 	private volatile AtomicLong transTimeNs = new AtomicLong();
 	private volatile AtomicLong checkTimeNs = new AtomicLong();
-	
 	private volatile AtomicInteger completedTranslations = new AtomicInteger();
 	private volatile AtomicInteger completedChecks = new AtomicInteger();
 	
@@ -111,13 +112,39 @@ public class ConsistencyCheckerTest {
 	}
 	
 	@Parameters(name = "{0} ({2}, {3}, {4})")
-	public static Collection<Object[]> dataUnitScopeDeadlock() {
+	public static Collection<Object[]> params() {
+		return dataBigDiagrams();
+	}
+	
+	private static Collection<Object[]> dataBigDiagrams() {
+		return Stream.of(
+//			"complex x5",
+//			"complex x10",
+//			"complex x15",
+//			"complex x20",
+			"complex x25"//,
+//			"complex x30",
+//			"complex x40",
+//			"complex x60",
+//			"complex x80",
+//			"complex x100"//,
+//			"complex x200",
+//			"complex x400",
+//			"complex x800",
+//			"complex x1200",
+//			"complex x1600",
+//			"complex x2000"
+		).map(m -> new Object[] { m, false,  true,  true,  true })
+			.collect(Collectors.toList());
+	}
+	
+	private static Collection<Object[]> dataUnitScopeDeadlock() {
 		return Stream.of(
 //			"unit-scope-deadlock-50",
 //			"unit-scope-deadlock-100",
 //			"unit-scope-deadlock-150",
 			"unit-scope-deadlock-200",
-			"unit-scope-deadlock-300",
+			"unit-scope-deadlock-300",			
 			"unit-scope-deadlock-400"//,
 //			"unit-scope-deadlock-600",
 //			"unit-scope-deadlock-800"
@@ -125,9 +152,7 @@ public class ConsistencyCheckerTest {
 			.collect(Collectors.toList());
 	}
 
-	@Ignore
-	@Parameters(name = "{0} ({2}, {3}, {4})")
-	public static Collection<Object[]> dataHotelVariants() {
+	private static Collection<Object[]> dataHotelVariants() {
 		List<Object[]> params = new ArrayList<>();
 		String[] modelNames = { "consistent", "cyclic", "deadlock", "complex" };
 		boolean[] expectSuccess = { true, false, false, false };
@@ -137,14 +162,14 @@ public class ConsistencyCheckerTest {
 			boolean e = expectSuccess[i];
 			// Put sophisticated first so the JIT will optimize them less,
 			// thus if they still take less time it is not because of the JIT. 
-			params.add(new Object[] { m, e,  true,  true,  true });
-			params.add(new Object[] { m, e, false,  true,  true });
+//			params.add(new Object[] { m, e,  true,  true,  true });
+//			params.add(new Object[] { m, e, false,  true,  true });
 			params.add(new Object[] { m, e,  true,  true, false });
-			params.add(new Object[] { m, e, false,  true, false });
+//			params.add(new Object[] { m, e, false,  true, false });
 			params.add(new Object[] { m, e,  true, false,  true });
-			params.add(new Object[] { m, e, false, false,  true });
-			params.add(new Object[] { m, e,  true, false, false });
-			params.add(new Object[] { m, e, false, false, false });
+//			params.add(new Object[] { m, e, false, false,  true });
+//			params.add(new Object[] { m, e,  true, false, false });
+//			params.add(new Object[] { m, e, false, false, false });
 		}
 		return params;
 	}
@@ -164,7 +189,7 @@ public class ConsistencyCheckerTest {
 		}
 	}
 	
-	@Test(timeout=TIMEOUT_MS)
+	@Test
 	public void test() throws JsonParseException, IOException {
 		// Add first to also consider timed-out runs
 		allRuns.add(this);

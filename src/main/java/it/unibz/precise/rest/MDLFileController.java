@@ -1,6 +1,5 @@
 package it.unibz.precise.rest;
 
-import it.unibz.precise.model.Activity;
 import it.unibz.precise.model.Dependency;
 import it.unibz.precise.model.Model;
 import it.unibz.precise.model.Task;
@@ -150,14 +149,13 @@ public class MDLFileController {
 		tasksByModel.add(new ArrayList<>(replicatedModel.getTasks())); 
 		// Generate remaining copies
 		for (int i = 1; i < repeat; i++) {
-			MDLContext context = replicationContext(originalModel);
+			MDLContext context = replicationContext(replicatedModel);
 			MDLFileAST mdlFile = context.files().toMDL(originalModel);
 			MDLConfigAST mdlConfig = mdlFile.getConfiguration();
 			MDLDiagramAST mdlDiagram = mdlFile.getDiagram();
 			for (MDLActivityAST a : mdlConfig.getActivities()) {
-				Activity copy = new Activity();
-				copy.setName(a.getName() + '-' + i);
-				copy.setShortName(a.getShortName() + '-' + i);
+				a.setName(a.getName() + '-' + i);
+				a.setShortName(a.getShortName() + '-' + i);
 				replicatedModel.addActivity(context.activities().toEntity(a));
 			}
 			List<MDLTaskAST> mdlTasks = mdlDiagram.getTasks();

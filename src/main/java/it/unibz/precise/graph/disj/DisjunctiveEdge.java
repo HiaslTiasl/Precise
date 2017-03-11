@@ -39,6 +39,12 @@ public class DisjunctiveEdge<T> {
 			: null;
 	}
 	
+	public Set<T> getOther(Set<T> side) {
+		return side == left ? right
+			: side == right ? left
+			: null;
+	}
+	
 	/** Indicates whether the two given nodes are excluded in the specified direction. */
 	public boolean excludes(T l, T r) {
 		return left.contains(l) && right.contains(r);

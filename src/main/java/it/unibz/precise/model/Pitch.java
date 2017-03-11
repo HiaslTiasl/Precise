@@ -107,11 +107,6 @@ public class Pitch {
 	float exactManDays() {
 		return crewCount * crewSize * exactDurationDays();
 	}
-
-	/** Returns man days. */
-	public int getManDays() {
-		return (int)Math.ceil(exactManDays());
-	}
 	
 	/**
 	 * Update pitch fields.
