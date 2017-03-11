@@ -2,13 +2,6 @@ package it.unibz.precise.check;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import it.unibz.precise.Application;
-import it.unibz.precise.TestUtil;
-import it.unibz.precise.graph.disj.AcyclicOrientationFinder;
-import it.unibz.precise.graph.disj.DisjunctiveGraph;
-import it.unibz.precise.model.Model;
-import it.unibz.precise.rest.mdl.ast.MDLFileAST;
-import it.unibz.precise.rest.mdl.conversion.MDLContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,6 +17,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
@@ -38,18 +32,28 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import it.unibz.precise.Application;
+import it.unibz.precise.TestUtil;
+import it.unibz.precise.graph.disj.AcyclicOrientationFinder;
+import it.unibz.precise.graph.disj.DisjunctiveGraph;
+import it.unibz.precise.model.Model;
+import it.unibz.precise.rest.mdl.ast.MDLFileAST;
+import it.unibz.precise.rest.mdl.conversion.MDLContext;
+
 @RunWith(Parameterized.class)
 @SpringBootTest(classes=Application.class, webEnvironment=WebEnvironment.RANDOM_PORT)
 public class ConsistencyCheckerTest {
 	
-	private static final int ITERATIONS = 5;
+	private static final int ITERATIONS = 1;
 	private static final int WARMUP_ITERATIONS = 0;
-	private static final int TIMEOUT_MIN = 30;
-	private static final int TIMEOUT_MS = TIMEOUT_MIN * 60 * 1000;
+	private static final int TIMEOUT_MIN = 60;
 	
 	@ClassRule
 	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
+	@Rule
+    public Timeout globalTimeout = Timeout.seconds(TIMEOUT_MIN * 60);
+    
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
 	
@@ -76,11 +80,10 @@ public class ConsistencyCheckerTest {
 	private Model model;
 	private DisjunctiveGraph<TaskUnitNode> graph;
 	
-	private AtomicLong transTimeNs = new AtomicLong();
-	private AtomicLong checkTimeNs = new AtomicLong();
-	
-	private AtomicInteger completedTranslations = new AtomicInteger();
-	private AtomicInteger completedChecks = new AtomicInteger();
+	private volatile AtomicLong transTimeNs = new AtomicLong();
+	private volatile AtomicLong checkTimeNs = new AtomicLong();
+	private volatile AtomicInteger completedTranslations = new AtomicInteger();
+	private volatile AtomicInteger completedChecks = new AtomicInteger();
 	
 	private static final List<ConsistencyCheckerTest> allRuns = new ArrayList<>();
 	
@@ -119,13 +122,12 @@ public class ConsistencyCheckerTest {
 //			"complex x10",
 //			"complex x15",
 //			"complex x20",
-//			"complex x25",
-			"complex x30"//,
+			"complex x25"//,
+//			"complex x30",
 //			"complex x40",
 //			"complex x60",
 //			"complex x80",
-//			"complex x100",
-//			"complex x100",
+//			"complex x100"//,
 //			"complex x200",
 //			"complex x400",
 //			"complex x800",
@@ -138,12 +140,14 @@ public class ConsistencyCheckerTest {
 	
 	private static Collection<Object[]> dataUnitScopeDeadlock() {
 		return Stream.of(
-			"unit-scope-deadlock-50",
-			"unit-scope-deadlock-100",
-			"unit-scope-deadlock-150",
+//			"unit-scope-deadlock-50",
+//			"unit-scope-deadlock-100",
+//			"unit-scope-deadlock-150",
 			"unit-scope-deadlock-200",
-			"unit-scope-deadlock-400",
-			"unit-scope-deadlock-800"
+			"unit-scope-deadlock-300",			
+			"unit-scope-deadlock-400"//,
+//			"unit-scope-deadlock-600",
+//			"unit-scope-deadlock-800"
 		).map(m -> new Object[] { m, false,  true,  true,  true })
 			.collect(Collectors.toList());
 	}
@@ -185,7 +189,7 @@ public class ConsistencyCheckerTest {
 		}
 	}
 	
-	@Test(timeout=TIMEOUT_MS)
+	@Test
 	public void test() throws JsonParseException, IOException {
 		// Add first to also consider timed-out runs
 		allRuns.add(this);
