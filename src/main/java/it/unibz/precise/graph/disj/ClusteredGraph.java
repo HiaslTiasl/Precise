@@ -53,7 +53,8 @@ public final class ClusteredGraph<T> implements Graph<T> {
 	public Stream<T> successors(T node) {
 		// Groups of nodes corresponding to the side of disjunctive edges that contain
 		// the given node.
-		Stream<Set<T>> exclusiveGroups = disjGraph.groupsContaining(node).stream()
+		Stream<Set<T>> exclusiveGroups = disjGraph.disjunctions(node).stream()
+			.map(e -> e.getSide(node))
 			.filter(Objects::nonNull);		// Should not be necessary
 		
 		return Stream.concat(

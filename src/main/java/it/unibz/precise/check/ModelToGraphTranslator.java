@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -147,11 +146,14 @@ public class ModelToGraphTranslator {
 			boolean alt = dep.isAlternate();
 			boolean chain = dep.isChain();
 			if (alt || chain) {
-				Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = sharedExclusiveGroups(graph, sourceGroups, targetGroups);
+				Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = sharedGroups(sourceGroups, targetGroups);
 				if (alt)
-					processAlternatePrecedence(graph, sourceGroups, targetGroups, exclusiveGroups);
-				if (chain)
-					processChainPrecedence(graph, dep, nodesByLocationByTask, exclusiveGroups, sourceGroups, targetGroups, ignoreSimpleEdges);
+					processAlternatePrecedence(graph, exclusiveGroups);
+				if (chain) {
+					addNonSharedGroups(exclusiveGroups, sourceGroups);
+					addNonSharedGroups(exclusiveGroups, targetGroups);
+					processChainPrecedence(graph, dep, nodesByLocationByTask, exclusiveGroups, ignoreSimpleEdges);
+				}
 			}
 		}
 	}
@@ -202,8 +204,6 @@ public class ModelToGraphTranslator {
 		if (!ignoreSimpleEdges && exclusiveness.getType() == Type.UNIT) {
 			// Partition the nodes of the task by the projection to the scope of its exclusiveness
 			Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = groupNodesBy(nodesByLocationByTask.get(t), exclusiveness);
-			for (Set<TaskUnitNode> g : exclusiveGroups.values())
-				graph.addExclusiveGroup(g);
 			// Add a disjunctive edge from exclusive groups to nodes of other tasks and the same projection
 			addExclusiveAcces(graph, nodesByLocationByTask, exclusiveGroups, exclusiveness, ignoreSimpleEdges, t);
 		}
@@ -227,13 +227,11 @@ public class ModelToGraphTranslator {
 	/** Processes an alternate precedence that has the given exclusive groups*/
 	private void processAlternatePrecedence(
 		DisjunctiveGraph<TaskUnitNode> graph,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> sourceGroups,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> targetGroups,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> sharedGroups
 	) {
 		// Alternate precedences have disjunctive edges among pairs of their own exclusive groups.
 		// Using an auxiliary list for index-based iteration, which is useful to avoid looking twice at the same combination.
-		List<Set<TaskUnitNode>> valueList = new ArrayList<>(exclusiveGroups.values());
+		ArrayList<Set<TaskUnitNode>> valueList = new ArrayList<>(sharedGroups.values());
 		
 		int len = valueList.size();
 		for (int i = 0; i < len - 1; i++) {
@@ -248,19 +246,14 @@ public class ModelToGraphTranslator {
 		DisjunctiveGraph<TaskUnitNode> graph,
 		Dependency dep,
 		Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> sharedExclusiveGroups,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> sourceGroups,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> targetGroups,
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> allGroups,
 		boolean ignoreSimpleEdges
 	) {
 		Task source = dep.getSource();
 		Task target = dep.getTarget();
 		Scope scope = dep.getScope();
-		// Add non-shared exclusive groups
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> allExclusiveGroups = allExclusiveGroups(graph, sourceGroups, targetGroups, sharedExclusiveGroups);
-		
 		// Add a disjunctive edge from every node of other tasks to exclusive groups of matching projections to given scope
-		addExclusiveAcces(graph, nodesByLocationByTask, allExclusiveGroups, scope, ignoreSimpleEdges, source, target);
+		addExclusiveAcces(graph, nodesByLocationByTask, allGroups, scope, ignoreSimpleEdges, source, target);
 	}
 	
 	//-------------------------------------------
@@ -297,60 +290,47 @@ public class ModelToGraphTranslator {
 			.forEach(graph::addEdge);
 	}
 	
-	/** Returns the shared exclusive groups of a dependency with the given source and target groups. */
-	private Map<Map<Attribute, String>, Set<TaskUnitNode>> sharedExclusiveGroups(
-		DisjunctiveGraph<TaskUnitNode> graph,
+	/** Returns the exclusive groups of a dependency with the given source and target groups. */
+	private Map<Map<Attribute, String>, Set<TaskUnitNode>> sharedGroups(
 		Map<Map<Attribute, String>, Set<TaskUnitNode>> sourceGroups,
 		Map<Map<Attribute, String>, Set<TaskUnitNode>> targetGroups
 	) {
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = new HashMap<>();
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> iterateGroups = sourceGroups.size() < targetGroups.size() ? sourceGroups : targetGroups;
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> otherGroups = iterateGroups == sourceGroups ? targetGroups : sourceGroups;
 		
-		for (Entry<Map<Attribute, String>, Set<TaskUnitNode>> g : sourceGroups.entrySet()) {
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> exclusiveGroups = new HashMap<>();
+		for (Entry<Map<Attribute, String>, Set<TaskUnitNode>> g : iterateGroups.entrySet()) {
 			Map<Attribute, String> projection = g.getKey();
-			Set<TaskUnitNode> sourceNodes = g.getValue();
-			Set<TaskUnitNode> targetNodes = targetGroups.get(projection);
-			if (Util.hasElements(targetNodes)) {
-				// Merge source and target nodes
-				Set<TaskUnitNode> exclusiveNodes = new HashSet<>(sourceNodes);
-				exclusiveNodes.addAll(targetNodes);
-				exclusiveGroups.put(projection, exclusiveNodes);
-				graph.addExclusiveGroup(exclusiveNodes);
+			Set<TaskUnitNode> nodes = g.getValue();
+			Set<TaskUnitNode> otherNodes = otherGroups.get(projection);
+			if (Util.hasElements(nodes)) {
+				if (!Util.hasElements(otherNodes))
+					exclusiveGroups.put(projection, nodes);
+				else {
+					// Merge source and target nodes
+					Set<TaskUnitNode> exclusiveNodes = Stream.of(nodes, otherNodes)
+						.flatMap(Set::stream)
+						.collect(Collectors.toSet());
+					exclusiveGroups.put(projection, exclusiveNodes);
+				}
 			}
 		}
 		return exclusiveGroups;
 	}
 	
-	/** Returns the shared exclusive groups of a dependency with the given source and target groups. */
-	private Map<Map<Attribute, String>, Set<TaskUnitNode>> allExclusiveGroups(
-		DisjunctiveGraph<TaskUnitNode> graph,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> sourceGroups,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> targetGroups,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> sharedExclusiveGroups
+	private void addNonSharedGroups(
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> sharedGroups,
+		Map<Map<Attribute, String>, Set<TaskUnitNode>> newGroups
 	) {
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> allExclusiveGroups = new HashMap<>(sharedExclusiveGroups);
-		addNonSharedExclusiveGroups(graph, sourceGroups, sharedExclusiveGroups, allExclusiveGroups);
-		addNonSharedExclusiveGroups(graph, targetGroups, sharedExclusiveGroups, allExclusiveGroups);
-		return allExclusiveGroups;
-	}
-	
-	private void addNonSharedExclusiveGroups(
-		DisjunctiveGraph<TaskUnitNode> graph,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> groups,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> sharedExclusiveGroups,
-		Map<Map<Attribute, String>, Set<TaskUnitNode>> allExclusiveGroups
-		
-	) {
-		for (Entry<Map<Attribute, String>, Set<TaskUnitNode>> g : groups.entrySet()) {
+		for (Entry<Map<Attribute, String>, Set<TaskUnitNode>> g : newGroups.entrySet()) {
 			Map<Attribute, String> projection = g.getKey();
 			Set<TaskUnitNode> nodes = g.getValue();
-			if (Util.hasElements(nodes) && !Util.hasElements(sharedExclusiveGroups.get(projection))) {
-				// Merge source and target nodes
-				allExclusiveGroups.put(projection, nodes);
-				graph.addExclusiveGroup(nodes);
-			}
+			Set<TaskUnitNode> otherNodes = sharedGroups.get(projection);
+			if (Util.hasElements(nodes) && !Util.hasElements(otherNodes))
+				sharedGroups.put(projection, nodes);
 		}
 	}
-	
+		
 	
 	/** Returns a map of the given tasks to the corresponding {@link TaskUnitNode}s, grouped by location. */
 	public Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask(List<Task> tasks) {

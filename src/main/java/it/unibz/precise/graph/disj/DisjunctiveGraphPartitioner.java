@@ -1,12 +1,14 @@
 package it.unibz.precise.graph.disj;
 
+import it.unibz.precise.graph.SCCTarjan;
+
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import it.unibz.precise.graph.SCCTarjan;
 
 /**
  * Partitions a {@link DisjunctiveGraph} into multiple subgraphs that can be checked independently,
@@ -35,8 +37,9 @@ public class DisjunctiveGraphPartitioner {
 	 */
 	public <T> Stream<DisjunctiveGraph<T>> orderedPartition(DisjunctiveGraph<T> graph) {
 		// Use SCCTarjan to obtain SCCs in topological order
-		return tarjan.findSCCs(new ClusteredGraph<>(graph), HashSet::new).parallelStream()
-			.map(graph::restrictedTo);
+		List<Set<T>> clusters = tarjan.findSCCs(new ClusteredGraph<>(graph), HashSet::new);
+		return clusters.size() == 1 ? Stream.of(graph)
+			: clusters.parallelStream().map(graph::restrictedTo);
 	}
 
 }
