@@ -98,7 +98,7 @@ public class ConsistencyCheckerTest {
 				run.model.getTasks().size(),
 				run.model.getDependencies().size(),
 				run.graph.nodes().size(),
-				run.graph.arcs().size(),
+				run.graph.arcCount(),
 				run.graph.edges().size(),
 				run.ignoreSimpleEdges ? 'X' : ' ',
 				run.useResolving ? 'X' : ' ',
@@ -113,20 +113,24 @@ public class ConsistencyCheckerTest {
 	
 	@Parameters(name = "{0} ({2}, {3}, {4})")
 	public static Collection<Object[]> params() {
-		return dataBigDiagrams();
+		ArrayList<Object[]> params = new ArrayList<>();
+		params.addAll(dataUnitScopeDeadlock());
+//		params.addAll(dataHotelVariants());
+		return params;
 	}
 	
 	private static Collection<Object[]> dataBigDiagrams() {
 		return Stream.of(
-//			"complex x5",
-//			"complex x10",
-//			"complex x15",
+			"complex x5",
+			"complex x10",
+			"complex x15"//,
 //			"complex x20",
-			"complex x25"//,
+//			"complex x25"//,
 //			"complex x30",
+//			"complex x35"//,
 //			"complex x40",
-//			"complex x60",
-//			"complex x80",
+//			"complex x60"//,
+//			"complex x80"//,
 //			"complex x100"//,
 //			"complex x200",
 //			"complex x400",
@@ -142,11 +146,11 @@ public class ConsistencyCheckerTest {
 		return Stream.of(
 //			"unit-scope-deadlock-50",
 //			"unit-scope-deadlock-100",
-//			"unit-scope-deadlock-150",
-			"unit-scope-deadlock-200",
-			"unit-scope-deadlock-300",			
+//			"unit-scope-deadlock-150"//,
+//			"unit-scope-deadlock-200",
+//			"unit-scope-deadlock-300",			
 			"unit-scope-deadlock-400"//,
-//			"unit-scope-deadlock-600",
+//			"unit-scope-deadlock-600"//,
 //			"unit-scope-deadlock-800"
 		).map(m -> new Object[] { m, false,  true,  true,  true })
 			.collect(Collectors.toList());
@@ -154,22 +158,32 @@ public class ConsistencyCheckerTest {
 
 	private static Collection<Object[]> dataHotelVariants() {
 		List<Object[]> params = new ArrayList<>();
-		String[] modelNames = { "consistent", "cyclic", "deadlock", "complex" };
-		boolean[] expectSuccess = { true, false, false, false };
+		String[] modelNames = {
+			"consistent",
+			"cyclic",
+			"deadlock",
+			"complex"
+		};
+		boolean[] expectSuccess = {
+			true,
+			false,
+			false,
+			false
+		};
 		
 		for (int i = 0; i < modelNames.length; i++) {
 			String m = modelNames[i];
 			boolean e = expectSuccess[i];
 			// Put sophisticated first so the JIT will optimize them less,
 			// thus if they still take less time it is not because of the JIT. 
-//			params.add(new Object[] { m, e,  true,  true,  true });
-//			params.add(new Object[] { m, e, false,  true,  true });
+			params.add(new Object[] { m, e,  true,  true,  true });
+			params.add(new Object[] { m, e, false,  true,  true });
 			params.add(new Object[] { m, e,  true,  true, false });
-//			params.add(new Object[] { m, e, false,  true, false });
+			params.add(new Object[] { m, e, false,  true, false });
 			params.add(new Object[] { m, e,  true, false,  true });
-//			params.add(new Object[] { m, e, false, false,  true });
-//			params.add(new Object[] { m, e,  true, false, false });
-//			params.add(new Object[] { m, e, false, false, false });
+			params.add(new Object[] { m, e, false, false,  true });
+			params.add(new Object[] { m, e,  true, false, false });
+			params.add(new Object[] { m, e, false, false, false });
 		}
 		return params;
 	}
@@ -199,6 +213,7 @@ public class ConsistencyCheckerTest {
 			long t1 = System.nanoTime();
 			transTimeNs.addAndGet(t1 - t0);
 			completedTranslations.incrementAndGet();
+			//boolean success = expectSuccess;	// For testing translation only
 			boolean success = orientationFinder.init(usePartitioning, useResolving).search(graph).isSuccessful();
 			long t2 = System.nanoTime();
 			checkTimeNs.addAndGet(t2 - t1);
