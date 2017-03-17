@@ -44,8 +44,6 @@ import it.unibz.precise.rest.mdl.conversion.MDLContext;
 @SpringBootTest(classes=Application.class, webEnvironment=WebEnvironment.RANDOM_PORT)
 public class ConsistencyCheckerTest {
 	
-	private static final int ITERATIONS = 100;
-	private static final int WARMUP_ITERATIONS = 100;
 	private static final int TIMEOUT_MIN = 60;
 	
 	@ClassRule
@@ -76,6 +74,11 @@ public class ConsistencyCheckerTest {
 	public boolean usePartitioning;
 	@Parameter(4)
 	public boolean useResolving;
+	
+	@Parameter(5)
+	public int warmup;
+	@Parameter(6)
+	public int iterations;
 	
 	private Model model;
 	private DisjunctiveGraph<TaskUnitNode> graph;
@@ -119,8 +122,8 @@ public class ConsistencyCheckerTest {
 	public static Collection<Object[]> params() {
 		ArrayList<Object[]> params = new ArrayList<>();
 		// Comment out the datasets that should not be tested
-		params.addAll(dataHotelVariants());
-//		params.addAll(dataBigDiagrams());
+//		params.addAll(dataHotelVariants());
+		params.addAll(dataBigDiagrams());
 //		params.addAll(dataUnitScopeDeadlock());
 		return params;
 	}
@@ -134,12 +137,12 @@ public class ConsistencyCheckerTest {
 //			"complex x20"//,
 //			"complex x25"//,
 //			"complex x30",
-			"complex x35"//,
+//			"complex x35"//,
 //			"complex x40",
 //			"complex x60",
 //			"complex x80"//,
 //			"complex x100"//,
-//			"complex x120"//,
+			"complex x120"//,
 //			"complex x150"//,
 //			"complex x200"//,
 //			"complex x400",
@@ -147,7 +150,7 @@ public class ConsistencyCheckerTest {
 //			"complex x1200",
 //			"complex x1600",
 //			"complex x2000"
-		).map(m -> new Object[] { m, false,  true,  true,  true })
+		).map(m -> new Object[] { m, false,  true,  true,  true, 0, 3 })
 			.collect(Collectors.toList());
 	}
 	
@@ -162,7 +165,7 @@ public class ConsistencyCheckerTest {
 //			"unit-scope-deadlock-400",
 //			"unit-scope-deadlock-600",
 			"unit-scope-deadlock-800"
-		).map(m -> new Object[] { m, false,  true,  true,  true })
+		).map(m -> new Object[] { m, false,  true,  true,  true, 0, 3 })
 			.collect(Collectors.toList());
 	}
 
@@ -181,20 +184,21 @@ public class ConsistencyCheckerTest {
 			false,
 			false
 		};
-		
+		int warmup = 100;
+		int iterations = 100;
 		for (int i = 0; i < modelNames.length; i++) {
 			String m = modelNames[i];
 			boolean e = expectSuccess[i];
 			// Put sophisticated first so the JIT will optimize them less,
 			// thus if they still take less time it is not because of the JIT. 
-			params.add(new Object[] { m, e,  true,  true,  true });
-			params.add(new Object[] { m, e, false,  true,  true });
-			params.add(new Object[] { m, e,  true,  true, false });
-//			params.add(new Object[] { m, e, false,  true, false });
-//			params.add(new Object[] { m, e,  true, false,  true });
-//			params.add(new Object[] { m, e, false, false,  true });
-//			params.add(new Object[] { m, e,  true, false, false });
-//			params.add(new Object[] { m, e, false, false, false });
+			params.add(new Object[] { m, e,  true,  true,  true, warmup, iterations });
+			params.add(new Object[] { m, e, false,  true,  true, warmup, iterations });
+			params.add(new Object[] { m, e,  true,  true, false, warmup, iterations });
+//			params.add(new Object[] { m, e, false,  true, false, warmup, iterations });
+//			params.add(new Object[] { m, e,  true, false,  true, warmup, iterations });
+//			params.add(new Object[] { m, e, false, false,  true, warmup, iterations });
+//			params.add(new Object[] { m, e,  true, false, false, warmup, iterations });
+//			params.add(new Object[] { m, e, false, false, false, warmup, iterations });
 		}
 		return params;
 	}
@@ -210,7 +214,7 @@ public class ConsistencyCheckerTest {
 	
 	/** Execute some warm-up experiments to trigger optimizations before time is measured. */
 	private void warmUp() {
-		for (int i = 0; i < WARMUP_ITERATIONS; i++) {
+		for (int i = 0; i < warmup; i++) {
 			graph = modelToGraphTranslator.translate(model.getTasks(), ignoreSimpleEdges);
 			orientationFinder.init(true, true).search(graph).isSuccessful();
 		}
@@ -220,7 +224,7 @@ public class ConsistencyCheckerTest {
 	public void test() throws JsonParseException, IOException {
 		// Add first to also consider timed-out runs
 		allRuns.add(this);
-		for (int i = 0; i < ITERATIONS; i++) {
+		for (int i = 0; i < iterations; i++) {
 			long t0 = System.nanoTime();
 			graph = modelToGraphTranslator.translate(model.getTasks(), ignoreSimpleEdges);
 			long t1 = System.nanoTime();
@@ -256,11 +260,14 @@ public class ConsistencyCheckerTest {
 	}
 	
 	private String totalTimeCell() {
-		return timeCell((transTimeNs() + checkTimeNs()) / 1000000);
+		long trans = transTimeNs();
+		long check = checkTimeNs();
+		long total = trans < 0 || check < 0 ? -1 : (trans + check) / 1000000;
+		return timeCell(total);
 	}
 	
 	private long avgTime(long sumNs, int iterations) {
-		return completedChecks.get() > 0
+		return iterations > 0
 			? sumNs / iterations
 			: -1;
 	}
