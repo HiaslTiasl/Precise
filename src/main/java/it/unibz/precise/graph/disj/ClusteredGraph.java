@@ -1,11 +1,15 @@
 package it.unibz.precise.graph.disj;
 
 import java.util.Collection;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import it.unibz.precise.graph.Graph;
+import it.unibz.util.Util;
 
 /**
  * View on a {@link DisjunctiveGraph} that groups nodes into clusters.
@@ -38,29 +42,45 @@ import it.unibz.precise.graph.Graph;
  */
 public final class ClusteredGraph<T> implements Graph<T> {
 	
-	private final DisjunctiveGraph<T> disjGraph;
+	//private final Set<T> nodes;
+	//private final Map<T, Set<T>> succ;
+	private DisjunctiveGraph<T> disjGraph;
+	private Map<T, Set<Set<T>>> groupsByNode;	// Map from nodes to the groups in which they are contained.
+//	private Map<T, Set<T>> inSameGroupAs;		// Alternative where all groups of a node get merged to a single set.
 	
 	public ClusteredGraph(DisjunctiveGraph<T> disjGraph) {
 		this.disjGraph = disjGraph;
+		groupsByNode = new HashMap<>();
+		Function<T, Set<Set<T>>> setSupplier = k -> new HashSet<>();
+		for (DisjunctiveEdge<T> e : disjGraph.edges()) {
+			addGroup(e.getLeft(), setSupplier);
+			addGroup(e.getRight(), setSupplier);
+		}
 	}
 
+	/** Add the given group to the map. */
+	private void addGroup(Set<T> nodes, Function<T, Set<Set<T>>> setSupplier) {
+		for (T n : nodes)
+			groupsByNode.computeIfAbsent(n, setSupplier).add(nodes);
+	}
+	
 	@Override
 	public Collection<T> nodes() {
 		return disjGraph.nodes();
 	}
-
+	
 	@Override
 	public Stream<T> successors(T node) {
-		// Groups of nodes corresponding to the side of disjunctive edges that contain
-		// the given node.
-		Stream<Set<T>> exclusiveGroups = disjGraph.disjunctions(node).stream()
-			.map(e -> e.getSide(node))
-			.filter(Objects::nonNull);		// Should not be necessary
+		Set<Set<T>> groups = groupsByNode.get(node);
+		Stream<T> successors = disjGraph.successors(node);
 		
-		return Stream.concat(
-			disjGraph.successors(node),
-			exclusiveGroups.flatMap(Set::stream)
-		);
+		return !Util.hasElements(groups) ? successors
+			: Stream.concat(
+				successors,
+				groups.stream()
+					.flatMap(Set::stream)
+					.filter(n -> !node.equals(n))
+				);
 	}
 	
 }

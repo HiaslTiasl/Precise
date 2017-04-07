@@ -54,8 +54,8 @@ public class NuSMVContext {
 		Stream<String> existences = nodeNames.values().stream()
 			.map(this::existence);
 		
-		Stream<String> arcs = graph.arcs().stream()
-			.map(a -> precedes(a.getSource(), a.getTarget()));
+		Stream<String> arcs = graph.arcs().entrySet().stream()
+			.flatMap(e -> e.getValue().stream().map(t -> precedes(e.getKey(), t)));
 		
 		Stream<String> edges = graph.edges().stream()
 			.map(this::excludes);
