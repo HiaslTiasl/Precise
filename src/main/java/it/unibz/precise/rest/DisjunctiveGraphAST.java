@@ -1,30 +1,27 @@
 package it.unibz.precise.rest;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import it.unibz.precise.check.ModelToGraphTranslator;
 import it.unibz.precise.check.TaskUnitNode;
-import it.unibz.precise.graph.disj.DisjunctiveEdge;
 import it.unibz.precise.graph.disj.DisjunctiveGraph;
 import it.unibz.precise.model.PatternEntry;
-import it.unibz.util.Util;
 
 public class DisjunctiveGraphAST {
 
-	private Collection<String> nodes;
+	private List<String> nodes;
 	private Map<String, List<String>> arcs;
-	private Collection<DisjunctiveEdge<String>> edges;
+	private List<SerializedEdge> edges;
 	
-	public DisjunctiveGraphAST(DisjunctiveGraph<TaskUnitNode> disjGraph) {
-		nodes = serializeNodes(disjGraph.nodes());
-		arcs = serializeArcs(disjGraph.arcs());
-		edges = serializeEdges(disjGraph.edges());
+	public DisjunctiveGraphAST(ModelToGraphTranslator.Input input, DisjunctiveGraph disjGraph) {
+		nodes = serializeAllNodes(input, disjGraph);
+		arcs = serializeArcs(input, disjGraph);
+		edges = serializeEdges(input, disjGraph);
 	}
 	
-	public Collection<String> getNodes() {
+	public List<String> getNodes() {
 		return nodes;
 	}
 	
@@ -32,33 +29,68 @@ public class DisjunctiveGraphAST {
 		return arcs;
 	}
 	
-	public Collection<DisjunctiveEdge<String>> getEdges() {
+	public List<SerializedEdge> getEdges() {
 		return edges;
 	}
-	
-	
-	private String serializeNode(TaskUnitNode node) {
-		return node.getActivity().getShortName() + ":" + PatternEntry.toValueString(node.getUnit().getPattern());
+
+	private static class SerializedEdge {
+		private final List<String> left;
+		private final List<String> right;
+
+		public SerializedEdge(List<String> left, List<String> right) {
+			this.left = left;
+			this.right = right;
+		}
+
+		public List<String> getLeft() {
+			return left;
+		}
+
+		public List<String> getRight() {
+			return right;
+		}
 	}
 	
-	private Set<String> serializeNodes(Collection<TaskUnitNode> nodes) {
-		return nodes.stream()
-			.map(this::serializeNode)
-			.collect(Collectors.toSet());
+	private String serializeNode(ModelToGraphTranslator.Input input, DisjunctiveGraph disjGraph, int node) {
+		TaskUnitNode taskUnitNode = input.nodeAt(disjGraph.toOriginalNode(node));
+		return taskUnitNode.getActivity().getShortName() + ":" + PatternEntry.toValueString(taskUnitNode.getUnit().getPattern());
+	}
+
+	private List<String> serializeNodes(ModelToGraphTranslator.Input input, DisjunctiveGraph disjGraph, IntStream nodes) {
+		return nodes
+			.mapToObj(n -> serializeNode(input, disjGraph, n))
+			.collect(Collectors.toList());
+	}
+
+	private List<String> serializeAllNodes(ModelToGraphTranslator.Input input, DisjunctiveGraph disjGraph) {
+		return serializeNodes(input, disjGraph, IntStream.range(0, disjGraph.nodes()));
+	}
+
+	private List<String> serializeNodes(ModelToGraphTranslator.Input input, DisjunctiveGraph disjGraph, BitSet nodes) {
+		return serializeNodes(input, disjGraph, nodes.stream());
 	}
 	
 	/** Returns a textual representation of the given graph. */
-	private Map<String, List<String>> serializeArcs(Map<TaskUnitNode, Set<TaskUnitNode>> arcs) {
-		return arcs.entrySet().stream()
-			.collect(Collectors.toMap(
-				e -> serializeNode(e.getKey()),
-				e -> Util.mapToList(e.getValue(), this::serializeNode)));
+	private Map<String, List<String>> serializeArcs(ModelToGraphTranslator.Input input, DisjunctiveGraph disjGraph) {
+		BitSet[] arcs = disjGraph.arcs();
+		HashMap<String, List<String>> arcMap = new HashMap<>();
+		for (int nSrc = 0; nSrc < arcs.length; nSrc++) {
+			String src = serializeNode(input, disjGraph, nSrc);
+			List<String> targets = arcs[nSrc].stream()
+				.mapToObj(nDst -> serializeNode(input, disjGraph, nDst))
+				.collect(Collectors.toList());
+			arcMap.put(src, targets);
+		}
+		return arcMap;
 	}
 	
 	/** Returns a textual representation of the given graph. */
-	private List<DisjunctiveEdge<String>> serializeEdges(Collection<DisjunctiveEdge<TaskUnitNode>> edges) {
-		return edges.stream()
-			.map(e -> new DisjunctiveEdge<>(serializeNodes(e.getLeft()), serializeNodes(e.getRight())))
+	private List<SerializedEdge> serializeEdges(ModelToGraphTranslator.Input input, DisjunctiveGraph disjGraph) {
+		return disjGraph.edges().stream()
+			.map(e -> new SerializedEdge(
+				serializeNodes(input, disjGraph, e.getLeft()),
+				serializeNodes(input, disjGraph, e.getRight()))
+			)
 			.collect(Collectors.toList());
 	}
 

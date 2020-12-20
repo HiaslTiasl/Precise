@@ -1,10 +1,6 @@
 package it.unibz.util;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,6 +31,11 @@ public class Util {
 	/** Returns the size of the given collection, or 0 of the collection is null. */
 	public static <T> int size(Collection<T> coll) {
 		return coll == null ? 0 : coll.size();
+	}
+
+	/** Returns the size of the given collection, or 0 of the collection is null. */
+	public static int size(BitSet bitSet) {
+		return bitSet == null ? 0 : bitSet.size();
 	}
 	
 	/** Returns whether the given collection is neither null nor empty. */

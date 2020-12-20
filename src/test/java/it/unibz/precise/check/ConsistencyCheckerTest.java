@@ -81,7 +81,7 @@ public class ConsistencyCheckerTest {
 	public int iterations;
 	
 	private Model model;
-	private DisjunctiveGraph<TaskUnitNode> graph;
+	private DisjunctiveGraph graph;
 	
 	private volatile AtomicLong transTimeNs = new AtomicLong();
 	private volatile AtomicLong checkTimeNs = new AtomicLong();
@@ -100,7 +100,7 @@ public class ConsistencyCheckerTest {
 				run.modelName,
 				run.model.getTasks().size(),
 				run.model.getDependencies().size(),
-				run.graph.nodes().size(),
+				run.graph.nodes(),
 				run.graph.arcCount(),
 				run.graph.edges().size(),
 				run.ignoreSimpleEdges ? 'X' : ' ',
@@ -215,7 +215,7 @@ public class ConsistencyCheckerTest {
 	/** Execute some warm-up experiments to trigger optimizations before time is measured. */
 	private void warmUp() {
 		for (int i = 0; i < warmup; i++) {
-			graph = modelToGraphTranslator.translate(model.getTasks(), ignoreSimpleEdges);
+			graph = modelToGraphTranslator.translate(model, ignoreSimpleEdges);
 			orientationFinder.init(true, true).search(graph).isSuccessful();
 		}
 	}
@@ -226,7 +226,7 @@ public class ConsistencyCheckerTest {
 		allRuns.add(this);
 		for (int i = 0; i < iterations; i++) {
 			long t0 = System.nanoTime();
-			graph = modelToGraphTranslator.translate(model.getTasks(), ignoreSimpleEdges);
+			graph = modelToGraphTranslator.translate(model, ignoreSimpleEdges);
 			long t1 = System.nanoTime();
 			transTimeNs.addAndGet(t1 - t0);
 			completedTranslations.incrementAndGet();

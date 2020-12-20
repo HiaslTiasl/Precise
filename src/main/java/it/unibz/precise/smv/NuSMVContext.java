@@ -1,11 +1,13 @@
 package it.unibz.precise.smv;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.BitSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import it.unibz.precise.check.ModelToGraphTranslator;
 import it.unibz.precise.check.TaskUnitNode;
 import it.unibz.precise.graph.disj.DisjunctiveEdge;
 import it.unibz.precise.graph.disj.DisjunctiveGraph;
@@ -34,28 +36,32 @@ public class NuSMVContext {
 
 	private static final String VAR_SEPARATOR = "_";		// Separates segments (task and location values) in variables
 
-	private final DisjunctiveGraph<TaskUnitNode> graph;		// The underlying graph
-	private final Map<TaskUnitNode, String> nodeNames;		// Map from node to their names used in the SMV file
+	private final ModelToGraphTranslator.Input input;
+	private final DisjunctiveGraph graph;		// The underlying graph
+	private final String[] nodeNames;		// Map from node to their names used in the SMV file
 	
-	public NuSMVContext(DisjunctiveGraph<TaskUnitNode> graph) {
+	public NuSMVContext(ModelToGraphTranslator.Input input, DisjunctiveGraph graph) {
+		this.input = input;
 		this.graph = graph;
-		this.nodeNames = graph.nodes().stream()
-			.collect(Collectors.toMap(Function.identity(), this::nodeName));
+		this.nodeNames = IntStream.range(0, graph.nodes())
+			.mapToObj(this::nodeName)
+			.toArray(String[]::new);
 	}
 	
 	public String toNuSMV() {
 		
-		Stream<String> variables = nodeNames.values().stream()
+		Stream<String> variables = Arrays.stream(nodeNames)
 			.flatMap(this::declareVariables);
 		
-		Stream<String> assignments = nodeNames.values().stream()
+		Stream<String> assignments = Arrays.stream(nodeNames)
 			.flatMap(this::assignVariables);
 		
-		Stream<String> existences = nodeNames.values().stream()
+		Stream<String> existences = Arrays.stream(nodeNames)
 			.map(this::existence);
 		
-		Stream<String> arcs = graph.arcs().entrySet().stream()
-			.flatMap(e -> e.getValue().stream().map(t -> precedes(e.getKey(), t)));
+		Stream<String> arcs = IntStream.range(0, graph.nodes())
+			.boxed()
+			.flatMap(s -> graph.allSuccessors(s).stream().mapToObj(t -> precedes(s, t)));
 		
 		Stream<String> edges = graph.edges().stream()
 			.map(this::excludes);
@@ -73,10 +79,11 @@ public class NuSMVContext {
 	}
 
 	/** Returns a name of the given node. */
-	private String nodeName(TaskUnitNode node) {
-		return node.getActivity().getShortName()
+	private String nodeName(int node) {
+		TaskUnitNode tuNode = input.nodeAt(graph.toOriginalNode(node));
+		return tuNode.getActivity().getShortName()
 			+ NuSMVContext.VAR_SEPARATOR
-			+ PatternEntry.toValueString(node.getUnit().getPattern(), NuSMVContext.VAR_SEPARATOR);
+			+ PatternEntry.toValueString(tuNode.getUnit().getPattern(), NuSMVContext.VAR_SEPARATOR);
 	}
 	
 	/** Returns a stream of variable declarations for the given node. */
@@ -175,7 +182,7 @@ public class NuSMVContext {
 	private String conjunction(Stream<String> lines) {
 		return lines
 			.map(NuSMVContext::parenthesis)
-			.collect(Collectors.joining("\n\t& ", "\n\t", "\n"));
+			.collect(Collectors.joining(")\n\t& (", "\n\t(", ")\n"));
 	}
 	
 	/** Returns an LTL formula capturing the existence constraint of the given node. */
@@ -185,16 +192,16 @@ public class NuSMVContext {
 	}
 	
 	/** Returns an LTL formula capturing a precedence constraint from {@code sourceNode} to {@code targetNode}. */
-	private String precedes(TaskUnitNode sourceNode, TaskUnitNode targetNode) {
-		String source = nodeNames.get(sourceNode);
-		String target = nodeNames.get(targetNode);
+	private String precedes(int sourceNode, int targetNode) {
+		String source = nodeNames[graph.toOriginalNode(sourceNode)];
+		String target = nodeNames[graph.toOriginalNode(targetNode)];
 		// The target node cannot start until the source node ends
 		return "! " + start(target) + " U " + end(source);
 	}
 	
 	/** Returns an LTL formula capturing the given disjunctive edge. */
-	private String excludes(DisjunctiveEdge<TaskUnitNode> edge) {
-		Set<TaskUnitNode> left = edge.getLeft(), right = edge.getRight();
+	private String excludes(DisjunctiveEdge edge) {
+		BitSet left = edge.getLeft(), right = edge.getRight();
 		// Either all left precede all right or vice-versa
 		return parenthesis(precedeAll(left, right))
 			+ " | "
@@ -205,11 +212,11 @@ public class NuSMVContext {
 	 * Returns an LTL formula capturing a precedence constraint from all nodes in
 	 * {@code sources} to all nodes in {@code targets}.
 	 */
-	private String precedeAll(Set<TaskUnitNode> sources, Set<TaskUnitNode> targets) {
+	private String precedeAll(BitSet sources, BitSet targets) {
 		return sources.stream()
-			.flatMap(s -> (Stream<String>)targets.stream().map(t -> precedes(s, t)))	// TODO: Delete cast once Eclipse understands
-			.map(NuSMVContext::parenthesis)
-			.collect(Collectors.joining(" & "));
+			.boxed()
+			.flatMap(s -> targets.stream().mapToObj(t -> precedes(s, t)))	// TODO: Delete cast once Eclipse understands
+			.collect(Collectors.joining(") & (", "(", ")"));
 	}
 	
 	/** Wraps the given formula in parenthesis. */

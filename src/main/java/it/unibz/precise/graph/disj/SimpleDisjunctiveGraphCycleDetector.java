@@ -1,5 +1,6 @@
 package it.unibz.precise.graph.disj;
 
+import java.util.BitSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,9 +25,8 @@ public class SimpleDisjunctiveGraphCycleDetector implements DisjunctiveGraphCycl
 
 	/** Returns non-trivial strongly connected components in the given disjunctive graph. */
 	@Override
-	public <T> List<List<T>> detect(DisjunctiveGraph<T> disjGraph) {
+	public List<BitSet> detect(DisjunctiveGraph disjGraph) {
 		return sccFinder.findNonTrivialSCCs(disjGraph).collect(Collectors.toList());
 	}
-
 
 }

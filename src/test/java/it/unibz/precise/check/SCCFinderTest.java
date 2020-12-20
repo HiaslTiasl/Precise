@@ -1,10 +1,6 @@
 package it.unibz.precise.check;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -42,10 +38,10 @@ public class SCCFinderTest {
 	public String name;
 	
 	@Parameter(1)
-	public Map<Integer, Set<Integer>> adj;
+	public BitSet[] adj;
 
 	@Parameter(2)
-	public Set<Set<Integer>> expectedSCCs;
+	public Set<BitSet> expectedSCCs;
 	
 	@Parameters(name = "{index}: {0}")
 	public static Collection<Object[]> data() {
@@ -59,8 +55,8 @@ public class SCCFinderTest {
 	
 	@Test
 	public void testFindSCCs() {
-		List<? extends List<Integer>> foundSCCs = sccFinder.findSCCs(MaterializedGraph.of(adj.keySet(), adj));
-		Assert.assertEquals(expectedSCCs, Util.asSet(foundSCCs));
+		SCCFinder.Components foundSCCs = sccFinder.findSCCs(MaterializedGraph.of(adj));
+		Assert.assertEquals(expectedSCCs, Util.asSet(Arrays.asList(foundSCCs.asBitSets())));
 	}
 	
 }

@@ -1,11 +1,7 @@
 package it.unibz.precise.graph;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.BitSet;
 import java.util.function.Supplier;
 
 import org.springframework.stereotype.Service;
@@ -39,61 +35,95 @@ import it.unibz.precise.check.SCCFinder;
 @Service
 public class SCCTarjan implements SCCFinder {
 
+	private static class SCCs implements Components {
 
-	public <T, SCC extends Collection<T>> List<SCC> findSCCs(Graph<T> graph, Supplier<SCC> sccSupplier) {
-		return new Run<>(graph, sccSupplier).dfs();
+		private final int[] nodeTimes;
+		private final int maxTime;
+
+		public SCCs(int[] nodeTimes, int maxTime) {
+			this.nodeTimes = nodeTimes;
+			this.maxTime = maxTime;
+		}
+
+		@Override
+		public int count() {
+			return maxTime;
+		}
+
+		@Override
+		public int componentOfNode(int n) {
+			return nodeTimes[n];
+		}
+
+		@Override
+		public BitSet[] asBitSets() {
+			BitSet[] result = new BitSet[maxTime];
+			for (int n = 0; n < nodeTimes.length; n++) {
+				int t = nodeTimes[n];
+				BitSet c = result[t];
+				if (c == null)
+					c = result[t] = new BitSet();
+				c.set(n);
+			}
+			return result;
+		}
+		
+	}
+
+	public Components findSCCs(Graph graph) {
+		return new Run(graph).dfs();
 	}
 	
 	/**
 	 * Encapsulates one execution of {@link #findSCCs(Graph)}.
 	 * 
 	 * @author MatthiasP
-	 *
-	 * @param <T>
 	 */
-	private static class Run<T, SCC extends Collection<T>> {
-		private Graph<T> graph;				// The graph to be checked
-		private Supplier<SCC> sccSupplier;	// Supplier for creating a new, empty component
-		private ArrayList<T> stack;			// Stack of nodes
-		private Map<T, Integer> nodeTimes;	// Earliest time (lowest SCC index) for reaching node. Also used to mark nodes as visited.
-		private List<SCC> components;		// Resulting SCCs
+	private static class Run {
+		private Graph graph;				// The graph to be checked
+		//private ArrayList<Integer> stack;	// Stack of nodes
+		private int[] nodeTimes;			// Earliest time (lowest SCC index) for reaching node. Also used to mark nodes as visited.
+		//private List<BitSet> components;	// Resulting SCCs
+		private int components;				// Resulting SCCs
 		private int time;					// Current time (number of visited nodes)
 		
 		/** Initialize the run based on {@code graph}. */
-		private Run(Graph<T> graph, Supplier<SCC> sccSupplier) {
+		private Run(Graph graph) {
 			this.graph = graph;
-			this.sccSupplier = sccSupplier;
-			int n = graph.nodes().size();
-			stack = new ArrayList<>(n);
-			nodeTimes = new HashMap<>(n);
-			components = new ArrayList<>(n);
+			int N = graph.nodes();
+			//stack = new ArrayList<>(N);
+			nodeTimes = new int[N];
+			//components = new ArrayList<>(N);
 		}
 		
 		/** Indicates whether {@code node} was visited already. */
-		private boolean visited(T node) {
-			return nodeTimes.containsKey(node);
+		private boolean visited(int node) {
+			return nodeTimes[node] > 0;
 		}
 		
 		/** Visits {@code node}, i.e. inits its time, adds it the the stack, and increments time. */
-		private void visit(T node) {
-			nodeTimes.put(node, time++);
-			stack.add(node);
+		private void visit(int node) {
+			nodeTimes[node] = ++time;
+			//stack.add(node);
 		}
 		
-		/** Pops the top-most node from the stack. */
-		private T pop() {
-			return stack.remove(stack.size() - 1);
-		}
+//		/** Pops the top-most node from the stack. */
+//		private int pop() {
+//			return stack.remove(stack.size() - 1);
+//		}
 		
 		/** Start visiting nodes in depth-first order. */
-		private List<SCC> dfs() {
-			for (T node : graph.nodes()) {
-				if (!visited(node))
-					dfs(node);
+		private Components dfs() {
+			int N = graph.nodes();
+			for (int n = 0; n < N; n++) {
+				if (!visited(n))
+					dfs(n);
 			}
+			
 			// Reverse to obtain topological sort. 
-			Collections.reverse(components);
-			return components;
+			//Collections.reverse(components);
+			//return components;
+			return new SCCs(nodeTimes, components);
 		}
 		
 		/**
@@ -102,36 +132,40 @@ public class SCCTarjan implements SCCFinder {
 		 * Otherwise, if the time does not need to be adjusted, there is an SCC containing {@code node}
 		 * and all other nodes above it in the stack.
 		 */
-		private void dfs(T node) {
+		private void dfs(int node) {
 			visit(node);
 			boolean isComponentRoot = true;
 			
 			// Using an Iterator instead of a Stream, because nodes are visited recursively.
 			// In particular, each iteration depends on state modifications from earlier iterations.
-			Iterable<T> successors = graph.successors(node)::iterator;
-			for (T suc : successors) {
+			Successors successors = graph.successors(node);
+			int suc;
+			while ((suc = successors.next()) >= 0) {
 				if (!visited(suc))
 					dfs(suc);
-				int sucLow = nodeTimes.get(suc);
-				if (nodeTimes.get(node) > sucLow) {
+				int sucLow = nodeTimes[suc];
+				if (nodeTimes[node] > sucLow) {
 					// node can reach an earlier node -> it is not the root of the component
-					nodeTimes.put(node, sucLow);
+					nodeTimes[node] = sucLow;
 					isComponentRoot = false;
 				}
 			}
 
-			if (isComponentRoot) {
-				// node can reach all other nodes above it in the stack
-				// -> pop all these nodes from the stack and add them as a SCC to the result.
-				SCC scc = sccSupplier.get();
-				T n;
-				do {
-					n = pop();
-					scc.add(n);
-					nodeTimes.put(n, Integer.MAX_VALUE);
-				} while (!n.equals(node));
-				components.add(scc);
-			}
+			if (isComponentRoot)
+				components++;
+			
+//			if (isComponentRoot) {
+//				// node can reach all other nodes above it in the stack
+//				// -> pop all these nodes from the stack and add them as a SCC to the result.
+//				BitSet scc = new BitSet();
+//				int n;
+//				do {
+//					n = pop();
+//					scc.set(n);
+//					nodeTimes[n] = Integer.MAX_VALUE;
+//				} while (n != node);
+//				components.add(scc);
+//			}
 		}
 	}
 

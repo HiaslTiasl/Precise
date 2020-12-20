@@ -1,15 +1,11 @@
 package it.unibz.precise.graph.disj;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
 
 import it.unibz.precise.graph.Graph;
-import it.unibz.util.Util;
+import it.unibz.precise.graph.Successors;
 
 /**
  * View on a {@link DisjunctiveGraph} that groups nodes into clusters.
@@ -33,54 +29,74 @@ import it.unibz.util.Util;
  * clusters would be merged into one.
  * <p>
  * Note that the returned Graph is a view on {@code disjGraph}.
- * If {@code disjGraph} is modified while traversing {@link Graph#nodes()}
- * or {@link Graph#successors(Object)}, the behavior is undefined.
+ * If {@code disjGraph} is modified while traversing {@link Graph#successors},
+ * the behavior is undefined.
  * 
  * @author MatthiasP
- *
- * @param <T> The type of the nodes
  */
-public final class ClusteredGraph<T> implements Graph<T> {
+public final class ClusteredGraph implements Graph.Lazy {
 	
 	//private final Set<T> nodes;
 	//private final Map<T, Set<T>> succ;
-	private DisjunctiveGraph<T> disjGraph;
-	private Map<T, Set<Set<T>>> groupsByNode;	// Map from nodes to the groups in which they are contained.
-//	private Map<T, Set<T>> inSameGroupAs;		// Alternative where all groups of a node get merged to a single set.
+	private DisjunctiveGraph disjGraph;
+	private ArrayList<BitSet> groups;
+	private int[] groupIndexByNode;
 	
-	public ClusteredGraph(DisjunctiveGraph<T> disjGraph) {
+	public ClusteredGraph(DisjunctiveGraph disjGraph) {
 		this.disjGraph = disjGraph;
-		groupsByNode = new HashMap<>();
-		Function<T, Set<Set<T>>> setSupplier = k -> new HashSet<>();
-		for (DisjunctiveEdge<T> e : disjGraph.edges()) {
-			addGroup(e.getLeft(), setSupplier);
-			addGroup(e.getRight(), setSupplier);
+		int nodes = disjGraph.nodes();
+		groups = new ArrayList<BitSet>();
+		for (DisjunctiveEdge e : disjGraph.edges()) {
+			addGroup(e.getLeft());
+			addGroup(e.getRight());
+		}
+		groupIndexByNode = new int[nodes];
+		Arrays.fill(groupIndexByNode, -1);
+		for (int i = 0, len = groups.size(); i < len; i++) {
+			BitSet g = groups.get(i);
+			for (int n = g.nextSetBit(0); n >= 0; n = g.nextSetBit(n + 1))
+				groupIndexByNode[n] = i;
 		}
 	}
 
 	/** Add the given group to the map. */
-	private void addGroup(Set<T> nodes, Function<T, Set<Set<T>>> setSupplier) {
-		for (T n : nodes)
-			groupsByNode.computeIfAbsent(n, setSupplier).add(nodes);
+	private void addGroup(BitSet group) {
+		for (int i = groups.size(); i-- > 0;) {
+			if (group.intersects(groups.get(i)))
+				group.or(groups.remove(i));
+		}
+		groups.add(group);
 	}
 	
 	@Override
-	public Collection<T> nodes() {
+	public int nodes() {
 		return disjGraph.nodes();
 	}
 	
 	@Override
-	public Stream<T> successors(T node) {
-		Set<Set<T>> groups = groupsByNode.get(node);
-		Stream<T> successors = disjGraph.successors(node);
+	public Successors successors(int node) {
+		BitSet group = groups.get(node);
 		
-		return !Util.hasElements(groups) ? successors
-			: Stream.concat(
-				successors,
-				groups.stream()
-					.flatMap(Set::stream)
-					.filter(n -> !node.equals(n))
-				);
+		return new Successors() {
+			private int cur		= -2;		// Current node in the group
+			private int curSucc	= -1;		// Current successor node
+			
+			@Override
+			public int next() {
+				if (cur == -2)
+					cur = group.nextSetBit(0);
+				if (cur == -1)
+					return -1;
+				BitSet succs = disjGraph.allSuccessors(cur);
+				while (true) {
+					curSucc = succs.nextSetBit(curSucc + 1);
+					if (curSucc >= 0)
+						return groupIndexByNode[curSucc];
+					cur = group.nextSetBit(cur + 1);
+					if (cur < 0)
+						return -1;
+				}
+			}
+		};
 	}
-	
 }

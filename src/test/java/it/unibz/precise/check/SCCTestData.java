@@ -1,9 +1,6 @@
 package it.unibz.precise.check;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,11 +8,11 @@ public class SCCTestData {
 	
 	private String name;
 	
-	private Map<Integer, Set<Integer>> adj;
+	private BitSet[] adj;
 	
-	private Set<Set<Integer>> expectedSCCs;
+	private Set<BitSet> expectedSCCs;
 	
-	public SCCTestData(String name, Map<Integer, Set<Integer>> adj, Set<Set<Integer>> expectedSCCs) {
+	public SCCTestData(String name, BitSet[] adj, Set<BitSet> expectedSCCs) {
 		this.name = name;
 		this.adj = adj;
 		this.expectedSCCs = expectedSCCs;
@@ -25,11 +22,11 @@ public class SCCTestData {
 		return name;
 	}
 
-	public Map<Integer, Set<Integer>> getAdj() {
+	public BitSet[] getAdj() {
 		return adj;
 	}
 
-	public Set<Set<Integer>> getExpectedSCCs() {
+	public Set<BitSet> getExpectedSCCs() {
 		return expectedSCCs;
 	}
 	
@@ -41,56 +38,60 @@ public class SCCTestData {
 	static <T> Set<T> asSet(T ...values) {
 		return Stream.of(values).collect(Collectors.toSet());
 	}
+
+	@SafeVarargs
+	static BitSet asBitSet(int ...values) {
+		BitSet bitSet = new BitSet();
+		for (int v : values)
+			bitSet.set(v);
+		return bitSet;
+	}
 	
 	public static SCCTestData emptyGraph() {
 		return new SCCTestData(
 			"emptyGraph",
-			Collections.emptyMap(),
+			new BitSet[] { asBitSet() },
 			Collections.emptySet()
 		);
 	}
 	
 	public static SCCTestData dag() {
-		Map<Integer, Set<Integer>> adj = new HashMap<>();
-		adj.put(0, asSet(1, 2));
-		adj.put(1, asSet(2, 3));
-		adj.put(2, asSet(3));
-		adj.put(3, asSet());
-		
 		return new SCCTestData(
 			"dag",
-			adj,
-			asSet(asSet(0), asSet(1), asSet(2), asSet(3))
+			new BitSet[] {
+				asBitSet(1, 2),
+				asBitSet(2, 3),
+				asBitSet(3)
+			},
+			asSet(asBitSet(0), asBitSet(1), asBitSet(2), asBitSet(3))
 		);
 	}
 	
 	public static SCCTestData twoCycles() {
-		Map<Integer, Set<Integer>> adj = new HashMap<>();
-		
-		adj.put(0, asSet(1));
-		adj.put(1, asSet(2));
-		adj.put(2, asSet(0, 3));
-		adj.put(3, asSet(4));
-		adj.put(4, asSet(5));
-		adj.put(5, asSet(4));
-		
 		return new SCCTestData(
 			"twoCycles",
-			adj,
-			asSet(asSet(0, 1, 2), asSet(3), asSet(4, 5))
+			new BitSet[] {
+				asBitSet(1),
+				asBitSet(2),
+				asBitSet(0, 3),
+				asBitSet(4),
+				asBitSet(5),
+				asBitSet(4)
+			},
+			asSet(asBitSet(0, 1, 2), asBitSet(3), asBitSet(4, 5))
 		);
 	}
 	
 	public static SCCTestData multiplyCyclesPerSCC() {
-		Map<Integer, Set<Integer>> adj = new HashMap<>();
-		adj.put(0, asSet(1, 2));
-		adj.put(1, asSet(2, 3));
-		adj.put(2, asSet(3));
-		adj.put(3, asSet(0));
 		return new SCCTestData(
 			"multiplyCyclesPerSCC",
-			adj,
-			asSet(asSet(0, 1, 2, 3))
+			new BitSet[] {
+				asBitSet(1, 2),
+				asBitSet(2, 3),
+				asBitSet(3),
+				asBitSet(0)
+			},
+			asSet(asBitSet(0, 1, 2, 3))
 		);
 	}
 

@@ -6,6 +6,9 @@ import it.unibz.precise.model.Model;
 import it.unibz.precise.model.PatternEntry;
 import it.unibz.precise.model.Activity;
 
+import static java.util.Comparator.comparing;
+
+import java.util.Comparator;
 import java.util.Set;
 
 /**
@@ -20,8 +23,13 @@ import java.util.Set;
  * @see DisjunctiveGraph
  */
 public class TaskUnitNode {
+	
+	public static final Comparator<TaskUnitNode> BY_TO_STRING = comparing(TaskUnitNode::toString);
+	
 	private final Activity activity;
 	private final AttributeHierarchyNode unit;
+	
+	private String string;
 	
 	public TaskUnitNode(Activity activity, AttributeHierarchyNode unit) {
 		this.activity = activity;
@@ -66,10 +74,12 @@ public class TaskUnitNode {
 			return false;
 		return true;
 	}
-
+	
 	@Override
 	public String toString() {
-		return "<" + activity.getShortName() + "," + PatternEntry.toValueString(unit.getPattern()) + ">"; 
+		if (string == null)
+			string = "<" + activity.getShortName() + "," + PatternEntry.toValueString(unit.getPattern()) + ">";
+		return string;
 	}
 	
 }

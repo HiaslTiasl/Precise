@@ -1,7 +1,9 @@
 package it.unibz.precise.graph.disj;
 
+import it.unibz.precise.check.SCCFinder;
 import it.unibz.precise.graph.SCCTarjan;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,11 +37,11 @@ public class DisjunctiveGraphPartitioner {
 	 * @see ClusteredGraph
 	 * @see SCCTarjan
 	 */
-	public <T> Stream<DisjunctiveGraph<T>> orderedPartition(DisjunctiveGraph<T> graph) {
+	public Stream<DisjunctiveGraph> orderedPartition(DisjunctiveGraph graph) {
 		// Use SCCTarjan to obtain SCCs in topological order
-		List<Set<T>> clusters = tarjan.findSCCs(new ClusteredGraph<>(graph), HashSet::new);
-		return clusters.size() == 1 ? Stream.of(graph)
-			: clusters.parallelStream().map(graph::restrictedTo);
+		SCCFinder.Components clusters = tarjan.findSCCs(new ClusteredGraph(graph));
+		return clusters.count() == 1 ? Stream.of(graph)
+			: Arrays.stream(clusters.asBitSets()).map(graph::restrictedTo);
 	}
 
 }

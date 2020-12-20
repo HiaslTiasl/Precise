@@ -1,10 +1,12 @@
 package it.unibz.precise.rest;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import it.unibz.precise.graph.MaterializedGraph;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -112,9 +114,12 @@ public class CSVFileController {
 		
 		// List tasks in topological order.
 		// Tasks in a SCCs are sorted lexicographically by short identification.
-		DiagramGraph graph = DiagramGraph.of(model);
-		List<Task> orderedTasks = sccTarjan.findSCCs(graph).stream()
-			.flatMap(l -> l.stream().sorted(Task.shortIdentificationComparator()))
+		MaterializedGraph graph = DiagramGraph.of(model);
+		List<Task> orderedTasks = Arrays.stream(sccTarjan.findSCCs(graph).asBitSets())
+			.flatMap(l -> l.stream()
+				.mapToObj(model.getTasks()::get)
+				.sorted(Task.shortIdentificationComparator())
+			)
 			.collect(Collectors.toList());
 		
 		String dataRows = orderedTasks.stream()

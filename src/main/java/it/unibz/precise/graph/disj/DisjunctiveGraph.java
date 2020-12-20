@@ -1,15 +1,14 @@
 package it.unibz.precise.graph.disj;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import it.unibz.precise.graph.Graph;
+
+import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import it.unibz.precise.graph.MaterializedGraph;
+import java.util.function.IntUnaryOperator;
 
 /**
  * A disjunctive graph representation.
@@ -17,184 +16,205 @@ import it.unibz.precise.graph.MaterializedGraph;
  * Supports orienting edges into a particular direction, effectively
  * removing the edge and adding arcs from all nodes of the one side
  * to all nodes of the other side.
- * 
- * @author MatthiasP
  *
- * @param <T> The type of the nodes.
+ * @author MatthiasP
  */
-public class DisjunctiveGraph<T> implements Cloneable, MaterializedGraph<T> {
-	
-	private int arcCount;
-	
-	private Set<T> nodes;
-	private Set<DisjunctiveEdge<T>> edges;
+public class DisjunctiveGraph implements Cloneable, Graph.Eager {
 
-	private Map<T, Set<T>> succ = new HashMap<>();		// Map from node to successors
-	
+	private int arcCount;
+
+	private int nodes;
+	private BitSet[] adj;
+	private Set<DisjunctiveEdge> edges;
+
+	private IntUnaryOperator toOriginalNode;
+
 	// N.B. The following auxiliary data structure was used to speed up the algorithm.
 	// In particular, it allows to resolve disjunctive edges found on the way while trying to resolve another disjunctive edge (see ResolveType.SOME).
 	// However, if many nodes are involved in many disjunctive edges, it requires a lot of memory.
 	// Also, it looks as if that in turn this also requires time to fill the structure.
 	// Therefore, it was dropped
 	//private Map<T, Set<DisjunctiveEdge<T>>> disj = new HashMap<>();		// Map from nodes to disjunctive edges that contains them
-	
-	public DisjunctiveGraph() {
-		this(new HashSet<>());
-	}
-	
+
 	/** Creates a new graph with the given nodes only. */
-	private DisjunctiveGraph(Set<T> nodes) {
+	private DisjunctiveGraph(int nodes, IntUnaryOperator toOriginalNode) {
 		this.nodes = nodes;
+		this.adj = new BitSet[nodes];
 		this.edges = new HashSet<>();
+		this.toOriginalNode = toOriginalNode;
 	}
-	
+
 	/**
 	 * Creates a graph with the given nodes and adds all given arcs and edges.
 	 * The set of nodes is used as is, whereas arcs and edges are copied into new collections.
 	 */
-	private DisjunctiveGraph(Set<T> nodes, Map<T, Set<T>> succ, Collection<DisjunctiveEdge<T>> edges) {
-		this.nodes = nodes;
-		this.edges = new HashSet<>(edges.size());
-		addAllArcs(succ);
-		addAllEdges(edges);
+	private DisjunctiveGraph(BitSet[] adj, HashSet<DisjunctiveEdge> edges, IntUnaryOperator toOriginalNode) {
+		this.nodes = adj.length;
+		this.adj = adj;
+		this.edges = edges;
+		this.toOriginalNode = toOriginalNode;
 	}
-	
+
 	/** Copy the given graph. */
-	public static <T> DisjunctiveGraph<T> copy(DisjunctiveGraph<T> other) {
-		return new DisjunctiveGraph<>(new HashSet<>(other.nodes), other.succ, other.edges);
+	public static DisjunctiveGraph copy(DisjunctiveGraph other) {
+		return new DisjunctiveGraph(
+			Arrays.copyOf(other.adj, other.adj.length),
+			new HashSet<>(other.edges),
+			other.toOriginalNode
+		);
 	}
-	
+
 	/**
 	 * Copy the given graph with sealed nodes.
 	 * This prevents to add further nodes afterwards and avoids copying nodes.
 	 */
-	public static <T> DisjunctiveGraph<T> copySealedNodes(DisjunctiveGraph<T> other) {
-		return new DisjunctiveGraph<>(Collections.unmodifiableSet(other.nodes), other.succ, other.edges);
+	public static DisjunctiveGraph copySealedNodes(DisjunctiveGraph other) {
+		return new DisjunctiveGraph(
+			Arrays.copyOf(other.adj, other.adj.length),
+			new HashSet<>(other.edges),
+			other.toOriginalNode
+		);
 	}
-	
+
 	/**
 	 * Create a graph with the given sealed nodes.
 	 * This prevents to add further nodes afterwards and avoids copying nodes.
 	 */
-	public static <T> DisjunctiveGraph<T> sealedNodes(Set<T> nodes) {
-		return new DisjunctiveGraph<>(Collections.unmodifiableSet(nodes));
+	public static DisjunctiveGraph sealedNodes(int nodes) {
+		return new DisjunctiveGraph(nodes, null);
 	}
-	
+
 	/**
 	 * Creates a subgraph of this graph consisting only of the given nodes.
 	 * This implementation assumes that the given nodes are all contained in this graph.
 	 * If this is not the case, the behavior is unspecified.
 	 */
-	public DisjunctiveGraph<T> restrictedTo(Set<T> nodes) {
-		return new DisjunctiveGraph<>(Collections.unmodifiableSet(nodes), succ, edges);
+	public DisjunctiveGraph restrictedTo(BitSet subset) {
+		int nodes = subset.cardinality();
+		BitSet[] newAdj = new BitSet[nodes];
+		HashSet<DisjunctiveEdge> edges = new HashSet<>(this.edges.size());
+		int[] mapping = new int[nodes];
+		int curNode = -1;
+		for (int i = 0; i < nodes; i++) {
+			curNode = subset.nextSetBit(curNode + 1);
+			newAdj[i] = pick(this.adj[curNode], nodes, subset);
+			mapping[i] = curNode;
+		}
+		for (DisjunctiveEdge oldEdge : this.edges) {
+			BitSet newLeft = pick(oldEdge.getLeft(), nodes, subset);
+			if (newLeft.isEmpty())
+				continue;
+			BitSet newRight = pick(oldEdge.getRight(), nodes, subset);
+			if (newRight.isEmpty())
+				continue;
+			edges.add(new DisjunctiveEdge(newLeft, newRight));
+		}
+		return new DisjunctiveGraph(newAdj, edges, node -> toOriginalNode(mapping[node]));
 	}
-	
-	public Set<T> nodes() {
+
+	private static BitSet pick(BitSet org, int size, BitSet mask) {
+		BitSet restricted = new BitSet(size);
+		for (int i = 0, bit = -1; i < size; i++) {
+			bit = mask.nextSetBit(bit + 1);
+			restricted.set(i,  mask.get(bit));
+		}
+		return restricted;
+	}
+
+	public int nodes() {
 		return nodes;
 	}
-	
-	public Set<T> successorSet(T n) {
-		return checkSet(succ.get(n));
+
+	public int toOriginalNode(int node) {
+		return toOriginalNode != null ? toOriginalNode.applyAsInt(node) : node;
 	}
-	
+
+	public BitSet allSuccessors(int n) {
+		return adj[n];
+	}
+
 	private static <E> Set<E> checkSet(Set<E> set) {
 		return set != null ? set : Collections.emptySet();
 	}
-	
+
 	public int arcCount() {
 		return arcCount;
 	}
-	
-	public Map<T, Set<T>> arcs() {
-		return succ;
+
+	public BitSet[] arcs() {
+		return adj;
 	}
-	
-	public Set<DisjunctiveEdge<T>> edges() {
+
+	public Set<DisjunctiveEdge> edges() {
 		return edges;
 	}
 
 //	public Set<DisjunctiveEdge<T>> disjunctions(T n) {
 //		return checkSet(disj.get(n));
 //	}
-	
-	public boolean addAllNodes(Collection<T> nodes) {
-		return this.nodes.addAll(nodes);
-	}
-	
-	public boolean addNode(T n) {
-		return nodes.add(n);
-	}
-	
-	public boolean addAllArcs(Map<T, Set<T>> succ) {
+
+	public boolean addAllArcs(BitSet[] adj) {
 		boolean added = false;
-		for (Map.Entry<T, Set<T>> entry : succ.entrySet()) {
-			T source = entry.getKey();
-			for (T target : entry.getValue())
-				added |= addArc(source, target);
+		for (int n = 0; n < nodes; n++) {
+			BitSet oldSuccs = this.adj[n];
+			BitSet newSuccs = adj[n];
+			int oldSuccsSize = oldSuccs.size();
+			int newSuccsSize = newSuccs.size();
+			if (newSuccsSize <= oldSuccsSize)
+				oldSuccs.or(newSuccs);
+			else {
+				for (int s = newSuccs.nextSetBit(0); s >= 0 && s < nodes; s = newSuccs.nextSetBit(s + 1))
+					oldSuccs.set(s);
+			}
+			added |= oldSuccsSize != oldSuccs.size();
 		}
 		return added;
 	}
-	
-	public boolean addAllArcs(Collection<T> sources, Collection<T> targets) {
-		boolean added = false;
-		for (T s : sources) {
-			for (T t : targets)
-				added |= addArc(s, t);
+
+	public void addSuccessors(int node, BitSet successors) {
+		adj[node].or(successors);
+	}
+
+	public void addAllArcs(BitSet sources, BitSet targets) {
+		int src = -1;
+		while ((src = sources.nextSetBit(src + 1)) >= 0) {
+			addSuccessors(src, targets);
 		}
-		return added;
 	}
-	
-	public boolean addArc(T source, T target) {
-		// N.B: arcs is a set, and can only contain an arc once.
-		// Also, only add arc if both source and target are already nodes in this graph
-		boolean added = nodes.contains(source) && nodes.contains(target)
-			&& addToMultimap(succ, source, target);
-		if (added)
-			arcCount++;
-		return added;
+
+	public boolean addEdge(BitSet left, BitSet right) {
+		return addEdge(new DisjunctiveEdge(left, right));
 	}
-	
-	public boolean removeArc(T source, T target) {
-		boolean removed = removeFrom(succ, source, target);
-		if (removed)
-			arcCount--;
-		return removed;
-	}
-	
-	public boolean addAllEdges(Collection<DisjunctiveEdge<T>> edges) {
-		boolean added = false;
-		for (DisjunctiveEdge<T> e : edges)
-			added |= addEdge(e);
-		return added;
-	}
-	
-	public boolean addEdge(DisjunctiveEdge<T> edge) {
-		Set<T> left = edge.getLeft(), right = edge.getRight();
+
+	public boolean addEdge(DisjunctiveEdge edge) {
+		BitSet left = edge.getLeft(), right = edge.getRight();
+		if (left.size() != nodes || right.size() != nodes)
+			throw new IllegalArgumentException("Groups of DisjunctiveEdge do not match Graph size");
 		// N.B: edges is a set, and can only contain an arc once.
 		// Also, only add edge if all connected nodes are already nodes in this graph
-		return nodes.containsAll(left) && nodes.containsAll(right)
+		return
 			//&& addToMultimapUnderAll(disj, edge.getLeft(), edge)
 			//&& addToMultimapUnderAll(disj, edge.getRight(), edge)
-			&& edges.add(edge);
+			edges.add(edge);
 	}
-	
-	public boolean removeEdge(DisjunctiveEdge<T> edge) {
+
+	public boolean removeEdge(DisjunctiveEdge edge) {
 		return edges.remove(edge);
 			//&& removeFromAll(disj, edge.getLeft(), edge)
 			//&& removeFromAll(disj, edge.getRight(), edge);
 	}
-	
+
 	/** Orients the given disjunctive edge in the given direction. */
-	public boolean orient(DisjunctiveEdge<T> e, Set<T> from, Set<T> to) {
-		return removeEdge(e)
-			&& addAllArcs(from, to);
+	public void orient(DisjunctiveEdge e, BitSet from, BitSet to) {
+		if (removeEdge(e))
+			addAllArcs(from, to);
 	}
-	
+
 	/** Adds {@code value} to the set of values stored in {@code map} under {@code key}. */
 	private <K, V> boolean addToMultimap(Map<K, Set<V>> map, K key, V value) {
 		return map.computeIfAbsent(key, k -> new HashSet<>()).add(value);
 	}
-	
+
 	/** Remove {@code value} from the set of values stored in {@code map} under {@code key}. */
 	private <K, V> boolean removeFrom(Map<K, Set<V>> map, K key, V value) {
 		Set<V> values = map.get(key);

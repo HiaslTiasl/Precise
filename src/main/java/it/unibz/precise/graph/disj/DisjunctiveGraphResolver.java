@@ -1,5 +1,6 @@
 package it.unibz.precise.graph.disj;
 
+import java.util.BitSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,12 @@ public class DisjunctiveGraphResolver implements DisjunctiveGraphCycleDetector {
 	private SimpleDisjunctiveGraphCycleDetector simpleCycleDetector;
 	
 	/** Initializes the operation. */
-	public <T> DisjunctiveGraphResolverOperation<T> init(DisjunctiveGraph<T> graph) {
-		return new DisjunctiveGraphResolverOperation<>(graph, simpleCycleDetector);
+	public DisjunctiveGraphResolverOperation init(DisjunctiveGraph graph) {
+		return new DisjunctiveGraphResolverOperation(graph, simpleCycleDetector);
 	}
 	
 	/** Resolves as many {@link DisjunctiveEdge} as possible in a given {@link DisjunctiveGraph}. */
-	public <T> List<List<T>> detect(DisjunctiveGraph<T> disjGraph) {
+	public List<BitSet> detect(DisjunctiveGraph disjGraph) {
 		return init(disjGraph).resolve();
 	}
 

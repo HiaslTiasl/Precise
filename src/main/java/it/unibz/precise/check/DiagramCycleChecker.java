@@ -2,10 +2,12 @@ package it.unibz.precise.check;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import it.unibz.precise.graph.MaterializedGraph;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,31 +51,31 @@ public class DiagramCycleChecker implements ProblemChecker {
 	 */
 	@Override
 	public Stream<ModelProblem> check(Model model) {
-		DiagramGraph graph = DiagramGraph.of(model);
+		MaterializedGraph graph = DiagramGraph.of(model);
 		return sccFinder.findNonTrivialSCCs(graph)
-			.map(this::checkSCC);
+			.map(scc -> checkSCC(model, scc));
 	}
 	
 	/** Produce a warning iff the given SCC actually contains any arcs. */
-	private ModelProblem checkSCC(List<Task> scc) {
+	private ModelProblem checkSCC(Model model, BitSet scc) {
 		ModelProblem p = null;
 		int size = Util.size(scc);
 		if (size > 1)
-			p = cycleWarning(scc);
+			p = cycleWarning(model, scc);
 		else if (size == 1) {						// Should always be the case
-			Task t = scc.get(0);
+			Task t = model.getTasks().get(scc.nextSetBit(0));
 			p = t.getOut().stream()
 				.filter(Dependency::isSelfLoop)
 				.filter(Dependency::isPrecedence)
 				.findAny()
-				.map(this::selfLoopWarning)
+				.map(d -> selfLoopWarning(model, d))
 				.orElse(null);						// Should never be the case
 		}
 		return p;
 	}
 	
 	/** Produce a warning about the given self-loop. */
-	private ModelProblem selfLoopWarning(Dependency dependency) {
+	private ModelProblem selfLoopWarning(Model model, Dependency dependency) {
 		Task task = dependency.getSource();
 		return warning(
 			MessageFormat.format(PROBLEM_SELFLOOP_MESSAGE, task.getShortIdentification()),
@@ -84,13 +86,14 @@ public class DiagramCycleChecker implements ProblemChecker {
 	
 	
 	/** Produce a warning about the given SCC. */
-	private ModelProblem cycleWarning(List<Task> scc) {
+	private ModelProblem cycleWarning(Model model, BitSet scc) {
 		// Tasks and dependencies in the given strongly connected component
-		List<BaseEntity> entities = CheckerUtil.restrictDiagramByTasks(scc).collect(Collectors.toList());
+		List<BaseEntity> entities = CheckerUtil.restrictDiagramByTasks(model, scc).collect(Collectors.toList());
 		
 		// Create message
-		String msg = MessageFormat.format(PROBLEM_CYCLE_MESSAGE, 
+		String msg = MessageFormat.format(PROBLEM_CYCLE_MESSAGE,
 			scc.stream()
+				.mapToObj(model.getTasks()::get)
 				.sorted(Task.shortIdentificationComparator())
 				.map(Task::getShortIdentification)
 				.map(String::valueOf)

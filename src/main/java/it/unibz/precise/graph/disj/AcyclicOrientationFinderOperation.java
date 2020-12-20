@@ -1,8 +1,6 @@
 package it.unibz.precise.graph.disj;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -42,7 +40,7 @@ public class AcyclicOrientationFinderOperation {
 	 * Otherwise the edge represents a deadlock, and a corresponding failure result
 	 * is returned.
 	 */
-	public <T> OrientationResult<T> search(DisjunctiveGraph<T> graph) {
+	public OrientationResult search(DisjunctiveGraph graph) {
 		return partitioner != null ? partitionAndSearch(graph) : searchInPartition(graph);
 	}
 	
@@ -52,7 +50,7 @@ public class AcyclicOrientationFinderOperation {
 	 * If two or more subgraphs result from partitioning, the returned result is
 	 * {@link OrientationResult.Complex complex}.
 	 */
-	private <T> OrientationResult<T> partitionAndSearch(DisjunctiveGraph<T> graph) {
+	private OrientationResult partitionAndSearch(DisjunctiveGraph graph) {
 		return OrientationResult.compose(
 			graph,
 			partitioner.orderedPartition(graph)
@@ -62,22 +60,19 @@ public class AcyclicOrientationFinderOperation {
 	}
 	
 	/** Searches an acyclic orientation in a given partition. */
-	private <T> OrientationResult<T> searchInPartition(DisjunctiveGraph<T> graph) {
-		if (graph.nodes().size() <= 1) {
+	private OrientationResult searchInPartition(DisjunctiveGraph graph) {
+		if (graph.nodes() <= 1) {
 			// Graph has only a single node.
 			// If there is a self-loop on that node, we found a cycle.
 			// Otherwise, it is already an acyclic orientation.
-			return graph.nodes().stream()
-				.findAny()
-				.filter(n -> graph.successorSet(n).contains(n))
-				.map(n -> OrientationResult.cycles(graph, Arrays.asList(Arrays.asList(n))))
-				.orElseGet(() -> OrientationResult.success(graph));
+			return graph.nodes() == 1 && graph.allSuccessors(0).get(0)
+				? OrientationResult.cycle(graph, Collections.singletonList(graph.allSuccessors(0)))
+				: OrientationResult.success(graph);
 		}
 		
-		List<List<T>> nonTrivialSCCs = cycleDetector.detect(graph);
-		
+		List<BitSet> nonTrivialSCCs = cycleDetector.detect(graph);
 		return !nonTrivialSCCs.isEmpty()
-			? OrientationResult.cycles(graph, nonTrivialSCCs)
+			? OrientationResult.cycle(graph, nonTrivialSCCs)
 			: processUnresolvedEdges(graph);
 	}
 	
@@ -88,7 +83,7 @@ public class AcyclicOrientationFinderOperation {
 	 * Then the first successful result found in one of the two directions
 	 * is returned, otherwise a failure is returned. 
 	 */
-	private <T> OrientationResult<T> processUnresolvedEdges(DisjunctiveGraph<T> graph) {
+	private OrientationResult processUnresolvedEdges(DisjunctiveGraph graph) {
 		return graph.edges().stream()
 			.findAny()
 			.map(e -> findDirection(graph, e))
@@ -96,10 +91,10 @@ public class AcyclicOrientationFinderOperation {
 	}
 	
 	/** Attempts to find an acyclic orientation by trying out both directions of the given edge. */
-	private <T> OrientationResult<T> findDirection(DisjunctiveGraph<T> graph, DisjunctiveEdge<T> e) {
-		Set<T> left = e.getLeft(), right = e.getRight();
+	private OrientationResult findDirection(DisjunctiveGraph graph, DisjunctiveEdge e) {
+		BitSet left = e.getLeft(), right = e.getRight();
 		
-		OrientationResult<T> rs = tryDirection(graph, e, left, right);
+		OrientationResult rs = tryDirection(graph, e, left, right);
 		if (rs.isSuccessful())
 			return rs;
 
@@ -111,8 +106,8 @@ public class AcyclicOrientationFinderOperation {
 	}
 	
 	/** Returns the result of searching an acyclic orientation of the graph with the given direction of the given edge. */
-	private <T> OrientationResult<T> tryDirection(DisjunctiveGraph<T> graph, DisjunctiveEdge<T> e, Set<T> from, Set<T> to) {
-		DisjunctiveGraph<T> copy = DisjunctiveGraph.copySealedNodes(graph);
+	private OrientationResult tryDirection(DisjunctiveGraph graph, DisjunctiveEdge e, BitSet from, BitSet to) {
+		DisjunctiveGraph copy = DisjunctiveGraph.copySealedNodes(graph);
 		copy.orient(e, from, to);
 		return search(copy);												// Recursion
 	}

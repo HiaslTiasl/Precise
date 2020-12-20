@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.unibz.precise.check.ModelToGraphTranslator;
-import it.unibz.precise.check.TaskUnitNode;
 import it.unibz.precise.graph.disj.AcyclicOrientationFinder;
 import it.unibz.precise.graph.disj.DisjunctiveGraph;
 import it.unibz.precise.model.Model;
@@ -57,8 +56,11 @@ public class GraphController {
 	)
 	public ResponseEntity<?> getGraph(@PathVariable("name") String name) {
 		Model model = repository.findByName(name);
-		DisjunctiveGraph<TaskUnitNode> g = toGraph(model);
-		return toResponse(name, g);
+		if (model == null)
+			return ResponseEntity.notFound().build();
+		ModelToGraphTranslator.Input input = new ModelToGraphTranslator.Input(model);
+		DisjunctiveGraph g = translator.translate(input);
+		return ok(name, new DisjunctiveGraphAST(input, g));
 	}
 	
 	/** Exposes an acyclic orient of the given model if one exists. */
@@ -69,8 +71,12 @@ public class GraphController {
 	)
 	public ResponseEntity<?> getOrientation(@PathVariable("name") String name) {
 		Model model = repository.findByName(name);
-		DisjunctiveGraph<TaskUnitNode> g = toOrientation(toGraph(model));
-		return toResponse(name, g);
+		if (model == null)
+			return ResponseEntity.notFound().build();
+		ModelToGraphTranslator.Input input = new ModelToGraphTranslator.Input(model);
+		DisjunctiveGraph orgGraph = translator.translate(input);
+		DisjunctiveGraph orientation = orientationFinder.search(orgGraph).buildOrientation();
+		return ok(name, new DisjunctiveGraphAST(input, orientation));
 	}
 	
 	/**
@@ -78,21 +84,10 @@ public class GraphController {
 	 * Returns {@link HttpStatus#NOT_FOUND} if {@code g} is null,
 	 * a {@link DisjunctiveGraphAST} representation otherwise.
 	 */
-	private ResponseEntity<?> toResponse(String name, DisjunctiveGraph<TaskUnitNode> g) {
-		return g == null
-			? ResponseEntity.notFound().build()
-			: ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, FileControllers.getContentDisposition(name, FILE_EXT))
-				.body(new DisjunctiveGraphAST(g));
-		
-	}
-	
-	private DisjunctiveGraph<TaskUnitNode> toGraph(Model model) {
-		return model == null ? null : translator.translate(model);
-	}
-	
-	private DisjunctiveGraph<TaskUnitNode> toOrientation(DisjunctiveGraph<TaskUnitNode> g) {
-		return g == null ? null : orientationFinder.search(g).buildOrientation();
+	private ResponseEntity<?> ok(String name, DisjunctiveGraphAST ast) {
+		return ResponseEntity.ok()
+			.header(HttpHeaders.CONTENT_DISPOSITION, FileControllers.getContentDisposition(name, FILE_EXT))
+			.body(ast);
 	}
 
 }

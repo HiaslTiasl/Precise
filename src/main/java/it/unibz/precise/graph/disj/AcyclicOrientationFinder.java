@@ -47,7 +47,7 @@ public class AcyclicOrientationFinder {
 	 * that uses both {@link DisjunctiveGraphResolver resolving} and
 	 * {@link DisjunctiveGraphPartitioner partitioning}.
 	 */
-	public <T> OrientationResult<T> search(DisjunctiveGraph<T> graph) {
+	public <T> OrientationResult search(DisjunctiveGraph graph) {
 		return init(true, true).search(graph);
 	}
 	

@@ -1,11 +1,7 @@
 package it.unibz.precise.check;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -66,13 +62,13 @@ public class ConsistencyProblemChecker implements ProblemChecker {
 	public Stream<ModelProblem> check(Model model) {
 		long t0 = System.nanoTime();
 		
-		Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask = translator.nodesByLocationByTask(model.getTasks());
-		Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode = taskLocationByNode(nodesByLocationByTask);
-		DisjunctiveGraph<TaskUnitNode> graph = translator.translate(nodesByLocationByTask, true);
+		ModelToGraphTranslator.Input input = new ModelToGraphTranslator.Input(model);
+		Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode = taskLocationByNode(input);
+		DisjunctiveGraph graph = translator.translate(input, true);
 		
 		long t1 = System.nanoTime();
 		
-		OrientationResult<TaskUnitNode> res = orientationFinder.search(graph);
+		OrientationResult res = orientationFinder.search(graph);
 		
 		long t2 = System.nanoTime();
 		
@@ -84,24 +80,29 @@ public class ConsistencyProblemChecker implements ProblemChecker {
         	logger.info("Checks completed in " + totalTime + " ms (Graph construction: " + translationTime + " ms; Algorithm: " + algorithmTime + " ms)");
 		
 		return res.failureReasons()
-			.flatMap(result -> warnings(result, taskLocationByNode));
-		
+			.flatMap(result -> warnings(input, result, taskLocationByNode));
 	}
 	
 	/** Produces warnings for the given result if it represents an error. */
-	private Stream<ModelProblem> warnings(OrientationResult.Leaf<TaskUnitNode> result, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode) {
-		List<List<TaskUnitNode>> sccs = result.getSccs();
+	private Stream<ModelProblem> warnings(ModelToGraphTranslator.Input input,
+										  OrientationResult.Leaf result, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode)
+	{
+		List<BitSet> sccs = result.getSccs();
 		if (sccs != null)
-			return sccs.stream().map(nodes -> cycleWarning(nodes, taskLocationByNode));
-		DisjunctiveEdge<TaskUnitNode> edge = result.getDeadlockEdge();
+			return sccs.stream().map(nodes -> cycleWarning(input, result, nodes, taskLocationByNode));
+		DisjunctiveEdge edge = result.getDeadlockEdge();
 		if (edge != null)
-			return Stream.of(deadlockWarning(edge, taskLocationByNode));
+			return Stream.of(deadlockWarning(input, result, edge, taskLocationByNode));
 		return Stream.empty();
 	}
 	
 	/** Produces a warning describing a cycle among the given nodes. */
-	private ModelProblem cycleWarning(List<TaskUnitNode> cycleNodes, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode) {
-		List<TaskLocation> taskLocations = cycleNodes.stream()
+	private ModelProblem cycleWarning(ModelToGraphTranslator.Input input, OrientationResult.Leaf result,
+		  BitSet scc, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode)
+	{
+		List<TaskLocation> taskLocations = scc.stream()
+			.map(result.getGraph()::toOriginalNode)
+			.mapToObj(input::nodeAt)
 			.map(taskLocationByNode::get)
 			.flatMap(List::stream)
 			.collect(Collectors.toList());
@@ -114,13 +115,16 @@ public class ConsistencyProblemChecker implements ProblemChecker {
 	}
 	
 	/** Produces a warning describing that the given edge cannot be resolved in any direction. */
-	private ModelProblem deadlockWarning(DisjunctiveEdge<TaskUnitNode> deadlockEdge, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode) {
+	private ModelProblem deadlockWarning(ModelToGraphTranslator.Input input, OrientationResult.Leaf result,
+		DisjunctiveEdge deadlockEdge, Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode)
+	{
 		List<TaskLocation> taskLocations = Stream.of(
 			deadlockEdge.getLeft(),
 			deadlockEdge.getRight()
 		)
-		.flatMap(Set::stream)
-		.map(taskLocationByNode::get)
+		.flatMapToInt(BitSet::stream)
+		.map(result.getGraph()::toOriginalNode)
+		.mapToObj(n -> taskLocationByNode.get(input.nodeAt(n)))
 		.flatMap(List::stream)
 		.collect(Collectors.toList());
 		
@@ -131,9 +135,9 @@ public class ConsistencyProblemChecker implements ProblemChecker {
 	 * Inverse the given map, by mapping each contained node to all {@link TaskLocation}s that produced it.
 	 * A node is mapped to multiple {@link TaskLocation}s iff those locations are overlapping.
 	 */
-	private Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode(Map<Task, List<List<TaskUnitNode>>> nodesByLocationByTask) {
+	private Map<TaskUnitNode, List<TaskLocation>> taskLocationByNode(ModelToGraphTranslator.Input input) {
 		Map<TaskUnitNode, List<TaskLocation>> res = new HashMap<>();
-		for (Entry<Task, List<List<TaskUnitNode>>> e : nodesByLocationByTask.entrySet()) {
+		for (Entry<Task, List<List<TaskUnitNode>>> e : input.getNodesByLocationByTask().entrySet()) {
 			Task task = e.getKey();
 			List<List<TaskUnitNode>> locations = e.getValue();
 			int locCount = locations.size();

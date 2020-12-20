@@ -1,14 +1,7 @@
 package it.unibz.precise.graph.disj;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 import java.util.stream.Stream;
-
-import it.unibz.util.Util;
 
 /**
  * Represents the result of searching an acyclic orientation, which can be successful or not.
@@ -21,21 +14,19 @@ import it.unibz.util.Util;
  * to construct one.
  * 
  * @author MatthiasP
- * 
- * @param <T> The type of the nodes in the graph.
  */
-public abstract class OrientationResult<T> {
+public abstract class OrientationResult {
 	
-	private DisjunctiveGraph<T> graph;
+	private DisjunctiveGraph graph;
 	private boolean successful;
 	
-	private OrientationResult(DisjunctiveGraph<T> graph, boolean success) {
+	private OrientationResult(DisjunctiveGraph graph, boolean success) {
 		this.graph = graph;
 		this.successful = success;
 	}
 
 	/** Returns the (possibly simplified) input graph. */
-	public DisjunctiveGraph<T> getGraph() {
+	public DisjunctiveGraph getGraph() {
 		return graph;
 	}
 	
@@ -45,18 +36,18 @@ public abstract class OrientationResult<T> {
 	}
 
 	/** Returns the immediate children in topological order. */
-	public abstract List<OrientationResult<T>> children();
+	public abstract List<OrientationResult> children();
 	
 	/** Returns a stream of all nodes in the result tree. */
-	public abstract Stream<OrientationResult<T>> flatten();
+	public abstract Stream<OrientationResult> flatten();
 	
 	/** Returns a stream of all leaf nodes in the result tree. */
-	public Stream<OrientationResult.Leaf<T>> leaves() {
+	public Stream<OrientationResult.Leaf> leaves() {
 		return leafs(false);
 	}
 	
 	/** Returns a stream of all failure leaf nodes in the result tree. */ 
-	public Stream<OrientationResult.Leaf<T>> failureReasons() {
+	public Stream<OrientationResult.Leaf> failureReasons() {
 		return leafs(true);
 	}
 	
@@ -65,43 +56,43 @@ public abstract class OrientationResult<T> {
 	 * If {@code onlyFailures} is set to {@literal true}, successful results are
 	 * omitted.
 	 */
-	protected abstract Stream<OrientationResult.Leaf<T>> leafs(boolean onlyFailures);
+	protected abstract Stream<OrientationResult.Leaf> leafs(boolean onlyFailures);
 	
 	/**
 	 * Project a lists of {@link OrientationResult}s for a list of clusters to a graph
 	 * of results, using the
 	 */
-	public DisjunctiveGraph<T> buildOrientation() {
+	public DisjunctiveGraph buildOrientation() {
 		// Can only build orientations for successful results
 		if (!successful)
 			return null;
-		
-		List<OrientationResult.Leaf<T>> leaves = leaves().collect(Collectors.toList());
-		int count = leaves.size();
-		
-		DisjunctiveGraph<T> orientation = DisjunctiveGraph.sealedNodes(graph.nodes());
-		orientation.addAllArcs(graph.arcs());
+
+		DisjunctiveGraph orientation = DisjunctiveGraph.copy(graph);
 		
 		// Map each node in to the cluster in which it is contained
-		Map<T, Integer> leafClusterIndexMap = new HashMap<>();
-		for (int i = 0; i < count; i++) {
-			for (T n : leaves.get(i).getGraph().nodes())
-				leafClusterIndexMap.put(n, i);
+		// TODO use integers in the original graph, if possible
+		int[] leafClusterIndexMap = new int[graph.nodes()];
+		int clusterIndex = 0;
+		for (Iterator<Leaf> leaves = leaves().iterator(); leaves.hasNext(); clusterIndex++) {
+			OrientationResult leaf = leaves.next();
+			int leafGraphNodes = leaf.graph.nodes();
+			for (int n = 0; n < leafGraphNodes; n++)
+				leafClusterIndexMap[leaf.graph.toOriginalNode(n)] = clusterIndex;
 		}
 		
-		for (DisjunctiveEdge<T> e : graph.edges()) {
-			Set<T> left = e.getLeft(), right = e.getRight();
+		for (DisjunctiveEdge e : graph.edges()) {
+			BitSet left = e.getLeft(), right = e.getRight();
 			// It is guaranteed that the two sides of an edge are each contained in a cluster
 			// at the same level in the result tree, respectively.
 			// For a level higher than leaves, the nodes of one side might be contained in
 			// different leaf graphs. However, this is not a problem, because the topological
 			// order still applies.
-			T anyLeft = Util.findAny(left);
-			T anyRight = Util.findAny(right);
-			int iLeft = leafClusterIndexMap.get(anyLeft);
-			int iRight = leafClusterIndexMap.get(anyRight);
+			int anyLeft = left.nextSetBit(0);
+			int anyRight = right.nextSetBit(0);
+			int iLeft = leafClusterIndexMap[anyLeft];
+			int iRight = leafClusterIndexMap[anyRight];
 			boolean l2r = iLeft < iRight
-				|| iLeft == iRight && graph.successorSet(anyLeft).contains(anyRight);
+				|| iLeft == iRight && graph.allSuccessors(anyLeft).get(anyRight);
 			if (l2r)
 				orientation.addAllArcs(left, right);
 			else if (iRight < iLeft)
@@ -116,32 +107,30 @@ public abstract class OrientationResult<T> {
 	 * A complex result is successful if all child results are successful.
 	 * 
 	 * @author MatthiasP
-	 *
-	 * @param <T> The type of the nodes in the graph.
 	 */
-	public static final class Complex<T> extends OrientationResult<T> {
+	public static final class Complex extends OrientationResult {
 		
-		private List<OrientationResult<T>> children;	// The children in topological order
+		private List<OrientationResult> children;	// The children in topological order
 		
-		private Complex(DisjunctiveGraph<T> resolved, List<OrientationResult<T>> children) {
+		private Complex(DisjunctiveGraph resolved, List<OrientationResult> children) {
 			super(resolved, children.stream().allMatch(OrientationResult::isSuccessful));
 			this.children = children;
 		}
 		
 		@Override
-		public List<OrientationResult<T>> children() {
+		public List<OrientationResult> children() {
 			return children;
 		}
 		
 		@Override
-		protected Stream<OrientationResult.Leaf<T>> leafs(boolean onlyFailures) {
+		protected Stream<OrientationResult.Leaf> leafs(boolean onlyFailures) {
 			return onlyFailures && isSuccessful()	// A successful result does not contain any failure leaves.
 				? Stream.empty()
 				: children.stream().flatMap(r -> r.leafs(onlyFailures));
 		}
 		
 		@Override
-		public Stream<OrientationResult<T>> flatten() {
+		public Stream<OrientationResult> flatten() {
 			return Stream.concat(
 				Stream.of(this),
 				children.stream().flatMap(OrientationResult::flatten)
@@ -159,44 +148,42 @@ public abstract class OrientationResult<T> {
 	 * another problem.
 	 * 
 	 * @author MatthiasP
-	 *
-	 * @param <T> The type of the nodes in the graph.
 	 */
-	public static final class Leaf<T> extends OrientationResult<T> {
+	public static final class Leaf extends OrientationResult {
 		
-		private List<List<T>> sccs;
-		private DisjunctiveEdge<T> deadlockEdge;
+		private List<BitSet> sccs;
+		private DisjunctiveEdge deadlockEdge;
 		
-		private Leaf(DisjunctiveGraph<T> resolved, boolean success, List<List<T>> sccs, DisjunctiveEdge<T> deadlockEdge) {
+		private Leaf(DisjunctiveGraph resolved, boolean success, List<BitSet> sccs, DisjunctiveEdge deadlockEdge) {
 			super(resolved, success);
 			this.sccs = sccs;
 			this.deadlockEdge = deadlockEdge;
 		}
 		
 		@Override
-		public List<OrientationResult<T>> children() {
+		public List<OrientationResult> children() {
 			return Collections.emptyList();
 		}
 		
 		@Override
-		public Stream<OrientationResult.Leaf<T>> leafs(boolean onlyFailures) {
+		public Stream<OrientationResult.Leaf> leafs(boolean onlyFailures) {
 			return onlyFailures && isSuccessful()
 				? Stream.empty()
 				: Stream.of(this);
 		}
 		
 		@Override
-		public Stream<OrientationResult<T>> flatten() {
+		public Stream<OrientationResult> flatten() {
 			return Stream.of(this);
 		}
 		
 		/** Returns the Strongly-Connected Components in the given graph. */
-		public List<List<T>> getSccs() {
+		public List<BitSet> getSccs() {
 			return sccs;
 		}
 		
 		/** Returns the edge that leads to a deadlock in the given graph. */
-		public DisjunctiveEdge<T> getDeadlockEdge() {
+		public DisjunctiveEdge getDeadlockEdge() {
 			return deadlockEdge;
 		}
 	}
@@ -205,25 +192,25 @@ public abstract class OrientationResult<T> {
 	 * Creates a result composed of the given children results.
 	 * The children results must be in topological order.
 	 */
-	public static <T> OrientationResult<T> compose(DisjunctiveGraph<T> graph, List<OrientationResult<T>> children) {
+	public static <T> OrientationResult compose(DisjunctiveGraph graph, List<OrientationResult> children) {
 		return children.size() <= 1 
 			? children.stream().findAny().orElseGet(() -> success(graph))
-			: new Complex<>(graph, children);
+			: new Complex(graph, children);
 	}
 
 	/** Creates a successful result. */
-	public static <T> OrientationResult.Leaf<T> success(DisjunctiveGraph<T> graph) {
-		return new Leaf<>(graph, true, null, null);
+	public static <T> OrientationResult.Leaf success(DisjunctiveGraph graph) {
+		return new Leaf(graph, true, null, null);
 	}
 	
 	/** Creates a failure because of the given strongly connected components. */
-	public static <T> OrientationResult.Leaf<T> cycles(DisjunctiveGraph<T> graph, List<List<T>> sccs) {
-		return new Leaf<>(graph, false, sccs, null);
+	public static <T> OrientationResult.Leaf cycle(DisjunctiveGraph graph, List<BitSet> sccs) {
+		return new Leaf(graph, false, sccs, null);
 	}
 	
 	/** Creates a failure because of a deadlock represented by the given edge. */
-	public static <T> OrientationResult.Leaf<T> deadlock(DisjunctiveGraph<T> graph, DisjunctiveEdge<T> deadlockEdge) {
-		return new Leaf<>(graph, false, null, deadlockEdge);
+	public static <T> OrientationResult.Leaf deadlock(DisjunctiveGraph graph, DisjunctiveEdge deadlockEdge) {
+		return new Leaf(graph, false, null, deadlockEdge);
 	}
 	
 }

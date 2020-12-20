@@ -1,9 +1,10 @@
 package it.unibz.precise.graph.disj;
 
+import java.util.BitSet;
 import java.util.List;
 
 public interface DisjunctiveGraphCycleDetector {
 
-	<T> List<List<T>> detect(DisjunctiveGraph<T> disjGraph);
+	List<BitSet> detect(DisjunctiveGraph disjGraph);
 	
 }
