@@ -6,3 +6,5 @@
 /.settings
 /bin/
 /precise.log
+/.idea/
+*.iml
